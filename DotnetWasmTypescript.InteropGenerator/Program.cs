@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using System.Text;
 using TypeScriptExport;
 
 string[] csFilePaths = args;
@@ -31,14 +32,14 @@ foreach (CSharpFileInfo fileInfo in fileInfos)
     IEnumerable<INamedTypeSymbol> typeSymbols = FindLabelledClassSymbols(semanticModel, root);
     foreach (INamedTypeSymbol classSymbol in typeSymbols)
     {
-        InteropClassBuilder interopClassBuilder = new();
-        SourceText? source = interopClassBuilder.Build(classSymbol);
-        if (source != null)
-        {
-            string outFileName = $"{classSymbol.Name}.Interop.cs";
-            string outFileDir = Path.GetDirectoryName(fileInfo.Path) ?? throw new InvalidOperationException($"Provided path {fileInfo.Path} has no directory");
-            File.WriteAllText(Path.Combine(outFileDir, outFileName), source.ToString());
-        }
+        ClassInfoBuilder classInfoBuilder = new(classSymbol);
+        ClassInfo classInfo = classInfoBuilder.Build();
+        
+        CSharpInteropClassInfoRenderer renderer = new(classInfo);
+        SourceText? source = SourceText.From(renderer.Render(), Encoding.UTF8);
+        string outFileName = $"{classSymbol.Name}.Interop.cs";
+        string outFileDir = Path.GetDirectoryName(fileInfo.Path) ?? throw new InvalidOperationException($"Provided path {fileInfo.Path} has no directory");
+        File.WriteAllText(Path.Combine(outFileDir, outFileName), source.ToString());
     }
 }
 

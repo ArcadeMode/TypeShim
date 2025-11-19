@@ -8,7 +8,6 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
 {
     internal IEnumerable<MethodParameterInfo> Build()
     {
-
         if (!memberMethod.IsStatic)
         {
             yield return new MethodParameterInfo
@@ -24,15 +23,12 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
         {
             JSTypeInfo parameterMarshallingTypeInfo = JSTypeInfo.CreateJSTypeInfoForTypeSymbol(parameterSymbol.Type); // type info needed for jsexport to know how to marshal param type
 
-
             TypeSyntax? parameterTypeSyntax = parameterMarshallingTypeInfo switch 
             {
                 JSSimpleTypeInfo { Syntax: TypeSyntax typeSyntax } => typeSyntax,
                 JSArrayTypeInfo arrayTypeInfo => SyntaxFactory.ArrayType(arrayTypeInfo.ElementTypeInfo.Syntax),
                 _ => throw new InvalidOperationException($"Unsupported type info found in parameter type {parameterSymbol.Type} of method {memberMethod} of {classSymbol}")
             };
-
-            
 
             yield return new MethodParameterInfo
             {
@@ -42,19 +38,5 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
                 CLRTypeSyntax = SyntaxFactory.ParseTypeName(parameterSymbol.Type.Name)
             };
         }
-    }
-
-    internal string Render(IEnumerable<MethodParameterInfo> parameterInfos)
-    {
-        StringBuilder codeBuilder = new();
-        foreach (MethodParameterInfo parameterInfo in parameterInfos)
-        {
-            if (parameterInfo.KnownType is KnownManagedType.Object)
-            {
-                codeBuilder.Append("[JSMarshalAs<JSType.Any>] ");
-            }
-            codeBuilder.Append($"{parameterInfo.InteropTypeSyntax} {parameterInfo.ParameterName}, ");
-        }
-        return codeBuilder.ToString().TrimEnd().TrimEnd(',');
     }
 }
