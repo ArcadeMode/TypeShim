@@ -195,6 +195,7 @@ public class TypeScriptGeneratorWithMethods : GeneratorBase
             string parameters = string.Join(", ", parameterExpressions);
             
             return $"    {m.Name}({parameters}): {ResolveTypeReference(m.ReturnParameter)};"; // each method signature is generated here
+            //TODO: bodies etc.
         });
 
         Console.WriteLine($"Generating {typescriptMethodDefinitions.Count()} method signatures for type '{typeName}'.");
