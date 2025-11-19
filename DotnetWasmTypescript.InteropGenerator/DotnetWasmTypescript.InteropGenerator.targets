@@ -1,7 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!-- Define an MSBuild target that runs before compilation -->
-  <Target Name="ScanTsExportClasses" BeforeTargets="CoreCompile">
+  <Target Name="ScanTsExportClasses" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' != 'true'">
     <!-- Get all .cs files included in compilation -->
     <ItemGroup>
       <CsFilesToScan Include="@(Compile)" />

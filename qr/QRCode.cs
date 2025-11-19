@@ -42,60 +42,26 @@ namespace QR.Wasm
         public string Value { get; set; }
     }
 
-    [TsExport]
-    public partial class PersonNameExport
-    {
-        [JSExport]
-        [return: JSMarshalAs<JSType.String>]
-        internal static string GetValue([JSMarshalAs<JSType.Any>] object personNameObject)
-        {
-
-            if (personNameObject is PersonName personName)
-            {
-                return GetValue(personName);
-            }
-            throw new ArgumentException($"Argument was not compatible with expected type {nameof(PersonName)}");
-        }
-
-        public static string GetValue(PersonName personName)
-        {
-            return personName.Value;
-        }
-    }
-
     //[TsExport]
-    //public partial class PersonProvider
+    //public partial class PersonNameExport
     //{
-    //    public string PlaceHolderOrTsGenNoWorkey_FixThis { get; set; }
-
     //    [JSExport]
-    //    [return: JSMarshalAs<JSType.Any>]
-    //    internal static object GetPerson(JSObject personNameObject)
+    //    [return: JSMarshalAs<JSType.String>]
+    //    internal static string GetValue([JSMarshalAs<JSType.Any>] object personNameObject)
     //    {
-    //        if (personNameObject.GetPropertyAsString("Value") is string name)
+
+    //        if (personNameObject is PersonName personName)
     //        {
-    //            return GetPerson((PersonName)name);
+    //            return GetValue(personName);
     //        }
     //        throw new ArgumentException($"Argument was not compatible with expected type {nameof(PersonName)}");
     //    }
 
-    //    public static Person GetPerson(PersonName name)
+    //    public static string GetValue(PersonName personName)
     //    {
-    //        return new Person
-    //        {
-    //            Name = name,
-    //            Age = 30,
-    //            Pet = new Dog
-    //            {
-    //                Name = "Fido",
-    //                Age = 5
-    //            }
-    //        };
+    //        return personName.Value;
     //    }
     //}
-
-
-
 
     [TsExport]
     public struct Dog
@@ -104,28 +70,7 @@ namespace QR.Wasm
 
         public int Age { get; set; }
     }
-
-    [TsExport]
-    public partial class DogExport
-    {
-        [JSExport]
-        [return: JSMarshalAs<JSType.Any>]
-        internal static object GetOwner([JSMarshalAs<JSType.Any>] object daggoe)
-        {
-            return GetOwner((Dog)daggoe);
-        }
-
-        public static Person GetOwner(Dog daggoe)
-        {
-            return new Person
-            {
-                Name = "henkie",
-                Age = 30,
-                Pet = daggoe
-            };
-        }
-    }
-
+    
     [TsExport]
     public enum Color
     {

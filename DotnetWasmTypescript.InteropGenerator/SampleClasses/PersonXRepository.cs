@@ -6,31 +6,29 @@ using TypeScriptExportGenerator;
 namespace QR.Wasm
 {
     [TsExport]
-    public partial class PersonRepository
+    public partial class PersonXRepository
     {
         public string PlaceHolderOrTsGenNoWorkey_FixThis { get; set; }
 
 
-        internal Person Person1 = new Person()
+        internal PersonX Person1 = new PersonX()
         {
             Name = "Alice",
             Age = 28,
         };
 
-        internal Person Person2 = new Person()
+        internal static PersonX Person2 = new PersonX()
         {
             Name = "Bob",
             Age = 35,
         };
 
-        [return: TsExportAs<Person>]
-        public Person GetPerson1()
+        public PersonX GetPerson1()
         {
             return Person1;
         }
 
-        [return: TsExportAs<Person>]
-        public Person GetPerson2()
+        public static PersonX GetPerson2()
         {
             return Person2;
         }

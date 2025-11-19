@@ -7,28 +7,22 @@ using Microsoft.CodeAnalysis.Text;
 using System.Linq;
 using TypeScriptExport;
 
-Console.WriteLine("Hello, World!");
-Console.WriteLine(string.Join("!!!", args));
-
 string[] csFilePaths = args;
-foreach (var file in csFilePaths)
+foreach (string csFilePath in csFilePaths)
 {
-    if (!File.Exists(file)) { }
+    if (!File.Exists(csFilePath)) {
+        throw new InvalidOperationException($"Invalid .cs file path provided 'file'");
+    }
 
-    string code = File.ReadAllText(file);
+    string code = File.ReadAllText(csFilePath);
     SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(code);
-
-
     List<PortableExecutableReference> references = CsharpPartialCompilation.GetReferencesForSyntaxTree(syntaxTree);
-
     CSharpCompilation compilation = CSharpCompilation.Create(
             assemblyName: "TempAnalysis",
             syntaxTrees: new[] { syntaxTree },
             references: references);
 
-
     SemanticModel semanticModel = compilation.GetSemanticModel(syntaxTree);
-
 
     SyntaxNode root = syntaxTree.GetRoot();
     IEnumerable<INamedTypeSymbol> typeSymbols = FindLabelledClassSymbols(semanticModel, root);
@@ -39,7 +33,7 @@ foreach (var file in csFilePaths)
         if (source != null)
         {
             string outFileName = $"{classSymbol.Name}.Interop.cs";
-            string outFileDir = Path.GetDirectoryName(file) ?? throw new InvalidOperationException($"Provided path {file} has no directory");
+            string outFileDir = Path.GetDirectoryName(csFilePath) ?? throw new InvalidOperationException($"Provided path {csFilePath} has no directory");
             File.WriteAllText(Path.Combine(outFileDir, outFileName), source.ToString());
         }
     }
@@ -54,10 +48,10 @@ static IEnumerable<INamedTypeSymbol> FindLabelledClassSymbols(SemanticModel sema
             continue;
         }
         
-        Console.WriteLine($"Found class: {symbol.Name}, Full name: {symbol.ToDisplayString()}");
         // Example: List attributes
         if (symbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name == nameof(TsExportAttribute)))
         {
+            Console.WriteLine($"TsExport: {symbol.ToDisplayString()}");
             yield return symbol;
         }
     }

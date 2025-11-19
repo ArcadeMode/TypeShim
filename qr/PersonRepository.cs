@@ -32,20 +32,19 @@ namespace QR.Wasm
             }
         };
 
-        [JSExport]
-        [return: JSMarshalAs<JSType.Any>]
-        [return: TsExportAs<Person>]
-        public static object GetPerson1()
+        public Person GetPerson1()
         {
             return Person1;
         }
 
-        [JSExport]
-        [return: JSMarshalAs<JSType.Any>]
-        [return: TsExportAs<Person>]
-        public static object GetPerson2()
+        public Person GetPerson2()
         {
             return Person2;
+        }
+
+        public static Person GetPerson3()
+        {
+            return Person1;
         }
     }
 }
