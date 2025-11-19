@@ -1,4 +1,6 @@
-﻿namespace DotnetWasmTypescript.InteropGenerator;
+﻿using Microsoft.CodeAnalysis;
+
+namespace DotnetWasmTypescript.InteropGenerator;
 
 internal sealed class ClassInfo
 {

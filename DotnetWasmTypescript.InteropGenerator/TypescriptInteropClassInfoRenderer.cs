@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DotnetWasmTypescript.InteropGenerator;
 
-internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo)
+internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypeScriptTypeMapper typeMapper)
 {
     //TODO: render mirror TypeScript interop class
 
@@ -29,13 +29,13 @@ internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo)
 
     private string RenderMethodSignature(MethodInfo methodInfo)
     {
-        return $"{methodInfo.Name}({RenderMethodParameters(methodInfo)}): {TypeScriptTypeMapper.ToTypeScriptType(methodInfo.ReturnKnownType)}";
+        return $"{methodInfo.Name}({RenderMethodParameters(methodInfo)}): {typeMapper.ToTypeScriptType(methodInfo.ReturnKnownType, methodInfo.ReturnCLRTypeSyntax.ToString())}";
         
     }
 
     private string RenderMethodParameters(MethodInfo methodInfo)
     {
-        return string.Join(", ", methodInfo.MethodParameters.Select(p => $"{p.ParameterName}: {TypeScriptTypeMapper.ToTypeScriptType(p.KnownType)}"));
+        return string.Join(", ", methodInfo.MethodParameters.Select(p => $"{p.ParameterName}: {typeMapper.ToTypeScriptType(p.KnownType, p.CLRTypeSyntax.ToString())}"));
     }
 }
 
@@ -85,35 +85,42 @@ internal class TypescriptProxyClassInfoRenderer(ClassInfo classInfo)
     // - contructor takes ref to exports interface by TypescriptWasmExportsInterfaceClassInfoRenderer
 }
 
-internal static class TypeScriptTypeMapper
+internal class TypeScriptTypeMapper(IEnumerable<ClassInfo> classInfos)
 {
-    public static string ToTypeScriptType(this KnownManagedType type) => type switch
+    private readonly HashSet<string> _customTypeNames = [.. classInfos.Select(ci => ci.Name)];
+
+    public string ToTypeScriptType(KnownManagedType type, string nameHint)
     {
-        KnownManagedType.None => "undefined",
-        KnownManagedType.Void => "void",
-        KnownManagedType.Boolean => "boolean",
-        KnownManagedType.Byte => "number",
-        KnownManagedType.Char => "string",
-        KnownManagedType.Int16 => "number",
-        KnownManagedType.Int32 => "number",
-        KnownManagedType.Int64 => "number",
-        KnownManagedType.Double => "number",
-        KnownManagedType.Single => "number",
-        KnownManagedType.IntPtr => "number", // JS doesn't have pointers, typically represented as number
-        KnownManagedType.JSObject => "object",
-        KnownManagedType.Object => "object",
-        KnownManagedType.String => "string",
-        KnownManagedType.Exception => "Error",
-        KnownManagedType.DateTime => "Date",
-        KnownManagedType.DateTimeOffset => "Date",
-        KnownManagedType.Nullable => "number | null", // generic fallback, could be more precise
-        KnownManagedType.Task => "Promise<any>",  // could be mapped more precisely
-        KnownManagedType.Array => "any[]",
-        KnownManagedType.ArraySegment => "any[]",
-        KnownManagedType.Span => "any[]",
-        KnownManagedType.Action => "(() => void)",
-        KnownManagedType.Function => "Function",
-        KnownManagedType.Unknown => "any",
-        _ => "any"
-    };
+        if (_customTypeNames.Contains(nameHint)) return nameHint;
+
+        return type switch
+        {
+            KnownManagedType.None => "undefined",
+            KnownManagedType.Void => "void",
+            KnownManagedType.Boolean => "boolean",
+            KnownManagedType.Byte => "number",
+            KnownManagedType.Char => "string",
+            KnownManagedType.Int16 => "number",
+            KnownManagedType.Int32 => "number",
+            KnownManagedType.Int64 => "number",
+            KnownManagedType.Double => "number",
+            KnownManagedType.Single => "number",
+            KnownManagedType.IntPtr => "number", // JS doesn't have pointers, typically represented as number
+            KnownManagedType.JSObject => "object",
+            KnownManagedType.Object => "object",
+            KnownManagedType.String => "string",
+            KnownManagedType.Exception => "Error",
+            KnownManagedType.DateTime => "Date",
+            KnownManagedType.DateTimeOffset => "Date",
+            KnownManagedType.Nullable => "number | null", // generic fallback, could be more precise
+            KnownManagedType.Task => "Promise<any>",  // could be mapped more precisely
+            KnownManagedType.Array => "any[]",
+            KnownManagedType.ArraySegment => "any[]",
+            KnownManagedType.Span => "any[]",
+            KnownManagedType.Action => "(() => void)",
+            KnownManagedType.Function => "Function",
+            KnownManagedType.Unknown => "any",
+            _ => "any"
+        };
+    }
 }

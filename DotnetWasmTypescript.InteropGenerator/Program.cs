@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using TypeScriptExport;
 
@@ -26,6 +27,7 @@ foreach (string csFilePath in csFilePaths)
 
 CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation(fileInfos.Select(i => i.SyntaxTree));
 
+List<(CSharpFileInfo FileInfo, ClassInfo ClassInfo)> classInfoByFile = [];
 foreach (CSharpFileInfo fileInfo in fileInfos)
 {
     SemanticModel semanticModel = compilation.GetSemanticModel(fileInfo.SyntaxTree);
@@ -35,20 +37,27 @@ foreach (CSharpFileInfo fileInfo in fileInfos)
     {
         ClassInfoBuilder classInfoBuilder = new(classSymbol);
         ClassInfo classInfo = classInfoBuilder.Build();
-        
-        CSharpInteropClassRenderer renderer = new(classInfo);
-        SourceText? source = SourceText.From(renderer.Render(), Encoding.UTF8);
-        string outFileName = $"{classSymbol.Name}.Interop.cs";
-        string outFileDir = Path.GetDirectoryName(fileInfo.Path) ?? throw new InvalidOperationException($"Provided path {fileInfo.Path} has no directory");
-        File.WriteAllText(Path.Combine(outFileDir, outFileName), source.ToString());
 
-        RenderTypescriptInterfaceFile(classInfo, fileInfo);
+        classInfoByFile.Add((fileInfo, classInfo));
     }
 }
 
-static void RenderTypescriptInterfaceFile(ClassInfo classInfo, CSharpFileInfo fileInfo)
+TypeScriptTypeMapper typeMapper = new(classInfoByFile.Select(c => c.ClassInfo));
+
+foreach ((CSharpFileInfo fileInfo, ClassInfo classInfo) in classInfoByFile)
 {
-    TypescriptInteropInterfaceRenderer interopInterfaceRenderer = new(classInfo);
+    CSharpInteropClassRenderer renderer = new(classInfo);
+    SourceText? source = SourceText.From(renderer.Render(), Encoding.UTF8);
+    string outFileName = $"{classInfo.Name}.Interop.cs";
+    string outFileDir = Path.GetDirectoryName(fileInfo.Path) ?? throw new InvalidOperationException($"Provided path {fileInfo.Path} has no directory");
+    File.WriteAllText(Path.Combine(outFileDir, outFileName), source.ToString());
+
+    RenderTypescriptInterfaceFile(classInfo, fileInfo, typeMapper);
+}
+
+static void RenderTypescriptInterfaceFile(ClassInfo classInfo, CSharpFileInfo fileInfo, TypeScriptTypeMapper typeMapper)
+{
+    TypescriptInteropInterfaceRenderer interopInterfaceRenderer = new(classInfo, typeMapper);
     SourceText? source = SourceText.From(interopInterfaceRenderer.Render(), Encoding.UTF8);
     string outFileName = $"{classInfo.Name}.ts";
     string outFileDir = Path.GetDirectoryName(fileInfo.Path) ?? throw new InvalidOperationException($"Provided path {fileInfo.Path} has no directory");
