@@ -6,6 +6,8 @@ using Microsoft.CodeAnalysis.Text;
 using TypeScriptExport;
 
 string[] csFilePaths = args;
+
+List<CSharpFileInfo> fileInfos = new();
 foreach (string csFilePath in csFilePaths)
 {
     if (!File.Exists(csFilePath)) {
@@ -13,18 +15,28 @@ foreach (string csFilePath in csFilePaths)
     }
 
     string code = File.ReadAllText(csFilePath);
-    SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(code);
-    SemanticModel semanticModel = CSharpPartialCompilation.CreatePartialCompilation(syntaxTree);
-    SyntaxNode root = syntaxTree.GetRoot();
+    fileInfos.Add(new CSharpFileInfo 
+    { 
+        SyntaxTree = CSharpSyntaxTree.ParseText(code), 
+        Path = csFilePath 
+    });
+}
+
+CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation(fileInfos.Select(i => i.SyntaxTree));
+
+foreach (CSharpFileInfo fileInfo in fileInfos)
+{
+    SemanticModel semanticModel = compilation.GetSemanticModel(fileInfo.SyntaxTree);
+    SyntaxNode root = fileInfo.SyntaxTree.GetRoot();
     IEnumerable<INamedTypeSymbol> typeSymbols = FindLabelledClassSymbols(semanticModel, root);
-    foreach(INamedTypeSymbol classSymbol in typeSymbols) 
+    foreach (INamedTypeSymbol classSymbol in typeSymbols)
     {
         InteropClassBuilder interopClassBuilder = new();
         SourceText? source = interopClassBuilder.Build(classSymbol);
         if (source != null)
         {
             string outFileName = $"{classSymbol.Name}.Interop.cs";
-            string outFileDir = Path.GetDirectoryName(csFilePath) ?? throw new InvalidOperationException($"Provided path {csFilePath} has no directory");
+            string outFileDir = Path.GetDirectoryName(fileInfo.Path) ?? throw new InvalidOperationException($"Provided path {fileInfo.Path} has no directory");
             File.WriteAllText(Path.Combine(outFileDir, outFileName), source.ToString());
         }
     }
