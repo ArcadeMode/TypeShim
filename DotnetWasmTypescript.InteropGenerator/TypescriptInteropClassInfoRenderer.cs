@@ -11,6 +11,32 @@ internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo)
     // PURPOSE:
     // - provide strongly typed interop interface for a single class instance
     // - recognizable methods matching the original C# class for end user
+
+    private readonly StringBuilder sb = new();
+
+    internal string Render()
+    {
+        sb.AppendLine($"// Auto-generated TypeScript interop definitions for {classInfo.Namespace}.{classInfo.Name}");
+        sb.AppendLine();
+        sb.AppendLine($"export interface {classInfo.Name} {{");
+        foreach (MethodInfo methodInfo in classInfo.Methods)
+        {
+            sb.AppendLine($"    {RenderMethodSignature(methodInfo)};");
+        }
+        sb.AppendLine("}");
+        return sb.ToString();
+    }
+
+    private string RenderMethodSignature(MethodInfo methodInfo)
+    {
+        return $"{methodInfo.Name}({RenderMethodParameters(methodInfo)}): {TypeScriptTypeMapper.ToTypeScriptType(methodInfo.ReturnKnownType)}";
+        
+    }
+
+    private string RenderMethodParameters(MethodInfo methodInfo)
+    {
+        return string.Join(", ", methodInfo.MethodParameters.Select(p => $"{p.ParameterName}: {TypeScriptTypeMapper.ToTypeScriptType(p.KnownType)}"));
+    }
 }
 
 internal class TypescriptModuleInterfaceRenderer(IEnumerable<ClassInfo> classInfos)
@@ -59,3 +85,35 @@ internal class TypescriptProxyClassInfoRenderer(ClassInfo classInfo)
     // - contructor takes ref to exports interface by TypescriptWasmExportsInterfaceClassInfoRenderer
 }
 
+internal static class TypeScriptTypeMapper
+{
+    public static string ToTypeScriptType(this KnownManagedType type) => type switch
+    {
+        KnownManagedType.None => "undefined",
+        KnownManagedType.Void => "void",
+        KnownManagedType.Boolean => "boolean",
+        KnownManagedType.Byte => "number",
+        KnownManagedType.Char => "string",
+        KnownManagedType.Int16 => "number",
+        KnownManagedType.Int32 => "number",
+        KnownManagedType.Int64 => "number",
+        KnownManagedType.Double => "number",
+        KnownManagedType.Single => "number",
+        KnownManagedType.IntPtr => "number", // JS doesn't have pointers, typically represented as number
+        KnownManagedType.JSObject => "object",
+        KnownManagedType.Object => "object",
+        KnownManagedType.String => "string",
+        KnownManagedType.Exception => "Error",
+        KnownManagedType.DateTime => "Date",
+        KnownManagedType.DateTimeOffset => "Date",
+        KnownManagedType.Nullable => "number | null", // generic fallback, could be more precise
+        KnownManagedType.Task => "Promise<any>",  // could be mapped more precisely
+        KnownManagedType.Array => "any[]",
+        KnownManagedType.ArraySegment => "any[]",
+        KnownManagedType.Span => "any[]",
+        KnownManagedType.Action => "(() => void)",
+        KnownManagedType.Function => "Function",
+        KnownManagedType.Unknown => "any",
+        _ => "any"
+    };
+}

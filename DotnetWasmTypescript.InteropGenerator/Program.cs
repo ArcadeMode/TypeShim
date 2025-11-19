@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using System.IO;
 using System.Text;
 using TypeScriptExport;
 
@@ -12,7 +13,7 @@ List<CSharpFileInfo> fileInfos = new();
 foreach (string csFilePath in csFilePaths)
 {
     if (!File.Exists(csFilePath)) {
-        throw new InvalidOperationException($"Invalid .cs file path provided 'file'");
+        throw new InvalidOperationException($"Invalid .cs file path provided '{csFilePath}'");
     }
 
     string code = File.ReadAllText(csFilePath);
@@ -35,12 +36,23 @@ foreach (CSharpFileInfo fileInfo in fileInfos)
         ClassInfoBuilder classInfoBuilder = new(classSymbol);
         ClassInfo classInfo = classInfoBuilder.Build();
         
-        CSharpInteropClassInfoRenderer renderer = new(classInfo);
+        CSharpInteropClassRenderer renderer = new(classInfo);
         SourceText? source = SourceText.From(renderer.Render(), Encoding.UTF8);
         string outFileName = $"{classSymbol.Name}.Interop.cs";
         string outFileDir = Path.GetDirectoryName(fileInfo.Path) ?? throw new InvalidOperationException($"Provided path {fileInfo.Path} has no directory");
         File.WriteAllText(Path.Combine(outFileDir, outFileName), source.ToString());
+
+        RenderTypescriptInterfaceFile(classInfo, fileInfo);
     }
+}
+
+static void RenderTypescriptInterfaceFile(ClassInfo classInfo, CSharpFileInfo fileInfo)
+{
+    TypescriptInteropInterfaceRenderer interopInterfaceRenderer = new(classInfo);
+    SourceText? source = SourceText.From(interopInterfaceRenderer.Render(), Encoding.UTF8);
+    string outFileName = $"{classInfo.Name}.ts";
+    string outFileDir = Path.GetDirectoryName(fileInfo.Path) ?? throw new InvalidOperationException($"Provided path {fileInfo.Path} has no directory");
+    File.WriteAllText(Path.Combine(outFileDir, outFileName), source.ToString());
 }
 
 static IEnumerable<INamedTypeSymbol> FindLabelledClassSymbols(SemanticModel semanticModel, SyntaxNode root)

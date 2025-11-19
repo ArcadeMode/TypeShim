@@ -2,7 +2,7 @@
 
 namespace DotnetWasmTypescript.InteropGenerator;
 
-internal sealed class CSharpInteropClassInfoRenderer(ClassInfo classInfo)
+internal sealed class CSharpInteropClassRenderer(ClassInfo classInfo)
 {
     internal string Render()
     {
