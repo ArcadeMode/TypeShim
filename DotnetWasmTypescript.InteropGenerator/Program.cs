@@ -1,10 +1,8 @@
-﻿// See https://aka.ms/new-console-template for more information
-using DotnetWasmTypescript.InteropGenerator;
+﻿using DotnetWasmTypescript.InteropGenerator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using System.Linq;
 using TypeScriptExport;
 
 string[] csFilePaths = args;
@@ -16,14 +14,7 @@ foreach (string csFilePath in csFilePaths)
 
     string code = File.ReadAllText(csFilePath);
     SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(code);
-    List<PortableExecutableReference> references = CsharpPartialCompilation.GetReferencesForSyntaxTree(syntaxTree);
-    CSharpCompilation compilation = CSharpCompilation.Create(
-            assemblyName: "TempAnalysis",
-            syntaxTrees: new[] { syntaxTree },
-            references: references);
-
-    SemanticModel semanticModel = compilation.GetSemanticModel(syntaxTree);
-
+    SemanticModel semanticModel = CSharpPartialCompilation.CreatePartialCompilation(syntaxTree);
     SyntaxNode root = syntaxTree.GetRoot();
     IEnumerable<INamedTypeSymbol> typeSymbols = FindLabelledClassSymbols(semanticModel, root);
     foreach(INamedTypeSymbol classSymbol in typeSymbols) 

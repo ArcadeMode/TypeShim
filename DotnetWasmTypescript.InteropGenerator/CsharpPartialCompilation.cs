@@ -1,20 +1,30 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 using TypeScriptExport;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace DotnetWasmTypescript.InteropGenerator;
 
-internal class CsharpPartialCompilation
+internal static class CSharpPartialCompilation
 {
+   
+    internal static SemanticModel CreatePartialCompilation(SyntaxTree syntaxTree)
+    {
+        List<PortableExecutableReference> references = GetReferencesForSyntaxTree(syntaxTree);
+        CSharpCompilation compilation = CSharpCompilation.Create(
+                assemblyName: "TempAnalysis",
+                syntaxTrees: new[] { syntaxTree },
+                references: references);
+
+        return compilation.GetSemanticModel(syntaxTree);
+    }
+
     /// <summary>
     /// Constructs a list of MetadataReferences required to compile the given syntax tree.
     /// Automatically includes common core assemblies and attempts to locate additional assemblies for each using directive.
     /// </summary>
-    public static List<PortableExecutableReference> GetReferencesForSyntaxTree(SyntaxTree syntaxTree)
+    private static List<PortableExecutableReference> GetReferencesForSyntaxTree(SyntaxTree syntaxTree)
     {
         // Find all using directives
         SyntaxNode root = syntaxTree.GetRoot();
@@ -25,13 +35,11 @@ internal class CsharpPartialCompilation
             .Distinct()];
 
         // Always include mscorlib & system runtime (needed for core types)
-        Assembly[] baseAssemblies = new[]
-        {
+        Assembly[] baseAssemblies =
+        [
             typeof(object).Assembly,
-            typeof(Console).Assembly,
-            typeof(Enumerable).Assembly,
             typeof(TsExportAttribute).Assembly
-        };
+        ];
 
         // Try to map namespace to an assembly in the current AppDomain
         Assembly[] loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
