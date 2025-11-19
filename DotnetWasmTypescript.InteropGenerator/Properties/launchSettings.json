@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Run Interop CS Generator": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\marcd\\source\\repos\\DotNetWasmReact\\DotnetWasmTypescript.InteropGenerator\\SampleClasses\\Person.cs C:\\Users\\marcd\\source\\repos\\DotNetWasmReact\\DotnetWasmTypescript.InteropGenerator\\SampleClasses\\PersonRepository.cs"
+      //"commandLineArgs": "C:\\Users\\marcd\\source\\repos\\DotNetWasmReact\\qr\\QR.Wasm.csproj"
+    }
+  }
+}
