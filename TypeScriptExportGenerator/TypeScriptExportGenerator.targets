@@ -1,0 +1,59 @@
+<Project>
+  <!--<Target Name="CopyGeneratedTsFile" 
+          AfterTargets="Compile" 
+          Inputs="$(IntermediateOutputPath)exportedTypes.ts.g.cs"
+          Outputs="$(ProjectDir)exportedTypes.ts"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <Message Text="Hello from CopyGeneratedTsFile" Importance="high" />
+
+    <ReadLinesFromFile File="$(IntermediateOutputPath)exportedTypes.ts.g.cs">
+      <Output TaskParameter="Lines" ItemName="TsLines"/>
+    </ReadLinesFromFile>
+    --><!-- You can use a script/task to extract just the TS content --><!--
+    <WriteLinesToFile
+      Lines="@(TsLines->'%(Identity)')"
+      File="$(ProjectDir)exportedTypes.ts"
+      Overwrite="true" />
+  </Target>-->
+
+  <!--<Target Name="ExtractTsPSPostBuild" AfterTargets="Build">
+    <Message Text="Hello from ExtractTsPSPostBuild" Importance="high" />
+
+    <Exec Command="powershell -ExecutionPolicy Bypass -File $(ProjectDir)extract-ts.ps1 $(TargetPath) $(ProjectDir)exported-types.ts" />
+  </Target>-->
+  <!--<UsingTask
+    TaskName="ExtractTsContent"
+    TaskFactory="CodeTaskFactory"
+    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+    <ParameterGroup>
+      <DllPath ParameterType="System.String" Required="true" />
+      <TypeName ParameterType="System.String" Required="true" />
+      <FieldName ParameterType="System.String" Required="true" />
+      <OutFile ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include="System.Runtime" />
+      <Reference Include="System.Reflection" />
+      <Using Namespace="System" />
+      <Using Namespace="System.Reflection" />
+      <Using Namespace="System.IO" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+        var asm = Assembly.LoadFrom(DllPath);
+        var type = asm.GetType(TypeName);
+        var field = type.GetField(FieldName, BindingFlags.Public | BindingFlags.Static);
+        var tsContent = field.GetValue(null) as string;
+        File.WriteAllText(OutFile, tsContent ?? "");
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>-->
+
+  <!--<Target Name="ExportTsPostBuild" AfterTargets="Build">
+    <ExtractTsContent
+      DllPath="$(TargetPath)"
+      TypeName="TsExportGenerated.ExportedTs"
+      FieldName="Content"
+      OutFile="$(ProjectDir)exported-types.ts" />
+  </Target>-->
+</Project>

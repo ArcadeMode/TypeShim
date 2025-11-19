@@ -1,0 +1,13 @@
+{
+  "name": "dotnet-qr",
+  "type": "module",
+  "types": "index.d.ts",
+  "main": "./main.ts",
+  "module": "./main.ts",
+  "exports": {
+    ".": {
+      "import": "./main.ts",
+      "require": "./main.ts"
+    }
+  }
+}

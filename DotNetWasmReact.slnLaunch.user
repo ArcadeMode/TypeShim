@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "Shell\\Host.Client.esproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "qr-frontend\\qr-frontend.esproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

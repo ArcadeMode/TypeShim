@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <OutputPath>.\tools\</OutputPath>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NJsonSchema" Version="11.5.2" />
+    <PackageReference Include="NJsonSchema.NewtonsoftJson" Version="11.5.2" />
+    <PackageReference Include="NSwag.CodeGeneration.TypeScript" Version="14.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TypeScriptExportGenerator\TypeScriptExport.Analyzers.csproj" />
+  </ItemGroup>
+
+</Project>
