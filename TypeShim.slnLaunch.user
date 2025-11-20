@@ -7,7 +7,7 @@
         "Action": "Start"
       },
       {
-        "Path": "qr-frontend\\qr-frontend.esproj",
+        "Path": "qr-frontend\\QR.UI.esproj",
         "Action": "Start"
       }
     ]

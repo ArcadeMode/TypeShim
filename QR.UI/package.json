@@ -21,7 +21,7 @@
         "react": "^18.2.0"
     },
     "dependencies": {
-        "dotnet-qr": "file:../qr/bin/Release/net10.0/publish/wwwroot",
+        "dotnet-qr": "file:../QR.Wasm/bin/Release/net10.0/publish/wwwroot",
         "tslib": "^2.8.1"
     },
     "devDependencies": {

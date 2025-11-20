@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
 
-  <Import Project="../DotnetWasmTypescript.InteropGenerator/DotnetWasmTypescript.InteropGenerator.targets" />
+  <Import Project="../TypeShim/DotnetWasmTypescript.InteropGenerator.targets" />
   
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DotnetWasmTypescript.InteropGenerator\DotnetWasmTypescript.InteropGenerator.csproj" />
+    <ProjectReference Include="..\TypeShim\TypeShim.csproj" />
     <ProjectReference Include="..\QR.Core\QR.Core.csproj" />
     <!--<ProjectReference Include="..\TypeScriptExportGenerator\TypeScriptExport.Analyzers.csproj" OutputItemType="Analyzer" />-->
   </ItemGroup>

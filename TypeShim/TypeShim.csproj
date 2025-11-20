@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TypeScriptExportGenerator\TypeScriptExport.Analyzers.csproj" />
+    <ProjectReference Include="..\TypeShim.Analyzers\TypeShim.Analyzers.csproj" />
   </ItemGroup>
 
 </Project>
