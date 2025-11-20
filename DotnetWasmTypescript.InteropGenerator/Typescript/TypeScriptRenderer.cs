@@ -2,34 +2,60 @@
 using DotnetWasmTypescript.InteropGenerator.Typescript;
 using System.Text;
 
-internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos)
+internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo moduleInfo, TypescriptClassNameBuilder classNameBuilder)
 {
     private readonly StringBuilder sourceBuilder = new();
     private readonly TypeScriptTypeMapper typeMapper = new(classInfos);
-    private readonly WasmModuleInfo moduleInfo = WasmModuleInfo.FromClasses(classInfos);
 
     internal string Render()
     {
+        RenderInteropModuleInterface();
         RenderInteropInterfaces();
+        RenderUserClassInterfaces();
+
+        RenderUserModuleClass();
+        RenderUserClassProxies();
         return sourceBuilder.ToString();
+    }
+
+    private void RenderInteropModuleInterface()
+    {
+        TypescriptInteropModuleInterfaceRenderer moduleInterfaceRenderer = new(moduleInfo.HierarchyInfo, classNameBuilder);
+        sourceBuilder.AppendLine(moduleInterfaceRenderer.Render());
     }
 
     private void RenderInteropInterfaces()
     {
-        TypescriptModuleInterfaceRenderer moduleInterfaceRenderer = new(moduleInfo);
-        sourceBuilder.AppendLine(moduleInterfaceRenderer.Render());
-
         foreach (ClassInfo classInfo in classInfos)
         {
-            TypescriptInteropInterfaceRenderer interopInterfaceRenderer = new(classInfo, typeMapper);
+            TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+            TypescriptInteropInterfaceRenderer interopInterfaceRenderer = new(classInfo, methodRenderer, classNameBuilder);
             sourceBuilder.AppendLine(interopInterfaceRenderer.Render());
         }
+    }
 
+    private void RenderUserClassInterfaces()
+    {
         foreach (ClassInfo classInfo in classInfos)
         {
-            TypescriptUserClassInterfaceRenderer interopInterfaceRenderer = new(classInfo, typeMapper);
-            sourceBuilder.AppendLine(interopInterfaceRenderer.Render());
+            TypescriptUserClassInterfaceRenderer classInterfaceRenderer = new(classInfo, typeMapper);
+            sourceBuilder.AppendLine(classInterfaceRenderer.Render());
         }
-        
+    }
+
+    private void RenderUserModuleClass()
+    {
+        TypescriptUserModuleClassRenderer moduleClassRenderer = new(moduleInfo, typeMapper, classNameBuilder);
+        sourceBuilder.AppendLine(moduleClassRenderer.Render());
+    }
+
+    private void RenderUserClassProxies()
+    {
+        foreach (ClassInfo classInfo in classInfos)
+        {
+            TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+            TypescriptUserClassProxyRenderer classProxyRenderer = new(classInfo, methodRenderer, classNameBuilder);
+            sourceBuilder.AppendLine(classProxyRenderer.Render());
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DotnetWasmTypescript.InteropGenerator;
+using DotnetWasmTypescript.InteropGenerator.Typescript;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -50,12 +51,17 @@ foreach ((CSharpFileInfo fileInfo, ClassInfo classInfo) in classInfoByFile)
     string outFileName = $"{classInfo.Name}.Interop.cs";
     string outFileDir = Path.GetDirectoryName(fileInfo.Path) ?? throw new InvalidOperationException($"Provided path {fileInfo.Path} has no directory");
     File.WriteAllText(Path.Combine(outFileDir, outFileName), source.ToString());
-
-    //RenderTypescriptInterfaceFile(classInfo, fileInfo, typeMapper);
 }
 
 string typescriptFileTarget = "C:\\Users\\marcd\\source\\repos\\DotNetWasmReact\\DotnetWasmTypescript.InteropGenerator\\index.ts";
-TypeScriptRenderer tsRenderer = new(classInfoByFile.Select(c => c.ClassInfo));
+IEnumerable<ClassInfo> classInfos = classInfoByFile.Select(c => c.ClassInfo);
+TypescriptClassNameBuilder classNameBuilder = new();
+ModuleInfo moduleInfo = new()
+{
+    ExportedClasses = classInfos,
+    HierarchyInfo = ModuleHierarchyInfo.FromClasses(classInfos, classNameBuilder)
+};
+TypeScriptRenderer tsRenderer = new(classInfos, moduleInfo, classNameBuilder);
 File.WriteAllText(typescriptFileTarget, tsRenderer.Render());
 
 

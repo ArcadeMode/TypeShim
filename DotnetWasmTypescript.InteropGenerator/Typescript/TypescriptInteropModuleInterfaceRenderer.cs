@@ -5,30 +5,30 @@ namespace DotnetWasmTypescript.InteropGenerator.Typescript;
 /// <summary>
 /// Renders a TypeScript interface matching the JSExport-generated WebAssembly module exports
 /// </summary>
-/// <param name="moduleInfo"></param>
-internal class TypescriptModuleInterfaceRenderer(WasmModuleInfo moduleInfo)
+/// <param name="moduleHierarchyInfo"></param>
+internal class TypescriptInteropModuleInterfaceRenderer(ModuleHierarchyInfo moduleHierarchyInfo, TypescriptClassNameBuilder classNameBuilder)
 {   
     private readonly StringBuilder sb = new();
 
     internal string Render()
     {
         sb.AppendLine("// Auto-generated TypeScript module exports interface");
-        sb.AppendLine("export interface WasmModuleExports {"); // FEATURE: allow custom module naming?
+        sb.AppendLine($"export interface {classNameBuilder.GetModuleInteropClassName()} {{");
 
-        RenderModuleInfo(moduleInfo, 1);
+        RenderModuleInfo(moduleHierarchyInfo, 1);
 
         sb.AppendLine("}");
         return sb.ToString();
     }
 
-    private void RenderModuleInfo(WasmModuleInfo moduleInfo, int indentLevel)
+    private void RenderModuleInfo(ModuleHierarchyInfo moduleInfo, int indentLevel)
     {
         string indent = new(' ', indentLevel * 4);
-        foreach (KeyValuePair<string, WasmModuleInfo> child in moduleInfo.Children)
+        foreach (KeyValuePair<string, ModuleHierarchyInfo> child in moduleInfo.Children)
         {
             if (child.Value.ExportedClass != null)
             {
-                sb.AppendLine($"{indent}{child.Key}: {TypescriptClassNameBuilder.GetInteropInterfaceName(child.Value.ExportedClass)};");
+                sb.AppendLine($"{indent}{child.Key}: {classNameBuilder.GetInteropInterfaceName(child.Value.ExportedClass)};");
             }
             else
             {

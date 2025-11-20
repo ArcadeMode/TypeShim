@@ -28,3 +28,4 @@
 //}
 
 export * from './_framework/dotnet.js'
+export * from './exported-types'

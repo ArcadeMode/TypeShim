@@ -9,7 +9,6 @@
       <Deploy />
     </Project>
     <Project Path="QR.Core/QR.Core.csproj" />
-    <Project Path="QR.Wasm.Out/QR.Wasm.Out.csproj" Id="a5c0c70b-df51-4b13-9b31-4b6be6ad375e" />
     <Project Path="qr/QR.Wasm.csproj" />
   </Folder>
   <Project Path="DotnetWasmTypescript.InteropGenerator/DotnetWasmTypescript.InteropGenerator.csproj" Id="f2ba4743-c519-4001-afa5-6537a27eb689" />

@@ -22,7 +22,7 @@ export interface PersonRepository {
 
     GetPerson1(): Person;
     GetPerson2(): Person;
-    GetPerson3(): Person;
+    GetInstance(): PersonRepository;
 }
 
 export interface QRCode {

@@ -9,8 +9,9 @@ namespace QR.Wasm
     {
         public string PlaceHolderOrTsGenNoWorkey_FixThis { get; set; }
 
+        private static readonly PersonRepository _instance = new();
 
-        internal static Person Person1 = new Person()
+        internal Person Person1 = new Person()
         {
             Name = "Alice",
             Age = 28,
@@ -21,7 +22,7 @@ namespace QR.Wasm
             }
         };
 
-        internal static Person Person2 = new Person()
+        internal Person Person2 = new Person()
         {
             Name = "Bob",
             Age = 35,
@@ -42,26 +43,9 @@ namespace QR.Wasm
             return Person2;
         }
 
-        public static Person GetPerson3()
+        public static PersonRepository GetInstance()
         {
-            return Person1;
+            return _instance;
         }
     }
 }
-
-//namespace QR.Wasm.Impl
-//{
-//    [TsExport]
-//    public static class PersonRepository
-//    {
-//        public static Wasm.Person GetPerson1()
-//        {
-//            return QR.Wasm.PersonRepository.Person1;
-//        }
-
-//        public static Wasm.Person GetPerson2()
-//        {
-//            return QR.Wasm.PersonRepository.Person2;
-//        }
-//    }
-//}

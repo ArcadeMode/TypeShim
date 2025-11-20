@@ -7,7 +7,7 @@ namespace DotnetWasmTypescript.InteropGenerator.Typescript;
 /// </summary>
 /// <param name="classInfo"></param>
 /// <param name="typeMapper"></param>
-internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypeScriptTypeMapper typeMapper)
+internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypeScriptMethodRenderer methodRenderer, TypescriptClassNameBuilder classNameBuilder)
 {
     //TODO: render mirror TypeScript interop class
 
@@ -20,22 +20,12 @@ internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypeScrip
     internal string Render()
     {
         sb.AppendLine($"// Auto-generated TypeScript interop interface. Source class: {classInfo.Namespace}.{classInfo.Name}");
-        sb.AppendLine($"export interface {TypescriptClassNameBuilder.GetInteropInterfaceName(classInfo)} {{");
+        sb.AppendLine($"export interface {classNameBuilder.GetInteropInterfaceName(classInfo)} {{");
         foreach (MethodInfo methodInfo in classInfo.Methods)
         {
-            sb.AppendLine($"    {RenderMethodSignature(methodInfo)};");
+            sb.AppendLine($"    {methodRenderer.RenderMethodSignature(methodInfo.WithoutInstanceParameterTypeInfo())};");
         }
         sb.AppendLine("}");
         return sb.ToString();
-    }
-
-    private string RenderMethodSignature(MethodInfo methodInfo)
-    {
-        return $"{methodInfo.Name}({RenderMethodParameters(methodInfo)}): {typeMapper.ToTypeScriptType(methodInfo.ReturnKnownType, methodInfo.ReturnCLRTypeSyntax.ToString())}";
-    }
-
-    private string RenderMethodParameters(MethodInfo methodInfo)
-    {
-        return string.Join(", ", methodInfo.MethodParameters.Select(p => $"{p.ParameterName}: {typeMapper.ToTypeScriptType(p.KnownType, p.CLRTypeSyntax.ToString())}"));
     }
 }

@@ -1,18 +1,25 @@
 ﻿namespace DotnetWasmTypescript.InteropGenerator.Typescript;
 
-internal class WasmModuleInfo
+internal class ModuleInfo
+{
+    internal required IEnumerable<ClassInfo> ExportedClasses { get; init; }
+
+    internal required ModuleHierarchyInfo HierarchyInfo { get; init; }
+}
+
+internal class ModuleHierarchyInfo
 {
     internal required ClassInfo? ExportedClass { get; init; }
-    internal IReadOnlyDictionary<string, WasmModuleInfo> Children => _children;
+    internal IReadOnlyDictionary<string, ModuleHierarchyInfo> Children => _children;
 
-    private readonly Dictionary<string, WasmModuleInfo> _children = [];
+    private readonly Dictionary<string, ModuleHierarchyInfo> _children = [];
 
-    internal static WasmModuleInfo FromClasses(IEnumerable<ClassInfo> classInfos)
+    internal static ModuleHierarchyInfo FromClasses(IEnumerable<ClassInfo> classInfos, TypescriptClassNameBuilder classNameBuilder)
     {
-        WasmModuleInfo moduleInfo = new() { ExportedClass = null };
+        ModuleHierarchyInfo moduleInfo = new() { ExportedClass = null };
         foreach (ClassInfo classInfo in classInfos)
         {
-            string[] propertyAccessorParts = [.. classInfo.Namespace.Split('.'), classInfo.Name];
+            string[] propertyAccessorParts = [.. classInfo.Namespace.Split('.'), classNameBuilder.GetInteropInterfaceName(classInfo)];
             moduleInfo.Add(propertyAccessorParts, classInfo);
         }
         return moduleInfo;
@@ -28,7 +35,7 @@ internal class WasmModuleInfo
         if (accessorParts.Length == 1)
         {
             string localExport = accessorParts[0];
-            _children[localExport] = new WasmModuleInfo
+            _children[localExport] = new ModuleHierarchyInfo
             {
                 ExportedClass = classInfo
             };
@@ -38,9 +45,9 @@ internal class WasmModuleInfo
         {
             string localExport = accessorParts[0];
             string[] remainingParts = accessorParts[1..];
-            if (!_children.TryGetValue(localExport, out WasmModuleInfo? value))
+            if (!_children.TryGetValue(localExport, out ModuleHierarchyInfo? value))
             {
-                value = new WasmModuleInfo
+                value = new ModuleHierarchyInfo
                 {
                     ExportedClass = null
                 };

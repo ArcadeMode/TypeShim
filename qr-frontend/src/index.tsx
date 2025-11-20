@@ -5,24 +5,24 @@ console.log("React QR component loaded.");
 
 
 import { dotnet } from 'dotnet-qr'
-import type { PersonName, Person, QRCode, PersonRepositoryInterop, PersonInterop, PersonRepository } from './exported-types.js';
+import { PersonName, Person, QRCode, PersonRepositoryInterop, PersonInterop, PersonRepository, WasmModuleExports, WasmModule } from './exported-types';
 
-export type QRWasmExports = {
-    QR: {
-        Wasm: {
-            QRCode: QRCode;
-            PersonInterop: PersonInterop;
-            PersonName: PersonName;
-            PersonRepositoryInterop: PersonRepositoryInterop;
-        }
-    }
-}
+//export type QRWasmExports = {
+//    QR: {
+//        Wasm: {
+//            QRCode: QRCode;
+//            PersonInterop: PersonInterop;
+//            PersonName: PersonName;
+//            PersonRepositoryInterop: PersonRepositoryInterop;
+//        }
+//    }
+//}
 
-export class DotnetBootstrapper {
+export class DotnetBootstrapper<TExports> {
     private dotnetObj: any | null = null;
-    private exportsPromise: Promise<QRWasmExports> | null = null;
+    private exportsPromise: Promise<TExports> | null = null;
 
-    public async Create(): Promise<QRWasmExports> {
+    public async Create(): Promise<TExports> {
         if (this.exportsPromise == null) {
             this.dotnetObj ??= await dotnet.create();
             const getAssemblyExports = this.dotnetObj.getAssemblyExports;
@@ -34,73 +34,77 @@ export class DotnetBootstrapper {
     }
 }
 
-export class QR_Wasm_Interop {
-    private exports: QRWasmExports;
+//export class QR_Wasm_Interop {
+//    private exports: QRWasmExports;
 
-    constructor(exports: QRWasmExports) {
-        this.exports = exports;
-    }
-    //TODO: FEATURE: mark as included in Exports API?? (name it..)
-    public GetPersonRepository(): PersonRepository {
-        return new PersonRepositoryImpl(this.exports);
-    }
-}
+//    constructor(exports: QRWasmExports) {
+//        this.exports = exports;
+//    }
+//    //TODO: FEATURE: mark as included in Exports API?? (name it..)
+//    public GetPersonRepository(): PersonRepository {
+//        return new PersonRepositoryImpl(this.exports);
+//    }
+//}
 
-// KEY IDEAS
-// - INTEROP STATICS
-// - NO SUFFIX PUBLIC API (EITHER EQUALS INTEROP OR HAS FIRST ARG AS TARGET FOR DYNAMIC CALLS)
-// - IMPL CLASSES ON TS SIDE TO WRAP MANAGED OBJECTS AND INTEROP CALLS
+//// KEY IDEAS
+//// - INTEROP STATICS
+//// - NO SUFFIX PUBLIC API (EITHER EQUALS INTEROP OR HAS FIRST ARG AS TARGET FOR DYNAMIC CALLS)
+//// - IMPL CLASSES ON TS SIDE TO WRAP MANAGED OBJECTS AND INTEROP CALLS
 
-export class PersonRepositoryImpl implements PersonRepository {
-    private exports: QRWasmExports
+//export class PersonRepositoryImpl implements PersonRepository {
+//    private exports: QRWasmExports
 
-    public PlaceHolderOrTsGenNoWorkey_FixThis: string = "";
+//    public PlaceHolderOrTsGenNoWorkey_FixThis: string = "";
 
-    constructor(exports: QRWasmExports) {
-        this.exports = exports;
-    }
+//    constructor(exports: QRWasmExports) {
+//        this.exports = exports;
+//    }
 
-    public GetPerson1(): Person {
-        return new PersonImpl(this.exports.QR.Wasm.PersonRepositoryInterop.GetPerson1(), this.exports.QR.Wasm.PersonInterop);
-    }
+//    public GetPerson1(): Person {
+//        return new PersonImpl(this.exports.QR.Wasm.PersonRepositoryInterop.GetPerson1(), this.exports.QR.Wasm.PersonInterop);
+//    }
 
-    public GetPerson2(): Person {
-        return new PersonImpl(this.exports.QR.Wasm.PersonRepositoryInterop.GetPerson2(), this.exports.QR.Wasm.PersonInterop);
-    }
-}
+//    public GetPerson2(): Person {
+//        return new PersonImpl(this.exports.QR.Wasm.PersonRepositoryInterop.GetPerson2(), this.exports.QR.Wasm.PersonInterop);
+//    }
+//}
 
-class PersonImpl implements Person {
+//class PersonImpl implements Person {
 
-    PlaceHolderOrTsGenNoWorkey_FixThis: string = "";
+//    PlaceHolderOrTsGenNoWorkey_FixThis: string = "";
 
-    private managedObj: Person;
-    private interop: PersonInterop;
-    constructor(managedObj: Person, interop: PersonInterop) {
-        this.managedObj = managedObj;
-        this.interop = interop;
-    }
+//    private managedObj: Person;
+//    private interop: PersonInterop;
+//    constructor(managedObj: Person, interop: PersonInterop) {
+//        this.managedObj = managedObj;
+//        this.interop = interop;
+//    }
 
-    GetName(): string {
-        return this.interop.GetName(this.managedObj);
-    }
+//    GetName(): string {
+//        return this.interop.GetName(this.managedObj);
+//    }
 
-    SetName(name: PersonName): void {
-        this.interop.SetName(this.managedObj, name);
-    }
-}
+//    SetName(name: PersonName): void {
+//        this.interop.SetName(this.managedObj, name);
+//    }
+//}
 
-let bootstrapper: DotnetBootstrapper | null = null;
+let bootstrapper: DotnetBootstrapper<WasmModuleExports> | null = null;
 
 export async function generate(text: string, pixelsPerBlock: number) {
-    bootstrapper ??= new DotnetBootstrapper();
-    const exports: QRWasmExports = await bootstrapper.Create();
-    const interop = new QR_Wasm_Interop()
+    bootstrapper ??= new DotnetBootstrapper<WasmModuleExports>();
+    const exports: WasmModuleExports = await bootstrapper.Create();
+    const module = new WasmModule(exports)
     console.log("exports:", exports);
 
-    const managedObj = exports!.QR.Wasm.PersonRepositoryInterop.GetPerson1();
+    //const managedObj = exports!.QR.Wasm.PersonRepositoryInterop.GetPerson1();
 
-    const person = new PersonImpl(managedObj, exports!.QR.Wasm.PersonInterop);
+    //const person = new PersonImpl(managedObj, exports!.QR.Wasm.PersonInterop);
 
+    
+
+    const instance: PersonRepository = module.PersonRepository().GetInstance();
+    const person: Person = instance.GetPerson1();
     console.log("PERSON before set", person, person.GetName(), ",", person.GetName());
     person.SetName({ Value: "TSNAME" });
     console.log("PERSON after set", person, person.GetName(), ",", person.GetName());

@@ -1,6 +1,8 @@
-﻿namespace DotnetWasmTypescript.InteropGenerator.Typescript;
+﻿using System.Text;
 
-internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo)
+namespace DotnetWasmTypescript.InteropGenerator.Typescript;
+
+internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypeScriptMethodRenderer methodRenderer, TypescriptClassNameBuilder classNameBuilder)
 {
     //TODO: render proxy class implementing the interface rendered by TypescriptUserClassInterfaceRenderer
 
@@ -11,4 +13,69 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo)
     // - constructor takes ref to managedObject (js runtime) to pass as instance parameter to interop calls
     // --- IF the original class has non-static methods
     // - contructor takes ref to exports interface by TypescriptWasmExportsInterfaceClassInfoRenderer
+
+    private readonly StringBuilder sb = new();
+
+    internal string Render()
+    {
+        string proxyClassName = classNameBuilder.GetUserClassProxyName(classInfo);
+        string interopInterfaceName = classNameBuilder.GetModuleInteropClassName();
+        RenderProxyClass(proxyClassName, interopInterfaceName, classInfo.Methods.Where(m => !m.IsStatic));
+
+
+        string staticsClassName = classNameBuilder.GetUserClassStaticsName(classInfo);
+        RenderStaticsClass(staticsClassName, interopInterfaceName, classInfo.Methods.Where(m => m.IsStatic));
+        return sb.ToString();
+    }
+
+    private void RenderStaticsClass(string className, string interopInterfaceName, IEnumerable<MethodInfo> methods)
+    {
+        string indent = "  ";
+        sb.AppendLine($"// Auto-generated TypeScript statics class. Source class: {classInfo.Namespace}.{classInfo.Name}");
+        
+        sb.AppendLine($"export class {className} {{");
+        sb.AppendLine($"{indent}private interop: {interopInterfaceName};");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}constructor(interop: {interopInterfaceName}) {{");
+        sb.AppendLine($"{indent}{indent}this.interop = interop;");
+        sb.AppendLine($"{indent}}}");
+        sb.AppendLine();
+        foreach (MethodInfo methodInfo in methods)
+        {
+            sb.AppendLine($"{indent}public {methodRenderer.RenderMethodSignature(methodInfo)} {{");
+            sb.AppendLine($"{indent}{indent}return this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({methodRenderer.RenderMethodCallParameters(methodInfo)});");
+            sb.AppendLine($"{indent}}}");
+            sb.AppendLine();
+        }
+        sb.AppendLine($"}}");
+    }
+
+    private void RenderProxyClass(string className, string interopInterfaceName, IEnumerable<MethodInfo> methods)
+    {
+        string indent = "  ";
+        sb.AppendLine($"// Auto-generated TypeScript proxy class. Source class: {classInfo.Namespace}.{classInfo.Name}");
+
+        sb.AppendLine($"export class {className} implements {classInfo.Name} {{");
+        sb.AppendLine($"{indent}private interop: {interopInterfaceName};");
+        sb.AppendLine($"{indent}private instance: object;");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}constructor(instance: object, interop: {interopInterfaceName}) {{");
+        sb.AppendLine($"{indent}{indent}this.interop = interop;");
+        sb.AppendLine($"{indent}{indent}this.instance = instance;");
+        sb.AppendLine($"{indent}}}");
+        sb.AppendLine();
+        foreach (MethodInfo methodInfo in methods)
+        {
+            sb.AppendLine($"{indent}public {methodRenderer.RenderMethodSignature(methodInfo.WithoutInstanceParameter())} {{"); // skip instance parameter, its provided by the proxy class
+            sb.AppendLine($"{indent}{indent}return this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({methodRenderer.RenderMethodCallParametersWithInstanceParameterExpression(methodInfo, "this.instance")});");
+            sb.AppendLine($"{indent}}}");
+            sb.AppendLine();
+        }
+        sb.AppendLine($"}}");
+    }
+
+    private string ResolveInteropMethodAccessor(ClassInfo classInfo, MethodInfo methodInfo)
+    {
+        return $"{classInfo.Namespace}.{classNameBuilder.GetInteropInterfaceName(classInfo)}.{methodInfo.Name}";
+    }
 }

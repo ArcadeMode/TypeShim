@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.4110890">
+﻿<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.4110890">
   <PropertyGroup>
     <StartupCommand>npm run build</StartupCommand>
     <JavaScriptTestRoot>src\</JavaScriptTestRoot>
@@ -7,4 +7,10 @@
     <!-- Folder where production build objects will be placed -->
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
   </PropertyGroup>
+  <ItemGroup>
+    <None Update="src\exported-types.ts">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
 </Project>
