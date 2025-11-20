@@ -1,6 +1,0 @@
-<Project>
-  <Target Name="ExportTypeScript" AfterTargets="Build">
-    <Exec
-      Command="dotnet &quot;$(MSBuildThisFileDirectory)tools/$(TargetFramework)/TypeScriptExport.dll&quot; &quot;$(TargetPath)&quot; &quot;$(ProjectDir)exported-types.ts&quot;" />
-  </Target>
-</Project>
