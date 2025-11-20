@@ -42,7 +42,6 @@ foreach (CSharpFileInfo fileInfo in fileInfos)
     }
 }
 
-TypeScriptTypeMapper typeMapper = new(classInfoByFile.Select(c => c.ClassInfo));
 
 foreach ((CSharpFileInfo fileInfo, ClassInfo classInfo) in classInfoByFile)
 {
@@ -52,17 +51,13 @@ foreach ((CSharpFileInfo fileInfo, ClassInfo classInfo) in classInfoByFile)
     string outFileDir = Path.GetDirectoryName(fileInfo.Path) ?? throw new InvalidOperationException($"Provided path {fileInfo.Path} has no directory");
     File.WriteAllText(Path.Combine(outFileDir, outFileName), source.ToString());
 
-    RenderTypescriptInterfaceFile(classInfo, fileInfo, typeMapper);
+    //RenderTypescriptInterfaceFile(classInfo, fileInfo, typeMapper);
 }
 
-static void RenderTypescriptInterfaceFile(ClassInfo classInfo, CSharpFileInfo fileInfo, TypeScriptTypeMapper typeMapper)
-{
-    TypescriptInteropInterfaceRenderer interopInterfaceRenderer = new(classInfo, typeMapper);
-    SourceText? source = SourceText.From(interopInterfaceRenderer.Render(), Encoding.UTF8);
-    string outFileName = $"{classInfo.Name}.ts";
-    string outFileDir = Path.GetDirectoryName(fileInfo.Path) ?? throw new InvalidOperationException($"Provided path {fileInfo.Path} has no directory");
-    File.WriteAllText(Path.Combine(outFileDir, outFileName), source.ToString());
-}
+string typescriptFileTarget = "C:\\Users\\marcd\\source\\repos\\DotNetWasmReact\\DotnetWasmTypescript.InteropGenerator\\index.ts";
+TypeScriptRenderer tsRenderer = new(classInfoByFile.Select(c => c.ClassInfo));
+File.WriteAllText(typescriptFileTarget, tsRenderer.Render());
+
 
 static IEnumerable<INamedTypeSymbol> FindLabelledClassSymbols(SemanticModel semanticModel, SyntaxNode root)
 {

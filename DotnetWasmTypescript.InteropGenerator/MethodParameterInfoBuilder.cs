@@ -13,6 +13,7 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
             yield return new MethodParameterInfo
             {
                 ParameterName = "instance",
+                IsInjectedInstanceParameter = true,
                 KnownType = KnownManagedType.Object,
                 InteropTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),
                 CLRTypeSyntax = SyntaxFactory.IdentifierName(classSymbol.Name)
@@ -33,6 +34,7 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
             yield return new MethodParameterInfo
             {
                 ParameterName = parameterSymbol.Name,
+                IsInjectedInstanceParameter = false,
                 KnownType = parameterMarshallingTypeInfo.KnownType,
                 InteropTypeSyntax = parameterTypeSyntax,
                 CLRTypeSyntax = SyntaxFactory.ParseTypeName(parameterSymbol.Type.Name)
