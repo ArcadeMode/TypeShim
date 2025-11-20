@@ -7,25 +7,9 @@ internal class TypeScriptMethodRenderer(TypeScriptTypeMapper typeMapper)
         return $"{methodInfo.Name}({RenderMethodParameters(methodInfo, includeInstanceParameter: true)}): {typeMapper.ToTypeScriptType(methodInfo.ReturnKnownType, methodInfo.ReturnCLRTypeSyntax.ToString())}";
     }
 
-    ///// <summary>
-    ///// omits the injected instance parameter _type_. Needed for the interop boundary.
-    ///// </summary>
-    ///// <param name="methodInfo"></param>
-    ///// <returns></returns>
-    //internal string RenderMethodSignatureWithoutInstanceParameterType(MethodInfo methodInfo)
-    //{
-    //    return $"{methodInfo.Name}({RenderMethodParameters(methodInfo, includeInstanceParameter: true)}): {typeMapper.ToTypeScriptType(methodInfo.ReturnKnownType, methodInfo.ReturnCLRTypeSyntax.ToString())}";
-    //}
-
-    //internal string RenderMethodSignatureWithoutInstanceParameter(MethodInfo methodInfo)
-    //{
-    //    return $"{methodInfo.Name}({RenderMethodParameters(methodInfo, includeInstanceParameter: false)}): {typeMapper.ToTypeScriptType(methodInfo.ReturnKnownType, methodInfo.ReturnCLRTypeSyntax.ToString())}";
-    //}
-
     private string RenderMethodParameters(MethodInfo methodInfo, bool includeInstanceParameter)
     {
         return string.Join(", ", methodInfo.MethodParameters
-            //.Where(p => includeInstanceParameter || !p.IsInjectedInstanceParameter)
             .Select(p => $"{p.ParameterName}: {typeMapper.ToTypeScriptType(p.KnownType, p.CLRTypeSyntax.ToString())}"));
     }
 

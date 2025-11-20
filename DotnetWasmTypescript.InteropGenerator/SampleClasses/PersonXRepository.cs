@@ -1,7 +1,7 @@
 ﻿using DotnetWasmTypescript.InteropGenerator.SampleClasses;
 using TypeScriptExport;
 
-namespace QR.Wasm;
+namespace DotnetWasmTypescript.InteropGenerator.SampleClasses.DifferentNS;
 
 [TsExport]
 public partial class PersonXRepository

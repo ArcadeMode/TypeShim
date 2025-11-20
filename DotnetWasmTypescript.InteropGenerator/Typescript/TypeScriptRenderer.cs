@@ -2,10 +2,9 @@
 using DotnetWasmTypescript.InteropGenerator.Typescript;
 using System.Text;
 
-internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo moduleInfo, TypescriptClassNameBuilder classNameBuilder)
+internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo moduleInfo, TypescriptClassNameBuilder classNameBuilder, TypeScriptTypeMapper typeMapper)
 {
     private readonly StringBuilder sourceBuilder = new();
-    private readonly TypeScriptTypeMapper typeMapper = new(classInfos);
 
     internal string Render()
     {

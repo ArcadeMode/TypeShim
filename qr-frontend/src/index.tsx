@@ -106,9 +106,9 @@ export async function generate(text: string, pixelsPerBlock: number) {
     const instance: PersonRepository = module.PersonRepository().GetInstance();
     const person: Person = instance.GetPerson1();
     console.log("PERSON before set", person, person.GetName(), ",", person.GetName());
-    person.SetName({ Value: "TSNAME" });
+    person.SetName("TSNAME");
     console.log("PERSON after set", person, person.GetName(), ",", person.GetName());
-    return exports!.QR.Wasm.QRCode.Generate(text, pixelsPerBlock);
+    return exports!.QR.Wasm.QRCodeInterop.Generate(text, pixelsPerBlock);
 }
 
 

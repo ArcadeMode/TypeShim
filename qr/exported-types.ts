@@ -14,7 +14,7 @@ export interface Person {
     PlaceHolderOrTsGenNoWorkey_FixThis: string;
 
     GetName(): string;
-    SetName(name: PersonName): void;
+    SetName(name: string): void;
 }
 
 export interface PersonRepository {

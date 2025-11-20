@@ -13,7 +13,7 @@ export interface WasmModuleExports {
 // Auto-generated TypeScript interop interface. Source class: QR.Wasm.Person
 export interface PersonInterop {
     GetName(instance: object): string;
-    SetName(instance: object, name: PersonName): void;
+    SetName(instance: object, name: string): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: QR.Wasm.PersonRepository
@@ -35,7 +35,7 @@ export interface PersonNameInterop {
 // Auto-generated TypeScript interface. Source class: QR.Wasm.Person
 export interface Person {
     GetName(): string;
-    SetName(name: PersonName): void;
+    SetName(name: string): void;
 }
 
 // Auto-generated TypeScript interface. Source class: QR.Wasm.PersonRepository
@@ -79,8 +79,8 @@ export class PersonProxy implements Person {
         return this.interop.QR.Wasm.PersonInterop.GetName(this.instance);
     }
 
-    public SetName(name: PersonName): void {
-        return this.interop.QR.Wasm.PersonInterop.SetName(this.instance, name);
+    public SetName(name: string): void {
+        this.interop.QR.Wasm.PersonInterop.SetName(this.instance, name);
     }
 
 }

@@ -4,6 +4,11 @@ internal class TypeScriptTypeMapper(IEnumerable<ClassInfo> classInfos)
 {
     private readonly HashSet<string> _customTypeNames = [.. classInfos.Select(ci => ci.Name)];
 
+    public bool HasKnownType(string nameHint)
+    {
+        return _customTypeNames.Contains(nameHint);
+    }
+
     public string ToTypeScriptType(KnownManagedType type, string nameHint)
     {
         if (_customTypeNames.Contains(nameHint)) return nameHint;

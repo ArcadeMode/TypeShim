@@ -8,7 +8,7 @@ namespace QR.Wasm
     {
         public string PlaceHolderOrTsGenNoWorkey_FixThis { get; set; }
 
-        internal PersonName Name { get; set; }
+        internal string Name { get; set; }
 
         internal int Age { get; set; }
 
@@ -16,10 +16,10 @@ namespace QR.Wasm
         
         public string GetName()
         {
-            return Name.Value;
+            return Name;
         }
 
-        public void SetName(PersonName name)
+        public void SetName(string name)
         {
             this.Name = name;
         }

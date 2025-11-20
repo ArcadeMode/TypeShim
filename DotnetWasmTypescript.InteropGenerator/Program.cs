@@ -55,13 +55,14 @@ foreach ((CSharpFileInfo fileInfo, ClassInfo classInfo) in classInfoByFile)
 
 string typescriptFileTarget = "C:\\Users\\marcd\\source\\repos\\DotNetWasmReact\\DotnetWasmTypescript.InteropGenerator\\index.ts";
 IEnumerable<ClassInfo> classInfos = classInfoByFile.Select(c => c.ClassInfo);
-TypescriptClassNameBuilder classNameBuilder = new();
+TypeScriptTypeMapper typeMapper = new(classInfos);
+TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
 ModuleInfo moduleInfo = new()
 {
     ExportedClasses = classInfos,
     HierarchyInfo = ModuleHierarchyInfo.FromClasses(classInfos, classNameBuilder)
 };
-TypeScriptRenderer tsRenderer = new(classInfos, moduleInfo, classNameBuilder);
+TypeScriptRenderer tsRenderer = new(classInfos, moduleInfo, classNameBuilder, typeMapper);
 File.WriteAllText(typescriptFileTarget, tsRenderer.Render());
 
 
