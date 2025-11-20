@@ -17,6 +17,5 @@
     <Build />
     <Deploy />
   </Project>
-  <Project Path="TypeScriptExport/TypeScriptExport.csproj" Id="be7a9e89-ea99-45bb-b99b-f8926b5c85dd" />
   <Project Path="TypeScriptExportGenerator/TypeScriptExport.Analyzers.csproj" />
 </Solution>
