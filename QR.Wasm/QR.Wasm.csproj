@@ -1,7 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
 
-  <Import Project="../TypeShim/TypeShim.targets" />
-  
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <OutputType>Library</OutputType>
@@ -10,20 +8,30 @@
     <PublishDir>$(MSBuildProjectDirectory)\publish\</PublishDir>
   </PropertyGroup>
 
+
   <PropertyGroup>
     <WasmBundlerFriendlyBootConfig>true</WasmBundlerFriendlyBootConfig>
     <WasmFingerprintAssets>false</WasmFingerprintAssets>
     <CompressionEnabled>false</CompressionEnabled>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <NugetMode>false</NugetMode>
+  </PropertyGroup>
+
+  <Import Project="../TypeShim/pack/TypeShim.targets" Condition="'$(NugetMode)' != true" />
+
   <ItemGroup>
-    <!--<ProjectReference Include="..\TypeShim\TypeShim.csproj">-->
-    <ProjectReference Include="..\TypeShim.Analyzers\TypeShim.csproj" OutputItemType="Analyzer" />
+    <ProjectReference Include="..\TypeShim\TypeShim.csproj" Condition="'$(NugetMode)' != true" />
     <ProjectReference Include="..\QR.Core\QR.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TypeShim" Version="0.0.1" Condition="'$(NugetMode)' == true" />
   </ItemGroup>
   
 </Project>
