@@ -1,5 +1,5 @@
 ﻿using System.Runtime.InteropServices.JavaScript;
-using TypeScriptExport;
+using TypeShim;
 
 namespace QR.Wasm
 {

@@ -38,9 +38,8 @@ export async function generate(text: string, pixelsPerBlock: number) {
     person.SetName("TSNAME");
     console.log("PERSON after set", person, person.GetName(), ",", person.GetName());
 
-    return module.QRCode().GenerateMyQR(text, pixelsPerBlock);
+    return module.QRCode().Generate(text, pixelsPerBlock);
 }
-
 
 type QrImageProps = {
     text?: string;
