@@ -1,1 +1,2 @@
-pack
+pack/*
+!pack/TypeShim.targets

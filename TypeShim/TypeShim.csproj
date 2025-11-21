@@ -12,6 +12,23 @@
     <GeneratorProjectName>TypeShim.Generator</GeneratorProjectName>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageId>TypeShim</PackageId>
+    <Version>0.0.1</Version>
+    <Authors>ArcadeMode</Authors>
+    <Product>TypeShim</Product>
+    <Description>WASM CSharp - TypeScript interop with static ánd instance members.</Description>
+    <PackageTags>wasm, csharp, typescript, interop, generated</PackageTags>
+    <RepositoryUrl>https://github.com/ArcadeMode/TypeShim</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/ArcadeMode/TypeShim</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="pack/TypeShim.targets" Pack="true" PackagePath="build" />
+    <Content Include="pack/**/*.*" Pack="true" PackagePath="build" />
+  </ItemGroup>
+  
   <Target Name="BuildGenerator" BeforeTargets="Build">
     <!-- this enables building the generator without referencing its code, making it easier to pack -->
     <MSBuild Projects="../$(GeneratorProjectName)/$(GeneratorProjectName).csproj"
@@ -22,9 +39,4 @@
     </ItemGroup>
     <Copy SourceFiles="@(GeneratorFiles)" DestinationFolder="$(ProjectDir)/pack/" />
   </Target>
-
-  <ItemGroup>
-    <None Include="TypeShim.targets" Pack="true" PackagePath="build" />
-    <Content Include="pack/**/*.*" Pack="true" PackagePath="build" />
-  </ItemGroup>
 </Project>
