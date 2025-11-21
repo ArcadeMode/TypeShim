@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TypeShim\TypeShim.csproj" Condition="'$(NugetMode)' != true" />
-    <ProjectReference Include="..\QR.Core\QR.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,6 +31,7 @@
 
   <ItemGroup>
     <PackageReference Include="TypeShim" Version="0.0.1" Condition="'$(NugetMode)' == true" />
+    <PackageReference Include="QRCoder" Version="1.6.0" />
   </ItemGroup>
   
 </Project>

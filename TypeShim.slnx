@@ -1,6 +1,5 @@
 <Solution>
   <Folder Name="/QR Module/">
-    <Project Path="QR.Core/QR.Core.csproj" />
     <Project Path="QR.UI/QR.UI.esproj">
       <Build />
       <Deploy />
