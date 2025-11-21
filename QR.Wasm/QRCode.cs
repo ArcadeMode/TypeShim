@@ -1,5 +1,3 @@
-using System;
-using System.Runtime.InteropServices.JavaScript;
 using TypeShim;
 
 [assembly: System.Runtime.Versioning.SupportedOSPlatform("browser")]
@@ -13,27 +11,6 @@ namespace QR.Wasm
         {
             return QRHelper.Generate(text, pixelsPerBlock);
         }
-    }
-
-
-    [TsExport]
-    public partial class PersonName
-    {
-        public static implicit operator PersonName(string value) => new() { Value = value };
-        public static implicit operator PersonName(JSObject jsObj) => new()
-        {
-            Value = jsObj.GetPropertyAsString(nameof(Value)) ?? throw new ArgumentException($"JSObject is not a valid {nameof(PersonName)}", nameof(jsObj))
-        };
-
-        public string Value { get; set; }
-    }
-
-    [TsExport]
-    public enum Color
-    {
-        Red,
-        Green,
-        Blue
     }
 }
 

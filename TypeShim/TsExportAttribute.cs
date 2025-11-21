@@ -1,5 +1,5 @@
 ﻿namespace TypeShim;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Enum)]
+[AttributeUsage(AttributeTargets.Class)]
 public class TsExportAttribute : Attribute {
 }
