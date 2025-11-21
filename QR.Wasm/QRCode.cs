@@ -29,14 +29,6 @@ namespace QR.Wasm
     }
 
     [TsExport]
-    public struct Dog
-    {
-        public string Name { get; set; }
-
-        public int Age { get; set; }
-    }
-
-    [TsExport]
     public enum Color
     {
         Red,

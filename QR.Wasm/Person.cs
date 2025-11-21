@@ -23,5 +23,10 @@ namespace QR.Wasm
         {
             this.Name = name;
         }
+
+        public Dog GetPet()
+        {
+            return Pet;
+        }
     }
 }

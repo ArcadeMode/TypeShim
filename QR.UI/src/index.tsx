@@ -3,7 +3,7 @@ import React from 'react';
 console.log("React QR component loaded.");
 
 
-import { Person, PersonRepository, WasmModuleExports, WasmModule } from '../../QR.Wasm/publish/wwwroot/typeshim';
+import { Person, Dog, PersonRepository, WasmModuleExports, WasmModule } from '../../QR.Wasm/publish/wwwroot/typeshim';
 
 export class DotnetBootstrapper<TExports> {
     private dotnetObj: any | null = null;
@@ -37,6 +37,9 @@ export async function generate(text: string, pixelsPerBlock: number) {
     console.log("PERSON before set", person, person.GetName(), ",", person.GetName());
     person.SetName("TSNAME");
     console.log("PERSON after set", person, person.GetName(), ",", person.GetName());
+
+    const pet: Dog = person.GetPet();
+    console.log("pet.GetName()", pet, pet.GetName());
 
     return module.QRCode().Generate(text, pixelsPerBlock);
 }
