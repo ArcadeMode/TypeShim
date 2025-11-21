@@ -4,7 +4,7 @@ using System.Reflection;
 using TypeScriptExport;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace DotnetWasmTypescript.InteropGenerator;
+namespace TypeShim.CSharp;
 
 internal static class CSharpPartialCompilation
 {

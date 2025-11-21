@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
 
-  <Import Project="../TypeShim/DotnetWasmTypescript.InteropGenerator.targets" />
+  <Import Project="../TypeShim/TypeShim.targets" />
   
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <OutputType>Library</OutputType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <PublishDir>$(MSBuildProjectDirectory)\publish\</PublishDir>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -21,9 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="wwwroot\exported-types.ts">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Content>
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>

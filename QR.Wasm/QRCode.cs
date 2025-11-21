@@ -15,20 +15,14 @@ using TypeScriptExportGenerator;
 namespace QR.Wasm
 {
     [TsExport]
-    public partial class QRCode
+    public class QRCode
     {
-        public string Wowzers { get; set; }
-
-        [JSExport]
-        public static string Generate(string text, int pixelsPerBlock)
+        public static string GenerateMyQR(string text, int pixelsPerBlock)
         {
             return QRHelper.Generate(text, pixelsPerBlock);
         }
     }
 
-    
-
-    
 
     [TsExport]
     public partial class PersonName
@@ -41,27 +35,6 @@ namespace QR.Wasm
 
         public string Value { get; set; }
     }
-
-    //[TsExport]
-    //public partial class PersonNameExport
-    //{
-    //    [JSExport]
-    //    [return: JSMarshalAs<JSType.String>]
-    //    internal static string GetValue([JSMarshalAs<JSType.Any>] object personNameObject)
-    //    {
-
-    //        if (personNameObject is PersonName personName)
-    //        {
-    //            return GetValue(personName);
-    //        }
-    //        throw new ArgumentException($"Argument was not compatible with expected type {nameof(PersonName)}");
-    //    }
-
-    //    public static string GetValue(PersonName personName)
-    //    {
-    //        return personName.Value;
-    //    }
-    //}
 
     [TsExport]
     public struct Dog

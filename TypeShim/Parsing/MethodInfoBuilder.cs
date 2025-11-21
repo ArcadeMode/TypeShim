@@ -1,8 +1,8 @@
-﻿using DotnetWasmTypescript.InteropGenerator;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Text;
+using TypeShim.Parsing;
 
 internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSymbol memberMethod)
 {

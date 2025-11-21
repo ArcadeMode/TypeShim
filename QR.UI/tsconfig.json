@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "ESNext",
+    "moduleResolution": "node",
     "jsx": "react-jsx",
     "strict": true,
     "esModuleInterop": true,
@@ -9,5 +10,5 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": [ "src" ],
-  "exclude": [ "node_modules", "dist" ]
+  "exclude": [ "node_modules", "dist", "public" ]
 }

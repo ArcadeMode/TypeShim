@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using TypeShim.Parsing;
 
 namespace DotnetWasmTypescript.InteropGenerator.Typescript;
 

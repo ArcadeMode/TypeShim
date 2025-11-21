@@ -1,11 +1,9 @@
 import React from 'react';
-//import { generate } from 'dotnet-qr';
 
 console.log("React QR component loaded.");
 
 
-import { dotnet } from 'dotnet-qr'
-import { Person, PersonRepository, WasmModuleExports, WasmModule } from './exported-types';
+import { Person, PersonRepository, WasmModuleExports, WasmModule } from '../../QR.Wasm/publish/wwwroot/typeshim';
 
 export class DotnetBootstrapper<TExports> {
     private dotnetObj: any | null = null;
@@ -13,7 +11,10 @@ export class DotnetBootstrapper<TExports> {
 
     public async Create(): Promise<TExports> {
         if (this.exportsPromise == null) {
-            this.dotnetObj ??= await dotnet.create();
+            //@ts-ignore
+            const dotnetModule = await import('../../QR.Wasm/publish/wwwroot/_framework/dotnet.js');
+            console.log("dotnetModule:", dotnetModule);
+            this.dotnetObj ??= await (dotnetModule).dotnet.create();
             const getAssemblyExports = this.dotnetObj.getAssemblyExports;
             const config = this.dotnetObj.getConfig();
             this.exportsPromise = getAssemblyExports(config.mainAssemblyName);
@@ -29,7 +30,7 @@ export async function generate(text: string, pixelsPerBlock: number) {
     bootstrapper ??= new DotnetBootstrapper<WasmModuleExports>();
     const exports: WasmModuleExports = await bootstrapper.Create();
     const module = new WasmModule(exports)
-    console.log("exports:", exports);
+    console.log("exports?:", exports);
 
     const instance: PersonRepository = module.PersonRepository().GetInstance();
     const person: Person = instance.GetPerson1();
@@ -37,7 +38,7 @@ export async function generate(text: string, pixelsPerBlock: number) {
     person.SetName("TSNAME");
     console.log("PERSON after set", person, person.GetName(), ",", person.GetName());
 
-    return module.QRCode().Generate(text, pixelsPerBlock);
+    return module.QRCode().GenerateMyQR(text, pixelsPerBlock);
 }
 
 

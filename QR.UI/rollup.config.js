@@ -10,7 +10,7 @@ export default [
 {
    input: 'src/index.tsx',
    output: {
-      file: 'public/bundle.js',
+      dir: 'public',
       format: 'module'
    },
     plugins: [

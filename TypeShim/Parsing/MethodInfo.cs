@@ -1,6 +1,6 @@
-﻿using DotnetWasmTypescript.InteropGenerator;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TypeShim.Parsing;
 
 internal sealed class MethodInfo
 {

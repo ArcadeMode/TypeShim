@@ -1,0 +1,45 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Define default TypeShim build properties -->
+  <PropertyGroup>
+    <TypeShim_GeneratedDir>TypeShim</TypeShim_GeneratedDir>
+    <TypeShim_TypeScriptOutputDirectory>wwwroot</TypeShim_TypeScriptOutputDirectory>
+    <TypeShim_TypeScriptOutputFileName>typeshim.ts</TypeShim_TypeScriptOutputFileName>
+  </PropertyGroup>
+
+  <Target Name="TypeShimCleanGeneratedCs" BeforeTargets="TypeShimGenerateInterop" Condition="'$(DesignTimeBuild)' != 'true'">
+    <RemoveDir Directories="$(IntermediateOutputPath)/$(TypeShim_GeneratedDir)" />
+  </Target>
+  
+  <Target Name="TypeShimGenerateInterop" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' != 'true'">
+    <Message Text="Generating TypeShim .cs/.ts files" Importance="Normal" />
+
+    <ItemGroup>
+      <CsFilesToScan Include="@(Compile)" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <TypeShim_TypeScriptOutputFilePath>$([System.IO.Path]::Combine('$(TypeShim_TypeScriptOutputDirectory)', '$(TypeShim_TypeScriptOutputFileName)'))</TypeShim_TypeScriptOutputFilePath>
+    </PropertyGroup>
+    
+    <!-- TODO: rid of MSBuildThisFileDirectory for publishability-->
+    <Exec
+      Command="dotnet &quot;$(MSBuildThisFileDirectory)tools/$(TargetFramework)/TypeShim.dll&quot; &quot;@(CsFilesToScan->'%(FullPath)', ';')&quot; &quot;$(IntermediateOutputPath)$(TypeShim_GeneratedDir)&quot; &quot;$(OutDir)$(TypeShim_TypeScriptOutputFilePath)&quot;"
+      WorkingDirectory="$(ProjectDir)"
+      IgnoreExitCode="false" />
+
+    <ItemGroup>
+      <Compile Include="$(IntermediateOutputPath)/$(TypeShim_GeneratedDir)/*.cs" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="TypeShimCopyTsToPublish" AfterTargets="Publish">
+    <PropertyGroup>
+      <TypeShim_TypeScriptOutputFilePath>$([System.IO.Path]::Combine('$(OutDir)', '$(TypeShim_TypeScriptOutputDirectory)', '$(TypeShim_TypeScriptOutputFileName)'))</TypeShim_TypeScriptOutputFilePath>
+      <TypeShim_TypeScriptPublishDirPath>$([System.IO.Path]::Combine('$(PublishDir)', '$(TypeShim_TypeScriptOutputDirectory)'))</TypeShim_TypeScriptPublishDirPath>
+    </PropertyGroup>
+    
+    <Message Text="Copying TypeShim generated .ts file from: $(TypeShim_TypeScriptOutputFilePath) to: $(TypeShim_TypeScriptPublishDirPath)" Importance="Normal" />
+    <Copy SourceFiles="$(TypeShim_TypeScriptOutputFilePath)" DestinationFolder="$(TypeShim_TypeScriptPublishDirPath)" />
+  </Target>
+
+</Project>
