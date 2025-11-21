@@ -12,18 +12,15 @@
   
   <Target Name="TypeShimGenerateInterop" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' != 'true'">
     <Message Text="Generating TypeShim .cs/.ts files" Importance="Normal" />
-
     <ItemGroup>
       <CsFilesToScan Include="@(Compile)" />
     </ItemGroup>
-
     <PropertyGroup>
       <TypeShim_TypeScriptOutputFilePath>$([System.IO.Path]::Combine('$(TypeShim_TypeScriptOutputDirectory)', '$(TypeShim_TypeScriptOutputFileName)'))</TypeShim_TypeScriptOutputFilePath>
     </PropertyGroup>
     
-    <!-- TODO: rid of MSBuildThisFileDirectory for publishability-->
     <Exec
-      Command="dotnet &quot;$(MSBuildThisFileDirectory)tools/$(TargetFramework)/TypeShim.dll&quot; &quot;@(CsFilesToScan->'%(FullPath)', ';')&quot; &quot;$(IntermediateOutputPath)$(TypeShim_GeneratedDir)&quot; &quot;$(OutDir)$(TypeShim_TypeScriptOutputFilePath)&quot;"
+      Command="dotnet &quot;$(MSBuildThisFileDirectory)/TypeShim.Generator.dll&quot; &quot;@(CsFilesToScan->'%(FullPath)', ';')&quot; &quot;$(IntermediateOutputPath)$(TypeShim_GeneratedDir)&quot; &quot;$(OutDir)$(TypeShim_TypeScriptOutputFilePath)&quot;"
       WorkingDirectory="$(ProjectDir)"
       IgnoreExitCode="false" />
 
@@ -41,5 +38,4 @@
     <Message Text="Copying TypeShim generated .ts file from: $(TypeShim_TypeScriptOutputFilePath) to: $(TypeShim_TypeScriptPublishDirPath)" Importance="Normal" />
     <Copy SourceFiles="$(TypeShim_TypeScriptOutputFilePath)" DestinationFolder="$(TypeShim_TypeScriptPublishDirPath)" />
   </Target>
-
 </Project>

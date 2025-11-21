@@ -1,6 +1,6 @@
-﻿using DotnetWasmTypescript.InteropGenerator.Typescript;
-using System.Text;
-using TypeShim.Parsing;
+﻿using System.Text;
+using TypeShim.Generator.Parsing;
+using TypeShim.Generator.Typescript;
 
 internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo moduleInfo, TypescriptClassNameBuilder classNameBuilder, TypeScriptTypeMapper typeMapper)
 {

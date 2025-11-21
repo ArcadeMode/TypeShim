@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using TypeShim.Parsing;
+using TypeShim.Generator.Parsing;
 
-namespace DotnetWasmTypescript.InteropGenerator.Typescript;
+namespace TypeShim.Generator.Typescript;
 
 /// <summary>
 /// Renders a TypeScript interface matching the signature of the user's C# class annotated with <see cref="TsExportAttribute"/>.

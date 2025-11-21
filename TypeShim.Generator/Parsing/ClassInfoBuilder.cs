@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace TypeShim.Parsing;
+namespace TypeShim.Generator.Parsing;
 
 internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol)
 {

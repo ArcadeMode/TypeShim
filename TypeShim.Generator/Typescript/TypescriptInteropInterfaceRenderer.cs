@@ -1,8 +1,8 @@
 ﻿using System.Text;
-using TypeShim.CSharp;
-using TypeShim.Parsing;
+using TypeShim.Generator.CSharp;
+using TypeShim.Generator.Parsing;
 
-namespace DotnetWasmTypescript.InteropGenerator.Typescript;
+namespace TypeShim.Generator.Typescript;
 
 /// <summary>
 /// Renders a TypeScript interface matching the generated JSExport-annoted class by <see cref="CSharpInteropClassRenderer"/>

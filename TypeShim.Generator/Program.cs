@@ -1,14 +1,12 @@
-﻿using DotnetWasmTypescript.InteropGenerator.Typescript;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using System.IO;
-using System.Reflection;
 using System.Text;
-using TypeScriptExport;
-using TypeShim.CSharp;
-using TypeShim.Parsing;
+using TypeShim;
+using TypeShim.Generator.CSharp;
+using TypeShim.Generator.Parsing;
+using TypeShim.Generator.Typescript;
 
 if (args.Length != 3)
 {
@@ -124,7 +122,7 @@ static IEnumerable<INamedTypeSymbol> FindLabelledClassSymbols(SemanticModel sema
         }
         
         // Example: List attributes
-        if (symbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name == nameof(TsExportAttribute)))
+        if (symbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TsExportAttribute" or "TsExport"))
         {
             Console.WriteLine($"TsExport: {symbol.ToDisplayString()}");
             yield return symbol;

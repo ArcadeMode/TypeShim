@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace DotnetWasmTypescript.InteropGenerator.Typescript;
+namespace TypeShim.Generator.Typescript;
 
 /// <summary>
 /// Renders a TypeScript interface matching the JSExport-generated WebAssembly module exports

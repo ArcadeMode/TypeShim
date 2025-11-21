@@ -1,23 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
+  </PropertyGroup>  
+  
   <PropertyGroup>
-    <OutputPath>.\tools\</OutputPath>
+    <GeneratorProjectName>TypeShim.Generator</GeneratorProjectName>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
-  </ItemGroup>
+  <Target Name="BuildGenerator" BeforeTargets="Build">
+    <!-- this enables building the generator without referencing its code, making it easier to pack -->
+    <MSBuild Projects="../$(GeneratorProjectName)/$(GeneratorProjectName).csproj"
+             Targets="Build"
+             Properties="Configuration=$(Configuration);Platform=$(Platform);OutputPath=pack" />
+    <ItemGroup>
+      <GeneratorFiles Include="../$(GeneratorProjectName)/bin/build/**/*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(GeneratorFiles)" DestinationFolder="$(ProjectDir)/pack/" />
+  </Target>
 
   <ItemGroup>
-    <ProjectReference Include="..\TypeShim.Analyzers\TypeShim.Analyzers.csproj" />
+    <None Include="TypeShim.targets" Pack="true" PackagePath="build" />
+    <Content Include="pack/**/*.*" Pack="true" PackagePath="build" />
   </ItemGroup>
-
 </Project>

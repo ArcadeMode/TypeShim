@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using TypeShim.Parsing;
+using TypeShim.Generator.Parsing;
 
 internal class MethodParameterInfo
 { 

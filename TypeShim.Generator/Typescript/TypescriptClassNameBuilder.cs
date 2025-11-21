@@ -1,6 +1,6 @@
-﻿using TypeShim.Parsing;
+﻿using TypeShim.Generator.Parsing;
 
-namespace DotnetWasmTypescript.InteropGenerator.Typescript;
+namespace TypeShim.Generator.Typescript;
 
 internal class TypescriptClassNameBuilder(TypeScriptTypeMapper typeMapper)
 {

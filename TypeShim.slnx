@@ -1,16 +1,16 @@
 <Solution>
   <Folder Name="/QR Module/">
+    <Project Path="QR.Core/QR.Core.csproj" />
     <Project Path="QR.UI/QR.UI.esproj">
       <Build />
       <Deploy />
     </Project>
-    <Project Path="QR.Core/QR.Core.csproj" />
     <Project Path="QR.Wasm/QR.Wasm.csproj" />
   </Folder>
   <Project Path="Host.Client/Host.Client.esproj">
     <Build />
     <Deploy />
   </Project>
-  <Project Path="TypeShim.Analyzers/TypeShim.Analyzers.csproj" />
-  <Project Path="TypeShim/TypeShim.csproj" Id="f2ba4743-c519-4001-afa5-6537a27eb689" />
+  <Project Path="TypeShim/TypeShim.csproj" />
+  <Project Path="TypeShim.Generator/TypeShim.Generator.csproj" Id="f2ba4743-c519-4001-afa5-6537a27eb689" />
 </Solution>

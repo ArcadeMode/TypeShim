@@ -1,4 +1,4 @@
-﻿namespace DotnetWasmTypescript.InteropGenerator.Typescript;
+﻿namespace TypeShim.Generator.Typescript;
 
 internal class TypeScriptMethodRenderer(TypeScriptTypeMapper typeMapper)
 {

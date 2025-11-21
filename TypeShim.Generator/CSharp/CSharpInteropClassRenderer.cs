@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using TypeShim.Parsing;
+using TypeShim.Generator.Parsing;
 
-namespace TypeShim.CSharp;
+namespace TypeShim.Generator.CSharp;
 
 internal sealed class CSharpInteropClassRenderer(ClassInfo classInfo)
 {

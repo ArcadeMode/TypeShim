@@ -1,10 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Reflection;
-using TypeScriptExport;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace TypeShim.CSharp;
+namespace TypeShim.Generator.CSharp;
 
 internal static class CSharpPartialCompilation
 {
@@ -26,7 +24,7 @@ internal static class CSharpPartialCompilation
         Assembly[] baseAssemblies =
         [
             typeof(object).Assembly,
-            typeof(TsExportAttribute).Assembly
+            //typeof(TsExportAttribute).Assembly
         ];
 
         List<PortableExecutableReference> references = [.. baseAssemblies.Select(a => MetadataReference.CreateFromFile(a.Location))];

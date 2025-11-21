@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using TypeShim.Parsing;
+using TypeShim.Generator.Parsing;
 
-namespace DotnetWasmTypescript.InteropGenerator.Typescript;
+namespace TypeShim.Generator.Typescript;
 
 internal class TypescriptUserModuleClassRenderer(ModuleInfo moduleInfo, TypeScriptTypeMapper typeMapper, TypescriptClassNameBuilder classNameBuilder)
 {
