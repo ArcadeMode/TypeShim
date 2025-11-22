@@ -4,8 +4,7 @@
 </p>
 
 ## Why TypeShim
-.NET on WebAssembly is an awesome technology but the [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0) can be somewhat cumbersome to work with. TypeShim sets out to provide an opinionated and easy to use wrapper for this API to allow developers to remain focussed on delivering value to their users. 
-The ability to run .NET on WebAssembly brings great architectural opportunities, with TypeShim it will become very easy to bring WASM components to your TypeScript-based frontends.
+.NET on WebAssembly is an awesome technology but the [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0) can be somewhat cumbersome to work with. TypeShim sets out to provide an opinionated and easy to use wrapper for this API to allow developers to remain focussed on delivering value to their users. With TypeShim it will be a breeze to bring WASM components to your TypeScript-based frontends.
 
 ## Features
 TypeShim can hide the JSExport API from you, however you are still free to write classes annotated with JSExport. They just dont play nice together so you either roll your own implementation or let TypeShim do the work for you. Besides generating your JSExport class for you, TypeShim adds the TypeScript side of things for you as well.
@@ -74,6 +73,9 @@ class MyCoolUIApp {
 
 #### TypeShim generates your module definition
 Types like `WasmModule` are generated automatically to bring you your `static` methods as a first-line of access to your C# classes. Then you receive your very recognizable `PersonRepository` which behaves just like a real C# object. Instance method invocations on the typescript instances call into your .NET class's instance methods completely transparently.
+
+## Installing
+**TODO**: nuget, options for msbuild props.
 
 ## Roadmap
 This project is still in its early stages but there are a few short- and longterm goals right now
