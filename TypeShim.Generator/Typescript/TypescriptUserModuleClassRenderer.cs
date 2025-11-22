@@ -25,6 +25,9 @@ internal class TypescriptUserModuleClassRenderer(ModuleInfo moduleInfo, TypeScri
         sb.AppendLine($"{indent}}}");
 
         // Render static methods for each exported class
+        // TODO: add private-class-like structure to deal with duplicate class names across namespaces
+        // so not module.ClassA but module.Namespace.Sub.ClassA()
+        // TODO: swap to properties instead of methods to drop unnecessary parentheses
         foreach (ClassInfo classInfo in moduleInfo.ExportedClasses.Where(c => c.Methods.Any(m => m.IsStatic)))
         {
             string staticsClassName = classNameBuilder.GetUserClassStaticsName(classInfo);
