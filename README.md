@@ -1,43 +1,94 @@
-# .NET on WebAssembly in a React component
+<h1 align=center tabindex=-1>TypeShim - Seamless .NET <> TypeScript interop</h1>
+<p align=center tabindex=-1>
+  _Use your actual .NET classes, directly in TypeScript_
+</p>
 
-This sample shows how to use .NET on WebAssembly integrated into a React app. It also extracts the React component into a reusable package.
+## Why TypeShim
+.NET on WebAssembly is an awesome technology but the [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0) can be somewhat cumbersome to work with. TypeShim sets out to provide an opinionated and easy to use wrapper for this API to allow developers to remain focussed on delivering value to their users. 
+The ability to run .NET on WebAssembly brings great architectural opportunities, with TypeShim it will become very easy to bring WASM components to your TypeScript-based frontends.
 
-* [Blazor Community Standup - Integrate .NET in JavaScript apps](https://www.youtube.com/watch?v=tAh899Gri4E)
-* [Blazor + React demo (`BlazorWebAssemblyReact`, .NET 10 or later, `dotnet/blazor-samples` GitHub repository](https://github.com/dotnet/blazor-samples)
-* [Host and deploy: JavaScript bundler support](https://learn.microsoft.com/aspnet/core/blazor/host-and-deploy/#javascript-bundler-support)
+## Features
+TypeShim can hide the JSExport API from you, however you are still free to write classes annotated with JSExport. They just dont play nice together so you either roll your own implementation or let TypeShim do the work for you. Besides generating your JSExport class for you, TypeShim adds the TypeScript side of things for you as well.
 
-## Project structure
+#### Export your entire C# class to JS with one attribute, no JSExport or typemarshalling info required.
+```csharp
+using TypeShim;
 
-* `app`: Target React app using rollup to do the JavaScript build.
-* `qrlibrary`: npm library implementing QR generation.
-  * `dotnet`: .NET implementation of QR generator.
-  * `react`: [Rollup](https://rollupjs.org/)-bundled React component for showing a QR code image.
+namespace MyBusiness.People;
 
-## Building the source code
+[TsExport]
+public class PersonRepository
+{
+    private static readonly PersonRepository _instance = new();
 
-### .NET
+    internal Person Person = new Person()
+    {
+        Name = "Alice",
+        Age = 28,
+        Pet = new Dog
+        {
+            Name = "Fido",
+            Age = 4
+        }
+    };
 
-* Install the [.NET SDK](https://dotnet.microsoft.com/download) (.NET 10 or later).
-* Run `dotnet publish` in the `qrlibrary/dotnet` folder.
+    public Person GetPerson()
+    {
+        return Person;
+    }
 
-### React library
 
-In the `qrlibrary/react` folder:
+    public static PersonRepository GetInstance()
+    {
+        return _instance;
+    }
+}
 
-* Run `npm install`.
-* Run `npm run build`.
+```
 
-### App
+On the typescript end you simply retrieve the `exports` as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-). However in your projects output you will find a generated `typeshim.ts`.
 
-In the `app` folder:
+#### Interact with your .NET class instance from TypeScript, completely naturally.
 
-* Run `npm install`.
-* Run `npm run build`.
+```typescript
+import { WasmModuleExports, WasmModule, PersonRepository, Person, Dog } from 'path/to/Wasm.Project/publish/wwwroot/typeshim';
 
-## Producing bundler-friendly build output
+class MyCoolUIApp {
+  public DoInteropStuff(exports: any) {
+  const module = new WasmModule((WasmModuleExports)exports)
 
-In JS, file dependencies, such as other JS files or images, are resolved using `import` statements. In browsers, only JS files can be imported using `import` statements. In .NET 10 or later, the .NET SDK can produce build output for JavaScript (JS) bundlers with the MSBuild property `WasmBundlerFriendlyBootConfig` set to `true`.
+  // the static 'GetInstance' method retrieves our first object instance from the dotnet side.
+  const repository: PersonRepository = module.PersonRepository().GetInstance(); 
 
-Only publishing the app (`dotnet publish` or **Publish** in Visual Studio/Visual Studio Code) copies all files to the output directory. Bundler-friendly output isn't generated when building an app to make incremental builds faster. Making it work for build output should be possible by properly mapping imports to individual locations using a bundler's custom plugin. Microsoft doesn't provide any such plugin at the moment.
+  // from here on out we can call instance members 'as usual'
+  const person: Person = repository.GetPerson();
+  console.log("Before:", person.GetName()); // prints "Alice"
+  person.SetName("Bob");
+  console.log("After:", person.GetName()); // prints "Bob"
 
-For more information, see [Host and deploy: JavaScript bundler support](https://learn.microsoft.com/aspnet/core/blazor/host-and-deploy/#javascript-bundler-support) in the ASP.NET Core Blazor documentation.
+  const pet: Dog = person.GetPet();
+  console.log("pet.GetName()", pet.GetName()); // prints "Fido"
+  }
+}
+```
+
+#### TypeShim generates your module definition and handles the interop invocations
+Types like `WasmModule` are generated automatically to bring you your `static` methods as a first-line of access to your C# classes. Then you receive your very recognizable `PersonRepository` which behaves just like a real C# object. Instance method invocations on the typescript instances call into your .NET class's instance methods completely transparently.
+
+## Roadmap
+This project is still in its early stages but there are a few short- and longterm goals right now
+
+### JSObjects support for JS > .NET calls
+To create an object on the JS side and pass it to the .NET side, we'll need to write a generator for the object mapping logic. This sounds like low hanging fruit and would improve usability a lot.
+
+### Properties
+Auto-generating the C# properties on the TS side would make the ability to . Albeit they should probably be used sparingly given the performance implications of making large amounts of interop calls.
+
+### Larger object transfer
+Currently we support no properties at all, and fetching many properties would require many interop calls, which is undesirable. By introducing some kind of readonly class annotation we could make it simple to move larger objects over the interop boundary without having to write many mappers by hand. This would require some performance testing to see how usable it is for real world use.
+
+> The MemoryView provides opportunities for zero copy memory access across the interop boundary. We could use this to serialize data and read from it on the JS _or_ .NET side. This could be as simple as json serialization or more advanced protobuf-like implementations could very well be possible.
+
+### Automic JSImports
+Longer term goal, but being able to take specified TS classes as input for C# code generation would bring the JS world significantly closer to the .NET side as well.
+

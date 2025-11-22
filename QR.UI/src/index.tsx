@@ -13,7 +13,6 @@ export class DotnetBootstrapper<TExports> {
         if (this.exportsPromise == null) {
             //@ts-ignore
             const dotnetModule = await import('../../QR.Wasm/publish/wwwroot/_framework/dotnet.js');
-            console.log("dotnetModule:", dotnetModule);
             this.dotnetObj ??= await (dotnetModule).dotnet.create();
             const getAssemblyExports = this.dotnetObj.getAssemblyExports;
             const config = this.dotnetObj.getConfig();
@@ -30,16 +29,15 @@ export async function generate(text: string, pixelsPerBlock: number) {
     bootstrapper ??= new DotnetBootstrapper<WasmModuleExports>();
     const exports: WasmModuleExports = await bootstrapper.Create();
     const module = new WasmModule(exports)
-    console.log("exports?:", exports);
 
-    const instance: PersonRepository = module.PersonRepository().GetInstance();
-    const person: Person = instance.GetPerson1();
-    console.log("PERSON before set", person, person.GetName(), ",", person.GetName());
-    person.SetName("TSNAME");
-    console.log("PERSON after set", person, person.GetName(), ",", person.GetName());
+    const repository: PersonRepository = module.PersonRepository().GetInstance();
+    const person: Person = repository.GetPerson();
+    console.log("Before:", person.GetName()); // prints "Alice"
+    person.SetName("Bob");
+    console.log("After:", person.GetName()); // prints "Bob"
 
     const pet: Dog = person.GetPet();
-    console.log("pet.GetName()", pet, pet.GetName());
+    console.log("pet.GetName()", pet.GetName()); // prints "Fido"
 
     return module.QRCode().Generate(text, pixelsPerBlock);
 }

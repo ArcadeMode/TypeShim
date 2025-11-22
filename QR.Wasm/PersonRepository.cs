@@ -1,50 +1,32 @@
 ﻿using System.Runtime.InteropServices.JavaScript;
 using TypeShim;
 
-namespace QR.Wasm
+namespace QR.Wasm;
+
+[TsExport]
+public class PersonRepository
 {
-    [TsExport]
-    public partial class PersonRepository
+    private static readonly PersonRepository _instance = new();
+
+    internal Person Person = new Person()
     {
-        public string PlaceHolderOrTsGenNoWorkey_FixThis { get; set; }
-
-        private static readonly PersonRepository _instance = new();
-
-        internal Person Person1 = new Person()
+        Name = "Alice",
+        Age = 28,
+        Pet = new Dog
         {
-            Name = "Alice",
-            Age = 28,
-            Pet = new Dog
-            {
-                Name = "Buddy",
-                Age = 4
-            }
-        };
-
-        internal Person Person2 = new Person()
-        {
-            Name = "Bob",
-            Age = 35,
-            Pet = new Dog
-            {
-                Name = "Max",
-                Age = 6
-            }
-        };
-
-        public Person GetPerson1()
-        {
-            return Person1;
+            Name = "Buddy",
+            Age = 4
         }
+    };
 
-        public Person GetPerson2()
-        {
-            return Person2;
-        }
+    public Person GetPerson()
+    {
+        return Person;
+    }
 
-        public static PersonRepository GetInstance()
-        {
-            return _instance;
-        }
+
+    public static PersonRepository GetInstance()
+    {
+        return _instance;
     }
 }
