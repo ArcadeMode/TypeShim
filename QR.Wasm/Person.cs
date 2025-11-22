@@ -6,8 +6,6 @@ namespace QR.Wasm
     [TsExport]
     public class Person
     {
-        public string PlaceHolderOrTsGenNoWorkey_FixThis { get; set; }
-
         internal string Name { get; set; }
 
         internal int Age { get; set; }
