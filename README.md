@@ -1,6 +1,6 @@
 <h1 align=center tabindex=-1>TypeShim - Seamless .NET <> TypeScript interop</h1>
 <p align=center tabindex=-1>
-  _Use your actual .NET classes, directly in TypeScript_
+  <i>Your .NET classes, transparently accessible in TypeScript</i>
 </p>
 
 ## Why TypeShim
@@ -72,7 +72,7 @@ class MyCoolUIApp {
 }
 ```
 
-#### TypeShim generates your module definition and handles the interop invocations
+#### TypeShim generates your module definition
 Types like `WasmModule` are generated automatically to bring you your `static` methods as a first-line of access to your C# classes. Then you receive your very recognizable `PersonRepository` which behaves just like a real C# object. Instance method invocations on the typescript instances call into your .NET class's instance methods completely transparently.
 
 ## Roadmap
@@ -89,6 +89,8 @@ Currently we support no properties at all, and fetching many properties would re
 
 > The MemoryView provides opportunities for zero copy memory access across the interop boundary. We could use this to serialize data and read from it on the JS _or_ .NET side. This could be as simple as json serialization or more advanced protobuf-like implementations could very well be possible.
 
-### Automic JSImports
-Longer term goal, but being able to take specified TS classes as input for C# code generation would bring the JS world significantly closer to the .NET side as well.
+### JSImports
+Longer term goal, but being able to take specified TS classes as input for C# code generation would bring the JS world significantly closer to the .NET side as well. 
+
+> Got inspired or have ideas? Feel free to open a discussion or an issue!
 
