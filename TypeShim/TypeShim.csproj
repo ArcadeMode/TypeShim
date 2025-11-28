@@ -30,12 +30,13 @@
   </ItemGroup>
   
   <Target Name="BuildGenerator" BeforeTargets="Build">
+    <Message Text="Building TypeShim.Generator project..." Importance="high" />
     <!-- this enables building the generator without referencing its code, making it easier to pack -->
     <MSBuild Projects="../$(GeneratorProjectName)/$(GeneratorProjectName).csproj"
              Targets="Build"
              Properties="Configuration=$(Configuration);Platform=$(Platform);OutputPath=pack" />
     <ItemGroup>
-      <GeneratorFiles Include="../$(GeneratorProjectName)/bin/build/**/*.*" />
+      <GeneratorFiles Include="../$(GeneratorProjectName)/pack/**/*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(GeneratorFiles)" DestinationFolder="$(ProjectDir)/pack/" />
   </Target>

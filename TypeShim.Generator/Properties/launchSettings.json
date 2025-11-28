@@ -2,7 +2,7 @@
   "profiles": {
     "Run Interop CS Generator": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Users\\marcd\\source\\repos\\DotNetWasmReact\\TypeShim\\SampleClasses\\PersonX.cs;C:\\Users\\marcd\\source\\repos\\DotNetWasmReact\\TypeShim\\SampleClasses\\PersonXRepository.cs\""
+      "commandLineArgs": "\"Z:\\sources\\TypeShim\\Sample\\VisageNovel\\PeopleApiClient.cs\" \"C:\\temp\" \"C:\\temp\\xx.ts\""
       //"commandLineArgs": "C:\\Users\\marcd\\source\\repos\\DotNetWasmReact\\qr\\QR.Wasm.csproj"
     }
   }

@@ -27,7 +27,6 @@ yarn-error.log*
 **/.vs/**
 
 **/build/**
+**/dist/**
 **/node_modules/**
-**/public/*.wasm
-**/public/*.js
-**/public/*.dat
+

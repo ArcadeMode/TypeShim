@@ -10,12 +10,7 @@ internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSym
 
     internal MethodInfo Build()
     {
-        // type info needed for jsexport to know how to marshal return type
-        if (JSTypeInfo.CreateJSTypeInfoForTypeSymbol(memberMethod.ReturnType) is not JSSimpleTypeInfo { Syntax: TypeSyntax returnTypeSyntax, KnownType: KnownManagedType knownReturnType })
-        {
-            throw new InvalidOperationException($"Unsupported type info found in return type {memberMethod.ReturnType} of method {memberMethod} of {classSymbol}");
-        }
-
+        
         MethodParameterInfoBuilder parameterInfoBuilder = new(classSymbol, memberMethod);
 
         return new MethodInfo
@@ -23,9 +18,7 @@ internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSym
             IsStatic = memberMethod.IsStatic,
             Name = memberMethod.Name,
             MethodParameters = parameterInfoBuilder.Build(),
-            ReturnKnownType = knownReturnType,
-            ReturnInteropTypeSyntax = returnTypeSyntax,
-            ReturnCLRTypeSyntax = SyntaxFactory.ParseTypeName(memberMethod.ReturnType.Name)
+            ReturnType = InteropTypeInfo.FromTypeSymbol(memberMethod.ReturnType) ?? throw new InvalidOperationException($"Could not create InteropTypeInfo for return type {memberMethod.ReturnType} of method {memberMethod} of {classSymbol}")
         };
     }
 }

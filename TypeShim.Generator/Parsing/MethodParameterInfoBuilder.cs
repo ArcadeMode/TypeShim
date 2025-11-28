@@ -28,6 +28,12 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
             {
                 JSSimpleTypeInfo { Syntax: TypeSyntax typeSyntax } => typeSyntax,
                 JSArrayTypeInfo arrayTypeInfo => SyntaxFactory.ArrayType(arrayTypeInfo.ElementTypeInfo.Syntax),
+                JSTaskTypeInfo taskTypeInfo => SyntaxFactory.GenericName("Task")
+                                            .WithTypeArgumentList(
+                                                SyntaxFactory.TypeArgumentList(
+                                                    SyntaxFactory.SingletonSeparatedList<TypeSyntax>(taskTypeInfo.ResultTypeInfo.Syntax)
+                                                )
+                                            ),
                 _ => throw new InvalidOperationException($"Unsupported type info found in parameter type {parameterSymbol.Type} of method {memberMethod} of {classSymbol}")
             };
 

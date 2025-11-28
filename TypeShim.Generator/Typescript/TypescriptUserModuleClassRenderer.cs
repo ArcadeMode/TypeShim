@@ -5,7 +5,7 @@ using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
 
-internal class TypescriptUserModuleClassRenderer(ModuleInfo moduleInfo, TypeScriptTypeMapper typeMapper, TypescriptClassNameBuilder classNameBuilder)
+internal class TypescriptUserModuleClassRenderer(ModuleInfo moduleInfo, TypescriptClassNameBuilder classNameBuilder)
 {
     private readonly StringBuilder sb = new();
     // PURPOSE:

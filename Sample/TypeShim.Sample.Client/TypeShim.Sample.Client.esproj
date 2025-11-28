@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.2752196">
+  <PropertyGroup>
+    <BuildCommand>npm run build</BuildCommand>
+    <!--<BuildOutputFolder>../TypeShim.Sample/wwwroot</BuildOutputFolder>-->
+    <StartupCommand>npm start</StartupCommand>
+    <StartupCommandWorkingDirectory>$(MSBuildProjectDirectory)\</StartupCommandWorkingDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="@typeshim" Exclude="*" />
+  </ItemGroup>
+</Project>

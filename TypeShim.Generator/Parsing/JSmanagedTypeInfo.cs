@@ -7,10 +7,6 @@ namespace TypeShim.Generator.Parsing;
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using global::Microsoft.CodeAnalysis;
-using global::Microsoft.CodeAnalysis.CSharp;
-using global::Microsoft.CodeAnalysis.CSharp.Syntax;
-using global::Microsoft.VisualBasic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -125,7 +121,10 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
 
             // task
             case ITypeSymbol when fullTypeName == Constants.TaskGlobal:
-                return new JSTaskTypeInfo(new JSSimpleTypeInfo(KnownManagedType.Void, SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword))));
+                return new JSTaskTypeInfo(new JSSimpleTypeInfo(KnownManagedType.Void) 
+                { 
+                    Syntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword))
+                });
             case INamedTypeSymbol { TypeArguments.Length: 1 } taskType when fullTypeName.StartsWith(Constants.TaskGlobal, StringComparison.Ordinal):
                 if (CreateJSTypeInfoForTypeSymbol(taskType.TypeArguments[0]) is JSSimpleTypeInfo rti)
                 {
@@ -153,25 +152,21 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
             case ITypeSymbol when fullTypeName == Constants.ActionGlobal:
                 return new JSFunctionTypeInfo(true, Array.Empty<JSSimpleTypeInfo>());
             case INamedTypeSymbol actionType when fullTypeName.StartsWith(Constants.ActionGlobal, StringComparison.Ordinal):
-                var argumentTypes = actionType.TypeArguments
-                    .Select(arg => CreateJSTypeInfoForTypeSymbol(arg) as JSSimpleTypeInfo)
-                    .ToArray();
+                JSSimpleTypeInfo?[] argumentTypes = [.. actionType.TypeArguments.Select(arg => CreateJSTypeInfoForTypeSymbol(arg) as JSSimpleTypeInfo)];
                 if (argumentTypes.Any(x => x is null))
                 {
                     return new JSInvalidTypeInfo();
                 }
-                return new JSFunctionTypeInfo(true, argumentTypes);
+                return new JSFunctionTypeInfo(true, argumentTypes!);
 
             // function
             case INamedTypeSymbol funcType when fullTypeName.StartsWith(Constants.FuncGlobal, StringComparison.Ordinal):
-                var signatureTypes = funcType.TypeArguments
-                    .Select(argName => CreateJSTypeInfoForTypeSymbol(argName) as JSSimpleTypeInfo)
-                    .ToArray();
+                JSSimpleTypeInfo?[] signatureTypes = [.. funcType.TypeArguments.Select(argName => CreateJSTypeInfoForTypeSymbol(argName) as JSSimpleTypeInfo)];
                 if (signatureTypes.Any(x => x is null))
                 {
                     return new JSInvalidTypeInfo();
                 }
-                return new JSFunctionTypeInfo(false, signatureTypes);
+                return new JSFunctionTypeInfo(false, signatureTypes!);
             default:
                 // JS Interop generator does not support the marshalling of structs (BY DEFAULT, THIS HAS BEEN MANUALLY ADDED IN THIS COPY)
                 // In case structs were to be allowed for marshalling in the future,
@@ -184,16 +179,11 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
     }
 }
 
-internal sealed record JSInvalidTypeInfo() : JSSimpleTypeInfo(KnownManagedType.None);
+internal sealed record JSInvalidTypeInfo() : JSTypeInfo(KnownManagedType.None);
 
 internal record JSSimpleTypeInfo(KnownManagedType KnownType) : JSTypeInfo(KnownType)
 {
-    public JSSimpleTypeInfo(KnownManagedType knownType, TypeSyntax syntax)
-        : this(knownType)
-    {
-        Syntax = syntax;
-    }
-    public TypeSyntax Syntax { get; init; }
+    public required TypeSyntax Syntax { get; init; }
 }
 
 internal sealed record JSArrayTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.Array);

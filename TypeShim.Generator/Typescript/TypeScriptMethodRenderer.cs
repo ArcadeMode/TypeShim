@@ -1,26 +1,24 @@
-﻿namespace TypeShim.Generator.Typescript;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+namespace TypeShim.Generator.Typescript;
 
 internal class TypeScriptMethodRenderer(TypeScriptTypeMapper typeMapper)
 {
-    internal string RenderMethodSignature(MethodInfo methodInfo)
+    internal string RenderMethodSignatureForClass(MethodInfo methodInfo)
     {
-        return $"{methodInfo.Name}({RenderMethodParameters(methodInfo, includeInstanceParameter: true)}): {typeMapper.ToTypeScriptType(methodInfo.ReturnKnownType, methodInfo.ReturnCLRTypeSyntax.ToString())}";
+        string optionalAsync = methodInfo.ReturnType.IsTaskType ? "async " : string.Empty;
+        return $"{optionalAsync}{RenderMethodSignatureForInterface(methodInfo)}";
     }
 
-    private string RenderMethodParameters(MethodInfo methodInfo, bool includeInstanceParameter)
+    internal string RenderMethodSignatureForInterface(MethodInfo methodInfo)
+    {
+        return $"{methodInfo.Name}({RenderMethodParameters(methodInfo)}): {typeMapper.ToTypeScriptType(methodInfo.ReturnType.ManagedType, methodInfo.ReturnType.CLRTypeSyntax)}";
+    }
+
+    private string RenderMethodParameters(MethodInfo methodInfo)
     {
         return string.Join(", ", methodInfo.MethodParameters
-            .Select(p => $"{p.ParameterName}: {typeMapper.ToTypeScriptType(p.KnownType, p.CLRTypeSyntax.ToString())}"));
-    }
-
-    /// <summary>
-    /// Renders only the parameter names for method call, with the same names as defined in the method info.
-    /// </summary>
-    /// <param name="methodInfo"></param>
-    /// <returns></returns>
-    internal string RenderMethodCallParameters(MethodInfo methodInfo)
-    {
-        return string.Join(", ", methodInfo.MethodParameters.Select(p => p.ParameterName));
+            .Select(p => $"{p.ParameterName}: {typeMapper.ToTypeScriptType(p.KnownType, p.CLRTypeSyntax)}"));
     }
 
     /// <summary>

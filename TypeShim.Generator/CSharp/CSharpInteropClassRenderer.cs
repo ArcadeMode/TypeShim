@@ -1,23 +1,37 @@
-﻿using System.Text;
+﻿using System.Runtime.InteropServices.JavaScript;
+using System.Text;
 using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.CSharp;
 
-internal sealed class CSharpInteropClassRenderer(ClassInfo classInfo)
+internal sealed class CSharpInteropClassRenderer
 {
+    private readonly ClassInfo classInfo;
+
+    public CSharpInteropClassRenderer(ClassInfo classInfo)
+    {
+        ArgumentNullException.ThrowIfNull(classInfo);
+        if (!classInfo.Methods.Any())
+        {
+            throw new ArgumentException("Interop class must have at least one method to render.", nameof(classInfo));
+        }
+        this.classInfo = classInfo;
+    }
+
     internal string Render()
     {
         StringBuilder sb = new();
         sb.AppendLine("// Auto-generated TypeScript interop definitions");
         sb.AppendLine("using System.Runtime.InteropServices.JavaScript;");
+        sb.AppendLine("using System.Threading.Tasks;");
         sb.AppendLine($@"namespace {classInfo.Namespace};");
         sb.AppendLine($"public partial class {classInfo.Name}Interop");
         sb.AppendLine("{");
         foreach (MethodInfo methodInfo in classInfo.Methods)
         {
-            MethodInfoBuilder builder = new(null!, null!);
             sb.AppendLine(Render(methodInfo));
         }
+        sb.Length -= 2; // Remove last newline
         sb.AppendLine("}");
         return sb.ToString();
     }
@@ -26,14 +40,23 @@ internal sealed class CSharpInteropClassRenderer(ClassInfo classInfo)
     {
         StringBuilder sb = new();
         sb.AppendLine("    [JSExport]");
-        if (methodInfo.ReturnKnownType == KnownManagedType.Object)
+        bool async = false;
+        if (methodInfo.ReturnType.ManagedType is KnownManagedType.Object)
         {
             sb.AppendLine("    [return: JSMarshalAs<JSType.Any>]");
         }
+        if (methodInfo.ReturnType.ManagedType == KnownManagedType.Task) {
+            sb.AppendLine("    [return: JSMarshalAs<JSType.Promise<JSType.Any>>]");
+            async = true;
+        }
+        if (methodInfo.ReturnType.ManagedType == KnownManagedType.Array) {
+            sb.AppendLine("    [return: JSMarshalAs<JSType.Array<JSType.Any>>]");
+        }
 
         List<MethodParameterInfo> methodParameters = [.. methodInfo.MethodParameters];
+        // TODO: refactor, async is hacky.
 
-        sb.AppendLine($"    public static {methodInfo.ReturnInteropTypeSyntax} {methodInfo.Name}({Render(methodParameters)})");
+        sb.AppendLine($"    public static {(async ? "async " : "")}{methodInfo.ReturnType.InteropTypeSyntax} {methodInfo.Name}({Render(methodParameters)})");
         sb.AppendLine("    {");
 
         // Cast object-typed parameters to their original types
@@ -58,13 +81,13 @@ internal sealed class CSharpInteropClassRenderer(ClassInfo classInfo)
             methodInvocation = $"{classInfo.Name}.{methodInfo.Name}({string.Join(", ", memberParams.Select(p => p.GetTypedParameterName()))})";
         }
 
-        if (methodInfo.ReturnKnownType != KnownManagedType.Void)
+        if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void)
         {
-            sb.AppendLine($"        return {methodInvocation};");
+            sb.AppendLine($"        return {(async ? "await " : "")}{methodInvocation};");
         }
         else
         {
-            sb.AppendLine($"        {methodInvocation};");
+            sb.AppendLine($"       {(async ? "await " : "")}{methodInvocation};");
         }
         sb.AppendLine("    }");
         return sb.ToString();

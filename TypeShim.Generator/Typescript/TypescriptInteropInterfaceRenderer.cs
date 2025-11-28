@@ -25,7 +25,7 @@ internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypeScrip
         sb.AppendLine($"export interface {classNameBuilder.GetInteropInterfaceName(classInfo)} {{");
         foreach (MethodInfo methodInfo in classInfo.Methods)
         {
-            sb.AppendLine($"    {methodRenderer.RenderMethodSignature(methodInfo.WithoutInstanceParameterTypeInfo())};");
+            sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(methodInfo.WithoutInstanceParameterTypeInfo())};");
         }
         sb.AppendLine("}");
         return sb.ToString();

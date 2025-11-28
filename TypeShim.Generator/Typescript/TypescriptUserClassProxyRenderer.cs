@@ -1,12 +1,11 @@
-﻿using System.Text;
+﻿using System.Reflection;
+using System.Text;
 using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
 
 internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypeScriptMethodRenderer methodRenderer, TypescriptClassNameBuilder classNameBuilder)
 {
-    //TODO: render proxy class implementing the interface rendered by TypescriptUserClassInterfaceRenderer
-
     // PURPOSE:
     // - glue between interop interface for a single class instance, enabling dynamic method invocation
 
@@ -43,7 +42,7 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypeScriptM
         sb.AppendLine();
         foreach (MethodInfo methodInfo in methods)
         {
-            sb.AppendLine($"{indent}public {methodRenderer.RenderMethodSignature(methodInfo)} {{");
+            sb.AppendLine($"{indent}public {methodRenderer.RenderMethodSignatureForClass(methodInfo)} {{");
             RenderInteropInvocation(indent, methodInfo);
 
             sb.AppendLine($"{indent}}}");
@@ -54,14 +53,36 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypeScriptM
 
     private void RenderInteropInvocation(string indent, MethodInfo methodInfo)
     {
-        if (classNameBuilder.GetUserClassProxyNameForReturnType(methodInfo) is string proxyClassName) // user class return type, wrap in proxy
+        if (classNameBuilder.GetUserClassProxyName(methodInfo.ReturnType) is string proxyClassName) // user class return type, wrap in proxy
         {
-            sb.AppendLine($"{indent}{indent}return new {classNameBuilder.GetUserClassProxyNameForReturnType(methodInfo)}(this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({methodRenderer.RenderMethodCallParametersWithInstanceParameterExpression(methodInfo, "this.instance")}), this.interop);");
+            string optionalAwait = methodInfo.ReturnType.IsTaskType ? "await " : string.Empty;
+            sb.AppendLine($"{indent}{indent}const res = {optionalAwait}this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({methodRenderer.RenderMethodCallParametersWithInstanceParameterExpression(methodInfo, "this.instance")});");
+
+            if (methodInfo.ReturnType.IsArrayType)
+            {
+                sb.AppendLine($"{indent}{indent}return res.map(item => {GetNewProxyExpression(methodInfo, proxyClassName, "item")});");
+            }
+            else
+            {
+                sb.AppendLine($"{indent}{indent}return {GetNewProxyExpression(methodInfo, proxyClassName, "res")};");
+            }
         }
         else // primitive return type or void
         {
-            string optionalReturn = methodInfo.ReturnKnownType == KnownManagedType.Void ? string.Empty : "return ";
+            string optionalReturn = methodInfo.ReturnType.ManagedType == KnownManagedType.Void ? string.Empty : "return ";
             sb.AppendLine($"{indent}{indent}{optionalReturn}this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({methodRenderer.RenderMethodCallParametersWithInstanceParameterExpression(methodInfo, "this.instance")});");
+        }
+    }
+
+    private string GetNewProxyExpression(MethodInfo methodInfo, string proxyClassName, string instanceName)
+    {
+        if (methodInfo.ReturnType.IsNullableType)
+        {
+            return $"{instanceName} ? new {proxyClassName}({instanceName}, this.interop) : null";
+        }
+        else
+        {
+            return $"new {proxyClassName}({instanceName}, this.interop)";
         }
     }
 
@@ -81,7 +102,7 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypeScriptM
         sb.AppendLine();
         foreach (MethodInfo methodInfo in methods)
         {
-            sb.AppendLine($"{indent}public {methodRenderer.RenderMethodSignature(methodInfo.WithoutInstanceParameter())} {{"); // skip instance parameter, its provided by the proxy class
+            sb.AppendLine($"{indent}public {methodRenderer.RenderMethodSignatureForClass(methodInfo.WithoutInstanceParameter())} {{"); // skip instance parameter, its provided by the proxy class
             RenderInteropInvocation(indent, methodInfo);
             sb.AppendLine($"{indent}}}");
             sb.AppendLine();

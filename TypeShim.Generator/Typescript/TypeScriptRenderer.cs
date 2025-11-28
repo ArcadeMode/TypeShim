@@ -5,6 +5,7 @@ using TypeShim.Generator.Typescript;
 internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo moduleInfo, TypescriptClassNameBuilder classNameBuilder, TypeScriptTypeMapper typeMapper)
 {
     private readonly StringBuilder sourceBuilder = new();
+    private readonly TypeScriptMethodRenderer methodRenderer = new(typeMapper);
 
     internal string Render()
     {
@@ -27,7 +28,6 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
     {
         foreach (ClassInfo classInfo in classInfos)
         {
-            TypeScriptMethodRenderer methodRenderer = new(typeMapper);
             TypescriptInteropInterfaceRenderer interopInterfaceRenderer = new(classInfo, methodRenderer, classNameBuilder);
             sourceBuilder.AppendLine(interopInterfaceRenderer.Render());
         }
@@ -37,14 +37,14 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
     {
         foreach (ClassInfo classInfo in classInfos)
         {
-            TypescriptUserClassInterfaceRenderer classInterfaceRenderer = new(classInfo, typeMapper);
+            TypescriptUserClassInterfaceRenderer classInterfaceRenderer = new(classInfo, methodRenderer);
             sourceBuilder.AppendLine(classInterfaceRenderer.Render());
         }
     }
 
     private void RenderUserModuleClass()
     {
-        TypescriptUserModuleClassRenderer moduleClassRenderer = new(moduleInfo, typeMapper, classNameBuilder);
+        TypescriptUserModuleClassRenderer moduleClassRenderer = new(moduleInfo, classNameBuilder);
         sourceBuilder.AppendLine(moduleClassRenderer.Render());
     }
 
@@ -52,7 +52,6 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
     {
         foreach (ClassInfo classInfo in classInfos)
         {
-            TypeScriptMethodRenderer methodRenderer = new(typeMapper);
             TypescriptUserClassProxyRenderer classProxyRenderer = new(classInfo, methodRenderer, classNameBuilder);
             sourceBuilder.AppendLine(classProxyRenderer.Render());
         }
