@@ -1,16 +1,70 @@
-<h1 align=center tabindex=-1>TypeShim - Seamless .NET <> TypeScript interop</h1>
+<h1 align=center tabindex=-1>TypeShim - Typesafe .NET ↔︎ TypeScript interop</h1>
 <p align=center tabindex=-1>
-  <i>Your .NET classes, transparently accessible in TypeScript</i>
+  <i>Your .NET classes, transparently accessible from TypeScript</i>
 </p>
 
 ## Why TypeShim
-.NET on WebAssembly is an awesome technology but the [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0) can be somewhat cumbersome to work with. TypeShim sets out to provide an opinionated and easy to use wrapper for this API to allow developers to remain focussed on delivering value to their users. With TypeShim it will be a breeze to bring WASM components to your TypeScript-based frontends.
+.NET on WebAssembly is an awesome technology and the [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0) has some solid primitives to build on top of. Sadly it lacks type information and instance member access. These limitations were what gave rise to the idea of TypeShim.
 
-## Features
-TypeShim can hide the JSExport API from you but does not stop your from adding your own JSExport-annotated classes. However, the real good stuff happens on the other end where TypeShim generates the TypeScript side of things for you as well.
+TypeShim sets out to provide an richer functionality by leveraging code generation with the goal of making the JSImport/JSExport API easy to work with ánd provide type information in TypeScript.
 
-#### Export your entire C# class to JS with one attribute, no JSExport or typemarshalling info required.
-```csharp
+## At a glance
+- Automated JSExport interop code generation for your convenience
+- Extended type marshalling 
+    - TypeShim shims _your_ classes to the TypeScript world.
+- Compile time type-safety across the interop boundary 
+- Natural [POCO](https://en.wikipedia.org/wiki/Plain_old_CLR_object) member access **in TypeScript**.
+    - JSExport offers only static method access. 
+    - TypeShim extends this with:
+        - instance method access. ✅
+        - instance property access. 🚧
+        - static property access. 🚧
+- `[JSExport]`/`[JSImport]` work fine in conjunction with TypeShim.
+    - If you need customization, TypeShim won't get in your way
+- TypeShim is compatible with both Wasm publish modes: Selfcontained or JS bundled.
+
+## Check the sample
+
+TODO: brief explanation how to run the sample.
+
+
+
+## POCO member access from TypeScript
+
+Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your exports as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-). 
+
+**TypeShim**
+ ```js
+    public UsingTypeShim(exports: WasmModuleExports) {
+        const module = new WasmModule(exports)
+        const repository: PersonRepository = module.PersonRepository().GetInstance(); 
+        const person: Person = repository.GetPerson();
+        console.log(person.GetName()); // prints "Alice"
+        person.SetName("Bob");
+        console.log(person.GetName()); // prints "Bob"
+    }
+```
+**Raw JSExport**
+  ```js
+    public UsingRawJSExport(exports: any) {
+        const repository: any = exports.MyBusiness.People.PersonRepository.GetInstance(); 
+        const person: any = exports.MyBusiness.People.PersonRepository.GetPerson(repository);
+        console.log(exports.MyBusiness.People.Person.GetName(person)); // prints "Alice"
+        exports.MyBusiness.People.Person.SetName(person, "Bob");
+        console.log(exports.MyBusiness.People.Person.GetName(person)); // prints "Bob"
+    }
+  ```
+
+### Easy opt-in to interop from C#.
+TypeShim generates your interop definitions for you at compile time, ensuring up-to-dateness and correctness.
+
+<details>
+    <summary>See the <code>TypeShim</code> C# implementation of <code>PersonRepository</code> and <code>Person</code></summary>
+&nbsp;
+
+TypeShim preserves your type information across the interop boundary.
+
+  ```csharp
 using TypeShim;
 
 namespace MyBusiness.People;
@@ -24,11 +78,6 @@ public class PersonRepository
     {
         Name = "Alice",
         Age = 28,
-        Pet = new Dog
-        {
-            Name = "Fido",
-            Age = 4
-        }
     };
 
     public Person GetPerson()
@@ -47,7 +96,6 @@ public class Person
 {
     internal string Name { get; set; }
     internal int Age { get; set; }
-    internal Dog Pet { get; set; }
     
     public string GetName()
     {
@@ -58,58 +106,125 @@ public class Person
     {
         this.Name = name;
     }
+}
+```
+</details>
 
-    public Dog GetPet()
+<details>
+  <summary>See the <code>JSExport</code> C# implementation of <code>PersonRepository</code> and <code>Person</code></summary>
+&nbsp;
+
+Note the error sensitivity of passing untyped objects across the interop boundary.
+
+  ```csharp
+namespace MyBusiness.People;
+
+public class PersonRepository
+{
+    private static readonly PersonRepository _instance = new();
+
+    internal Person Person = new Person()
     {
-        return Pet;
+        Name = "Alice",
+        Age = 28
+    };
+
+    [JSExport]
+    [return: JSMarshalAsType<JSType.Object>]
+    public static object GetPerson([JSMarshalAsType<JSType.Object>] object repository)
+    {
+        PersonRepository pr = (PersonRepository)repository;
+        return pr.Person;
+    }
+
+    [JSExport]
+    [return: JSMarshalAsType<JSType.Object>]
+    public static object GetInstance()
+    {
+        return _instance;
     }
 }
 
 [TsExport]
-public class Dog
+public class Person
 {
-    public string Name { get; set; }
-    public int Age { get; set; }
-
-    public string GetName()
+    internal string Name { get; set; }
+    internal int Age { get; set; }
+    
+    [JSExport]
+    [return: JSMarshalAsType<JSType.String>]
+    public static string GetName([JSMarshalAsType<JSType.Object>] object instance)
     {
-        return Name;
+        Person p = (Person)instance;
+        return p.Name;
+    }
+
+    [JSExport]
+    [return: JSMarshalAsType<JSType.Void>]
+    public static void SetName([JSMarshalAsType<JSType.Object>] object instance, [JSMarshalAsType<JSType.String>] string name)
+    {
+        Person p = (Person)instance;
+        return p.Name = name;
     }
 }
-
 ```
+</details>
 
-#### Natural interaction with your .NET class instance from TypeScript.
-On the TypeScript side you simply retrieve your assembly's `exports` as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-). As you check out your published Wasm app, you will notice an new file `typeshim.ts`. This contains various types, most of which you will recognize instantly.
+## Feature: Enriched Type support
 
-```typescript
-import { WasmModuleExports, WasmModule, PersonRepository, Person, Dog } from 'path/to/Wasm.Project/publish/wwwroot/typeshim';
+TypeShim adds functionality to bring your classes, typed and well, over the interop boundary, into TypeScript. It also brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. This work is largely completed, but some types are still on the roadmap for support.  Support for generics is limited to `Task` and `[]`. 
 
-class MyCoolUIApp {
-  public DoInteropStuff(exports: any) {
-    const module = new WasmModule((WasmModuleExports)exports)
+Every supported type can be used in methods as return and parameter types. When properties get support, they will inherit the existing supported types automatically.
 
-    // the static 'GetInstance' method retrieves our first object instance from the dotnet side.
-    const repository: PersonRepository = module.PersonRepository().GetInstance(); 
+TypeShim aims to support extended type definitions building on top of the .NET Marshalled types, i.e. `Enum` to generated `Enum` and `IEnumerable` to `[]` conversions can be build by leveraging existing `Int32` and `[]` marshalling combined with some generated shimming code. 
 
-    // from here on out we can call instance members 'as usual'
-    const person: Person = repository.GetPerson();
+| TypeShim Shimmed Type | Mapped Type | Status | Note |
+|----------------------|-------------|--------|------|
+| `TClass`                  |  `TClass`        | ✅     | `TClass`-shim generated in TypeScript* |
+| `Task<TClass>`            | `Promise<TClass>`| ✅     | `TClass`-shim generated in TypeScript* |
+| `TClass[]`                | `TClass[]`       | ✅     | `TClass`-shim generated in TypeScript* |
+| `TEnum`      | `TEnum`       | 💡     | under consideration |
+| `IEnumerable<T>`     | `T[]`       | 💡     | under consideration |
+| `Dictionary<TKey, TValue>` | `?`     | 💡     | under consideration |
 
-    console.log(person.GetName()); // prints "Alice"
-    person.SetName("Bob");
-    console.log(person.GetName()); // prints "Bob"
+| .NET Marshalled Type                  | Mapped Type | Status | Note |
+|----------------------|-------------|--------|------|
+| `Boolean`            | `Boolean`   | ✅     |      |
+| `Byte`               | `Number`    | ✅     |      |
+| `Char`               | `String`    | ✅     |      |
+| `Int16` (`short`)    | `Number`    | ✅     |      |
+| `Int32` (`int`)      | `Number`    | ✅     |      |
+| `Int64` (`long`)     | `Number`    | ✅     |      |
+| `Int64` (`long`)     | `BigInt`    | ⏳     | [ArcadeMode/TypeShim#15](https://github.com/ArcadeMode/TypeShim/issues/15) |
+| `Single` (`float`)   | `Number`    | ✅     |      |
+| `Double` (`double`)  | `Number`    | ✅     |      |
+| `IntPtr` (`nint`)    | `Number`    | ✅     |      |
+| `DateTime`           | `Date`      | ✅     |      |
+| `DateTimeOffset`     | `Date`      | ✅     |      |
+| `Exception`          | `Error`     | ✅     |      |
+| `JSObject`           | `Object`    | ✅     | You must process the JSObject manually |
+| `JSObject`           | `TClass`         | 💡     | [ArcadeMode/TypeShim#4](https://github.com/ArcadeMode/TypeShim/issues/4) |
+| `String`             | `String`    | ✅     |      |
+| `Object` (`object`)  | `Any`       | ✅     |      |
+| `T[]`         | `T[]`| ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) |
+| `Span<Byte>`         | `MemoryView`| 🚧     |      |
+| `Span<Int32>`        | `MemoryView`| 🚧     |      |
+| `Span<Double>`       | `MemoryView`| 🚧     |      |
+| `ArraySegment<Byte>` | `MemoryView`| 🚧     |      |
+| `ArraySegment<Int32>`| `MemoryView`| 🚧     |      |
+| `ArraySegment<Double>`| `MemoryView`| 🚧    |      |
+| `Task`               | `Promise`   | ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) |
+| `Action`             | `Function`  | 🚧     |      |
+| `Action<T1>`         | `Function`  | 🚧     |      |
+| `Action<T1, T2>`     | `Function`  | 🚧     |      |
+| `Action<T1, T2, T3>` | `Function`  | 🚧     |      |
+| `Func<TResult>`      | `Function`  | 🚧     |      |
+| `Func<T1, TResult>`  | `Function`  | 🚧     |      |
+| `Func<T1, T2, TResult>` | `Function`| 🚧   |      |
+| `Func<T1, T2, T3, TResult>` | `Function` | 🚧 |      |
 
-    const person_again: Person = repository.GetPerson();
-    console.log(person_again.GetName()); // prints "Bob"
+*<sub>For `[TSExport]` annotated classes</sub>
 
-    const pet: Dog = person.GetPet();
-    console.log("pet.GetName()", pet.GetName()); // prints "Fido"
-  }
-}
-```
-
-#### TypeShim generates your module definition
-Your first point of contact with TypeShim on the TypeScript side is with `WasmModule` which brings you your `static` methods as a first-line of access to your C# classes. Though the module you can access `PersonRepository`'s static method to retrieve a class instance. This instance behaves just like a real C# object, calling an instance method calls into your .NET class's instance methods completely transparently.
 
 ## Installing
 
@@ -121,22 +236,6 @@ nuget install TypeShim
 - **TODO**: document msbuild props.
 - **TODO**: ts import process
 
-## Roadmap
-This project is still in its early stages but there are a few short- and longterm goals right now
-
-### JSObjects support for JS > .NET calls
-To create an object on the JS side and pass it to the .NET side, we'll need to write a generator for the object mapping logic. This sounds like low hanging fruit and would improve usability a lot.
-
-### Properties
-Auto-generating the C# properties on the TS side would be a big usability win. Albeit they should probably be used sparingly given the performance implications of interop calls.
-
-### Larger object transfer
-Currently we support no properties at all, and fetching many properties would require many interop calls, which is undesirable. By introducing some kind of readonly class annotation we could make it simple to move larger objects over the interop boundary without having to write many mappers by hand. This would require some performance testing to see how usable it is for real world use.
-
-> The MemoryView provides opportunities for zero copy memory access across the interop boundary. We could use this to serialize data and read from it on the JS _or_ .NET side. This could be as simple as json serialization or more advanced protobuf-like implementations could very well be possible.
-
-### JSImports
-Longer term goal, but being able to take specified TS classes as input for C# code generation would bring the JS world significantly closer to the .NET side as well. 
 
 > Got inspired or have ideas? Feel free to open a discussion or an issue!
 
