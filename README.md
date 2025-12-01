@@ -29,7 +29,7 @@ TODO: brief explanation how to run the sample.
 
 
 
-## POCO member access from TypeScript
+## Feature: instance member access from TypeScript
 
 Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your exports as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-). 
 
@@ -172,22 +172,23 @@ public class Person
 
 ## Feature: Enriched Type support
 
-TypeShim adds functionality to bring your classes, typed and well, over the interop boundary, into TypeScript. It also brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. This work is largely completed, but some types are still on the roadmap for support.  Support for generics is limited to `Task` and `[]`. 
+TypeShim adds functionality to bring your classes, over the interop boundary, to TypeScript with matching signatures. It also brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. This work is largely completed, but some types are still on the roadmap for support.  Support for generics is limited to `Task` and `[]`. 
 
 Every supported type can be used in methods as return and parameter types. When properties get support, they will inherit the existing supported types automatically.
 
 TypeShim aims to support extended type definitions building on top of the .NET Marshalled types, i.e. `Enum` to generated `Enum` and `IEnumerable` to `[]` conversions can be build by leveraging existing `Int32` and `[]` marshalling combined with some generated shimming code. 
 
-| TypeShim Shimmed Type | Mapped Type | Status | Note |
+| TypeShim Shimmed Type | Mapped Type | Support | Note |
 |----------------------|-------------|--------|------|
 | `TClass`                  |  `TClass`        | ✅     | `TClass`-shim generated in TypeScript* |
 | `Task<TClass>`            | `Promise<TClass>`| ✅     | `TClass`-shim generated in TypeScript* |
 | `TClass[]`                | `TClass[]`       | ✅     | `TClass`-shim generated in TypeScript* |
+| `JSObject`           | `TClass`         | 💡     | [ArcadeMode/TypeShim#4](https://github.com/ArcadeMode/TypeShim/issues/4) (TS → C# only) |
 | `TEnum`      | `TEnum`       | 💡     | under consideration |
 | `IEnumerable<T>`     | `T[]`       | 💡     | under consideration |
 | `Dictionary<TKey, TValue>` | `?`     | 💡     | under consideration |
 
-| .NET Marshalled Type                  | Mapped Type | Status | Note |
+| .NET Marshalled Type                  | Mapped Type | Support | Note |
 |----------------------|-------------|--------|------|
 | `Boolean`            | `Boolean`   | ✅     |      |
 | `Byte`               | `Number`    | ✅     |      |
@@ -203,7 +204,6 @@ TypeShim aims to support extended type definitions building on top of the .NET M
 | `DateTimeOffset`     | `Date`      | ✅     |      |
 | `Exception`          | `Error`     | ✅     |      |
 | `JSObject`           | `Object`    | ✅     | You must process the JSObject manually |
-| `JSObject`           | `TClass`         | 💡     | [ArcadeMode/TypeShim#4](https://github.com/ArcadeMode/TypeShim/issues/4) |
 | `String`             | `String`    | ✅     |      |
 | `Object` (`object`)  | `Any`       | ✅     |      |
 | `T[]`         | `T[]`| ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) |
