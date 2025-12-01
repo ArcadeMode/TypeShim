@@ -23,8 +23,11 @@ internal static class CSharpPartialCompilation
         // Always include mscorlib & system runtime (needed for core types)
         Assembly[] baseAssemblies =
         [
+            // manually targetted assemblies
             typeof(object).Assembly,
             //typeof(TsExportAttribute).Assembly
+
+            .. AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location)) // include loaded assemblies
         ];
 
         List<PortableExecutableReference> references = [.. baseAssemblies.Select(a => MetadataReference.CreateFromFile(a.Location))];

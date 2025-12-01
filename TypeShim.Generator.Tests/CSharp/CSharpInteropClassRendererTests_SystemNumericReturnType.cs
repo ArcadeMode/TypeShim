@@ -1,0 +1,119 @@
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using TypeShim.Generator.CSharp;
+using TypeShim.Generator.Parsing;
+
+namespace TypeShim.Generator.Tests.CSharp;
+
+internal class CSharpInteropClassRendererTests_SystemNumericReturnType
+{
+    [TestCase("Byte", "byte")]
+    [TestCase("byte", "byte")]
+    [TestCase("Int16", "short")]
+    [TestCase("short", "short")]
+    [TestCase("Int32", "int")]
+    [TestCase("int", "int")]
+    [TestCase("Int64", "long")]
+    [TestCase("long", "long")]
+    [TestCase("Single", "float")]
+    [TestCase("float", "float")]
+    [TestCase("Double", "double")]
+    [TestCase("double", "double")]
+    [TestCase("IntPtr", "nint")]
+    [TestCase("nint", "nint")]
+    public void CSharpInteropClass_StaticMethod_HasJSTypeNumber_ForNumericReturnType(string typeExpression, string interopTypeExpression)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TsExport]
+            public class C1
+            {
+                public static {{typeExpression}} M1()
+                {
+                    return 1;
+                }
+            }
+        """.Replace("{{typeExpression}}", typeExpression));
+
+        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
+        List<INamedTypeSymbol> exportedClasses = [.. TsExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+
+        Assert.That(interopClass, Is.EqualTo("""    
+// Auto-generated TypeScript interop definitions
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static {{typeExpression}} M1()
+    {
+        return C1.M1();
+    }
+}
+
+""".Replace("{{typeExpression}}", interopTypeExpression)));
+    }
+
+    [TestCase("Byte?", "byte?")]
+    [TestCase("byte?", "byte?")]
+    [TestCase("Int16?", "short?")]
+    [TestCase("short?", "short?")]
+    [TestCase("Int32?", "int?")]
+    [TestCase("int?", "int?")]
+    [TestCase("Int64?", "long?")]
+    [TestCase("long?", "long?")]
+    [TestCase("Single?", "float?")]
+    [TestCase("float?", "float?")]
+    [TestCase("Double?", "double?")]
+    [TestCase("double?", "double?")]
+    [TestCase("IntPtr?", "nint?")]
+    [TestCase("nint?", "nint?")]
+    public void CSharpInteropClass_StaticMethod_HasJSTypeNumber_ForNullableNumericReturnType(string typeExpression, string interopTypeExpression)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TsExport]
+            public class C1
+            {
+                public static {{typeExpression}} M1()
+                {
+                    return 1;
+                }
+            }
+        """.Replace("{{typeExpression}}", typeExpression));
+
+        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
+        List<INamedTypeSymbol> exportedClasses = [.. TsExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+
+        Assert.That(interopClass, Is.EqualTo("""    
+// Auto-generated TypeScript interop definitions
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static {{typeExpression}} M1()
+    {
+        return C1.M1();
+    }
+}
+
+""".Replace("{{typeExpression}}", interopTypeExpression)));
+    }
+}

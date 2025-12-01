@@ -18,7 +18,7 @@ internal class TypeScriptMethodRenderer(TypeScriptTypeMapper typeMapper)
     private string RenderMethodParameters(MethodInfo methodInfo)
     {
         return string.Join(", ", methodInfo.MethodParameters
-            .Select(p => $"{p.ParameterName}: {typeMapper.ToTypeScriptType(p.KnownType, p.CLRTypeSyntax)}"));
+            .Select(p => $"{p.ParameterName}: {typeMapper.ToTypeScriptType(p.Type.ManagedType, p.Type.CLRTypeSyntax)}"));
     }
 
     /// <summary>

@@ -115,7 +115,7 @@ export class PeopleProxy implements People {
 
   public GetAll(): Array<Person> {
     const res = this.interop.TypeShim.Sample.PeopleInterop.GetAll(this.instance);
-    return res.map(item => new PersonProxy(item, this.interop));
+    return new PersonProxy(res, this.interop);
   }
 
 }
@@ -184,7 +184,7 @@ export class PersonProxy implements Person {
 
   public GetPet(): Dog | null {
     const res = this.interop.TypeShim.Sample.PersonInterop.GetPet(this.instance);
-    return res ? new DogProxy(res, this.interop) : null;
+    return new DogProxy(res, this.interop);
   }
 
 }

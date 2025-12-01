@@ -14,36 +14,17 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
             {
                 ParameterName = "instance",
                 IsInjectedInstanceParameter = true,
-                KnownType = KnownManagedType.Object,
-                InteropTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),
-                CLRTypeSyntax = SyntaxFactory.IdentifierName(classSymbol.Name)
+                Type = new InteropTypeInfoBuilder(classSymbol).Build() // TODO: TEST THIS
             };
         }
 
         foreach (IParameterSymbol parameterSymbol in memberMethod.Parameters)
         {
-            JSTypeInfo parameterMarshallingTypeInfo = JSTypeInfo.CreateJSTypeInfoForTypeSymbol(parameterSymbol.Type); // type info needed for jsexport to know how to marshal param type
-
-            TypeSyntax? parameterTypeSyntax = parameterMarshallingTypeInfo switch 
-            {
-                JSSimpleTypeInfo { Syntax: TypeSyntax typeSyntax } => typeSyntax,
-                JSArrayTypeInfo arrayTypeInfo => SyntaxFactory.ArrayType(arrayTypeInfo.ElementTypeInfo.Syntax),
-                JSTaskTypeInfo taskTypeInfo => SyntaxFactory.GenericName("Task")
-                                            .WithTypeArgumentList(
-                                                SyntaxFactory.TypeArgumentList(
-                                                    SyntaxFactory.SingletonSeparatedList<TypeSyntax>(taskTypeInfo.ResultTypeInfo.Syntax)
-                                                )
-                                            ),
-                _ => throw new InvalidOperationException($"Unsupported type info found in parameter type {parameterSymbol.Type} of method {memberMethod} of {classSymbol}")
-            };
-
             yield return new MethodParameterInfo
             {
                 ParameterName = parameterSymbol.Name,
                 IsInjectedInstanceParameter = false,
-                KnownType = parameterMarshallingTypeInfo.KnownType,
-                InteropTypeSyntax = parameterTypeSyntax,
-                CLRTypeSyntax = SyntaxFactory.ParseTypeName(parameterSymbol.Type.Name)
+                Type = new InteropTypeInfoBuilder(parameterSymbol.Type).Build()
             };
         }
     }

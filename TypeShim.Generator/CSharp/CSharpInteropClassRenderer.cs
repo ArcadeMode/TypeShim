@@ -1,5 +1,10 @@
-﻿using System.Runtime.InteropServices.JavaScript;
+﻿using Microsoft.CodeAnalysis;
+using System;
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.InteropServices.JavaScript;
 using System.Text;
+using System.Threading.Tasks;
 using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.CSharp;
@@ -7,6 +12,8 @@ namespace TypeShim.Generator.CSharp;
 internal sealed class CSharpInteropClassRenderer
 {
     private readonly ClassInfo classInfo;
+
+    private readonly StringBuilder sb = new();
 
     public CSharpInteropClassRenderer(ClassInfo classInfo)
     {
@@ -20,7 +27,6 @@ internal sealed class CSharpInteropClassRenderer
 
     internal string Render()
     {
-        StringBuilder sb = new();
         sb.AppendLine("// Auto-generated TypeScript interop definitions");
         sb.AppendLine("using System.Runtime.InteropServices.JavaScript;");
         sb.AppendLine("using System.Threading.Tasks;");
@@ -29,81 +35,133 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine("{");
         foreach (MethodInfo methodInfo in classInfo.Methods)
         {
-            sb.AppendLine(Render(methodInfo));
+            RenderMethod(methodInfo);
         }
-        sb.Length -= 2; // Remove last newline
         sb.AppendLine("}");
         return sb.ToString();
     }
 
-    private string Render(MethodInfo methodInfo)
+    private void RenderMethod(MethodInfo methodInfo)
     {
-        StringBuilder sb = new();
-        sb.AppendLine("    [JSExport]");
-        bool async = false;
-        if (methodInfo.ReturnType.ManagedType is KnownManagedType.Object)
-        {
-            sb.AppendLine("    [return: JSMarshalAs<JSType.Any>]");
-        }
-        if (methodInfo.ReturnType.ManagedType == KnownManagedType.Task) {
-            sb.AppendLine("    [return: JSMarshalAs<JSType.Promise<JSType.Any>>]");
-            async = true;
-        }
-        if (methodInfo.ReturnType.ManagedType == KnownManagedType.Array) {
-            sb.AppendLine("    [return: JSMarshalAs<JSType.Array<JSType.Any>>]");
-        }
+        string indent = new(' ', 4);
+        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(methodInfo.ReturnType);
+        sb.Append(indent);
+        sb.AppendLine(marshalAsAttributeRenderer.RenderJSExportAttribute().NormalizeWhitespace().ToFullString());
+        sb.Append(indent);
+        sb.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
+        
+        RenderMethodSignature(methodInfo, depth: 1);
 
-        List<MethodParameterInfo> methodParameters = [.. methodInfo.MethodParameters];
-        // TODO: refactor, async is hacky.
-
-        sb.AppendLine($"    public static {(async ? "async " : "")}{methodInfo.ReturnType.InteropTypeSyntax} {methodInfo.Name}({Render(methodParameters)})");
-        sb.AppendLine("    {");
-
-        // Cast object-typed parameters to their original types
-        foreach (MethodParameterInfo paramInfo in methodParameters)
-        {
-            if (paramInfo.KnownType is KnownManagedType.Object or KnownManagedType.Array)
-            {
-                sb.AppendLine($"        {paramInfo.CLRTypeSyntax} {paramInfo.GetTypedParameterName()} = ({paramInfo.CLRTypeSyntax}){paramInfo.ParameterName};");
-            }
-        }
-
-        string methodInvocation;
-        if (!methodInfo.IsStatic)
-        {
-            MethodParameterInfo instanceParam = methodParameters[0];
-            List<MethodParameterInfo> memberParams = methodParameters[1..];
-            methodInvocation = $"{instanceParam.GetTypedParameterName()}.{methodInfo.Name}({string.Join(", ", memberParams.Select(p => p.GetTypedParameterName()))})";
-        }
-        else
-        {
-            List<MethodParameterInfo> memberParams = methodParameters; // for static methods, all parameters are member parameters
-            methodInvocation = $"{classInfo.Name}.{methodInfo.Name}({string.Join(", ", memberParams.Select(p => p.GetTypedParameterName()))})";
-        }
-
-        if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void)
-        {
-            sb.AppendLine($"        return {(async ? "await " : "")}{methodInvocation};");
-        }
-        else
-        {
-            sb.AppendLine($"       {(async ? "await " : "")}{methodInvocation};");
-        }
-        sb.AppendLine("    }");
-        return sb.ToString();
+        sb.Append(indent);
+        sb.AppendLine("{");
+        RenderMethodBodyContent(methodInfo, depth: 2);
+        sb.Append(indent);
+        sb.AppendLine("}");
     }
 
-    private string Render(IEnumerable<MethodParameterInfo> parameterInfos)
+    private void RenderMethodSignature(MethodInfo methodInfo, int depth)
     {
-        StringBuilder codeBuilder = new();
+        string indent = new(' ', depth * 4);
+        sb.Append(indent);
+        sb.Append("public static ");
+        if (methodInfo.ReturnType.IsTaskType)
+        {
+            sb.Append("async ");
+        }
+        sb.Append(methodInfo.ReturnType.InteropTypeSyntax);
+        sb.Append(' ');
+        sb.Append(methodInfo.Name);
+        sb.Append('(');
+        RenderParameters(methodInfo.MethodParameters);
+        sb.Append(')');
+        sb.AppendLine();
+    }
+
+    private void RenderMethodBodyContent(MethodInfo methodInfo, int depth)
+    {
+        string indent = new(' ', depth * 4);
+    
+        foreach (MethodParameterInfo paramInfo in methodInfo.MethodParameters)
+        {
+            RenderParameterTypeConversion(paramInfo, depth);
+        }
+
+        sb.Append(indent);
+        if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void)
+        {
+            sb.Append("return ");
+        }
+        if (methodInfo.ReturnType.IsTaskType)
+        {
+            sb.Append("await ");
+        }
+        if (!methodInfo.IsStatic)
+        {
+            MethodParameterInfo instanceParam = methodInfo.MethodParameters.ElementAt(0);
+            List<MethodParameterInfo> memberParams = [.. methodInfo.MethodParameters.Skip(1)];
+            sb.Append($"{GetTypedParameterName(instanceParam)}.{methodInfo.Name}({string.Join(", ", memberParams.Select(GetTypedParameterName))})");
+        }
+        else
+        {
+            sb.Append($"{classInfo.Name}.{methodInfo.Name}({string.Join(", ", methodInfo.MethodParameters.Select(GetTypedParameterName))})");
+        }
+        sb.AppendLine(";");
+    }
+
+    private string GetTypedParameterName(MethodParameterInfo paramInfo) => paramInfo.Type.RequiresCLRTypeConversion ? $"typed_{paramInfo.ParameterName}" : paramInfo.ParameterName;
+
+    private void RenderParameterTypeConversion(MethodParameterInfo paramInfo, int depth)
+    {
+        if (!paramInfo.Type.RequiresCLRTypeConversion)
+            return;
+
+        string indent = new string(' ', depth * 4);
+
+        if (paramInfo.Type.IsTaskType)
+        {
+            InteropTypeInfo returnTypeInfo = paramInfo.Type.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
+            string tcsVarName = $"{paramInfo.ParameterName}Tcs";
+            sb.Append(indent);
+            sb.AppendLine($"TaskCompletionSource<{returnTypeInfo.CLRTypeSyntax}> {tcsVarName} = new();");
+            sb.Append(indent);
+            sb.AppendLine("task.ContinueWith(t =>");
+            string lambdaIndent = new(' ', (depth + 1) * 4);
+            sb.Append(lambdaIndent);
+            sb.AppendLine($"t.IsFaulted ? {tcsVarName}.SetException(t.Exception.InnerExceptions)");
+            sb.Append(lambdaIndent);
+            sb.AppendLine($": t.IsCanceled ? {tcsVarName}.SetCanceled()");
+            sb.Append(lambdaIndent);
+            sb.AppendLine($": {tcsVarName}.SetResult(({returnTypeInfo.CLRTypeSyntax})t.Result), TaskContinuationOptions.ExecuteSynchronously);");
+            sb.Append(indent);
+            sb.AppendLine($"Task<{returnTypeInfo.CLRTypeSyntax}> {GetTypedParameterName(paramInfo)} = {tcsVarName}.Task;");
+        }
+        // TODO: write some tests to see Arrays in action (update sample with array in parameters for runtime check?).
+        //else if (paramInfo.Type.IsArrayType) {}
+        else
+        {
+            // must be object type
+            Debug.Assert(paramInfo.Type.ManagedType == KnownManagedType.Object, "Unexpected non-object type with required type conversion");
+            sb.Append(indent);
+            
+            sb.AppendLine($"{paramInfo.Type.CLRTypeSyntax} {GetTypedParameterName(paramInfo)} = ({paramInfo.Type.CLRTypeSyntax}){paramInfo.ParameterName};");
+        }
+    }
+
+    private void RenderParameters(IEnumerable<MethodParameterInfo> parameterInfos)
+    {
+        if (!parameterInfos.Any())
+            return;
+
         foreach (MethodParameterInfo parameterInfo in parameterInfos)
         {
-            if (parameterInfo.KnownType is KnownManagedType.Object)
-            {
-                codeBuilder.Append("[JSMarshalAs<JSType.Any>] ");
-            }
-            codeBuilder.Append($"{parameterInfo.InteropTypeSyntax} {parameterInfo.ParameterName}, ");
+            JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(parameterInfo.Type);
+            sb.Append(marshalAsAttributeRenderer.RenderParameterAttribute().NormalizeWhitespace().ToFullString());
+            sb.Append(' ');
+            sb.Append(parameterInfo.Type.InteropTypeSyntax);
+            sb.Append(' ');
+            sb.Append(parameterInfo.ParameterName);
+            sb.Append(", ");
         }
-        return codeBuilder.ToString().TrimEnd().TrimEnd(',');
+        sb.Length -= 2; // Remove last ", "
     }
 }

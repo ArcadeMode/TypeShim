@@ -21,7 +21,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol)
         {
             Namespace = classSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
             Name = classSymbol.Name,
-            Methods = methodInfoBuilders.Select(b => b.Build())
+            Methods = [.. methodInfoBuilders.Select(b => b.Build())]
         };
     }
 }

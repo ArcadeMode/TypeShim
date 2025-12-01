@@ -167,14 +167,18 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
                     return new JSInvalidTypeInfo();
                 }
                 return new JSFunctionTypeInfo(false, signatureTypes!);
-            default:
-                // JS Interop generator does not support the marshalling of structs (BY DEFAULT, THIS HAS BEEN MANUALLY ADDED IN THIS COPY)
-                // In case structs were to be allowed for marshalling in the future,
-                // disallow marshalling of structs with the InlineArrayAttribute
+
+            // class
+            case INamedTypeSymbol classType when classType.TypeKind == TypeKind.Class:
                 return new JSSimpleTypeInfo(KnownManagedType.Object)
                 {
                     Syntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword))
                 };
+            default:
+                // JS Interop generator does not support the marshalling of structs
+                // In case structs were to be allowed for marshalling in the future,
+                // disallow marshalling of structs with the InlineArrayAttribute
+                return new JSInvalidTypeInfo();
         }
     }
 }
