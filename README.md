@@ -172,11 +172,11 @@ public class Person
 
 ## Feature: Enriched Type support
 
-TypeShim adds functionality to bring your classes, over the interop boundary, to TypeScript with matching signatures. It also brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. This work is largely completed, but some types are still on the roadmap for support.  Support for generics is limited to `Task` and `[]`. 
+TypeShim adds functionality to bring your classes over the interop boundary, as TypeScript interfaces with matching signatures. It also brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. This work is largely completed, but some types are still on the roadmap for support.  Support for generics is limited to `Task` and `[]`. 
 
 Every supported type can be used in methods as return and parameter types. When properties get support, they will inherit the existing supported types automatically.
 
-TypeShim aims to support extended type definitions building on top of the .NET Marshalled types, i.e. `Enum` to generated `Enum` and `IEnumerable` to `[]` conversions can be build by leveraging existing `Int32` and `[]` marshalling combined with some generated shimming code. 
+TypeShim aims to broaden its type support by building on top of the .NET Marshalled types. i.e. `Enum` and `IEnumerable` could be supported by leveraging existing `Int32` and `[]` marshalling combined with some generated shimming code. 
 
 | TypeShim Shimmed Type | Mapped Type | Support | Note |
 |----------------------|-------------|--------|------|
@@ -233,9 +233,16 @@ To use TypeShim all you have to do is install it directly into your `Microsoft.N
 nuget install TypeShim
 ```
 
-- **TODO**: document msbuild props.
-- **TODO**: ts import process
+## Configuration
 
+TypeShim is configured through MSBuild properties, you may provide these through your `.csproj` file or from the `msbuild`/`dotnet` cli. 
+
+| Name                               | Default     | Description                                                                                                                               | Example / Options                 |
+|-------------------------------------|-------------|-------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
+| `TypeShim_TypeScriptOutputDirectory`| `"wwwroot"` | Directory path (relative to `OutDir`) where `typeshim.ts` is generated. Supports relative paths.                                          | `../../myfrontend`                |
+| `TypeShim_TypeScriptOutputFileName` | `"typeshim.ts"` | Filename of the generated TypeShim TypeScript code.                                                                                       | `typeshim.ts`                     |
+| `TypeShim_GeneratedDir`             | `TypeShim`  | Directory path (relative to `IntermediateOutputPath`) for generated `YourClass.Interop.g.cs` files.                                       | `TypeShim`                        |
+| `TypeShim_MSBuildMessagePriority`   | `Normal`    | MSBuild message priority. Set to High for debugging.                                                                                      | `Low`, `Normal`, `High`           |
 
 > Got inspired or have ideas? Feel free to open a discussion or an issue!
 
