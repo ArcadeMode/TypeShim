@@ -4,6 +4,17 @@ namespace TypeShim.Generator.Typescript;
 
 internal class TypeScriptMethodRenderer(TypeScriptTypeMapper typeMapper)
 {
+    internal string RenderPropertyGetterSignatureForClass(MethodInfo methodInfo)
+    {
+
+        return $"get {methodInfo.Name.TrimStart("get_")}({RenderMethodParameters(methodInfo)}): {typeMapper.ToTypeScriptType(methodInfo.ReturnType.ManagedType, methodInfo.ReturnType.CLRTypeSyntax)}";
+    }
+
+    internal string RenderPropertySetterSignatureForClass(MethodInfo methodInfo)
+    {
+        return $"set {methodInfo.Name.TrimStart("set_")}({RenderMethodParameters(methodInfo)})";
+    }
+
     internal string RenderMethodSignatureForClass(MethodInfo methodInfo)
     {
         string optionalAsync = methodInfo.ReturnType.IsTaskType ? "async " : string.Empty;

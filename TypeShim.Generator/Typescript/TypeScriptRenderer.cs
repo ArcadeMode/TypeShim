@@ -10,10 +10,11 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
     internal string Render()
     {
         RenderInteropModuleInterface();
+        RenderUserModuleClass();
+        
         RenderInteropInterfaces();
         RenderUserClassInterfaces();
 
-        RenderUserModuleClass();
         RenderUserClassProxies();
         return sourceBuilder.ToString();
     }
@@ -37,7 +38,7 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
     {
         foreach (ClassInfo classInfo in classInfos)
         {
-            TypescriptUserClassInterfaceRenderer classInterfaceRenderer = new(classInfo, methodRenderer);
+            TypescriptUserClassInterfaceRenderer classInterfaceRenderer = new(classInfo, methodRenderer, typeMapper);
             sourceBuilder.AppendLine(classInterfaceRenderer.Render());
         }
     }

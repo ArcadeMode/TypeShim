@@ -14,7 +14,7 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
             {
                 ParameterName = "instance",
                 IsInjectedInstanceParameter = true,
-                Type = new InteropTypeInfoBuilder(classSymbol).Build() // TODO: TEST THIS
+                Type = new InteropTypeInfoBuilder(classSymbol).Build()
             };
         }
 

@@ -14,7 +14,7 @@ CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilatio
 List<ClassInfo> classInfos = [.. parsedArgs.CsFileInfos
     .SelectMany(fileInfo => TsExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(fileInfo.SyntaxTree), fileInfo.SyntaxTree.GetRoot()))
     .Select(classSymbol => new ClassInfoBuilder(classSymbol).Build())
-    .Where(ci => ci.Methods.Any())]; // dont bother with empty classes
+    .Where(ci => ci.Methods.Any() || ci.Properties.Any())]; // dont bother with empty classes
 
 Task generateTS = Task.Run(() => GenerateTypeScriptInteropCode(parsedArgs, classInfos));
 Task generateCS = Task.Run(() => GenerateCSharpInteropCode(parsedArgs, classInfos));

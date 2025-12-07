@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace TypeShim.Sample;
 
-public class RandomPersonGenerator
+public class RandomEntityGenerator
 {
     private static readonly string[] FirstNames =
     {
@@ -33,7 +33,7 @@ public class RandomPersonGenerator
 
     private readonly Random _rng;
 
-    public RandomPersonGenerator(int? seed = null)
+    public RandomEntityGenerator(int? seed = null)
     {
         _rng = seed.HasValue ? new Random(seed.Value) : new Random();
     }
@@ -54,17 +54,23 @@ public class RandomPersonGenerator
             Dog? pet = null;
             if (_rng.NextDouble() < 0.75) // 75% chance to have a pet because pets are cool
             {
-                pet = new Dog
-                {
-                    Name = DogNames[_rng.Next(DogNames.Length)],
-                    Breed = DogBreeds[_rng.Next(DogBreeds.Length)]
-                };
+                pet = GenerateDog();
             }
 
             persons.Add(new Person(i, fullName, age, pet));
         }
 
         return persons;
+    }
+
+    public Dog GenerateDog()
+    {
+        return new()
+        {
+            Name = DogNames[_rng.Next(DogNames.Length)],
+            Breed = DogBreeds[_rng.Next(DogBreeds.Length)],
+            Age = _rng.Next(1, 21) // Pet age 1 to 20
+        };
     }
 
     /// <summary>

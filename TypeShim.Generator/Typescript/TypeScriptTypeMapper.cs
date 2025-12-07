@@ -51,7 +51,7 @@ internal class TypeScriptTypeMapper(IEnumerable<ClassInfo> classInfos)
             KnownManagedType.Exception => "Error",
             KnownManagedType.DateTime => "Date",
             KnownManagedType.DateTimeOffset => "Date",
-            KnownManagedType.Nullable => throw new NotImplementedException("Nullable types are not yet supported"), // return "something | null" ?
+            KnownManagedType.Nullable => throw new NotImplementedException("Nullable value-types are not yet supported"), // return "something | null" ?
             KnownManagedType.Task => $"Promise<{ToTypeScriptType(KnownManagedType.Unknown, ExtractInnerTypeArgument(typeSyntax))}>",
             KnownManagedType.Array or KnownManagedType.ArraySegment or KnownManagedType.Span 
                 => $"Array<{ToTypeScriptType(KnownManagedType.Unknown, ExtractInnerTypeArgument(typeSyntax))}>",

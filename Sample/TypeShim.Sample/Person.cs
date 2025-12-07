@@ -21,21 +21,20 @@ public class Person
         Pet = pet;
     }
 
-    public int GetId() => Id;
-    public string GetName() => Name;
-    public int GetAge() => Age;
-    public Dog? GetPet() => Pet;
+    public bool IsOlderThan(Person other)
+    {
+        return Age > other.Age;
+    }
 
-    // TODO: analyzers for unsupported interop? jsexport no likey nullable value types in arrays it seems
-    //public int?[] GetLuckyNumbers() 
-    //{
-    //    // Example method returning an array with nullable integers
-    //    return [7, null, 42, 3];
-    //}
-
-    //public Dog?[] GetFriendPets()
-    //{
-    //    // Example method returning an array with nullable reference types
-    //    return [null, null, null];
-    //}
+    public void AdoptPet()
+    {
+        if (Pet != null)
+        {
+            Console.WriteLine($"{Name} already has a pet named {Pet.Name}.");
+            return;
+        }
+        RandomEntityGenerator generator = new();
+        Pet = generator.GenerateDog();
+        Console.WriteLine($"{Name} has adopted a new pet named {Pet.Name}.");
+    }
 }

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { PersonCard } from './PersonCard';
 import type { Person } from '@typeshim/people-exports';
-import { PeopleRepository } from './PeopleRepository';
+import { PeopleRepositoryInstance } from './PeopleRepository';
 
 export interface PeopleGridProps {
   emptyText?: string;
@@ -17,8 +17,7 @@ export const PeopleGrid: React.FC<PeopleGridProps> = ({ emptyText = 'No people f
   useEffect(() => {
     const fetchPeople = async () => {
       try {
-        const repo = new PeopleRepository();
-        const data = await repo.getAllPeople();
+        const data = await PeopleRepositoryInstance.getAllPeople();
         setPeople(data);
       } catch (err) {
         console.error(err);
@@ -44,7 +43,7 @@ export const PeopleGrid: React.FC<PeopleGridProps> = ({ emptyText = 'No people f
       }}
     >
       {people.map((p, index) => (
-        <PersonCard key={index} person={p} />
+        <PersonCard key={index} initPerson={p} />
       ))}
     </div>
   );

@@ -6,15 +6,12 @@ using TypeShim;
 namespace TypeShim.Sample;
 
 [TsExport]
-public class PeopleProvider
+public class PeopleProvider(PeopleApiClient _apiClient)
 {
-    private static readonly HttpClient _httpClient = new() { BaseAddress = new System.Uri("https://localhost:7266/") };
-    private static readonly PeopleApiClient _apiClient = new(_httpClient);
-
     private static Person[]? AllPeople;
     private static Person[]? ElderlyPeople;
 
-    public static async Task<People> FetchPeopleAsync()
+    public async Task<People> FetchPeopleAsync()
     {
         try
         {
@@ -36,7 +33,7 @@ public class PeopleProvider
         }
     }
 
-    public static async Task<People> FetchElderlyPeopleAsync()
+    public async Task<People> FetchElderlyPeopleAsync()
     {
         try
         {

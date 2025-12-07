@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Reflection;
+using System.Text;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
 
@@ -22,6 +23,14 @@ internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypeScrip
         foreach (MethodInfo methodInfo in classInfo.Methods)
         {
             sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(methodInfo.WithoutInstanceParameterTypeInfo())};");
+        }
+        foreach (PropertyInfo propertyInfo in classInfo.Properties)
+        {
+            sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(propertyInfo.GetMethod.WithoutInstanceParameterTypeInfo())};");
+            if (propertyInfo.SetMethod is MethodInfo setMethod)
+            {
+                sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(setMethod.WithoutInstanceParameterTypeInfo())};");
+            }
         }
         sb.AppendLine("}");
         return sb.ToString();

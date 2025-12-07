@@ -6,58 +6,9 @@ export interface WasmModuleExports {
             PeopleInterop: PeopleInterop;
             PeopleProviderInterop: PeopleProviderInterop;
             PersonInterop: PersonInterop;
+            TypeShimSampleModuleInterop: TypeShimSampleModuleInterop;
         };
     };
-}
-
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Dog
-export interface DogInterop {
-    GetName(instance: object): string;
-    GetBreed(instance: object): string;
-    Bark(instance: object): string;
-}
-
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.People
-export interface PeopleInterop {
-    GetAll(instance: object): Array<Person>;
-}
-
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.PeopleProvider
-export interface PeopleProviderInterop {
-    FetchPeopleAsync(): Promise<People>;
-    FetchElderlyPeopleAsync(): Promise<People>;
-}
-
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Person
-export interface PersonInterop {
-    GetId(instance: object): number;
-    GetName(instance: object): string;
-    GetAge(instance: object): number;
-    GetPet(instance: object): Dog | null;
-}
-
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Dog
-export interface Dog {
-    GetName(): string;
-    GetBreed(): string;
-    Bark(): string;
-}
-
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.People
-export interface People {
-    GetAll(): Array<Person>;
-}
-
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.PeopleProvider
-export interface PeopleProvider {
-}
-
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Person
-export interface Person {
-    GetId(): number;
-    GetName(): string;
-    GetAge(): number;
-    GetPet(): Dog | null;
 }
 
 export class WasmModule {
@@ -65,9 +16,81 @@ export class WasmModule {
   constructor(interop: WasmModuleExports) {
     this.interop = interop;
   }
-  public PeopleProvider(): PeopleProviderStatics {
-    return new PeopleProviderStatics(this.interop);
+  public get TypeShimSampleModule(): TypeShimSampleModuleStatics {
+    return new TypeShimSampleModuleStatics(this.interop);
   }
+}
+
+// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Dog
+export interface DogInterop {
+    Bark(instance: object): string;
+    get_Name(instance: object): string;
+    set_Name(instance: object, value: string): void;
+    get_Breed(instance: object): string;
+    set_Breed(instance: object, value: string): void;
+    get_Age(instance: object): number;
+    set_Age(instance: object, value: number): void;
+}
+
+// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.People
+export interface PeopleInterop {
+    get_All(instance: object): Array<Person>;
+}
+
+// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.PeopleProvider
+export interface PeopleProviderInterop {
+    FetchPeopleAsync(instance: object): Promise<People>;
+    FetchElderlyPeopleAsync(instance: object): Promise<People>;
+}
+
+// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Person
+export interface PersonInterop {
+    AdoptPet(instance: object): void;
+    get_Id(instance: object): number;
+    set_Id(instance: object, value: number): void;
+    get_Name(instance: object): string;
+    set_Name(instance: object, value: string): void;
+    get_Age(instance: object): number;
+    set_Age(instance: object, value: number): void;
+    get_Pet(instance: object): Dog | null;
+    set_Pet(instance: object, value: Dog | null): void;
+}
+
+// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.TypeShimSampleModule
+export interface TypeShimSampleModuleInterop {
+    get_PeopleProvider(): PeopleProvider | null;
+}
+
+// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Dog
+export interface Dog {
+    Bark(): string;
+    Name: string;
+    Breed: string;
+    Age: number;
+}
+
+// Auto-generated TypeScript interface. Source class: TypeShim.Sample.People
+export interface People {
+    readonly All: Array<Person>;
+}
+
+// Auto-generated TypeScript interface. Source class: TypeShim.Sample.PeopleProvider
+export interface PeopleProvider {
+    FetchPeopleAsync(): Promise<People>;
+    FetchElderlyPeopleAsync(): Promise<People>;
+}
+
+// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Person
+export interface Person {
+    AdoptPet(): void;
+    Id: number;
+    Name: string;
+    Age: number;
+    Pet: Dog | null;
+}
+
+// Auto-generated TypeScript interface. Source class: TypeShim.Sample.TypeShimSampleModule
+export interface TypeShimSampleModule {
 }
 
 // Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Dog
@@ -80,16 +103,32 @@ export class DogProxy implements Dog {
     this.instance = instance;
   }
 
-  public GetName(): string {
-    return this.interop.TypeShim.Sample.DogInterop.GetName(this.instance);
-  }
-
-  public GetBreed(): string {
-    return this.interop.TypeShim.Sample.DogInterop.GetBreed(this.instance);
-  }
-
   public Bark(): string {
     return this.interop.TypeShim.Sample.DogInterop.Bark(this.instance);
+  }
+
+  public get Name(): string {
+    return this.interop.TypeShim.Sample.DogInterop.get_Name(this.instance);
+  }
+
+  public set Name(value: string) {
+    this.interop.TypeShim.Sample.DogInterop.set_Name(this.instance, value);
+  }
+
+  public get Breed(): string {
+    return this.interop.TypeShim.Sample.DogInterop.get_Breed(this.instance);
+  }
+
+  public set Breed(value: string) {
+    this.interop.TypeShim.Sample.DogInterop.set_Breed(this.instance, value);
+  }
+
+  public get Age(): number {
+    return this.interop.TypeShim.Sample.DogInterop.get_Age(this.instance);
+  }
+
+  public set Age(value: number) {
+    this.interop.TypeShim.Sample.DogInterop.set_Age(this.instance, value);
   }
 
 }
@@ -113,9 +152,9 @@ export class PeopleProxy implements People {
     this.instance = instance;
   }
 
-  public GetAll(): Array<Person> {
-    const res = this.interop.TypeShim.Sample.PeopleInterop.GetAll(this.instance);
-    return new PersonProxy(res, this.interop);
+  public get All(): Array<Person> {
+    const res = this.interop.TypeShim.Sample.PeopleInterop.get_All(this.instance);
+    return res.map(item => new PersonProxy(item, this.interop));
   }
 
 }
@@ -139,6 +178,16 @@ export class PeopleProviderProxy implements PeopleProvider {
     this.instance = instance;
   }
 
+  public async FetchPeopleAsync(): Promise<People> {
+    const res = await this.interop.TypeShim.Sample.PeopleProviderInterop.FetchPeopleAsync(this.instance);
+    return new PeopleProxy(res, this.interop);
+  }
+
+  public async FetchElderlyPeopleAsync(): Promise<People> {
+    const res = await this.interop.TypeShim.Sample.PeopleProviderInterop.FetchElderlyPeopleAsync(this.instance);
+    return new PeopleProxy(res, this.interop);
+  }
+
 }
 // Auto-generated TypeScript statics class. Source class: TypeShim.Sample.PeopleProvider
 export class PeopleProviderStatics {
@@ -146,16 +195,6 @@ export class PeopleProviderStatics {
 
   constructor(interop: WasmModuleExports) {
     this.interop = interop;
-  }
-
-  public async FetchPeopleAsync(): Promise<People> {
-    const res = await this.interop.TypeShim.Sample.PeopleProviderInterop.FetchPeopleAsync();
-    return new PeopleProxy(res, this.interop);
-  }
-
-  public async FetchElderlyPeopleAsync(): Promise<People> {
-    const res = await this.interop.TypeShim.Sample.PeopleProviderInterop.FetchElderlyPeopleAsync();
-    return new PeopleProxy(res, this.interop);
   }
 
 }
@@ -170,21 +209,41 @@ export class PersonProxy implements Person {
     this.instance = instance;
   }
 
-  public GetId(): number {
-    return this.interop.TypeShim.Sample.PersonInterop.GetId(this.instance);
+  public AdoptPet(): void {
+    this.interop.TypeShim.Sample.PersonInterop.AdoptPet(this.instance);
   }
 
-  public GetName(): string {
-    return this.interop.TypeShim.Sample.PersonInterop.GetName(this.instance);
+  public get Id(): number {
+    return this.interop.TypeShim.Sample.PersonInterop.get_Id(this.instance);
   }
 
-  public GetAge(): number {
-    return this.interop.TypeShim.Sample.PersonInterop.GetAge(this.instance);
+  public set Id(value: number) {
+    this.interop.TypeShim.Sample.PersonInterop.set_Id(this.instance, value);
   }
 
-  public GetPet(): Dog | null {
-    const res = this.interop.TypeShim.Sample.PersonInterop.GetPet(this.instance);
-    return new DogProxy(res, this.interop);
+  public get Name(): string {
+    return this.interop.TypeShim.Sample.PersonInterop.get_Name(this.instance);
+  }
+
+  public set Name(value: string) {
+    this.interop.TypeShim.Sample.PersonInterop.set_Name(this.instance, value);
+  }
+
+  public get Age(): number {
+    return this.interop.TypeShim.Sample.PersonInterop.get_Age(this.instance);
+  }
+
+  public set Age(value: number) {
+    this.interop.TypeShim.Sample.PersonInterop.set_Age(this.instance, value);
+  }
+
+  public get Pet(): Dog | null {
+    const res = this.interop.TypeShim.Sample.PersonInterop.get_Pet(this.instance);
+    return res ? new DogProxy(res, this.interop) : null;
+  }
+
+  public set Pet(value: Dog | null) {
+    this.interop.TypeShim.Sample.PersonInterop.set_Pet(this.instance, value);
   }
 
 }
@@ -194,6 +253,32 @@ export class PersonStatics {
 
   constructor(interop: WasmModuleExports) {
     this.interop = interop;
+  }
+
+}
+
+// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.TypeShimSampleModule
+export class TypeShimSampleModuleProxy implements TypeShimSampleModule {
+  private interop: WasmModuleExports;
+  private instance: object;
+
+  constructor(instance: object, interop: WasmModuleExports) {
+    this.interop = interop;
+    this.instance = instance;
+  }
+
+}
+// Auto-generated TypeScript statics class. Source class: TypeShim.Sample.TypeShimSampleModule
+export class TypeShimSampleModuleStatics {
+  private interop: WasmModuleExports;
+
+  constructor(interop: WasmModuleExports) {
+    this.interop = interop;
+  }
+
+  public get PeopleProvider(): PeopleProvider | null {
+    const res = this.interop.TypeShim.Sample.TypeShimSampleModuleInterop.get_PeopleProvider();
+    return res ? new PeopleProviderProxy(res, this.interop) : null;
   }
 
 }

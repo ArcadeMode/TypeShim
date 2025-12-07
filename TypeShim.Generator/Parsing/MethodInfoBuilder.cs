@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using TypeShim.Generator;
 
 internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSymbol memberMethod)
 {
@@ -7,6 +8,12 @@ internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSym
 
     internal MethodInfo Build()
     {
+        if (memberMethod.DeclaredAccessibility != Accessibility.Public || 
+            memberMethod.MethodKind is not MethodKind.Ordinary and not MethodKind.PropertyGet and not MethodKind.PropertySet)
+        {
+            throw new UnsupportedMethodException($"Method {classSymbol}.{memberMethod} must be of kind 'Ordinary', 'PropertyGet' or 'PropertySet' and have accessibility 'Public'.");
+        }
+
         return new MethodInfo
         {
             IsStatic = memberMethod.IsStatic,

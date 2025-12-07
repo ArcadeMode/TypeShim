@@ -8,7 +8,7 @@ using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Tests;
 
-internal class SyntaxTreeParsingTests
+internal class SyntaxTreeParsingTests_UnsupportedType
 {
     [TestCase("SByte", "sbyte")]
     [TestCase("sbyte", "sbyte")]

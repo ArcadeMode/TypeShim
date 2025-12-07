@@ -31,27 +31,30 @@ TODO: brief explanation how to run the sample.
 
 ## Feature: instance member access from TypeScript
 
-Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your exports as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-). 
+Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your wasm browserapp as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-) in order to retrieve its `exports`. 
 
 **TypeShim**
  ```js
-    public UsingTypeShim(exports: WasmModuleExports) {
-        const module = new WasmModule(exports)
-        const repository: PersonRepository = module.PersonRepository().GetInstance(); 
-        const person: Person = repository.GetPerson();
-        console.log(person.GetName()); // prints "Alice"
-        person.SetName("Bob");
-        console.log(person.GetName()); // prints "Bob"
+    public UsingTypeShim(exports: AssemblyExports) {
+        const module = new PeopleModule(exports)
+        const alice: Person = module.PeopleRepository.GetPerson(0);
+        const bob: Person = module.PeopleRepository.GetPerson(1);
+        console.log(alice.Name, bob.Name); // prints "Alice", "Bob"
+        console.log(alice.IsOlderThan(bob)) // prints false
+        alice.Age = 30;
+        console.log(alice.IsOlderThan(bob)) // prints true
     }
 ```
 **Raw JSExport**
   ```js
     public UsingRawJSExport(exports: any) {
-        const repository: any = exports.MyBusiness.People.PersonRepository.GetInstance(); 
-        const person: any = exports.MyBusiness.People.PersonRepository.GetPerson(repository);
-        console.log(exports.MyBusiness.People.Person.GetName(person)); // prints "Alice"
-        exports.MyBusiness.People.Person.SetName(person, "Bob");
-        console.log(exports.MyBusiness.People.Person.GetName(person)); // prints "Bob"
+        const repository: any = exports.Sample.People.PeopleModule.GetPeopleRepository(); 
+        const alice: any = exports.Sample.People.PersonRepository.GetPerson(repository, 0);
+        const bob: any = exports.Sample.People.PersonRepository.GetPerson(repository, 1);
+        console.log(exports.Sample.People.Person.GetName(alice), exports.Sample.People.Person.GetName(bob)); // prints "Alice", "Bob"
+        console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints false
+        exports.Sample.People.Person.SetAge(alice, 30);
+        console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints true
     }
   ```
 
@@ -67,44 +70,45 @@ TypeShim preserves your type information across the interop boundary.
   ```csharp
 using TypeShim;
 
-namespace MyBusiness.People;
+namespace Sample.People;
+
+[TsModule]
+public static class PeopleModule
+{
+    public static PeopleRepository { get; internal set; } = new PeopleRepository();
+}
 
 [TsExport]
-public class PersonRepository
+public class PeopleRepository
 {
-    private static readonly PersonRepository _instance = new();
+    internal List<Person> People = [
+        new Person()
+        {
+            Name = "Alice",
+            Age = 26,
+        },
+        new Person()
+        {
+            Name = "Bob",
+            Age = 29,
+        }
+    ];
 
-    internal Person Person = new Person()
+    public Person GetPerson(int i)
     {
-        Name = "Alice",
-        Age = 28,
-    };
-
-    public Person GetPerson()
-    {
-        return Person;
-    }
-
-    public static PersonRepository GetInstance()
-    {
-        return _instance;
+        return People[i];
     }
 }
 
 [TsExport]
 public class Person
 {
-    internal string Name { get; set; }
-    internal int Age { get; set; }
+    public string Name { get; set; }
+    public int Age { get; set; }
     
-    public string GetName()
+    public bool IsOlderThan(Person p)
     {
-        return Name;
-    }
-
-    public void SetName(string name)
-    {
-        this.Name = name;
+        return Age > p.Age;
     }
 }
 ```
@@ -117,35 +121,43 @@ public class Person
 Note the error sensitivity of passing untyped objects across the interop boundary.
 
   ```csharp
-namespace MyBusiness.People;
+namespace Sample.People;
 
-public class PersonRepository
+public class PeopleModule 
 {
     private static readonly PersonRepository _instance = new();
-
-    internal Person Person = new Person()
-    {
-        Name = "Alice",
-        Age = 28
-    };
-
     [JSExport]
     [return: JSMarshalAsType<JSType.Object>]
-    public static object GetPerson([JSMarshalAsType<JSType.Object>] object repository)
-    {
-        PersonRepository pr = (PersonRepository)repository;
-        return pr.Person;
-    }
-
-    [JSExport]
-    [return: JSMarshalAsType<JSType.Object>]
-    public static object GetInstance()
+    public static object GetPeopleRepository()
     {
         return _instance;
     }
 }
 
-[TsExport]
+public class PeopleRepository
+{
+    internal List<Person> People = [
+        new Person()
+        {
+            Name = "Alice",
+            Age = 26,
+        },
+        new Person()
+        {
+            Name = "Bob",
+            Age = 29,
+        }
+    ];
+
+    [JSExport]
+    [return: JSMarshalAsType<JSType.Object>]
+    public static object GetPerson([JSMarshalAsType<JSType.Object>] object repository, [JSMarshalAsType<JSType.Number>] int i)
+    {
+        PersonRepository pr = (PersonRepository)repository;
+        return pr.People[i];
+    }
+}
+
 public class Person
 {
     internal string Name { get; set; }
@@ -166,6 +178,31 @@ public class Person
         Person p = (Person)instance;
         return p.Name = name;
     }
+
+    [JSExport]
+    [return: JSMarshalAsType<JSType.Number>]
+    public static int GetAge([JSMarshalAsType<JSType.Object>] object instance)
+    {
+        Person p = (Person)instance;
+        return p.Age;
+    }
+
+    [JSExport]
+    [return: JSMarshalAsType<JSType.Void>]
+    public static void SetAge([JSMarshalAsType<JSType.Object>] object instance, [JSMarshalAsType<JSType.Number>] int age)
+    {
+        Person p = (Person)instance;
+        return p.Age = age;
+    }
+
+    [JSExport]
+    [return: JSMarshalAsType<JSType.Void>]
+    public static void IsOlderThan([JSMarshalAsType<JSType.Object>] object instance, [JSMarshalAsType<JSType.Object>] object other)
+    {
+        Person p = (Person)instance;
+        Person o = (Person)other;
+        return p.Age > o.Age;
+    }
 }
 ```
 </details>
@@ -180,9 +217,10 @@ TypeShim aims to broaden its type support by building on top of the .NET Marshal
 
 | TypeShim Shimmed Type | Mapped Type | Support | Note |
 |----------------------|-------------|--------|------|
-| `TClass`                  |  `TClass`        | ✅     | `TClass`-shim generated in TypeScript* |
-| `Task<TClass>`            | `Promise<TClass>`| ✅     | `TClass`-shim generated in TypeScript* |
-| `TClass[]`                | `TClass[]`       | ✅     | `TClass`-shim generated in TypeScript* |
+| `TClass`                  |  `TClass`        | ✅     | `TClass` generated in TypeScript* |
+| `Task<TClass>`            | `Promise<TClass>`| ✅     | `TClass` generated in TypeScript* |
+| `Task<T[]>`            | `Promise<T[]>`| 💡     | under consideration (for all array-compatible `T`) |
+| `TClass[]`                | `TClass[]`       | ✅     | `TClass` generated in TypeScript* |
 | `JSObject`           | `TClass`         | 💡     | [ArcadeMode/TypeShim#4](https://github.com/ArcadeMode/TypeShim/issues/4) (TS → C# only) |
 | `TEnum`      | `TEnum`       | 💡     | under consideration |
 | `IEnumerable<T>`     | `T[]`       | 💡     | under consideration |

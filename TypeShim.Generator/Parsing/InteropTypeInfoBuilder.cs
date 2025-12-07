@@ -37,7 +37,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
             RequiresCLRTypeConversion = simpleTypeInfo.KnownType == KnownManagedType.Object,
             IsTaskType = false,
             IsArrayType = false,
-            IsNullableType = false
+            IsNullableType = clrTypeSyntax is NullableTypeSyntax
         };
     }
 
@@ -55,7 +55,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
             TypeArgument = elementTypeInfo,
             RequiresCLRTypeConversion = elementTypeInfo.RequiresCLRTypeConversion,
             IsTaskType = false,
-            IsArrayType = false,
+            IsArrayType = true,
             IsNullableType = false
         };
 

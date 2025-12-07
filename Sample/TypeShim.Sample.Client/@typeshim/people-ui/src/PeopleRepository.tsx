@@ -1,34 +1,46 @@
-import { WasmModuleExports, WasmModule, PeopleProviderStatics, People, Person } from '@typeshim/people-exports';
+import { WasmModuleExports, WasmModule, People, Person, TypeShimSampleModuleStatics, PeopleProvider } from '@typeshim/people-exports';
 
-export class PeopleRepository {
+class PeopleRepository {
 
-    private wasmModulePromise: Promise<WasmModule>;
+    private wasmModulePromise: Promise<TypeShimSampleModuleStatics>;
 
     constructor() {
-        this.wasmModulePromise = this.getWasmModule();
+        this.wasmModulePromise = this.getInitializedSampleModule();
     }
 
     public async getAllPeople(): Promise<Person[]> {
-        const wasmModule: WasmModule = await this.wasmModulePromise;
-        const peopleProvider: PeopleProviderStatics = wasmModule.PeopleProvider();
+        const sampleModule: TypeShimSampleModuleStatics = await this.wasmModulePromise;
+        const peopleProvider: PeopleProvider | null = sampleModule.PeopleProvider;
+        if (!peopleProvider) {
+            throw new Error("PeopleProvider is null");
+        }
         const people: People = await peopleProvider.FetchPeopleAsync();
-        return people.GetAll();
+        const persons: Person[] = people.All;
+        return persons;
     }
 
     public async getElderlyPeople(): Promise<Person[]> {
-        const wasmModule: WasmModule = await this.wasmModulePromise;
-        const peopleProvider: PeopleProviderStatics = wasmModule.PeopleProvider();
+        const sampleModule: TypeShimSampleModuleStatics = await this.wasmModulePromise;
+        const peopleProvider: PeopleProvider | null = sampleModule.PeopleProvider;
+        if (!peopleProvider) {
+            throw new Error("PeopleProvider is null");
+        }
         const people: People = await peopleProvider.FetchElderlyPeopleAsync();
-        return people.GetAll();
+        return people.All;
     }
 
-    private async getWasmModule(): Promise<WasmModule> {
+    private async getInitializedSampleModule(): Promise<TypeShimSampleModuleStatics> {
         const wasmModuleStarter = (window as any).wasmModuleStarter;
         if (!wasmModuleStarter) {
             throw new Error("wasmModuleStarter not found on window. Ensure dotnet-start.js is loaded.");
         }
 
         const exports: WasmModuleExports = await wasmModuleStarter.exports;
-        return new WasmModule(exports)
+        const wasmModule = new WasmModule(exports);
+
+        const sampleModule: TypeShimSampleModuleStatics = wasmModule.TypeShimSampleModule;
+        return sampleModule;
     }
 }
+
+export const PeopleRepositoryInstance = new PeopleRepository();

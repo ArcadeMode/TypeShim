@@ -2,13 +2,6 @@
 
 namespace TypeShim.Generator.Typescript;
 
-internal class ModuleInfo
-{
-    internal required IEnumerable<ClassInfo> ExportedClasses { get; init; }
-
-    internal required ModuleHierarchyInfo HierarchyInfo { get; init; }
-}
-
 internal class ModuleHierarchyInfo
 {
     internal required ClassInfo? ExportedClass { get; init; }

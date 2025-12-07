@@ -1,15 +1,16 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
 import type { Person } from '@typeshim/people-exports';
 
 export interface PersonCardProps {
-  person: Person;
+  initPerson: Person;
 }
 
-export const PersonCard: React.FC<PersonCardProps> = ({ person }) => {
-  const pet = person.GetPet();
+export const PersonCard: React.FC<PersonCardProps> = ({ initPerson }) => {
+  const [wrapper, setPerson] = useState<{person: Person}>({person: initPerson});
+  const person = wrapper.person;
+  const pet = person.Pet;
   return (
       <div
-          title={`${person.GetName()} (Id: ${person.GetId()})`}
           style={{
               border: '1px solid #ddd',
               borderRadius: 6,
@@ -20,9 +21,9 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person }) => {
               flexDirection: 'row',
               justifyContent: 'space-between',
           }}>
-      <div>
-        <h3 style={{ margin: '0 0 0.25rem 0' }}>{person.GetName()}</h3>
-        <p style={{ margin: 0, fontSize: '0.875rem', color: '#555' }}>Age: {person.GetAge()}</p>
+      <div title={`${person.Name} (Id: ${person.Id})`} style={{ padding: '0.5rem' }}>
+        <h3 style={{ margin: '0 0 0.25rem 0' }}>{person.Name}</h3>
+        <p style={{ margin: 0, fontSize: '0.875rem', color: '#555' }}>Age: {person.Age}</p>
       </div>
       {pet && (
         <div>
@@ -36,8 +37,31 @@ export const PersonCard: React.FC<PersonCardProps> = ({ person }) => {
             fontSize: '0.75rem',
             border: '1px solid #cfe0ff'
           }}>
-            Pet: {pet.GetName()} ({pet.GetBreed()}) - {pet.Bark()}
+            Pet: {pet.Name} ({pet.Breed}) - {pet.Bark()}
           </span>
+        </div>
+      )}
+      {!pet && (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <button 
+            style={{
+              display: 'inline-block',
+              marginTop: '0.5rem',
+              padding: '.5rem 0.75rem',
+              borderRadius: 4,
+              background: 'rgb(255 238 238)',
+              color: 'rgb(138 30 30)',
+              fontSize: '0.75rem',
+              border: '1px solid rgb(255 207 207)',
+              boxShadow: 'rgba(0, 0, 0, 0.1) 1px 1px 4px 0px',
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              person.AdoptPet(); 
+              setPerson({...wrapper}); 
+            }}>
+            Adopt a pet!
+          </button>
         </div>
       )}
     </div>

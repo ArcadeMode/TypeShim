@@ -9,7 +9,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <InternalsVisibleTo Include="TypeShim.Generator.Tests"/>
+    <InternalsVisibleTo Include="TypeShim.Generator.Tests" />
   </ItemGroup>
   
   <ItemGroup>

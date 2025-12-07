@@ -39,12 +39,24 @@ internal sealed class InteropTypeInfo
     internal required bool IsTaskType { get; init; }
     internal required bool IsArrayType { get; init; }
     internal required bool IsNullableType { get; init; } //TODO: factor out, terrible modelling. include Array<T?>, Array<T>, T? better.
-
     
+    public static InteropTypeInfo CLRVoidTypeInfo = new ()
+    {
+        ManagedType = KnownManagedType.Void,
+        JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Void"),
+        InteropTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
+        CLRTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
+        IsTaskType = false,
+        IsArrayType = false,
+        IsNullableType = false,
+        RequiresCLRTypeConversion = false,
+        TypeArgument = null,
+    };
+
     internal static readonly InteropTypeInfo CLRObjectTypeInfo = new()
     {
         ManagedType = KnownManagedType.Object,
-        JSTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),
+        JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Any"),
         InteropTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),
         CLRTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),
         IsTaskType = false,

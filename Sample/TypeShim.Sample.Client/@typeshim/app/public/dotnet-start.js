@@ -13,6 +13,7 @@ async function createWasmRuntime(args) {
     console.info(".NET WebAssembly Module started");
     return exports;
 };
+window.getBaseURI = () => document.baseURI;
 
 window.wasmModuleStarter = {
     exports: (async () =>{

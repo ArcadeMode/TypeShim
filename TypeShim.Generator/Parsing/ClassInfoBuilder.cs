@@ -7,21 +7,30 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol)
     internal ClassInfo Build()
     { 
         List<MethodInfoBuilder> methodInfoBuilders = new();
-        foreach (IMethodSymbol methodSymbol in classSymbol.GetMembers().OfType<IMethodSymbol>().Where(m => m.MethodKind == MethodKind.Ordinary))
+        IEnumerable<IMethodSymbol> methodSymbols = classSymbol.GetMembers().OfType<IMethodSymbol>()
+            .Where(m => m.MethodKind == MethodKind.Ordinary && m.DeclaredAccessibility == Accessibility.Public);
+        foreach (IMethodSymbol methodSymbol in methodSymbols)
         {
             MethodInfoBuilder methodInfoBuilder = new(classSymbol, methodSymbol);
             methodInfoBuilders.Add(methodInfoBuilder);
         }
 
-        // FEATURE: generate property accessors (mostly needs correct receivers on TS end)
-        foreach (var member in classSymbol.GetMembers().OfType<IPropertySymbol>())
-        { }
+        List<PropertyInfoBuilder> propertyInfoBuilders = new();
+        IEnumerable<IPropertySymbol> propertySymbols = classSymbol.GetMembers().OfType<IPropertySymbol>()
+            .Where(p => p.DeclaredAccessibility == Accessibility.Public);
+        foreach (IPropertySymbol propertySymbol in propertySymbols)
+        {
+            PropertyInfoBuilder propertyInfoBuilder = new(classSymbol, propertySymbol);
+            propertyInfoBuilders.Add(propertyInfoBuilder);
+        }
 
         return new ClassInfo
         {
             Namespace = classSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
             Name = classSymbol.Name,
-            Methods = [.. methodInfoBuilders.Select(b => b.Build())]
+            Type = new InteropTypeInfoBuilder(classSymbol).Build(),
+            Methods = [.. methodInfoBuilders.Select(b => b.Build())],
+            Properties = [.. propertyInfoBuilders.Select(b => b.Build())],
         };
     }
 }

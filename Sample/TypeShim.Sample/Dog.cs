@@ -8,11 +8,8 @@ public class Dog
 {
     public required string Name { get; set; }
     public required string Breed { get; set; }
+    public required int Age { get; set; }
 
-    public string GetName() => Name;
-
-    public string GetBreed() => Breed;
-
-    public string Bark() => new[] { "bark", "yip", "woof", "arf", "growl", "howl", "whine", "snarl" }[Random.Shared.Next(8)];
+    public string Bark() => new[] { "bark", "yip", "woof", "arf", "growl", "howl", "whine", "snarl" }[Age % 8];
 
 }

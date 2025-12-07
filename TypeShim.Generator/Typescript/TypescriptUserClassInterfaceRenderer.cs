@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Reflection;
+using System.Text;
 using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
@@ -9,7 +10,7 @@ namespace TypeShim.Generator.Typescript;
 /// </summary>
 /// <param name="classInfo"></param>
 /// <param name="typeMapper"></param>
-internal class TypescriptUserClassInterfaceRenderer(ClassInfo classInfo, TypeScriptMethodRenderer methodRenderer)
+internal class TypescriptUserClassInterfaceRenderer(ClassInfo classInfo, TypeScriptMethodRenderer methodRenderer, TypeScriptTypeMapper typeMapper)
 {
     private readonly StringBuilder sb = new();
 
@@ -20,6 +21,11 @@ internal class TypescriptUserClassInterfaceRenderer(ClassInfo classInfo, TypeScr
         foreach (MethodInfo methodInfo in classInfo.Methods.Where(m => !m.IsStatic)) // only instance methods
         {
             sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(methodInfo.WithoutInstanceParameter())};");
+        }
+        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => !p.IsStatic))
+        {
+            bool isReadonly = propertyInfo.SetMethod is null;
+            sb.AppendLine($"    {(isReadonly ? "readonly " : string.Empty)}{propertyInfo.Name}: {typeMapper.ToTypeScriptType(propertyInfo.Type.ManagedType, propertyInfo.Type.CLRTypeSyntax)};");
         }
         sb.AppendLine("}");
         return sb.ToString();

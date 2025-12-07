@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
+using System.Data;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices.JavaScript;
@@ -18,9 +19,9 @@ internal sealed class CSharpInteropClassRenderer
     public CSharpInteropClassRenderer(ClassInfo classInfo)
     {
         ArgumentNullException.ThrowIfNull(classInfo);
-        if (!classInfo.Methods.Any())
+        if (!classInfo.Methods.Any() && !classInfo.Properties.Any())
         {
-            throw new ArgumentException("Interop class must have at least one method to render.", nameof(classInfo));
+            throw new ArgumentException("Interop class must have at least one method or property to render.", nameof(classInfo));
         }
         this.classInfo = classInfo;
     }
@@ -30,15 +31,63 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine("// Auto-generated TypeScript interop definitions");
         sb.AppendLine("using System.Runtime.InteropServices.JavaScript;");
         sb.AppendLine("using System.Threading.Tasks;");
-        sb.AppendLine($@"namespace {classInfo.Namespace};");
+        sb.AppendLine($"namespace {classInfo.Namespace};");
         sb.AppendLine($"public partial class {classInfo.Name}Interop");
         sb.AppendLine("{");
         foreach (MethodInfo methodInfo in classInfo.Methods)
         {
             RenderMethod(methodInfo);
         }
+        foreach (PropertyInfo propertyInfo in classInfo.Properties)
+        {
+            RenderPropertyMethods(propertyInfo);
+        }
         sb.AppendLine("}");
         return sb.ToString();
+    }
+
+    private void RenderPropertyMethods(PropertyInfo propertyInfo)
+    {
+        RenderProperty(propertyInfo, getter: true);
+        if (propertyInfo.SetMethod is not null)
+        {
+            RenderProperty(propertyInfo, getter: false);
+        }
+    }
+
+    private void RenderProperty(PropertyInfo propertyInfo, bool getter)
+    {
+        MethodInfo methodInfo = getter ? propertyInfo.GetMethod : propertyInfo.SetMethod ?? throw new InvalidOperationException("RenderProperty called for setter with null SetMethod");
+
+        string indent = new(' ', 4);
+        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(methodInfo.ReturnType);
+        sb.Append(indent);
+        sb.AppendLine(marshalAsAttributeRenderer.RenderJSExportAttribute().NormalizeWhitespace().ToFullString());
+        sb.Append(indent);
+        sb.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
+
+        RenderMethodSignature(methodInfo, depth: 1);
+
+        sb.Append(indent);
+        sb.AppendLine("{");
+        foreach (MethodParameterInfo paramInfo in methodInfo.MethodParameters)
+        {
+            RenderParameterTypeConversion(paramInfo, depth: 2);
+        }
+
+        string accessorName = methodInfo.IsStatic ? classInfo.Name : GetTypedParameterName(methodInfo.MethodParameters.ElementAt(0));
+        if (getter)
+        {
+            sb.AppendLine($"{indent}{indent}return {accessorName}.{propertyInfo.Name};");
+        }
+        else
+        {
+            string valueVarName = GetTypedParameterName(methodInfo.MethodParameters.ElementAt(1));
+            sb.AppendLine($"{indent}{indent}{accessorName}.{propertyInfo.Name} = {valueVarName};");
+        }
+
+        sb.Append(indent);
+        sb.AppendLine("}");
     }
 
     private void RenderMethod(MethodInfo methodInfo)
@@ -54,7 +103,11 @@ internal sealed class CSharpInteropClassRenderer
 
         sb.Append(indent);
         sb.AppendLine("{");
-        RenderMethodBodyContent(methodInfo, depth: 2);
+        foreach (MethodParameterInfo paramInfo in methodInfo.MethodParameters)
+        {
+            RenderParameterTypeConversion(paramInfo, depth: 2);
+        }
+        RenderUserMethodInvocation(methodInfo, depth: 2);
         sb.Append(indent);
         sb.AppendLine("}");
     }
@@ -72,19 +125,14 @@ internal sealed class CSharpInteropClassRenderer
         sb.Append(' ');
         sb.Append(methodInfo.Name);
         sb.Append('(');
-        RenderParameters(methodInfo.MethodParameters);
+        RenderMethodParameters(methodInfo.MethodParameters);
         sb.Append(')');
         sb.AppendLine();
     }
 
-    private void RenderMethodBodyContent(MethodInfo methodInfo, int depth)
+    private void RenderUserMethodInvocation(MethodInfo methodInfo, int depth)
     {
         string indent = new(' ', depth * 4);
-    
-        foreach (MethodParameterInfo paramInfo in methodInfo.MethodParameters)
-        {
-            RenderParameterTypeConversion(paramInfo, depth);
-        }
 
         sb.Append(indent);
         if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void)
@@ -115,7 +163,7 @@ internal sealed class CSharpInteropClassRenderer
         if (!paramInfo.Type.RequiresCLRTypeConversion)
             return;
 
-        string indent = new string(' ', depth * 4);
+        string indent = new(' ', depth * 4);
 
         if (paramInfo.Type.IsTaskType)
         {
@@ -135,19 +183,16 @@ internal sealed class CSharpInteropClassRenderer
             sb.Append(indent);
             sb.AppendLine($"Task<{returnTypeInfo.CLRTypeSyntax}> {GetTypedParameterName(paramInfo)} = {tcsVarName}.Task;");
         }
-        // TODO: write some tests to see Arrays in action (update sample with array in parameters for runtime check?).
-        //else if (paramInfo.Type.IsArrayType) {}
+        //else if (paramInfo.Type.IsArrayType) {} // TODO: write some tests to see array type conversion + run in sample / integrations
         else
         {
-            // must be object type
             Debug.Assert(paramInfo.Type.ManagedType == KnownManagedType.Object, "Unexpected non-object type with required type conversion");
             sb.Append(indent);
-            
             sb.AppendLine($"{paramInfo.Type.CLRTypeSyntax} {GetTypedParameterName(paramInfo)} = ({paramInfo.Type.CLRTypeSyntax}){paramInfo.ParameterName};");
         }
     }
 
-    private void RenderParameters(IEnumerable<MethodParameterInfo> parameterInfos)
+    private void RenderMethodParameters(IEnumerable<MethodParameterInfo> parameterInfos)
     {
         if (!parameterInfos.Any())
             return;

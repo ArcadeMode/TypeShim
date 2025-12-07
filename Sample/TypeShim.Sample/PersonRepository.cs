@@ -6,7 +6,7 @@ namespace TypeShim.Sample;
 
 public class PersonRepository
 {
-    private readonly RandomPersonGenerator _generator = new();
+    private readonly RandomEntityGenerator _generator = new();
 
     private List<Person> _people;
     private Dictionary<Person, Person> _partnerDict;
@@ -26,7 +26,7 @@ public class PersonRepository
 
     public IEnumerable<Person> GetPetOwners()
     {
-        return _people.Where(p => p.GetPet() != null);
+        return _people.Where(p => p.Pet != null);
     }
 
     public IEnumerable<Person> GetFriends(Person person)
