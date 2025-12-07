@@ -4,30 +4,26 @@
 </p>
 
 ## Why TypeShim
-.NET on WebAssembly is an awesome technology and the [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0) has some solid primitives to build on top of. Sadly it lacks type information and instance member access. These limitations were what gave rise to the idea of TypeShim.
+TypeShim brings your classes over the .NET ↔︎ JavaScript interop boundary and back. TypeScript interfaces brought to life by generated interop invocations grant you access to instance members of your .NET classes, seamlessly, from TypeScript. 
 
-TypeShim sets out to provide an richer functionality by leveraging code generation with the goal of making the JSImport/JSExport API easy to work with ánd provide type information in TypeScript.
+The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0) lacks type information and instance member access, on top of that its not very ergonomic. These limitations were what gave rise to TypeShim. Fully automated construction of your Wasm interop facade, with a matching TypeScript library to boot.
+
+Excited? It only takes [one command to install](#installing) in your project!
+<sub>and maybe one or two [project settings](#configuration)</sub>
 
 ## At a glance
-- Automated JSExport interop code generation for your convenience
-- Extended type marshalling 
-    - TypeShim shims _your_ classes to the TypeScript world.
-- Compile time type-safety across the interop boundary 
-- Natural [POCO](https://en.wikipedia.org/wiki/Plain_old_CLR_object) member access **in TypeScript**.
-    - JSExport offers only static method access. 
-    - TypeShim extends this with:
-        - instance method access. ✅
-        - instance property access. 🚧
-        - static property access. 🚧
+- Generated JSExport interop code with matching TypeScript shims.
+    - Snappy, you'll hardly notice TypeShim being there.
+    - Tested for correctness
+- [Enriched type marshalling](#enriched-type-support) 
+    - _your_ classes accessible from TypeScript.
+    - Type-safety across the interop boundary.
+- JSExport's static methods extended with:
+    - static property access.
+    - instance method access.
+    - instance property access. 
 - `[JSExport]`/`[JSImport]` work fine in conjunction with TypeShim.
-    - If you need customization, TypeShim won't get in your way
-- TypeShim is compatible with both Wasm publish modes: Selfcontained or JS bundled.
-
-## Check the sample
-
-TODO: brief explanation how to run the sample.
-
-
+    - TypeShim won't get in your way
 
 ## Feature: instance member access from TypeScript
 
@@ -207,13 +203,13 @@ public class Person
 ```
 </details>
 
-## Feature: Enriched Type support
+## <a name="enriched-type-support"></a> Feature: Enriched Type support
 
-TypeShim adds functionality to bring your classes over the interop boundary, as TypeScript interfaces with matching signatures. It also brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. This work is largely completed, but some types are still on the roadmap for support.  Support for generics is limited to `Task` and `[]`. 
+TypeShim brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. This work is largely completed, but some types are still on the roadmap for support.  Support for generics is limited to `Task` and `[]`. 
 
-Every supported type can be used in methods as return and parameter types. When properties get support, they will inherit the existing supported types automatically.
+Every supported type can be used in methods as return and parameter types, they are also supported as property types.
 
-TypeShim aims to broaden its type support by building on top of the .NET Marshalled types. i.e. `Enum` and `IEnumerable` could be supported by leveraging existing `Int32` and `[]` marshalling combined with some generated shimming code. 
+TypeShim aims to broaden its type support by building on top of the .NET Marshalled types. i.e. `Enum` and `IEnumerable` could be supported by leveraging existing `Int32` and `[]` marshalling combined with some generated shimming code. Natively `Task<int[]>` is not supported, leaving the developer to fix this on their own, this is also on the TypeShim roadmap to be converted automatically into marshallable types.
 
 | TypeShim Shimmed Type | Mapped Type | Support | Note |
 |----------------------|-------------|--------|------|
@@ -263,15 +259,21 @@ TypeShim aims to broaden its type support by building on top of the .NET Marshal
 
 *<sub>For `[TSExport]` annotated classes</sub>
 
+## Run the sample
 
-## Installing
+In the Sample...
+
+TODO_EXPLAIN_LAUNCH_SAMPLE
+
+
+## <a name="installing"></a>Installing
 
 To use TypeShim all you have to do is install it directly into your `Microsoft.NET.Sdk.WebAssembly`-powered project.
 ```
 nuget install TypeShim
 ```
 
-## Configuration
+## <a name="configuration"></a>Configuration
 
 TypeShim is configured through MSBuild properties, you may provide these through your `.csproj` file or from the `msbuild`/`dotnet` cli. 
 
