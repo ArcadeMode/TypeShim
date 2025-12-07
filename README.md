@@ -1,20 +1,25 @@
 <h1 align=center tabindex=-1>TypeShim - Typesafe .NET ↔︎ TypeScript interop</h1>
 <p align=center tabindex=-1>
-  <i>Your .NET classes, transparently accessible from TypeScript</i>
+  <i>Your .NET classes, running on Wasm, accessible from TypeScript</i>
 </p>
 
 ## Why TypeShim
-TypeShim brings your classes over the .NET ↔︎ JavaScript interop boundary and back. TypeScript interfaces brought to life by generated interop invocations grant you access to instance members of your .NET classes, seamlessly, from TypeScript. 
+TypeShim brings your classes over the .NET ↔︎ JavaScript interop boundary and back. Breathing life into a TypeScript copy of your classes through generated interop on both the C# and TypeScript side. Bottom line, you get seamless access to your .NET class instances from TypeScript. 
 
-The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0) lacks type information and instance member access, on top of that its not very ergonomic. These limitations were what gave rise to TypeShim. Fully automated construction of your Wasm interop facade, with a matching TypeScript library to boot.
+The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), is not very ergonomic with lacking type information and exclusively static methods to export to JS. You need to learn about type limitations, how to marshall certain types, and frankly, you just wanted to run your C# code in the browser..
 
-Excited? It only takes [one command to install](#installing) in your project!
-<sub>and maybe one or two [project settings](#configuration)</sub>
+Enter: _TypeShim_. No hassle, just straight into the good stuff with generated C# interop ánd TypeScript classes that look and behave _just_ like your C# classes. Drop a `[TSExport]` on your C# class, build and _voilà_ a typescript class you can interact with. Get a class instance from the dotnet runtime and use its methods and properties, just like you wanted. 
 
-## At a glance
+> Fully automated construction of your Wasm interop facade and a matching TypeScript library to boot.
+
+### Getting started
+ It only takes [one command to install](#installing) in your project!
+<sub>and maybe one or two [project settings](#configuration).</sub>
+
+## Features at a glance
 - Generated JSExport interop code with matching TypeScript shims.
-    - Snappy, you'll hardly notice TypeShim being there.
     - Tested for correctness
+    - Snappy, you'll hardly notice TypeShim being there.
 - [Enriched type marshalling](#enriched-type-support) 
     - _your_ classes accessible from TypeScript.
     - Type-safety across the interop boundary.
@@ -45,8 +50,8 @@ Samples below demonstrate the same operations when interfacing with TypeShim gen
   ```js
     public UsingRawJSExport(exports: any) {
         const repository: any = exports.Sample.People.PeopleModule.GetPeopleRepository(); 
-        const alice: any = exports.Sample.People.PersonRepository.GetPerson(repository, 0);
-        const bob: any = exports.Sample.People.PersonRepository.GetPerson(repository, 1);
+        const alice: any = exports.Sample.People.PeopleRepository.GetPerson(repository, 0);
+        const bob: any = exports.Sample.People.PeopleRepository.GetPerson(repository, 1);
         console.log(exports.Sample.People.Person.GetName(alice), exports.Sample.People.Person.GetName(bob)); // prints "Alice", "Bob"
         console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints false
         exports.Sample.People.Person.SetAge(alice, 30);
@@ -54,11 +59,11 @@ Samples below demonstrate the same operations when interfacing with TypeShim gen
     }
   ```
 
-### Easy opt-in to interop from C#.
-TypeShim generates your interop definitions for you at compile time, ensuring up-to-dateness and correctness.
+### Reliable, easy to write and maintain interop from C#.
+Interop methods are clunky, highly repetitive and are error sensitive as you have to keep the JS code in sync with it and lack type safety due to often using types like `object`. TypeShim generates your interop definitions for you at compile time, ensuring up-to-dateness and correctness.
 
 <details>
-    <summary>See the <code>TypeShim</code> C# implementation of <code>PersonRepository</code> and <code>Person</code></summary>
+    <summary>See the <code>TypeShim</code> C# implementation of <code>PeopleRepository</code> and <code>Person</code></summary>
 &nbsp;
 
 TypeShim preserves your type information across the interop boundary.
@@ -111,7 +116,7 @@ public class Person
 </details>
 
 <details>
-  <summary>See the <code>JSExport</code> C# implementation of <code>PersonRepository</code> and <code>Person</code></summary>
+  <summary>See the <code>JSExport</code> C# implementation of <code>PeopleRepository</code> and <code>Person</code></summary>
 &nbsp;
 
 Note the error sensitivity of passing untyped objects across the interop boundary.
@@ -156,8 +161,8 @@ public class PeopleRepository
 
 public class Person
 {
-    internal string Name { get; set; }
-    internal int Age { get; set; }
+    public string Name { get; set; }
+    public int Age { get; set; }
     
     [JSExport]
     [return: JSMarshalAsType<JSType.String>]
@@ -205,11 +210,13 @@ public class Person
 
 ## <a name="enriched-type-support"></a> Feature: Enriched Type support
 
-TypeShim brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. This work is largely completed, but some types are still on the roadmap for support.  Support for generics is limited to `Task` and `[]`. 
+TypeShim enriches the supported types by JSExport by adding _your_ classes to the [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings). Repetitive patterns for type transformation and higher order types that you'd have to lower into the supported types yourself are readily supported and tested in TypeShim.
 
-Every supported type can be used in methods as return and parameter types, they are also supported as property types.
+Ofcourse, TypeShim brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. This work is largely completed, but some types are still on the roadmap for support.  Support for generics is limited to `Task` and `[]`. Every supported type can be used in methods as return and parameter types, they are also supported as property types. 
 
-TypeShim aims to broaden its type support by building on top of the .NET Marshalled types. i.e. `Enum` and `IEnumerable` could be supported by leveraging existing `Int32` and `[]` marshalling combined with some generated shimming code. Natively `Task<int[]>` is not supported, leaving the developer to fix this on their own, this is also on the TypeShim roadmap to be converted automatically into marshallable types.
+> Any type that you're missing can still be brought to JavaScript through JSExport while they're not implemented in TypeShim _yet_, TypeShim and JSExport/JSImport are perfectly usable side-by-side.
+
+TypeShim aims to continue to broaden its type support in order to improve the developer experience of .NET Wasm browser apps. Notably `Task<int[]>` generates compiler error's with JSExport but is within reach to support in TypeShim. Other commonly used types include `Enum` and `IEnumerable`. 
 
 | TypeShim Shimmed Type | Mapped Type | Support | Note |
 |----------------------|-------------|--------|------|
@@ -284,5 +291,11 @@ TypeShim is configured through MSBuild properties, you may provide these through
 | `TypeShim_GeneratedDir`             | `TypeShim`  | Directory path (relative to `IntermediateOutputPath`) for generated `YourClass.Interop.g.cs` files.                                       | `TypeShim`                        |
 | `TypeShim_MSBuildMessagePriority`   | `Normal`    | MSBuild message priority. Set to High for debugging.                                                                                      | `Low`, `Normal`, `High`           |
 
-> Got inspired or have ideas? Feel free to open a discussion or an issue!
+## Contributing
+
+TODO_CONTRIBUTING
+
+---
+
+> Got ideas, found a bug or want more features? Feel free to open a discussion or an issue!
 
