@@ -4,11 +4,9 @@
 </p>
 
 ## Why TypeShim
-TypeShim brings your classes over the .NET ↔︎ JavaScript interop boundary and back. Breathing life into a TypeScript copy of your classes through generated interop on both the C# and TypeScript side. Bottom line, you get seamless access to your .NET class instances from TypeScript. 
+The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), is not very ergonomic with lacking type information and exclusively static methods to export to JS. You need to learn about its type limitations, how to marshall certain types, and frankly, you just wanted to run your C# code in the browser..
 
-The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), is not very ergonomic with lacking type information and exclusively static methods to export to JS. You need to learn about type limitations, how to marshall certain types, and frankly, you just wanted to run your C# code in the browser..
-
-Enter: _TypeShim_. No hassle, just straight into the good stuff with generated C# interop ánd TypeScript classes that look and behave _just_ like your C# classes. Drop a `[TSExport]` on your C# class, build and _voilà_ a typescript class you can interact with. Get a class instance from the dotnet runtime and use its methods and properties, just like you wanted. 
+Enter: _TypeShim_. No hassle, just straight into the good stuff with generated C# interop ánd TypeScript classes that look and behave _just_ like your C# classes. Drop a `[TSExport]` on your C# class, build and _voilà_ a typescript class you can interact with. Get a class instance from the dotnet runtime and use its methods and properties, just like you wanted to do in the first place. 
 
 > Fully automated construction of your Wasm interop facade and a matching TypeScript library to boot.
 
@@ -34,39 +32,13 @@ Enter: _TypeShim_. No hassle, just straight into the good stuff with generated C
 
 Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your wasm browserapp as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-) in order to retrieve its `exports`. 
 
-**TypeShim**
- ```js
-    public UsingTypeShim(exports: AssemblyExports) {
-        const module = new PeopleModule(exports)
-        const alice: Person = module.PeopleRepository.GetPerson(0);
-        const bob: Person = module.PeopleRepository.GetPerson(1);
-        console.log(alice.Name, bob.Name); // prints "Alice", "Bob"
-        console.log(alice.IsOlderThan(bob)) // prints false
-        alice.Age = 30;
-        console.log(alice.IsOlderThan(bob)) // prints true
-    }
-```
-**Raw JSExport**
-  ```js
-    public UsingRawJSExport(exports: any) {
-        const repository: any = exports.Sample.People.PeopleModule.GetPeopleRepository(); 
-        const alice: any = exports.Sample.People.PeopleRepository.GetPerson(repository, 0);
-        const bob: any = exports.Sample.People.PeopleRepository.GetPerson(repository, 1);
-        console.log(exports.Sample.People.Person.GetName(alice), exports.Sample.People.Person.GetName(bob)); // prints "Alice", "Bob"
-        console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints false
-        exports.Sample.People.Person.SetAge(alice, 30);
-        console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints true
-    }
-  ```
 
-### Reliable, easy to write and maintain interop from C#.
-Interop methods are clunky, highly repetitive and are error sensitive as you have to keep the JS code in sync with it and lack type safety due to often using types like `object`. TypeShim generates your interop definitions for you at compile time, ensuring up-to-dateness and correctness.
+### TypeShim
+Preservation of type information across the interop boundary, including instance method and property access.
 
 <details>
     <summary>See the <code>TypeShim</code> C# implementation of <code>PeopleRepository</code> and <code>Person</code></summary>
 &nbsp;
-
-TypeShim preserves your type information across the interop boundary.
 
   ```csharp
 using TypeShim;
@@ -114,6 +86,21 @@ public class Person
 }
 ```
 </details>
+
+ ```js
+public UsingTypeShim(exports: AssemblyExports) {
+    const module = new PeopleModule(exports)
+    const alice: Person = module.PeopleRepository.GetPerson(0);
+    const bob: Person = module.PeopleRepository.GetPerson(1);
+    console.log(alice.Name, bob.Name); // prints "Alice", "Bob"
+    console.log(alice.IsOlderThan(bob)) // prints false
+    alice.Age = 30;
+    console.log(alice.IsOlderThan(bob)) // prints true
+}
+```
+
+### 'Raw' JSExport
+The exact same behavior as the TypeShim sample, with handwritten JSExport.
 
 <details>
   <summary>See the <code>JSExport</code> C# implementation of <code>PeopleRepository</code> and <code>Person</code></summary>
@@ -207,6 +194,18 @@ public class Person
 }
 ```
 </details>
+
+```js
+public UsingRawJSExport(exports: any) {
+    const repository: any = exports.Sample.People.PeopleModule.GetPeopleRepository(); 
+    const alice: any = exports.Sample.People.PeopleRepository.GetPerson(repository, 0);
+    const bob: any = exports.Sample.People.PeopleRepository.GetPerson(repository, 1);
+    console.log(exports.Sample.People.Person.GetName(alice), exports.Sample.People.Person.GetName(bob)); // prints "Alice", "Bob"
+    console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints false
+    exports.Sample.People.Person.SetAge(alice, 30);
+    console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints true
+}
+```
 
 ## <a name="enriched-type-support"></a> Feature: Enriched Type support
 
