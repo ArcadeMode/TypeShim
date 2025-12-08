@@ -22,14 +22,14 @@ internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypeScrip
         sb.AppendLine($"export interface {classNameBuilder.GetInteropInterfaceName(classInfo)} {{");
         foreach (MethodInfo methodInfo in classInfo.Methods)
         {
-            sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(methodInfo.WithoutInstanceParameterTypeInfo())};");
+            sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(methodInfo.WithInteropTypeInfo())};");
         }
         foreach (PropertyInfo propertyInfo in classInfo.Properties)
         {
-            sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(propertyInfo.GetMethod.WithoutInstanceParameterTypeInfo())};");
+            sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(propertyInfo.GetMethod.WithInteropTypeInfo())};");
             if (propertyInfo.SetMethod is MethodInfo setMethod)
             {
-                sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(setMethod.WithoutInstanceParameterTypeInfo())};");
+                sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(setMethod.WithInteropTypeInfo())};");
             }
         }
         sb.AppendLine("}");

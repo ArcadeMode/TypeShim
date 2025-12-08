@@ -39,8 +39,51 @@ internal sealed class InteropTypeInfo
     internal required bool IsTaskType { get; init; }
     internal required bool IsArrayType { get; init; }
     internal required bool IsNullableType { get; init; } //TODO: factor out, terrible modelling. include Array<T?>, Array<T>, T? better.
-    
-    public static InteropTypeInfo CLRVoidTypeInfo = new ()
+
+    /// <summary>
+    /// Transforms this <see cref="InteropTypeInfo"/> into one suitable for interop method signatures.
+    /// </summary>
+    /// <returns></returns>
+    internal InteropTypeInfo AsInteropTypeInfo() 
+    {
+        if (TypeArgument == null && ManagedType == KnownManagedType.Object)
+        {
+            return new InteropTypeInfo
+            {
+                ManagedType = this.ManagedType,
+                JSTypeSyntax = CLRObjectTypeInfo.JSTypeSyntax,
+                InteropTypeSyntax = CLRObjectTypeInfo.InteropTypeSyntax,
+                CLRTypeSyntax = CLRObjectTypeInfo.CLRTypeSyntax,
+                IsTaskType = false,
+                IsArrayType = false,
+                IsNullableType = this.IsNullableType,
+                RequiresCLRTypeConversion = false,
+                TypeArgument = null
+            };
+
+        }
+        else if (TypeArgument?.ManagedType == KnownManagedType.Object)
+        {
+            return new InteropTypeInfo
+            {
+                ManagedType = this.ManagedType,
+                JSTypeSyntax = this.JSTypeSyntax,
+                InteropTypeSyntax = this.InteropTypeSyntax,
+                CLRTypeSyntax = this.CLRTypeSyntax,
+                IsTaskType = this.IsTaskType,
+                IsArrayType = this.IsArrayType,
+                IsNullableType = this.IsNullableType,
+                RequiresCLRTypeConversion = false,
+                TypeArgument = CLRObjectTypeInfo
+            };
+        }
+        else
+        {
+            return this;   
+        }
+    }
+
+    internal static InteropTypeInfo CLRVoidTypeInfo = new ()
     {
         ManagedType = KnownManagedType.Void,
         JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Void"),

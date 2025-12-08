@@ -25,7 +25,7 @@ internal class TypescriptUserClassInterfaceRenderer(ClassInfo classInfo, TypeScr
         foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => !p.IsStatic))
         {
             bool isReadonly = propertyInfo.SetMethod is null;
-            sb.AppendLine($"    {(isReadonly ? "readonly " : string.Empty)}{propertyInfo.Name}: {typeMapper.ToTypeScriptType(propertyInfo.Type.ManagedType, propertyInfo.Type.CLRTypeSyntax)};");
+            sb.AppendLine($"    {(isReadonly ? "readonly " : string.Empty)}{propertyInfo.Name}: {typeMapper.ToTypeScriptType(propertyInfo.Type)};");
         }
         sb.AppendLine("}");
         return sb.ToString();

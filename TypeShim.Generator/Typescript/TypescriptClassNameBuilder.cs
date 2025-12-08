@@ -9,10 +9,12 @@ internal class TypescriptClassNameBuilder(TypeScriptTypeMapper typeMapper)
     internal string GetUserClassProxyName(ClassInfo classInfo) => $"{classInfo.Name}Proxy";
     internal string? GetUserClassProxyName(InteropTypeInfo typeInfo)
     {
-        TypeSyntax innerTypeSyntax = typeMapper.GetTypeFromNullableSyntax(typeMapper.ExtractInnerTypeArgument(typeInfo.CLRTypeSyntax) // extract T from Task<T>/T[] etc.
-        , out _);
-        return typeMapper.IsUserType(innerTypeSyntax)
-        ? $"{typeMapper.ToTypeScriptType(typeInfo.ManagedType, innerTypeSyntax)}Proxy"
+        //TypeSyntax innerTypeSyntax = typeMapper.GetTypeFromNullableSyntax(typeMapper.ExtractInnerTypeArgument(typeInfo.CLRTypeSyntax) // extract T from Task<T>/T[] etc.
+        //, out _);
+
+        InteropTypeInfo targetType = typeInfo.TypeArgument ?? typeInfo;
+        return typeMapper.IsUserType(targetType)
+        ? $"{typeMapper.ToTypeScriptType(targetType)}Proxy"
         : null;
     }
     internal string GetUserClassStaticsName(ClassInfo classInfo) => $"{classInfo.Name}Statics";

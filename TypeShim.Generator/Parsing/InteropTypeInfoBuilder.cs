@@ -14,7 +14,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
         TypeSyntax clrTypeSyntax = SyntaxFactory.ParseTypeName(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
         return parameterMarshallingTypeInfo switch
         {
-            JSSimpleTypeInfo simpleType => BuildSimpleTypeInfo(simpleType, clrTypeSyntax),
+            JSSimpleTypeInfo simpleType => clrTypeSyntax is NullableTypeSyntax ? BuildSimpleNullableTypeInfo(simpleType, clrTypeSyntax) : BuildSimpleTypeInfo(simpleType, clrTypeSyntax),
             JSArrayTypeInfo arrayTypeInfo => BuildArrayTypeInfo(arrayTypeInfo, clrTypeSyntax),
             JSTaskTypeInfo taskTypeInfo => BuildTaskTypeInfo(taskTypeInfo, clrTypeSyntax),
             JSNullableTypeInfo nullableTypeInfo => BuildNullableTypeInfo(nullableTypeInfo, clrTypeSyntax),
@@ -26,7 +26,6 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
 
     private InteropTypeInfo BuildSimpleTypeInfo(JSSimpleTypeInfo simpleTypeInfo, TypeSyntax clrTypeSyntax)
     {
-        // TODO: validate handling of generics
         return new InteropTypeInfo
         {
             ManagedType = simpleTypeInfo.KnownType,
@@ -129,6 +128,32 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
         {
             return typeSymbol is INamedTypeSymbol { ConstructedFrom.SpecialType: SpecialType.System_Nullable_T, TypeArguments.Length: 1 } named
                 ? named.TypeArguments[0]
+                : null;
+        }
+    }
+
+    private InteropTypeInfo BuildSimpleNullableTypeInfo(JSSimpleTypeInfo simpleTypeInfo, TypeSyntax clrTypeSyntax)
+    {
+        ITypeSymbol? innertypeSymbol = GetTypeArgument(typeSymbol) ?? throw new TypeNotSupportedException("Only nullables with one element type are supported");
+        InteropTypeInfo innerTypeInfo = new InteropTypeInfoBuilder(innertypeSymbol).Build();
+
+        return new InteropTypeInfo
+        {
+            ManagedType = simpleTypeInfo.KnownType,
+            JSTypeSyntax = SyntaxFactory.ParseTypeName(GetSimpleJSMarshalAsTypeArgument(simpleTypeInfo.KnownType)),
+            InteropTypeSyntax = SyntaxFactory.NullableType(simpleTypeInfo.Syntax),
+            CLRTypeSyntax = clrTypeSyntax,
+            TypeArgument = innerTypeInfo,
+            RequiresCLRTypeConversion = innerTypeInfo.RequiresCLRTypeConversion,
+            IsTaskType = false,
+            IsArrayType = false,
+            IsNullableType = true
+        };
+
+        static ITypeSymbol? GetTypeArgument(ITypeSymbol typeSymbol)
+        {
+            return typeSymbol.NullableAnnotation == NullableAnnotation.Annotated // mostly indicates a reference type, which is inherently nullable, but is still annotated
+                ? typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated)
                 : null;
         }
     }

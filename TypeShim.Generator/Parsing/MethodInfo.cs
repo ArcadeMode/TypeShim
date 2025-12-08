@@ -20,14 +20,14 @@ internal sealed class MethodInfo
         };
     }
 
-    public MethodInfo WithoutInstanceParameterTypeInfo()
+    public MethodInfo WithInteropTypeInfo()
     {
         return new MethodInfo
         {
             IsStatic = this.IsStatic,
             Name = this.Name,
-            MethodParameters = [.. this.MethodParameters.Select(p => !p.IsInjectedInstanceParameter ? p : p.WithoutTypeInfo())],
-            ReturnType = this.ReturnType,
+            MethodParameters = [.. this.MethodParameters.Select(p => p.WithInteropTypeInfo())],
+            ReturnType = this.ReturnType.AsInteropTypeInfo(),
         };
     }
 }

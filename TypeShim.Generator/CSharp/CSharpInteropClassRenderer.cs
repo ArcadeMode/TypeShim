@@ -121,6 +121,7 @@ internal sealed class CSharpInteropClassRenderer
         {
             sb.Append("async ");
         }
+
         sb.Append(methodInfo.ReturnType.InteropTypeSyntax);
         sb.Append(' ');
         sb.Append(methodInfo.Name);
@@ -156,7 +157,7 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine(";");
     }
 
-    private string GetTypedParameterName(MethodParameterInfo paramInfo) => paramInfo.Type.RequiresCLRTypeConversion ? $"typed_{paramInfo.ParameterName}" : paramInfo.ParameterName;
+    private string GetTypedParameterName(MethodParameterInfo paramInfo) => paramInfo.Type.RequiresCLRTypeConversion ? $"typed_{paramInfo.Name}" : paramInfo.Name;
 
     private void RenderParameterTypeConversion(MethodParameterInfo paramInfo, int depth)
     {
@@ -168,7 +169,7 @@ internal sealed class CSharpInteropClassRenderer
         if (paramInfo.Type.IsTaskType)
         {
             InteropTypeInfo returnTypeInfo = paramInfo.Type.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
-            string tcsVarName = $"{paramInfo.ParameterName}Tcs";
+            string tcsVarName = $"{paramInfo.Name}Tcs";
             sb.Append(indent);
             sb.AppendLine($"TaskCompletionSource<{returnTypeInfo.CLRTypeSyntax}> {tcsVarName} = new();");
             sb.Append(indent);
@@ -188,7 +189,7 @@ internal sealed class CSharpInteropClassRenderer
         {
             Debug.Assert(paramInfo.Type.ManagedType == KnownManagedType.Object, "Unexpected non-object type with required type conversion");
             sb.Append(indent);
-            sb.AppendLine($"{paramInfo.Type.CLRTypeSyntax} {GetTypedParameterName(paramInfo)} = ({paramInfo.Type.CLRTypeSyntax}){paramInfo.ParameterName};");
+            sb.AppendLine($"{paramInfo.Type.CLRTypeSyntax} {GetTypedParameterName(paramInfo)} = ({paramInfo.Type.CLRTypeSyntax}){paramInfo.Name};");
         }
     }
 
@@ -204,7 +205,7 @@ internal sealed class CSharpInteropClassRenderer
             sb.Append(' ');
             sb.Append(parameterInfo.Type.InteropTypeSyntax);
             sb.Append(' ');
-            sb.Append(parameterInfo.ParameterName);
+            sb.Append(parameterInfo.Name);
             sb.Append(", ");
         }
         sb.Length -= 2; // Remove last ", "

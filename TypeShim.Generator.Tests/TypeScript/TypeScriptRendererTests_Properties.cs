@@ -42,9 +42,9 @@ internal class TypeScriptRendererTests_Properties
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript proxy class. Source class: N1.C1
-export class C1Proxy implements C1 {
-  private interop: WasmModuleExports;
-  private instance: object;
+class C1Proxy implements C1 {
+  interop: WasmModuleExports;
+  instance: object;
 
   constructor(instance: object, interop: WasmModuleExports) {
     this.interop = interop;
@@ -104,9 +104,9 @@ export class C1Statics {
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript proxy class. Source class: N1.C1
-export class C1Proxy implements C1 {
-  private interop: WasmModuleExports;
-  private instance: object;
+class C1Proxy implements C1 {
+  interop: WasmModuleExports;
+  instance: object;
 
   constructor(instance: object, interop: WasmModuleExports) {
     this.interop = interop;

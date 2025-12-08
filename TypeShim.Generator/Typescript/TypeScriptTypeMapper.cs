@@ -8,9 +8,9 @@ internal class TypeScriptTypeMapper(IEnumerable<ClassInfo> classInfos)
 {
     private readonly HashSet<string> _userTypeNames = [.. classInfos.Select(ci => ci.Name)];
 
-    public bool IsUserType(TypeSyntax nameHint)
+    public bool IsUserType(InteropTypeInfo typeInfo)
     {
-        return _userTypeNames.Contains(nameHint.ToString());
+        return _userTypeNames.Contains(typeInfo.CLRTypeSyntax.ToString());
     }
 
     public TypeSyntax ExtractInnerTypeArgument(TypeSyntax typeSyntax)
@@ -24,15 +24,16 @@ internal class TypeScriptTypeMapper(IEnumerable<ClassInfo> classInfos)
         };
     }
 
-    public string ToTypeScriptType(KnownManagedType type, TypeSyntax typeSyntax)
+    public string ToTypeScriptType(InteropTypeInfo typeInfo)
     {
-        typeSyntax = GetTypeFromNullableSyntax(typeSyntax, out bool isNullable);
-        if (IsUserType(typeSyntax)) return isNullable ? $"{typeSyntax} | null" : typeSyntax.ToString();
+        if (IsUserType(typeInfo)) return typeInfo.CLRTypeSyntax.ToString(); // write user-defined types to TS as they are defined in C#
+
+        if (typeInfo.IsNullableType) return $"{ToTypeScriptType(typeInfo.TypeArgument ?? throw new ArgumentException("Nullable type must have a type argument"))} | null";
 
         // TODO: handle nullable types properly (i.e. int?[] => Array<int | null>
         // really need to start writing some unit tests...
 
-        return type switch
+        return typeInfo.ManagedType switch
         {
             KnownManagedType.None => "undefined",
             KnownManagedType.Void => "void",
@@ -52,9 +53,9 @@ internal class TypeScriptTypeMapper(IEnumerable<ClassInfo> classInfos)
             KnownManagedType.DateTime => "Date",
             KnownManagedType.DateTimeOffset => "Date",
             KnownManagedType.Nullable => throw new NotImplementedException("Nullable value-types are not yet supported"), // return "something | null" ?
-            KnownManagedType.Task => $"Promise<{ToTypeScriptType(KnownManagedType.Unknown, ExtractInnerTypeArgument(typeSyntax))}>",
+            KnownManagedType.Task => $"Promise<{ToTypeScriptType(typeInfo.TypeArgument ?? typeInfo)}>",
             KnownManagedType.Array or KnownManagedType.ArraySegment or KnownManagedType.Span 
-                => $"Array<{ToTypeScriptType(KnownManagedType.Unknown, ExtractInnerTypeArgument(typeSyntax))}>",
+                => $"Array<{ToTypeScriptType(typeInfo.TypeArgument ?? typeInfo)}>",
             KnownManagedType.Action => "(() => void)",
             KnownManagedType.Function => "Function", // TODO: try map signature ?
             KnownManagedType.Unknown => "any",

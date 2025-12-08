@@ -15,8 +15,8 @@ class PeopleRepository {
             throw new Error("PeopleProvider is null");
         }
         const people: People = await peopleProvider.FetchPeopleAsync();
-        const persons: Person[] = people.All;
-        return persons;
+        this.PrintAgeMethodUsage(people);
+        return people.All;
     }
 
     public async getElderlyPeople(): Promise<Person[]> {
@@ -27,6 +27,13 @@ class PeopleRepository {
         }
         const people: People = await peopleProvider.FetchElderlyPeopleAsync();
         return people.All;
+    }
+
+    private PrintAgeMethodUsage(people: People){
+        const persons: Person[] = people.All;
+        const person1 = persons[(Math.random() * persons.length) | 0];
+        const person2 = persons[(Math.random() * persons.length) | 0];
+        console.log(person1.Name, person1.Age, "isOlderThan", person2.Name, person2.Age, ":", person1.IsOlderThan(person2));
     }
 
     private async getInitializedSampleModule(): Promise<TypeShimSampleModuleStatics> {

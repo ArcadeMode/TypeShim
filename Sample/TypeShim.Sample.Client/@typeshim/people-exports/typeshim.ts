@@ -34,17 +34,18 @@ export interface DogInterop {
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.People
 export interface PeopleInterop {
-    get_All(instance: object): Array<Person>;
+    get_All(instance: object): Array<object>;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.PeopleProvider
 export interface PeopleProviderInterop {
-    FetchPeopleAsync(instance: object): Promise<People>;
-    FetchElderlyPeopleAsync(instance: object): Promise<People>;
+    FetchPeopleAsync(instance: object): Promise<object>;
+    FetchElderlyPeopleAsync(instance: object): Promise<object>;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Person
 export interface PersonInterop {
+    IsOlderThan(instance: object, other: object): boolean;
     AdoptPet(instance: object): void;
     get_Id(instance: object): number;
     set_Id(instance: object, value: number): void;
@@ -52,13 +53,13 @@ export interface PersonInterop {
     set_Name(instance: object, value: string): void;
     get_Age(instance: object): number;
     set_Age(instance: object, value: number): void;
-    get_Pet(instance: object): Dog | null;
-    set_Pet(instance: object, value: Dog | null): void;
+    get_Pet(instance: object): object | null;
+    set_Pet(instance: object, value: object | null): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.TypeShimSampleModule
 export interface TypeShimSampleModuleInterop {
-    get_PeopleProvider(): PeopleProvider | null;
+    get_PeopleProvider(): object | null;
 }
 
 // Auto-generated TypeScript interface. Source class: TypeShim.Sample.Dog
@@ -82,6 +83,7 @@ export interface PeopleProvider {
 
 // Auto-generated TypeScript interface. Source class: TypeShim.Sample.Person
 export interface Person {
+    IsOlderThan(other: Person): boolean;
     AdoptPet(): void;
     Id: number;
     Name: string;
@@ -94,9 +96,9 @@ export interface TypeShimSampleModule {
 }
 
 // Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Dog
-export class DogProxy implements Dog {
-  private interop: WasmModuleExports;
-  private instance: object;
+class DogProxy implements Dog {
+  interop: WasmModuleExports;
+  instance: object;
 
   constructor(instance: object, interop: WasmModuleExports) {
     this.interop = interop;
@@ -143,9 +145,9 @@ export class DogStatics {
 }
 
 // Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.People
-export class PeopleProxy implements People {
-  private interop: WasmModuleExports;
-  private instance: object;
+class PeopleProxy implements People {
+  interop: WasmModuleExports;
+  instance: object;
 
   constructor(instance: object, interop: WasmModuleExports) {
     this.interop = interop;
@@ -169,9 +171,9 @@ export class PeopleStatics {
 }
 
 // Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.PeopleProvider
-export class PeopleProviderProxy implements PeopleProvider {
-  private interop: WasmModuleExports;
-  private instance: object;
+class PeopleProviderProxy implements PeopleProvider {
+  interop: WasmModuleExports;
+  instance: object;
 
   constructor(instance: object, interop: WasmModuleExports) {
     this.interop = interop;
@@ -200,13 +202,18 @@ export class PeopleProviderStatics {
 }
 
 // Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Person
-export class PersonProxy implements Person {
-  private interop: WasmModuleExports;
-  private instance: object;
+class PersonProxy implements Person {
+  interop: WasmModuleExports;
+  instance: object;
 
   constructor(instance: object, interop: WasmModuleExports) {
     this.interop = interop;
     this.instance = instance;
+  }
+
+  public IsOlderThan(other: Person): boolean {
+    const otherInstance = other instanceof PersonProxy ? other.instance : other;
+    return this.interop.TypeShim.Sample.PersonInterop.IsOlderThan(this.instance, otherInstance);
   }
 
   public AdoptPet(): void {
@@ -243,7 +250,8 @@ export class PersonProxy implements Person {
   }
 
   public set Pet(value: Dog | null) {
-    this.interop.TypeShim.Sample.PersonInterop.set_Pet(this.instance, value);
+    const valueInstance = value instanceof DogProxy ? value.instance : value;
+    this.interop.TypeShim.Sample.PersonInterop.set_Pet(this.instance, valueInstance);
   }
 
 }
@@ -258,9 +266,9 @@ export class PersonStatics {
 }
 
 // Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.TypeShimSampleModule
-export class TypeShimSampleModuleProxy implements TypeShimSampleModule {
-  private interop: WasmModuleExports;
-  private instance: object;
+class TypeShimSampleModuleProxy implements TypeShimSampleModule {
+  interop: WasmModuleExports;
+  instance: object;
 
   constructor(instance: object, interop: WasmModuleExports) {
     this.interop = interop;

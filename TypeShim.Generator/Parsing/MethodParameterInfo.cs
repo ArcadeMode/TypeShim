@@ -4,17 +4,17 @@ using TypeShim.Generator.Parsing;
 
 internal class MethodParameterInfo
 { 
-    internal required string ParameterName { get; init; }
+    internal required string Name { get; init; }
     internal required bool IsInjectedInstanceParameter { get; init; }
     internal required InteropTypeInfo Type { get; init; }
 
-    internal MethodParameterInfo WithoutTypeInfo()
+    internal MethodParameterInfo WithInteropTypeInfo()
     {
         return new MethodParameterInfo
         {
-            ParameterName = this.ParameterName,
+            Name = this.Name,
             IsInjectedInstanceParameter = this.IsInjectedInstanceParameter,
-            Type = InteropTypeInfo.CLRObjectTypeInfo,
+            Type = Type.AsInteropTypeInfo(),
         };
     }
 }

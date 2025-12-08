@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 using TypeShim.Generator.Parsing;
 
@@ -63,9 +64,77 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypeScriptM
         sb.AppendLine($"}}");
     }
 
+    
+
+    private void RenderProxyClass(string className, string interopInterfaceName)
+    {
+        string indent = "  ";
+        sb.AppendLine($"// Auto-generated TypeScript proxy class. Source class: {classInfo.Namespace}.{classInfo.Name}");
+
+        sb.AppendLine($"class {className} implements {classInfo.Name} {{");
+        sb.AppendLine($"{indent}interop: {interopInterfaceName};");
+        sb.AppendLine($"{indent}instance: object;");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}constructor(instance: object, interop: {interopInterfaceName}) {{");
+        sb.AppendLine($"{indent}{indent}this.interop = interop;");
+        sb.AppendLine($"{indent}{indent}this.instance = instance;");
+        sb.AppendLine($"{indent}}}");
+        sb.AppendLine();
+
+        foreach (MethodInfo methodInfo in classInfo.Methods.Where(m => !m.IsStatic))
+        {
+            sb.AppendLine($"{indent}public {methodRenderer.RenderMethodSignatureForClass(methodInfo.WithoutInstanceParameter())} {{");
+            RenderProxyInstanceExtraction(indent, methodInfo);
+            RenderInteropInvocation(indent, methodInfo);
+            sb.AppendLine($"{indent}}}");
+            sb.AppendLine();
+        }
+        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => !p.IsStatic))
+        {
+            MethodInfo? getter = propertyInfo.GetMethod;
+            sb.AppendLine($"{indent}public {methodRenderer.RenderPropertyGetterSignatureForClass(getter.WithoutInstanceParameter())} {{");
+            RenderInteropInvocation(indent, getter);
+            sb.AppendLine($"{indent}}}");
+            sb.AppendLine();
+
+            if (propertyInfo.SetMethod is MethodInfo setter)
+            {
+                sb.AppendLine($"{indent}public {methodRenderer.RenderPropertySetterSignatureForClass(setter.WithoutInstanceParameter())} {{");
+                RenderProxyInstanceExtraction(indent, setter);
+                RenderInteropInvocation(indent, setter);
+                sb.AppendLine($"{indent}}}");
+                sb.AppendLine();
+            }
+        }
+        sb.AppendLine($"}}");
+    }
+
+    private void RenderProxyInstanceExtraction(string indent, MethodInfo methodInfo)
+    {
+        foreach (MethodParameterInfo param in methodInfo.MethodParameters.Where(p => p.Type.RequiresCLRTypeConversion && !p.IsInjectedInstanceParameter))
+        {
+            if (classNameBuilder.GetUserClassProxyName(param.Type) is not string proxyClassName)
+            {
+                throw new ArgumentException("All type conversion-requiring types should be user class proxies.");
+            }
+
+            if (param.Type.IsArrayType || param.Type.IsTaskType)
+            {
+                string transformFunction = param.Type.IsArrayType ? "map" : "then";
+                sb.AppendLine($"{indent}{indent}const {GetInteropInvocationVariable(param)} = {param.Name}.{transformFunction}(item => item instanceof {proxyClassName} ? item.instance : item);");
+            }
+            else
+            {
+                // simple or nullable types
+                sb.AppendLine($"{indent}{indent}const {GetInteropInvocationVariable(param)} = {param.Name} instanceof {proxyClassName} ? {param.Name}.instance : {param.Name};");
+            }
+
+        }
+    }
+
     private void RenderInteropInvocation(string indent, MethodInfo methodInfo)
     {
-        string interopInvoke = methodRenderer.RenderMethodCallParametersWithInstanceParameterExpression(methodInfo, "this.instance"); // note: instance parameter will be unused for static methods
+        string interopInvoke = RenderMethodCallParametersWithInstanceParameterExpression(methodInfo, "this.instance"); // note: instance parameter will be unused for static methods
         if (classNameBuilder.GetUserClassProxyName(methodInfo.ReturnType) is string proxyClassName) // user class return type, wrap in proxy
         {
             string optionalAwait = methodInfo.ReturnType.IsTaskType ? "await " : string.Empty;
@@ -87,32 +156,16 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypeScriptM
         }
     }
 
-    //private void RenderPropertyGetter(string indent, PropertyInfo propertyInfo)
-    //{
-    //    MethodInfo methodInfo = propertyInfo.GetMethod;
-    //    sb.AppendLine($"{indent}public get {propertyInfo.Name}(): {propertyInfo.Type} {{");
-    //    RenderInteropInvocation(indent, methodInfo);
-    //    sb.AppendLine($"{indent}}}");
-    //    sb.AppendLine();
-    //}
-
-    //private void RenderPropertySetter(string indent, PropertyInfo propertyInfo)
-    //{
-    //    MethodInfo methodInfo = propertyInfo.GetMethod;
-    //    sb.AppendLine($"{indent}public set {propertyInfo.Name}(): {propertyInfo.Type} {{");
-    //    RenderInteropInvocation(indent, methodInfo);
-    //    sb.AppendLine($"{indent}}}");
-    //    sb.AppendLine();
-    //}
-
-    //private void RenderInteropInvocation(string indent, PropertyInfo propertyInfo)
-    //{
-    //    RenderInteropInvocation(indent, propertyInfo.GetMethod);
-    //    if (propertyInfo.SetMethod is MethodInfo setter)
-    //    {
-    //        RenderInteropInvocation(indent, setter);
-    //    }
-    //}
+    /// <summary>
+    /// Renders only the parameter names for method call, with the same names as defined in the method info.
+    /// Excludes the injected instance parameter if present.
+    /// </summary>
+    /// <param name="methodInfo"></param>
+    /// <returns></returns>
+    internal string RenderMethodCallParametersWithInstanceParameterExpression(MethodInfo methodInfo, string instanceParameterExpression)
+    {
+        return string.Join(", ", methodInfo.MethodParameters.Select(p => p.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(p)));
+    }
 
     private string GetNewProxyExpression(InteropTypeInfo returnTypeInfo, string proxyClassName, string instanceName)
     {
@@ -126,45 +179,9 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypeScriptM
         }
     }
 
-    private void RenderProxyClass(string className, string interopInterfaceName)
+    private string GetInteropInvocationVariable(MethodParameterInfo param)
     {
-        string indent = "  ";
-        sb.AppendLine($"// Auto-generated TypeScript proxy class. Source class: {classInfo.Namespace}.{classInfo.Name}");
-
-        sb.AppendLine($"export class {className} implements {classInfo.Name} {{");
-        sb.AppendLine($"{indent}private interop: {interopInterfaceName};");
-        sb.AppendLine($"{indent}private instance: object;");
-        sb.AppendLine();
-        sb.AppendLine($"{indent}constructor(instance: object, interop: {interopInterfaceName}) {{");
-        sb.AppendLine($"{indent}{indent}this.interop = interop;");
-        sb.AppendLine($"{indent}{indent}this.instance = instance;");
-        sb.AppendLine($"{indent}}}");
-        sb.AppendLine();
-
-        foreach (MethodInfo methodInfo in classInfo.Methods.Where(m => !m.IsStatic))
-        {
-            sb.AppendLine($"{indent}public {methodRenderer.RenderMethodSignatureForClass(methodInfo.WithoutInstanceParameter())} {{");
-            RenderInteropInvocation(indent, methodInfo);
-            sb.AppendLine($"{indent}}}");
-            sb.AppendLine();
-        }
-        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => !p.IsStatic))
-        {
-            MethodInfo? getter = propertyInfo.GetMethod;
-            sb.AppendLine($"{indent}public {methodRenderer.RenderPropertyGetterSignatureForClass(getter.WithoutInstanceParameter())} {{");
-            RenderInteropInvocation(indent, getter);
-            sb.AppendLine($"{indent}}}");
-            sb.AppendLine();
-
-            if (propertyInfo.SetMethod is MethodInfo setter)
-            {
-                sb.AppendLine($"{indent}public {methodRenderer.RenderPropertySetterSignatureForClass(setter.WithoutInstanceParameter())} {{");
-                RenderInteropInvocation(indent, setter);
-                sb.AppendLine($"{indent}}}");
-                sb.AppendLine();
-            }
-        }
-        sb.AppendLine($"}}");
+        return param.Type.RequiresCLRTypeConversion ? $"{param.Name}Instance" : param.Name;
     }
 
     private string ResolveInteropMethodAccessor(ClassInfo classInfo, MethodInfo methodInfo)

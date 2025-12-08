@@ -12,7 +12,7 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
         {
             yield return new MethodParameterInfo
             {
-                ParameterName = "instance",
+                Name = "instance",
                 IsInjectedInstanceParameter = true,
                 Type = new InteropTypeInfoBuilder(classSymbol).Build()
             };
@@ -22,7 +22,7 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
         {
             yield return new MethodParameterInfo
             {
-                ParameterName = parameterSymbol.Name,
+                Name = parameterSymbol.Name,
                 IsInjectedInstanceParameter = false,
                 Type = new InteropTypeInfoBuilder(parameterSymbol.Type).Build()
             };
