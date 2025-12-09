@@ -3,6 +3,10 @@ name: Validate
 on:
   pull_request:
 
+permissions:
+  checks: write
+  pull-requests: write
+
 jobs:
   build-and-test:
     name: 🔎 Test Solution
@@ -29,8 +33,9 @@ jobs:
           --no-build 
           --verbosity normal
           --logger "trx;LogFileName=test-results.trx"
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: (!cancelled())
         with:
-          name: test-results
-          path: '**/*.trx'
+          files: |
+            **/*.trx
