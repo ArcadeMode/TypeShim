@@ -5,7 +5,7 @@ using TypeShim;
 
 namespace TypeShim.Sample;
 
-[TsExport]
+[TSExport]
 public class Person
 {
     public int Id { get; set; }

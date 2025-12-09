@@ -5,7 +5,7 @@ using TypeShim;
 
 namespace TypeShim.Sample;
 
-[TsExport]
+[TSExport]
 public class PeopleProvider(PeopleApiClient _apiClient)
 {
     private static Person[]? AllPeople;

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace TypeShim.Generator.Parsing;
 
-internal sealed class TsExportAnnotatedClassFinder
+internal sealed class TSExportAnnotatedClassFinder
 {
     internal static IEnumerable<INamedTypeSymbol> FindLabelledClassSymbols(SemanticModel semanticModel, SyntaxNode root)
     {
@@ -17,7 +17,7 @@ internal sealed class TsExportAnnotatedClassFinder
                 continue;
             }
 
-            if (symbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TsExportAttribute" or "TsExport"))
+            if (symbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSExportAttribute" or "TSExport"))
             {
                 //TODO: add verbosity argument and use with ILogger
                 //Console.WriteLine($"TsExport: {symbol.ToDisplayString()}");
