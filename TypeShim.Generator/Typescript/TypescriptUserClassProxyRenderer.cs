@@ -18,53 +18,11 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypeScriptM
         string interopInterfaceName = classNameBuilder.GetModuleInteropClassName();
         RenderProxyClass(proxyClassName, interopInterfaceName);
 
-
-        string staticsClassName = classNameBuilder.GetUserClassStaticsName(classInfo);
-        RenderStaticsClass(staticsClassName, interopInterfaceName);
+        //BEEPBOOP
+        //string staticsClassName = classNameBuilder.GetUserClassStaticsName(classInfo);
+        //RenderStaticsClass(staticsClassName, interopInterfaceName);
         return sb.ToString();
     }
-
-    private void RenderStaticsClass(string className, string interopInterfaceName)
-    {
-        string indent = "  ";
-        sb.AppendLine($"// Auto-generated TypeScript statics class. Source class: {classInfo.Namespace}.{classInfo.Name}");
-        
-        sb.AppendLine($"export class {className} {{");
-        sb.AppendLine($"{indent}private interop: {interopInterfaceName};");
-        sb.AppendLine();
-        sb.AppendLine($"{indent}constructor(interop: {interopInterfaceName}) {{");
-        sb.AppendLine($"{indent}{indent}this.interop = interop;");
-        sb.AppendLine($"{indent}}}");
-        sb.AppendLine();
-        foreach (MethodInfo methodInfo in classInfo.Methods.Where(m => m.IsStatic))
-        {
-            sb.AppendLine($"{indent}public {methodRenderer.RenderMethodSignatureForClass(methodInfo)} {{");
-            RenderInteropInvocation(indent, methodInfo);
-
-            sb.AppendLine($"{indent}}}");
-            sb.AppendLine();
-        }
-
-        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => p.IsStatic))
-        {
-            MethodInfo? getter = propertyInfo.GetMethod;
-            sb.AppendLine($"{indent}public {methodRenderer.RenderPropertyGetterSignatureForClass(getter.WithoutInstanceParameter())} {{");
-            RenderInteropInvocation(indent, getter);
-            sb.AppendLine($"{indent}}}");
-            sb.AppendLine();
-
-            if (propertyInfo.SetMethod is MethodInfo setter)
-            {
-                sb.AppendLine($"{indent}public {methodRenderer.RenderPropertySetterSignatureForClass(setter.WithoutInstanceParameter())} {{");
-                RenderInteropInvocation(indent, setter);
-                sb.AppendLine($"{indent}}}");
-                sb.AppendLine();
-            }
-        }
-        sb.AppendLine($"}}");
-    }
-
-    
 
     private void RenderProxyClass(string className, string interopInterfaceName)
     {
@@ -187,10 +145,5 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypeScriptM
     private string ResolveInteropMethodAccessor(ClassInfo classInfo, MethodInfo methodInfo)
     {
         return $"{classInfo.Namespace}.{classNameBuilder.GetInteropInterfaceName(classInfo)}.{methodInfo.Name}";
-    }
-
-    private string ResolveInteropPropertyAccessor(ClassInfo classInfo, PropertyInfo propertyInfo)
-    {
-        return $"{classInfo.Namespace}.{classNameBuilder.GetInteropInterfaceName(classInfo)}.{propertyInfo.Name}";
     }
 }

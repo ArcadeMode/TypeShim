@@ -23,7 +23,7 @@ internal class TypeScriptMethodRenderer(TypeScriptTypeMapper typeMapper)
     }
 
     internal string RenderMethodSignatureForInterface(MethodInfo methodInfo)
-    {//BEEPBOOP
+    {
         return $"{methodInfo.Name}({RenderMethodParameters(methodInfo)}): {typeMapper.ToTypeScriptType(methodInfo.ReturnType)}";
     }
 

@@ -4,6 +4,10 @@ namespace TypeShim.Generator.Parsing;
 
 internal sealed class ClassInfo
 {
+    /// <summary>
+    /// Whether the class is marked as a TSModule, else it is a TSExport class.
+    /// </summary>
+    internal required bool IsModule { get; init; }
     internal required string Namespace { get; init; }
     internal required string Name { get; init; }
     internal required InteropTypeInfo Type { get; init; }

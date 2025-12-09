@@ -1,15 +1,15 @@
-import { WasmModuleExports, WasmModule, People, Person, TypeShimSampleModuleStatics, PeopleProvider } from '@typeshim/people-exports';
+import { People, Person, PeopleProvider, TypeShimSampleModule, AssemblyExports } from '@typeshim/people-exports';
 
 class PeopleRepository {
 
-    private wasmModulePromise: Promise<TypeShimSampleModuleStatics>;
+    private wasmModulePromise: Promise<TypeShimSampleModule>;
 
     constructor() {
         this.wasmModulePromise = this.getInitializedSampleModule();
     }
 
     public async getAllPeople(): Promise<Person[]> {
-        const sampleModule: TypeShimSampleModuleStatics = await this.wasmModulePromise;
+        const sampleModule: TypeShimSampleModule = await this.wasmModulePromise;
         const peopleProvider: PeopleProvider | null = sampleModule.PeopleProvider;
         if (!peopleProvider) {
             throw new Error("PeopleProvider is null");
@@ -20,7 +20,7 @@ class PeopleRepository {
     }
 
     public async getElderlyPeople(): Promise<Person[]> {
-        const sampleModule: TypeShimSampleModuleStatics = await this.wasmModulePromise;
+        const sampleModule: TypeShimSampleModule = await this.wasmModulePromise;
         const peopleProvider: PeopleProvider | null = sampleModule.PeopleProvider;
         if (!peopleProvider) {
             throw new Error("PeopleProvider is null");
@@ -36,17 +36,14 @@ class PeopleRepository {
         console.log(person1.Name, person1.Age, "isOlderThan", person2.Name, person2.Age, ":", person1.IsOlderThan(person2));
     }
 
-    private async getInitializedSampleModule(): Promise<TypeShimSampleModuleStatics> {
+    private async getInitializedSampleModule(): Promise<TypeShimSampleModule> {
         const wasmModuleStarter = (window as any).wasmModuleStarter;
         if (!wasmModuleStarter) {
             throw new Error("wasmModuleStarter not found on window. Ensure dotnet-start.js is loaded.");
         }
 
-        const exports: WasmModuleExports = await wasmModuleStarter.exports;
-        const wasmModule = new WasmModule(exports);
-
-        const sampleModule: TypeShimSampleModuleStatics = wasmModule.TypeShimSampleModule;
-        return sampleModule;
+        const exports: AssemblyExports = await wasmModuleStarter.exports;
+        return new TypeShimSampleModule(exports);
     }
 }
 

@@ -17,7 +17,7 @@ internal sealed class TSExportAnnotatedClassFinder
                 continue;
             }
 
-            if (symbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSExportAttribute" or "TSExport"))
+            if (symbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSExportAttribute" or "TSExport" or "TSModuleAttribute" or "TSModule"))
             {
                 //TODO: add verbosity argument and use with ILogger
                 //Console.WriteLine($"TsExport: {symbol.ToDisplayString()}");
