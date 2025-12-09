@@ -16,7 +16,7 @@ internal class CSharpInteropClassRendererTests_SystemStringParameterType
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public static void M1(string p1)
@@ -58,7 +58,7 @@ public partial class C1Interop
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public void M1(string p1)

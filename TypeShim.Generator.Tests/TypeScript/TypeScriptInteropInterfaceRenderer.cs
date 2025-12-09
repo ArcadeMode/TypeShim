@@ -18,7 +18,7 @@ internal class TypeScriptInteropInterfaceRenderer
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class UserClass
             {
                 public int Id { get; set; }
@@ -29,7 +29,7 @@ internal class TypeScriptInteropInterfaceRenderer
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public void DoStuff(UserClass? u) {}
@@ -72,7 +72,7 @@ export interface C1Interop {
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public void DoStuff({{csType}} u) {}

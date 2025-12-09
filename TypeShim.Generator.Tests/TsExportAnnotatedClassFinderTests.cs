@@ -32,7 +32,7 @@ public class TSExportAnnotatedClassFinderTests
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(@"
             using System;
 
-            [TsExport]
+            [TSExport]
             public class SampleClass
             {
                 public static async Task<object> SampleMethod(object param1, int param2)
@@ -52,7 +52,7 @@ public class TSExportAnnotatedClassFinderTests
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(@"
             using System;
-            [TsExport]
+            [TSExport]
             public class SampleClass
             {
                 public static async Task<object> SampleMethod(object param1, int param2)
@@ -60,7 +60,7 @@ public class TSExportAnnotatedClassFinderTests
                     return await Task.FromResult(param1);
                 }
             }
-            [TsExportAttribute]
+            [TSExportAttribute]
             public class SampleClass2
             {
                 public static async Task<object> SampleMethod(object param1, int param2)

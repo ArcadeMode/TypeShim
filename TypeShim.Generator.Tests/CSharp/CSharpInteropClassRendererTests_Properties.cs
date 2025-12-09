@@ -16,7 +16,7 @@ internal class CSharpInteropClassRendererTests_Properties
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public {{typeExpression}} P1 { get; set; }
@@ -64,7 +64,7 @@ public partial class C1Interop
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class MyClass
             {
                 public void M1()
@@ -77,7 +77,7 @@ public partial class C1Interop
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public MyClass P1 { get; set; }
@@ -125,7 +125,7 @@ public partial class C1Interop
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class MyClass
             {
                 public void M1()
@@ -138,7 +138,7 @@ public partial class C1Interop
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public MyClass? P1 { get; set; }

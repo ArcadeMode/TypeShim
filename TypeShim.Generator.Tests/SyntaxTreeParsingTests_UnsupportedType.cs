@@ -27,7 +27,7 @@ internal class SyntaxTreeParsingTests_UnsupportedType
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public static {{typeExpression}} M1()
@@ -63,7 +63,7 @@ internal class SyntaxTreeParsingTests_UnsupportedType
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public static Task<{{typeExpression}}> M1()
@@ -105,7 +105,7 @@ internal class SyntaxTreeParsingTests_UnsupportedType
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public static {{typeExpression}}[] M1()

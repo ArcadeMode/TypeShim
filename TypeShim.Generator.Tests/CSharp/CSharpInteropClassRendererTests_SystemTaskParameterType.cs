@@ -31,7 +31,7 @@ internal class CSharpInteropClassRendererTests_SystemTaskParameterType
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public static void M1(Task<{{typeExpression}}> task)
@@ -74,7 +74,7 @@ public partial class C1Interop
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class MyClass
             {
                 public void M1()
@@ -87,7 +87,7 @@ public partial class C1Interop
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public static void M1(Task<MyClass> task)
@@ -138,7 +138,7 @@ public partial class C1Interop
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class MyClass
             {
                 public void M1()
@@ -151,7 +151,7 @@ public partial class C1Interop
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public static void M1(Task<MyClass> task)
@@ -200,7 +200,7 @@ public partial class C1Interop
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public static void M1(Task<{{typeName}}> task)

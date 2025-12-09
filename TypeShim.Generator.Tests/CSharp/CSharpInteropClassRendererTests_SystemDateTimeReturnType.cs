@@ -17,7 +17,7 @@ internal class CSharpInteropClassRendererTests_SystemDateTimeReturnType
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public static {{typeName}} M1()
@@ -59,7 +59,7 @@ public partial class C1Interop
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public {{typeName}} M1()

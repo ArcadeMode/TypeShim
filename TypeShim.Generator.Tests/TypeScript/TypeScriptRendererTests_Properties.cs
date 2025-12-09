@@ -20,7 +20,7 @@ internal class TypeScriptRendererTests_Properties
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public {{typeExpression}} P1 { get; set; }
@@ -83,7 +83,7 @@ export class C1Statics {
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public static {{typeExpression}} P1 { get; set; }
@@ -146,7 +146,7 @@ export class C1Statics {
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public {{typeExpression}} P1 { get; set; }
@@ -190,7 +190,7 @@ export interface C1 {
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public static {{typeExpression}} P1 { get; set; }

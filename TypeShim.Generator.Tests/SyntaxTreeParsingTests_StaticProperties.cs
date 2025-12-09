@@ -16,7 +16,7 @@ internal class SyntaxTreeParsingTests_StaticProperties
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public static int P1 { get; set; }

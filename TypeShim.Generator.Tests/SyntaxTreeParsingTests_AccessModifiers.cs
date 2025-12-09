@@ -16,7 +16,7 @@ internal class SyntaxTreeParsingTests_AccessModifiers
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 internal static int M1()
@@ -60,7 +60,7 @@ internal class SyntaxTreeParsingTests_AccessModifiers
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 internal static int P1 { get; set; }
@@ -86,7 +86,7 @@ internal class SyntaxTreeParsingTests_AccessModifiers
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
-            [TsExport]
+            [TSExport]
             public class C1
             {
                 public static int P1 { get; private set; }
