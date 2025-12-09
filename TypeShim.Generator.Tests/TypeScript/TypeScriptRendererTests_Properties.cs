@@ -44,10 +44,10 @@ internal class TypeScriptRendererTests_Properties
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript proxy class. Source class: N1.C1
 class C1Proxy implements C1 {
-  interop: WasmModuleExports;
+  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: WasmModuleExports) {
+  constructor(instance: object, interop: AssemblyExports) {
     this.interop = interop;
     this.instance = instance;
   }
@@ -61,15 +61,6 @@ class C1Proxy implements C1 {
   }
 
 }
-// Auto-generated TypeScript statics class. Source class: N1.C1
-export class C1Statics {
-  private interop: WasmModuleExports;
-
-  constructor(interop: WasmModuleExports) {
-    this.interop = interop;
-  }
-
-}
 
 """.Replace("{{typeScriptType}}", typeScriptType)));
     }
@@ -77,7 +68,7 @@ export class C1Statics {
     [TestCase("string", "string")]
     [TestCase("double", "number")]
     [TestCase("bool", "boolean")]
-    public void TypeScriptUserClassStatics_StaticProperty_GeneratesGetAndSetFunctions(string typeExpression, string typeScriptType)
+    public void TypeScriptUserClassProxy_StaticProperty_GeneratesNothing(string typeExpression, string typeScriptType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -107,29 +98,12 @@ export class C1Statics {
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript proxy class. Source class: N1.C1
 class C1Proxy implements C1 {
-  interop: WasmModuleExports;
+  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: WasmModuleExports) {
+  constructor(instance: object, interop: AssemblyExports) {
     this.interop = interop;
     this.instance = instance;
-  }
-
-}
-// Auto-generated TypeScript statics class. Source class: N1.C1
-export class C1Statics {
-  private interop: WasmModuleExports;
-
-  constructor(interop: WasmModuleExports) {
-    this.interop = interop;
-  }
-
-  public get P1(): {{typeScriptType}} {
-    return this.interop.N1.C1Interop.get_P1();
-  }
-
-  public set P1(value: {{typeScriptType}}) {
-    this.interop.N1.C1Interop.set_P1(value);
   }
 
 }
@@ -190,8 +164,8 @@ export interface C1 {
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TSExport]
-            public class C1
+            [TSModule]
+            public static class C1
             {
                 public static {{typeExpression}} P1 { get; set; }
                 public static {{typeExpression}} P2 { get; init; }
@@ -216,17 +190,41 @@ export interface C1 {
             HierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], classNameBuilder),
         };
 
-        string interopClass = new TypescriptUserModuleClassRenderer(moduleInfo, classNameBuilder).Render();
+        string interopClass = new TypescriptUserModuleClassRenderer(classInfo, methodRenderer, classNameBuilder).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-export class WasmModule {
-  private interop: WasmModuleExports
-  constructor(interop: WasmModuleExports) {
+        Assert.That(interopClass, Is.EqualTo("""
+// Auto-generated TypeShim TSModule class. Source class: N1.C1
+export class C1 {
+  private interop: AssemblyExports;
+
+  constructor(interop: AssemblyExports) {
     this.interop = interop;
   }
-  public get C1(): C1Statics {
-    return new C1Statics(this.interop);
+
+  public get P1(): {{typeScriptType}} {
+    return this.interop.N1.C1Interop.get_P1();
   }
+
+  public set P1(value: {{typeScriptType}}) {
+    this.interop.N1.C1Interop.set_P1(value);
+  }
+
+  public get P2(): {{typeScriptType}} {
+    return this.interop.N1.C1Interop.get_P2();
+  }
+
+  public set P2(value: {{typeScriptType}}) {
+    this.interop.N1.C1Interop.set_P2(value);
+  }
+
+  public get P3(): {{typeScriptType}} {
+    return this.interop.N1.C1Interop.get_P3();
+  }
+
+  public get P4(): {{typeScriptType}} {
+    return this.interop.N1.C1Interop.get_P4();
+  }
+
 }
 
 """.Replace("{{typeScriptType}}", typeScriptType)));

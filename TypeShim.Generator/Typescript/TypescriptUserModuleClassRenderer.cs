@@ -22,7 +22,7 @@ internal class TypescriptUserModuleClassRenderer(ClassInfo moduleClassInfo, Type
     private void RenderModuleClass(string className, string interopInterfaceName)
     {
         string indent = "  ";
-        sb.AppendLine($"// Auto-generated TypeScript statics class. Source class: {moduleClassInfo.Namespace}.{moduleClassInfo.Name}");
+        sb.AppendLine($"// Auto-generated TypeShim TSModule class. Source class: {moduleClassInfo.Namespace}.{moduleClassInfo.Name}");
 
         sb.AppendLine($"export class {className} {{");
         sb.AppendLine($"{indent}private interop: {interopInterfaceName};");
