@@ -17,7 +17,7 @@
     <Version>0.0.1</Version>
     <Authors>ArcadeMode</Authors>
     <Product>TypeShim</Product>
-    <Description>WASM CSharp - TypeScript interop with static ánd instance members.</Description>
+    <Description>Typesafe .NET ↔︎ TypeScript interop</Description>
     <PackageTags>wasm, csharp, typescript, interop, generated</PackageTags>
     <RepositoryUrl>https://github.com/ArcadeMode/TypeShim</RepositoryUrl>
     <PackageProjectUrl>https://github.com/ArcadeMode/TypeShim</PackageProjectUrl>
