@@ -1,5 +1,5 @@
 ﻿namespace TypeShim;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class TsExportAttribute : Attribute {
+public class TSExportAttribute : Attribute {
 }

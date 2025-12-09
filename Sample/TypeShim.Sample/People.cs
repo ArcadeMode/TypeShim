@@ -2,7 +2,7 @@
 
 namespace TypeShim.Sample;
 
-[TsExport]
+[TSExport]
 public class People(Person[] people)
 {
     public Person[] All => people;

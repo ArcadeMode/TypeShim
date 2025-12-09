@@ -3,7 +3,7 @@ using TypeShim;
 
 namespace TypeShim.Sample;
 
-[TsExport]
+[TSExport]
 public class Dog
 {
     public required string Name { get; set; }

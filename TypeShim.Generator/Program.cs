@@ -12,7 +12,7 @@ ProgramArguments parsedArgs = ProgramArguments.Parse(args);
 CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation(parsedArgs.CsFileInfos.Select(csFile => csFile.SyntaxTree));
 
 List<ClassInfo> classInfos = [.. parsedArgs.CsFileInfos
-    .SelectMany(fileInfo => TsExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(fileInfo.SyntaxTree), fileInfo.SyntaxTree.GetRoot()))
+    .SelectMany(fileInfo => TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(fileInfo.SyntaxTree), fileInfo.SyntaxTree.GetRoot()))
     .Select(classSymbol => new ClassInfoBuilder(classSymbol).Build())
     .Where(ci => ci.Methods.Any() || ci.Properties.Any())]; // dont bother with empty classes
 
