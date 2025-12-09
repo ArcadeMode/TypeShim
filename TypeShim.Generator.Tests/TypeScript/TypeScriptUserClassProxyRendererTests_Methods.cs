@@ -11,6 +11,7 @@ internal class TypeScriptUserClassProxyRendererTests_Methods
 {
     [TestCase("string", "string")]
     [TestCase("double", "number")]
+    [TestCase("bool", "boolean")]
     public void TypeScriptUserClassProxy_InstanceMethod_GeneratesSimpleFunction(string typeExpression, string typeScriptType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""

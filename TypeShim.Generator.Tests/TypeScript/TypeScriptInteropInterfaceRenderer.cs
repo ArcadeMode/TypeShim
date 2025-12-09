@@ -62,4 +62,44 @@ export interface C1Interop {
 
 """));
     }
+
+    [TestCase("bool", "boolean")]
+    [TestCase("int", "number")]
+    [TestCase("string", "string")]
+    public void TypeScriptInteropInterfaceRenderer_InstanceMethod_WithPrimitiveParameterType_RendersJSType(string csType, string tsType)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TsExport]
+            public class C1
+            {
+                public void DoStuff({{csType}} u) {}
+            }
+        """.Replace("{{csType}}", csType));
+
+        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
+        List<INamedTypeSymbol> exportedClasses = [
+            ..TsExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot()),
+        ];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo]);
+        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
+        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+
+        string interopClass = new TypescriptInteropInterfaceRenderer(classInfo, methodRenderer, classNameBuilder).Render();
+
+        Assert.That(interopClass, Is.EqualTo("""    
+// Auto-generated TypeScript interop interface. Source class: N1.C1
+export interface C1Interop {
+    DoStuff(instance: object, u: {{tsType}}): void;
+}
+
+""".Replace("{{tsType}}", tsType)));
+    }
 }

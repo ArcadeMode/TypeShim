@@ -13,6 +13,7 @@ internal class TypeScriptRendererTests_Properties
 {
     [TestCase("string", "string")]
     [TestCase("double", "number")]
+    [TestCase("bool", "boolean")]
     public void TypeScriptUserClassProxy_InstanceProperty_GeneratesGetAndSetFunctions(string typeExpression, string typeScriptType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -75,6 +76,7 @@ export class C1Statics {
 
     [TestCase("string", "string")]
     [TestCase("double", "number")]
+    [TestCase("bool", "boolean")]
     public void TypeScriptUserClassStatics_StaticProperty_GeneratesGetAndSetFunctions(string typeExpression, string typeScriptType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -137,6 +139,7 @@ export class C1Statics {
 
     [TestCase("string", "string")]
     [TestCase("double", "number")]
+    [TestCase("bool", "boolean")]
     public void TypeScriptUserClassInterface_InstanceProperty_GeneratesGetAndSetFunctions(string typeExpression, string typeScriptType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -180,6 +183,7 @@ export interface C1 {
 
     [TestCase("string", "string")]
     [TestCase("double", "number")]
+    [TestCase("bool", "boolean")]
     public void TypeScriptUserModuleClass_StaticProperty_GeneratesGetAndSetFunctions(string typeExpression, string typeScriptType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""

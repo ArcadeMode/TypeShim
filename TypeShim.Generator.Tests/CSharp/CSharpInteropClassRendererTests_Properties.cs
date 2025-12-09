@@ -9,6 +9,7 @@ internal class CSharpInteropClassRendererTests_Properties
 {
     [TestCase("string", "string", "JSType.String")]
     [TestCase("double", "double", "JSType.Number")]
+    [TestCase("bool", "bool", "JSType.Boolean")]
     public void CSharpInteropClass_InstanceProperty_GeneratesGetAndSetFunctions(string typeExpression, string interopTypeExpression, string jsType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""

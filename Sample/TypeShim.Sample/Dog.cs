@@ -12,4 +12,8 @@ public class Dog
 
     public string Bark() => new[] { "bark", "yip", "woof", "arf", "growl", "howl", "whine", "snarl" }[Age % 8];
 
+    public int GetAge(bool asHumanYears)
+    {
+        return asHumanYears ? Age * 7 : Age;
+    } 
 }

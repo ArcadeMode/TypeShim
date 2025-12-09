@@ -36,8 +36,8 @@ export const PersonCard: React.FC<PersonCardProps> = ({ initPerson }) => {
             color: '#1e3a8a',
             fontSize: '0.75rem',
             border: '1px solid #cfe0ff'
-          }}>
-            Pet: {pet.Name} ({pet.Breed}) - {pet.Bark()}
+          }} title={`Pet: ${pet.Name} (Breed: ${pet.Breed})`}>
+            Pet: {pet.Name} {pet.GetAge(false)} years/{pet.GetAge(true)} years ({pet.Breed}) - {pet.Bark()}
           </span>
         </div>
       )}

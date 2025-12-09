@@ -24,6 +24,7 @@ export class WasmModule {
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Dog
 export interface DogInterop {
     Bark(instance: object): string;
+    GetAge(instance: object, asHumanYears: boolean): number;
     get_Name(instance: object): string;
     set_Name(instance: object, value: string): void;
     get_Breed(instance: object): string;
@@ -65,6 +66,7 @@ export interface TypeShimSampleModuleInterop {
 // Auto-generated TypeScript interface. Source class: TypeShim.Sample.Dog
 export interface Dog {
     Bark(): string;
+    GetAge(asHumanYears: boolean): number;
     Name: string;
     Breed: string;
     Age: number;
@@ -107,6 +109,10 @@ class DogProxy implements Dog {
 
   public Bark(): string {
     return this.interop.TypeShim.Sample.DogInterop.Bark(this.instance);
+  }
+
+  public GetAge(asHumanYears: boolean): number {
+    return this.interop.TypeShim.Sample.DogInterop.GetAge(this.instance, asHumanYears);
   }
 
   public get Name(): string {
