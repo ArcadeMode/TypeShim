@@ -38,7 +38,7 @@ internal class CSharpInteropClassRendererTests_SystemTaskReturnType
         """.Replace("{{typeExpression}}", typeExpression));
 
         CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TsExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
+        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
@@ -94,7 +94,7 @@ public partial class C1Interop
         """);
 
         CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([userClass, syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TsExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
+        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.Last();
 
@@ -150,7 +150,7 @@ public partial class C1Interop
         """);
 
         CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([userClass, syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TsExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
+        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.Last();
 
@@ -194,7 +194,7 @@ public partial class C1Interop
             }
         """.Replace("{{typeName}}", typeName).Replace("{{objectCreation}}", objectCreation));
         CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TsExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
+        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.Last();
 

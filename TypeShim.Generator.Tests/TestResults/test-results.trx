@@ -327,7 +327,7 @@
     </UnitTest>
     <UnitTest name="ClassSyntax_WithoutTsExportAttribute_DoesNot_GetProcessed" storage="c:\users\marcd\source\repos\dotnetwasmreact\typeshim.generator.tests\bin\debug\net10.0\typeshim.generator.tests.dll" id="08680473-b045-5909-fcaa-a8bc8c71f533">
       <Execution id="fec640be-3e1f-4882-8183-f6f1d984fe7d" />
-      <TestMethod codeBase="C:\Users\marcd\source\repos\DotNetWasmReact\TypeShim.Generator.Tests\bin\Debug\net10.0\TypeShim.Generator.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="TypeShim.Generator.Tests.TsExportAnnotatedClassFinderTests" name="ClassSyntax_WithoutTsExportAttribute_DoesNot_GetProcessed" />
+      <TestMethod codeBase="C:\Users\marcd\source\repos\DotNetWasmReact\TypeShim.Generator.Tests\bin\Debug\net10.0\TypeShim.Generator.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="TypeShim.Generator.Tests.TSExportAnnotatedClassFinderTests" name="ClassSyntax_WithoutTsExportAttribute_DoesNot_GetProcessed" />
     </UnitTest>
     <UnitTest name="CSharpInteropClass_StaticMethod_HasJSTypeNumber_ForNumericReturnType(&quot;long&quot;,&quot;long&quot;)" storage="c:\users\marcd\source\repos\dotnetwasmreact\typeshim.generator.tests\bin\debug\net10.0\typeshim.generator.tests.dll" id="8f45e682-823e-fac8-36da-fb299a51540b">
       <Execution id="809b5fde-f89a-4a45-ac9b-ee2be6026732" />
@@ -827,7 +827,7 @@
     </UnitTest>
     <UnitTest name="ClassSyntax_WithTsExportAttribute_Do_GetProcessed_Multiple" storage="c:\users\marcd\source\repos\dotnetwasmreact\typeshim.generator.tests\bin\debug\net10.0\typeshim.generator.tests.dll" id="4c1ca3c3-fd9e-aaf0-408d-2eb76c646cae">
       <Execution id="12d744cf-ba6d-4fff-a4c9-ddc9222f3a45" />
-      <TestMethod codeBase="C:\Users\marcd\source\repos\DotNetWasmReact\TypeShim.Generator.Tests\bin\Debug\net10.0\TypeShim.Generator.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="TypeShim.Generator.Tests.TsExportAnnotatedClassFinderTests" name="ClassSyntax_WithTsExportAttribute_Do_GetProcessed_Multiple" />
+      <TestMethod codeBase="C:\Users\marcd\source\repos\DotNetWasmReact\TypeShim.Generator.Tests\bin\Debug\net10.0\TypeShim.Generator.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="TypeShim.Generator.Tests.TSExportAnnotatedClassFinderTests" name="ClassSyntax_WithTsExportAttribute_Do_GetProcessed_Multiple" />
     </UnitTest>
     <UnitTest name="CSharpInteropClass_DynamicMethod_RenderedWithJSTypeNumber_ForSupportedNumericParameterType(&quot;Int64&quot;,&quot;long&quot;)" storage="c:\users\marcd\source\repos\dotnetwasmreact\typeshim.generator.tests\bin\debug\net10.0\typeshim.generator.tests.dll" id="d17d485f-17e2-43cf-4a88-88cb4e8b7e8e">
       <Execution id="8ecb6e3d-18a8-4c53-ae4a-17dec5f45e88" />
@@ -935,7 +935,7 @@
     </UnitTest>
     <UnitTest name="ClassSyntax_WithTsExportAttribute_Does_GetProcessed" storage="c:\users\marcd\source\repos\dotnetwasmreact\typeshim.generator.tests\bin\debug\net10.0\typeshim.generator.tests.dll" id="b62ad0a0-435c-49c1-36a9-dcaf886d1f9f">
       <Execution id="4cd34714-88c3-43e4-b405-9bd08df76156" />
-      <TestMethod codeBase="C:\Users\marcd\source\repos\DotNetWasmReact\TypeShim.Generator.Tests\bin\Debug\net10.0\TypeShim.Generator.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="TypeShim.Generator.Tests.TsExportAnnotatedClassFinderTests" name="ClassSyntax_WithTsExportAttribute_Does_GetProcessed" />
+      <TestMethod codeBase="C:\Users\marcd\source\repos\DotNetWasmReact\TypeShim.Generator.Tests\bin\Debug\net10.0\TypeShim.Generator.Tests.dll" adapterTypeName="executor://nunit3testexecutor/" className="TypeShim.Generator.Tests.TSExportAnnotatedClassFinderTests" name="ClassSyntax_WithTsExportAttribute_Does_GetProcessed" />
     </UnitTest>
     <UnitTest name="ClassInfoBuilder_ParsesStaticProperties" storage="c:\users\marcd\source\repos\dotnetwasmreact\typeshim.generator.tests\bin\debug\net10.0\typeshim.generator.tests.dll" id="1d6a0b8a-95a5-2736-145d-82e210b89d37">
       <Execution id="0d6c2871-95e4-4c71-8788-e249a0999eab" />

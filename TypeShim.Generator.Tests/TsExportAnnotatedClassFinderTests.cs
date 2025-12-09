@@ -5,7 +5,7 @@ using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Tests;
 
-public class TsExportAnnotatedClassFinderTests
+public class TSExportAnnotatedClassFinderTests
 {
     [Test]
     public void ClassSyntax_WithoutTsExportAttribute_DoesNot_GetProcessed()
@@ -22,7 +22,7 @@ public class TsExportAnnotatedClassFinderTests
             ");
 
         CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
-        IEnumerable<INamedTypeSymbol> exportedClasses = TsExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot());
+        IEnumerable<INamedTypeSymbol> exportedClasses = TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot());
         Assert.That(exportedClasses, Is.Empty);
     }
 
@@ -43,7 +43,7 @@ public class TsExportAnnotatedClassFinderTests
         ");
 
         CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TsExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
+        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
     }
 
@@ -71,7 +71,7 @@ public class TsExportAnnotatedClassFinderTests
         ");
 
         CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TsExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
+        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
     }
 }
