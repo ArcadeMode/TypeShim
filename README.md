@@ -1,12 +1,12 @@
 <h1 align=center tabindex=-1>TypeShim - Typesafe .NET ↔︎ TypeScript interop</h1>
 <p align=center tabindex=-1>
-  <i>Your .NET classes, running on Wasm, accessible from TypeScript</i>
+  <i>Wasm powered .NET, accessible from TypeScript</i>
 </p>
 
 ## Why TypeShim
-The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), is not very ergonomic with lacking type information and exclusively static methods to export to JS. You need to learn about its type limitations, how to marshall certain types, and frankly, you just wanted to run your C# code in the browser..
+The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), lacks type information, exclusively supports static methods and overal lacks ergonomics. You need to learn various details about type marshalling and frankly, you just wanted to run your C# code in the browser..
 
-Enter: _TypeShim_. No hassle, just straight into the good stuff with generated C# interop ánd TypeScript classes that look and behave _just_ like your C# classes. Drop a `[TSExport]` on your C# class, build and _voilà_ a typescript class you can interact with. Get a class instance from the dotnet runtime and use its methods and properties, just like you wanted to do in the first place. 
+Enter: _TypeShim_. Drop a `[TSExport]` on your C# class and _voilà_, a typescript class you can interact with. Generated C# interop ánd TypeScript classes that look and behave _just_ like your C# classes. Get a class instance from the dotnet runtime and use its methods and properties, just like you wanted to do in the first place. 
 
 > Fully automated construction of your Wasm interop facade and a matching TypeScript library to boot.
 
