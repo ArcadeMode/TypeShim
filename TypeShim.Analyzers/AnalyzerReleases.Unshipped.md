@@ -6,3 +6,5 @@
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 TSHIM001 | Usage | Error | TsAttributesExclusivityAnalyzer
+TSHIM002 | Usage | Error | TsAttributesExclusivityAnalyzer
+TSHIM003 | Usage | Error | TsAttributesExclusivityAnalyzer
