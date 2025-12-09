@@ -3,6 +3,7 @@
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
   </Folder>
+  <Project Path="TypeShim.Analyzers/TypeShim.Analyzers.csproj" />
   <Project Path="TypeShim.Generator.Tests/TypeShim.Generator.Tests.csproj" Id="96ee9233-89fd-42c5-a58a-e0a30e6e6699" />
   <Project Path="TypeShim.Generator/TypeShim.Generator.csproj" Id="f2ba4743-c519-4001-afa5-6537a27eb689" />
   <Project Path="TypeShim/TypeShim.csproj" />

@@ -28,6 +28,26 @@
     <None Include="pack/TypeShim.targets" Pack="true" PackagePath="build" />
     <Content Include="pack/**/*.*" Pack="true" PackagePath="build" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\TypeShim.Analyzers\bin\$(Configuration)\$(TargetFramework)\TypeShim.Analyzers.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs" />
+  </ItemGroup>
+
+  <!--<Target Name="BuildAnalyzers" BeforeTargets="Build" DependsOnTargets="RestoreAnalyzers">
+    <Message Text="Building TypeShim.Analyzers project..." Importance="high" />
+    <MSBuild Projects="..\TypeShim.Analyzers\TypeShim.Analyzers.csproj"
+             Targets="Build"
+             Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+  </Target>
+
+  <Target Name="RestoreAnalyzers" BeforeTargets="Build;Pack">
+    <Message Text="Restoring TypeShim.Analyzers project..." Importance="high" />
+    <MSBuild Projects="..\TypeShim.Analyzers\TypeShim.Analyzers.csproj"
+             Targets="Restore"
+             Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+  </Target>-->
   
   <Target Name="BuildGenerator" BeforeTargets="Build">
     <Message Text="Building TypeShim.Generator project..." Importance="high" />

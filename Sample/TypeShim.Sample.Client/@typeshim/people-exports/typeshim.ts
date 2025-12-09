@@ -11,7 +11,17 @@ export interface AssemblyExports {
     };
 }
 
-// Auto-generated TypeScript statics class. Source class: TypeShim.Sample.TypeShimSampleModule
+// Auto-generated TypeShim TSModule class. Source class: TypeShim.Sample.People
+export class People {
+  private interop: AssemblyExports;
+
+  constructor(interop: AssemblyExports) {
+    this.interop = interop;
+  }
+
+}
+
+// Auto-generated TypeShim TSModule class. Source class: TypeShim.Sample.TypeShimSampleModule
 export class TypeShimSampleModule {
   private interop: AssemblyExports;
 
@@ -77,11 +87,6 @@ export interface Dog {
     Age: number;
 }
 
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.People
-export interface People {
-    readonly All: Array<Person>;
-}
-
 // Auto-generated TypeScript interface. Source class: TypeShim.Sample.PeopleProvider
 export interface PeopleProvider {
     FetchPeopleAsync(): Promise<People>;
@@ -138,23 +143,6 @@ class DogProxy implements Dog {
 
   public set Age(value: number) {
     this.interop.TypeShim.Sample.DogInterop.set_Age(this.instance, value);
-  }
-
-}
-
-// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.People
-class PeopleProxy implements People {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
-  }
-
-  public get All(): Array<Person> {
-    const res = this.interop.TypeShim.Sample.PeopleInterop.get_All(this.instance);
-    return res.map(item => new PersonProxy(item, this.interop));
   }
 
 }
