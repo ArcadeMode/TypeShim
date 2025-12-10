@@ -10,6 +10,7 @@
   
   <PropertyGroup>
     <GeneratorProjectName>TypeShim.Generator</GeneratorProjectName>
+    <AnalyzersProjectName>TypeShim.Analyzers</AnalyzersProjectName>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -25,36 +26,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="pack/TypeShim.targets" Pack="true" PackagePath="build" />
-    <Content Include="pack/**/*.*" Pack="true" PackagePath="build" />
+    <None Update="TypeShim.targets" Pack="true" PackagePath="build" />
+    <Content Include="pack/*.*" Pack="true" PackagePath="build" />
+    <Content Include="pack\analyzers\**\*" Pack="true" PackagePath="analyzers/dotnet/cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\TypeShim.Analyzers\bin\$(Configuration)\$(TargetFramework)\TypeShim.Analyzers.dll"
-          Pack="true"
-          PackagePath="analyzers/dotnet/cs" />
-  </ItemGroup>
-
-  <!--<Target Name="BuildAnalyzers" BeforeTargets="Build" DependsOnTargets="RestoreAnalyzers">
-    <Message Text="Building TypeShim.Analyzers project..." Importance="high" />
-    <MSBuild Projects="..\TypeShim.Analyzers\TypeShim.Analyzers.csproj"
-             Targets="Build"
-             Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+  <Target Name="BuildAnalyzers" BeforeTargets="Pack">
+    <Message Text="Building $(AnalyzersProjectName)" Importance="high" />
+    <MSBuild Projects="..\$(AnalyzersProjectName)\$(AnalyzersProjectName).csproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+    <ItemGroup>
+        <AnalyzerOutput Include="..\$(AnalyzersProjectName)\bin\$(Configuration)\$(TargetFramework)\$(AnalyzersProjectName).dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(AnalyzerOutput)" DestinationFolder="$(ProjectDir)pack\analyzers\" />
   </Target>
-
-  <Target Name="RestoreAnalyzers" BeforeTargets="Build;Pack">
-    <Message Text="Restoring TypeShim.Analyzers project..." Importance="high" />
-    <MSBuild Projects="..\TypeShim.Analyzers\TypeShim.Analyzers.csproj"
-             Targets="Restore"
-             Properties="Configuration=$(Configuration);Platform=$(Platform)" />
-  </Target>-->
-  
+    
   <Target Name="BuildGenerator" BeforeTargets="Build">
-    <Message Text="Building TypeShim.Generator project..." Importance="high" />
+    <Message Text="Building $(GeneratorProjectName)" Importance="high" />
     <!-- this enables building the generator without referencing its code, making it easier to pack -->
-    <MSBuild Projects="../$(GeneratorProjectName)/$(GeneratorProjectName).csproj"
-             Targets="Build"
-             Properties="Configuration=$(Configuration);Platform=$(Platform);OutputPath=pack" />
+    <MSBuild Projects="../$(GeneratorProjectName)/$(GeneratorProjectName).csproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform);OutputPath=pack" />
     <ItemGroup>
       <GeneratorFiles Include="../$(GeneratorProjectName)/pack/**/*.*" />
     </ItemGroup>

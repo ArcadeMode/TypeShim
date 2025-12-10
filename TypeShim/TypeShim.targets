@@ -19,7 +19,7 @@
   </Target>
   
   <Target Name="TypeShimGenerateInterop" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' != 'true'">
-    <Message Text="Generating TypeShim .cs/.ts files" Importance="Normal" />
+    <Message Text="Generating TypeShim .cs/.ts files" Importance="$(TypeShim_MSBuildMessagePriority)" />
     <ItemGroup>
       <CsFilesToScan Include="@(Compile)" />
     </ItemGroup>
@@ -28,7 +28,6 @@
     </PropertyGroup>
     
     <Message Text="TypeShim generating .ts file in: $(TypeShim_TypeScriptOutputFilePath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
-
 
     <Exec
       Command="dotnet &quot;$(MSBuildThisFileDirectory)/TypeShim.Generator.dll&quot; &quot;@(CsFilesToScan->'%(FullPath)', ';')&quot; &quot;$(IntermediateOutputPath)$(TypeShim_GeneratedDir)&quot; &quot;$(OutDir)$(TypeShim_TypeScriptOutputFilePath)&quot;"
