@@ -13,9 +13,6 @@
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.0" />
-    <PackageVersion Include="TypeShim" Version="0.0.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(NugetMode)' == true"> <!-- Only use for local testing as nuget package -->
+    <PackageVersion Include="TypeShim" Version="0.0.1" /> <!-- Only used for local testing as nuget package -->
   </ItemGroup>
 </Project>
