@@ -15,18 +15,19 @@ Enter: _TypeShim_. Drop a `[TSExport]` on your C# class and _voilà_, a typescri
 <sub>and maybe one or two [project settings](#configuration).</sub>
 
 ## Features at a glance
-- Generated JSExport interop code with matching TypeScript shims.
-    - Tested for correctness
-    - Snappy, you'll hardly notice TypeShim being there.
+- One attribute opt-in to interop
+    - Generated JSExport shims
+    - Generated TypeScript shims
 - [Enriched type marshalling](#enriched-type-support) 
-    - _your_ classes accessible from TypeScript.
-    - Type-safety across the interop boundary.
-- JSExport's static methods extended with:
-    - static property access.
-    - instance method access.
-    - instance property access. 
-- `[JSExport]`/`[JSImport]` work fine in conjunction with TypeShim.
-    - TypeShim won't get in your way
+    - _Your_ classes accessible from TypeScript.
+    - Code generation ensures Type-safety across the interop boundary.
+- Enriched member access:
+    - Static methods
+    - Static _properties_
+    - _Instance methods_
+    - _Instance properties_
+- Analyzers catch type mistakes fast
+    - No more compile errors after JSExport generates your method
 
 ## Feature: instance member access from TypeScript
 
