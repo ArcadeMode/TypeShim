@@ -224,10 +224,15 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
             }
             foreach (string constructedFrom in new[]
             {
+                "global::System.Threading.Tasks.ValueTask<TResult>",
                 "global::System.ReadOnlySpan<T>",
                 "global::System.ReadOnlyMemory<T>",
                 "global::System.Memory<T>",
                 "global::System.Collections.Generic.IEnumerable<T>",
+                "global::System.Collections.Generic.IList<T>",
+                "global::System.Collections.Generic.IReadOnlyList<T>",
+                "global::System.Collections.Generic.IDictionary<TKey, TValue>",
+                "global::System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>",
             })
             {
                 if (IsConstructedFrom(named, constructedFrom, out _))
@@ -244,11 +249,6 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
                     return true;
                 }
                 return ContainsUnsupportedPattern(inner);
-            }
-
-            if (IsConstructedFrom(type, "global::System.Threading.Tasks.ValueTask<TResult>", out _))
-            {
-                return true;
             }
 
             if (IsConstructedFrom(type, "global::System.Threading.Tasks.Task<TResult>", out ITypeSymbol? taskArg))
