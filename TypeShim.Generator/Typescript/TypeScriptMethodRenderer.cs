@@ -1,7 +1,4 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Diagnostics;
-
-namespace TypeShim.Generator.Typescript;
+﻿namespace TypeShim.Generator.Typescript;
 
 internal class TypeScriptMethodRenderer(TypeScriptTypeMapper typeMapper)
 {
@@ -23,7 +20,7 @@ internal class TypeScriptMethodRenderer(TypeScriptTypeMapper typeMapper)
     }
 
     internal string RenderMethodSignatureForInterface(MethodInfo methodInfo)
-    {//BEEPBOOP
+    {
         return $"{methodInfo.Name}({RenderMethodParameters(methodInfo)}): {typeMapper.ToTypeScriptType(methodInfo.ReturnType)}";
     }
 

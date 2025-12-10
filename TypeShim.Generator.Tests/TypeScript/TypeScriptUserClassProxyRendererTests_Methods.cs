@@ -42,25 +42,16 @@ internal class TypeScriptUserClassProxyRendererTests_Methods
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript proxy class. Source class: N1.C1
 class C1Proxy implements C1 {
-  interop: WasmModuleExports;
+  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: WasmModuleExports) {
+  constructor(instance: object, interop: AssemblyExports) {
     this.interop = interop;
     this.instance = instance;
   }
 
   public DoP1(): {{typeScriptType}} {
     return this.interop.N1.C1Interop.DoP1(this.instance);
-  }
-
-}
-// Auto-generated TypeScript statics class. Source class: N1.C1
-export class C1Statics {
-  private interop: WasmModuleExports;
-
-  constructor(interop: WasmModuleExports) {
-    this.interop = interop;
   }
 
 }
@@ -115,10 +106,10 @@ export class C1Statics {
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript proxy class. Source class: N1.C1
 class C1Proxy implements C1 {
-  interop: WasmModuleExports;
+  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: WasmModuleExports) {
+  constructor(instance: object, interop: AssemblyExports) {
     this.interop = interop;
     this.instance = instance;
   }
@@ -126,15 +117,6 @@ class C1Proxy implements C1 {
   public GetAll(): Array<UserClass> {
     const res = this.interop.N1.C1Interop.GetAll(this.instance);
     return res.map(item => new UserClassProxy(item, this.interop));
-  }
-
-}
-// Auto-generated TypeScript statics class. Source class: N1.C1
-export class C1Statics {
-  private interop: WasmModuleExports;
-
-  constructor(interop: WasmModuleExports) {
-    this.interop = interop;
   }
 
 }
@@ -189,10 +171,10 @@ export class C1Statics {
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript proxy class. Source class: N1.C1
 class C1Proxy implements C1 {
-  interop: WasmModuleExports;
+  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: WasmModuleExports) {
+  constructor(instance: object, interop: AssemblyExports) {
     this.interop = interop;
     this.instance = instance;
   }
@@ -200,15 +182,6 @@ class C1Proxy implements C1 {
   public GetMaybe(): UserClass | null {
     const res = this.interop.N1.C1Interop.GetMaybe(this.instance);
     return res ? new UserClassProxy(res, this.interop) : null;
-  }
-
-}
-// Auto-generated TypeScript statics class. Source class: N1.C1
-export class C1Statics {
-  private interop: WasmModuleExports;
-
-  constructor(interop: WasmModuleExports) {
-    this.interop = interop;
   }
 
 }
@@ -262,10 +235,10 @@ export class C1Statics {
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript proxy class. Source class: N1.C1
 class C1Proxy implements C1 {
-  interop: WasmModuleExports;
+  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: WasmModuleExports) {
+  constructor(instance: object, interop: AssemblyExports) {
     this.interop = interop;
     this.instance = instance;
   }
@@ -273,15 +246,6 @@ class C1Proxy implements C1 {
   public DoStuff(u: UserClass): void {
     const uInstance = u instanceof UserClassProxy ? u.instance : u;
     this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
-  }
-
-}
-// Auto-generated TypeScript statics class. Source class: N1.C1
-export class C1Statics {
-  private interop: WasmModuleExports;
-
-  constructor(interop: WasmModuleExports) {
-    this.interop = interop;
   }
 
 }
@@ -335,10 +299,10 @@ export class C1Statics {
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript proxy class. Source class: N1.C1
 class C1Proxy implements C1 {
-  interop: WasmModuleExports;
+  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: WasmModuleExports) {
+  constructor(instance: object, interop: AssemblyExports) {
     this.interop = interop;
     this.instance = instance;
   }
@@ -346,15 +310,6 @@ class C1Proxy implements C1 {
   public DoStuff(u: UserClass | null): void {
     const uInstance = u instanceof UserClassProxy ? u.instance : u;
     this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
-  }
-
-}
-// Auto-generated TypeScript statics class. Source class: N1.C1
-export class C1Statics {
-  private interop: WasmModuleExports;
-
-  constructor(interop: WasmModuleExports) {
-    this.interop = interop;
   }
 
 }
@@ -408,10 +363,10 @@ export class C1Statics {
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript proxy class. Source class: N1.C1
 class C1Proxy implements C1 {
-  interop: WasmModuleExports;
+  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: WasmModuleExports) {
+  constructor(instance: object, interop: AssemblyExports) {
     this.interop = interop;
     this.instance = instance;
   }
@@ -419,15 +374,6 @@ class C1Proxy implements C1 {
   public DoStuff(u: Array<UserClass>): void {
     const uInstance = u.map(item => item instanceof UserClassProxy ? item.instance : item);
     this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
-  }
-
-}
-// Auto-generated TypeScript statics class. Source class: N1.C1
-export class C1Statics {
-  private interop: WasmModuleExports;
-
-  constructor(interop: WasmModuleExports) {
-    this.interop = interop;
   }
 
 }
@@ -480,10 +426,10 @@ export class C1Statics {
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript proxy class. Source class: N1.C1
 class C1Proxy implements C1 {
-  interop: WasmModuleExports;
+  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: WasmModuleExports) {
+  constructor(instance: object, interop: AssemblyExports) {
     this.interop = interop;
     this.instance = instance;
   }
@@ -491,15 +437,6 @@ class C1Proxy implements C1 {
   public DoStuff(u: Promise<UserClass>): void {
     const uInstance = u.then(item => item instanceof UserClassProxy ? item.instance : item);
     this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
-  }
-
-}
-// Auto-generated TypeScript statics class. Source class: N1.C1
-export class C1Statics {
-  private interop: WasmModuleExports;
-
-  constructor(interop: WasmModuleExports) {
-    this.interop = interop;
   }
 
 }

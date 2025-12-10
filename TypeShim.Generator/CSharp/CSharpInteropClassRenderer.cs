@@ -1,11 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
-using System;
 using System.Data;
 using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.InteropServices.JavaScript;
 using System.Text;
-using System.Threading.Tasks;
 using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.CSharp;
@@ -98,7 +94,7 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine(marshalAsAttributeRenderer.RenderJSExportAttribute().NormalizeWhitespace().ToFullString());
         sb.Append(indent);
         sb.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
-        
+
         RenderMethodSignature(methodInfo, depth: 1);
 
         sb.Append(indent);

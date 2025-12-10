@@ -1,8 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TypeShim.Generator.Parsing;
 
@@ -17,7 +14,7 @@ internal sealed class TSExportAnnotatedClassFinder
                 continue;
             }
 
-            if (symbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSExportAttribute" or "TSExport"))
+            if (symbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSExportAttribute" or "TSExport" or "TSModuleAttribute" or "TSModule"))
             {
                 //TODO: add verbosity argument and use with ILogger
                 //Console.WriteLine($"TsExport: {symbol.ToDisplayString()}");

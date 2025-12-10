@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Runtime.InteropServices;
 using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.CSharp;

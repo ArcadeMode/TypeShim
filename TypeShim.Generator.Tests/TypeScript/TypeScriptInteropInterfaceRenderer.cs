@@ -1,8 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
 using TypeShim.Generator.Typescript;

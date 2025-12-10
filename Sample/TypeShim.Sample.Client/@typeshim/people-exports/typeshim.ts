@@ -1,5 +1,5 @@
 // Auto-generated TypeScript module exports interface
-export interface WasmModuleExports {
+export interface AssemblyExports {
     TypeShim: {
         Sample: {
             DogInterop: DogInterop;
@@ -11,14 +11,19 @@ export interface WasmModuleExports {
     };
 }
 
-export class WasmModule {
-  private interop: WasmModuleExports
-  constructor(interop: WasmModuleExports) {
+// Auto-generated TypeShim TSModule class. Source class: TypeShim.Sample.TypeShimSampleModule
+export class TypeShimSampleModule {
+  private interop: AssemblyExports;
+
+  constructor(interop: AssemblyExports) {
     this.interop = interop;
   }
-  public get TypeShimSampleModule(): TypeShimSampleModuleStatics {
-    return new TypeShimSampleModuleStatics(this.interop);
+
+  public get PeopleProvider(): PeopleProvider | null {
+    const res = this.interop.TypeShim.Sample.TypeShimSampleModuleInterop.get_PeopleProvider();
+    return res ? new PeopleProviderProxy(res, this.interop) : null;
   }
+
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Dog
@@ -93,16 +98,12 @@ export interface Person {
     Pet: Dog | null;
 }
 
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.TypeShimSampleModule
-export interface TypeShimSampleModule {
-}
-
 // Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Dog
 class DogProxy implements Dog {
-  interop: WasmModuleExports;
+  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: WasmModuleExports) {
+  constructor(instance: object, interop: AssemblyExports) {
     this.interop = interop;
     this.instance = instance;
   }
@@ -140,22 +141,13 @@ class DogProxy implements Dog {
   }
 
 }
-// Auto-generated TypeScript statics class. Source class: TypeShim.Sample.Dog
-export class DogStatics {
-  private interop: WasmModuleExports;
-
-  constructor(interop: WasmModuleExports) {
-    this.interop = interop;
-  }
-
-}
 
 // Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.People
 class PeopleProxy implements People {
-  interop: WasmModuleExports;
+  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: WasmModuleExports) {
+  constructor(instance: object, interop: AssemblyExports) {
     this.interop = interop;
     this.instance = instance;
   }
@@ -166,22 +158,13 @@ class PeopleProxy implements People {
   }
 
 }
-// Auto-generated TypeScript statics class. Source class: TypeShim.Sample.People
-export class PeopleStatics {
-  private interop: WasmModuleExports;
-
-  constructor(interop: WasmModuleExports) {
-    this.interop = interop;
-  }
-
-}
 
 // Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.PeopleProvider
 class PeopleProviderProxy implements PeopleProvider {
-  interop: WasmModuleExports;
+  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: WasmModuleExports) {
+  constructor(instance: object, interop: AssemblyExports) {
     this.interop = interop;
     this.instance = instance;
   }
@@ -197,22 +180,13 @@ class PeopleProviderProxy implements PeopleProvider {
   }
 
 }
-// Auto-generated TypeScript statics class. Source class: TypeShim.Sample.PeopleProvider
-export class PeopleProviderStatics {
-  private interop: WasmModuleExports;
-
-  constructor(interop: WasmModuleExports) {
-    this.interop = interop;
-  }
-
-}
 
 // Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Person
 class PersonProxy implements Person {
-  interop: WasmModuleExports;
+  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: WasmModuleExports) {
+  constructor(instance: object, interop: AssemblyExports) {
     this.interop = interop;
     this.instance = instance;
   }
@@ -258,41 +232,6 @@ class PersonProxy implements Person {
   public set Pet(value: Dog | null) {
     const valueInstance = value instanceof DogProxy ? value.instance : value;
     this.interop.TypeShim.Sample.PersonInterop.set_Pet(this.instance, valueInstance);
-  }
-
-}
-// Auto-generated TypeScript statics class. Source class: TypeShim.Sample.Person
-export class PersonStatics {
-  private interop: WasmModuleExports;
-
-  constructor(interop: WasmModuleExports) {
-    this.interop = interop;
-  }
-
-}
-
-// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.TypeShimSampleModule
-class TypeShimSampleModuleProxy implements TypeShimSampleModule {
-  interop: WasmModuleExports;
-  instance: object;
-
-  constructor(instance: object, interop: WasmModuleExports) {
-    this.interop = interop;
-    this.instance = instance;
-  }
-
-}
-// Auto-generated TypeScript statics class. Source class: TypeShim.Sample.TypeShimSampleModule
-export class TypeShimSampleModuleStatics {
-  private interop: WasmModuleExports;
-
-  constructor(interop: WasmModuleExports) {
-    this.interop = interop;
-  }
-
-  public get PeopleProvider(): PeopleProvider | null {
-    const res = this.interop.TypeShim.Sample.TypeShimSampleModuleInterop.get_PeopleProvider();
-    return res ? new PeopleProviderProxy(res, this.interop) : null;
   }
 
 }

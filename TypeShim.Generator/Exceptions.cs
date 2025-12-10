@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TypeShim.Generator;
+﻿namespace TypeShim.Generator;
 
 public class TypeShimException(string message, Exception? innerException = null) : Exception(message, innerException)
 {

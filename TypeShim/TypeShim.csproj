@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -10,6 +10,7 @@
   
   <PropertyGroup>
     <GeneratorProjectName>TypeShim.Generator</GeneratorProjectName>
+    <AnalyzersProjectName>TypeShim.Analyzers</AnalyzersProjectName>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -25,16 +26,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="pack/TypeShim.targets" Pack="true" PackagePath="build" />
-    <Content Include="pack/**/*.*" Pack="true" PackagePath="build" />
+    <Content Include="pack/*.*" Pack="true" PackagePath="build" />
+    <Content Include="pack\analyzers\**\*" Pack="true" PackagePath="analyzers/dotnet/cs" />
   </ItemGroup>
-  
+
+  <Target Name="BuildAnalyzers" BeforeTargets="Build">
+    <Message Text="Building $(AnalyzersProjectName)" Importance="high" />
+    <MSBuild Projects="..\$(AnalyzersProjectName)\$(AnalyzersProjectName).csproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+    <ItemGroup>
+        <AnalyzerOutput Include="..\$(AnalyzersProjectName)\bin\$(Configuration)\$(TargetFramework)\$(AnalyzersProjectName).dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(AnalyzerOutput)" DestinationFolder="$(ProjectDir)pack\analyzers\" />
+  </Target>
+    
   <Target Name="BuildGenerator" BeforeTargets="Build">
-    <Message Text="Building TypeShim.Generator project..." Importance="high" />
+    <Message Text="Building $(GeneratorProjectName)" Importance="high" />
     <!-- this enables building the generator without referencing its code, making it easier to pack -->
-    <MSBuild Projects="../$(GeneratorProjectName)/$(GeneratorProjectName).csproj"
-             Targets="Build"
-             Properties="Configuration=$(Configuration);Platform=$(Platform);OutputPath=pack" />
+    <MSBuild Projects="../$(GeneratorProjectName)/$(GeneratorProjectName).csproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform);OutputPath=pack" />
     <ItemGroup>
       <GeneratorFiles Include="../$(GeneratorProjectName)/pack/**/*.*" />
     </ItemGroup>

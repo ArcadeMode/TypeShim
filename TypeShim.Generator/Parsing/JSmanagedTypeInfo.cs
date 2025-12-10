@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TypeShim.Generator.Parsing;
+﻿namespace TypeShim.Generator.Parsing;
 
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
@@ -121,8 +117,8 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
 
             // task
             case ITypeSymbol when fullTypeName == Constants.TaskGlobal:
-                return new JSTaskTypeInfo(new JSSimpleTypeInfo(KnownManagedType.Void) 
-                { 
+                return new JSTaskTypeInfo(new JSSimpleTypeInfo(KnownManagedType.Void)
+                {
                     Syntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword))
                 });
             case INamedTypeSymbol { TypeArguments.Length: 1 } taskType when fullTypeName.StartsWith(Constants.TaskGlobal, StringComparison.Ordinal):

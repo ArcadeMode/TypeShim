@@ -1,9 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework.Internal;
-using System.Reflection.Metadata;
-using System.Runtime.InteropServices.JavaScript;
-using System.Threading.Tasks;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
 

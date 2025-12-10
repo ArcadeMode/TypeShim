@@ -11,7 +11,7 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
     {
         RenderInteropModuleInterface();
         RenderUserModuleClass();
-        
+
         RenderInteropInterfaces();
         RenderUserClassInterfaces();
 
@@ -36,7 +36,7 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
 
     private void RenderUserClassInterfaces()
     {
-        foreach (ClassInfo classInfo in classInfos)
+        foreach (ClassInfo classInfo in classInfos.Where(c => !c.IsModule))
         {
             TypescriptUserClassInterfaceRenderer classInterfaceRenderer = new(classInfo, methodRenderer, typeMapper);
             sourceBuilder.AppendLine(classInterfaceRenderer.Render());
@@ -45,13 +45,16 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
 
     private void RenderUserModuleClass()
     {
-        TypescriptUserModuleClassRenderer moduleClassRenderer = new(moduleInfo, classNameBuilder);
-        sourceBuilder.AppendLine(moduleClassRenderer.Render());
+        foreach (ClassInfo moduleClassInfo in classInfos.Where(c => c.IsModule))
+        {
+            TypescriptUserModuleClassRenderer moduleClassRenderer = new(moduleClassInfo, methodRenderer, classNameBuilder);
+            sourceBuilder.AppendLine(moduleClassRenderer.Render());
+        }
     }
 
     private void RenderUserClassProxies()
     {
-        foreach (ClassInfo classInfo in classInfos)
+        foreach (ClassInfo classInfo in classInfos.Where(c => !c.IsModule))
         {
             TypescriptUserClassProxyRenderer classProxyRenderer = new(classInfo, methodRenderer, classNameBuilder);
             sourceBuilder.AppendLine(classProxyRenderer.Render());

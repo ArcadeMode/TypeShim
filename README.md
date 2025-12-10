@@ -15,18 +15,19 @@ Enter: _TypeShim_. Drop a `[TSExport]` on your C# class and _voilà_, a typescri
 <sub>and maybe one or two [project settings](#configuration).</sub>
 
 ## Features at a glance
-- Generated JSExport interop code with matching TypeScript shims.
-    - Tested for correctness
-    - Snappy, you'll hardly notice TypeShim being there.
+- One attribute opt-in to interop
+    - Generated JSExport shims
+    - Generated TypeScript shims
 - [Enriched type marshalling](#enriched-type-support) 
-    - _your_ classes accessible from TypeScript.
-    - Type-safety across the interop boundary.
-- JSExport's static methods extended with:
-    - static property access.
-    - instance method access.
-    - instance property access. 
-- `[JSExport]`/`[JSImport]` work fine in conjunction with TypeShim.
-    - TypeShim won't get in your way
+    - _Your_ classes accessible from TypeScript.
+    - Code generation ensures Type-safety across the interop boundary.
+- Enriched member access:
+    - Static methods
+    - Static _properties_
+    - _Instance methods_
+    - _Instance properties_
+- Analyzers catch type mistakes fast
+    - No more compile errors after JSExport generates your method
 
 ## Feature: instance member access from TypeScript
 
@@ -213,7 +214,7 @@ TypeShim enriches the supported types by JSExport by adding _your_ classes to th
 
 Ofcourse, TypeShim brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. This work is largely completed, but some types are still on the roadmap for support.  Support for generics is limited to `Task` and `[]`. Every supported type can be used in methods as return and parameter types, they are also supported as property types. 
 
-> Any type that you're missing can still be brought to JavaScript through JSExport while they're not implemented in TypeShim _yet_, TypeShim and JSExport/JSImport are perfectly usable side-by-side.
+> TypeShim and JSExport/JSImport are perfectly usable side-by-side, in case you want to handroll parts of your interop.
 
 TypeShim aims to continue to broaden its type support in order to improve the developer experience of .NET Wasm browser apps. Notably `Task<int[]>` generates compiler error's with JSExport but is within reach to support in TypeShim. Other commonly used types include `Enum` and `IEnumerable`. 
 
@@ -227,6 +228,7 @@ TypeShim aims to continue to broaden its type support in order to improve the de
 | `TEnum`      | `TEnum`       | 💡     | under consideration |
 | `IEnumerable<T>`     | `T[]`       | 💡     | under consideration |
 | `Dictionary<TKey, TValue>` | `?`     | 💡     | under consideration |
+| `(T1, T2)` | `[T1, T2]`     | 💡     | under consideration |
 
 | .NET Marshalled Type                  | Mapped Type | Support | Note |
 |----------------------|-------------|--------|------|

@@ -1,8 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
 
@@ -100,6 +97,6 @@ internal class SyntaxTreeParsingTests_AccessModifiers
         INamedTypeSymbol classSymbol = exportedClasses[0];
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         Assert.That(classInfo.Properties.ToList(), Has.Count.EqualTo(2));
-        Assert.That(classInfo.Properties.All(p => p.SetMethod is null), Is.True); 
+        Assert.That(classInfo.Properties.All(p => p.SetMethod is null), Is.True);
     }
 }
