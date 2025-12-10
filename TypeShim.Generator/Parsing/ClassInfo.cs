@@ -1,6 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-
-namespace TypeShim.Generator.Parsing;
+﻿namespace TypeShim.Generator.Parsing;
 
 internal sealed class ClassInfo
 {

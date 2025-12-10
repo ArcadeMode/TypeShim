@@ -5,7 +5,7 @@ namespace TypeShim.Generator.Parsing;
 internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol)
 {
     internal ClassInfo Build()
-    { 
+    {
         List<MethodInfoBuilder> methodInfoBuilders = new();
         IEnumerable<IMethodSymbol> methodSymbols = classSymbol.GetMembers().OfType<IMethodSymbol>()
             .Where(m => m.MethodKind == MethodKind.Ordinary && m.DeclaredAccessibility == Accessibility.Public);

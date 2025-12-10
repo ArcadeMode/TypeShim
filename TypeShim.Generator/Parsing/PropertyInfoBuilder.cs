@@ -1,5 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using System.Reflection;
 using TypeShim.Generator;
 using TypeShim.Generator.Parsing;
 
@@ -19,7 +18,7 @@ internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropert
         {
             throw new UnsupportedPropertyException("Properties without get are not supported");
         }
-        
+
         MethodInfoBuilder methodInfoBuilder = new(classSymbol, methodSymbol);
         MethodInfo getMethod = methodInfoBuilder.Build();
 
@@ -29,7 +28,7 @@ internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropert
             MethodInfoBuilder setMethodInfoBuilder = new(classSymbol, setMethodSymbol);
             setMethod = setMethodInfoBuilder.Build();
         }
-        
+
         return new PropertyInfo
         {
             Name = propertySymbol.Name,

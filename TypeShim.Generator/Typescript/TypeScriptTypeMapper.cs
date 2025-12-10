@@ -15,7 +15,7 @@ internal class TypeScriptTypeMapper(IEnumerable<ClassInfo> classInfos)
 
     public TypeSyntax ExtractInnerTypeArgument(TypeSyntax typeSyntax)
     {
-       return typeSyntax switch
+        return typeSyntax switch
         {
             GenericNameSyntax generic => generic.TypeArgumentList.Arguments.SingleOrDefault()
                 ?? throw new Exception("Generic types are only supported with a single type argument"),
@@ -46,7 +46,7 @@ internal class TypeScriptTypeMapper(IEnumerable<ClassInfo> classInfos)
             KnownManagedType.Double => "number",
             KnownManagedType.Single => "number",
             KnownManagedType.IntPtr => "number", // JS doesn't have pointers, typically represented as number
-            KnownManagedType.JSObject or KnownManagedType.Object 
+            KnownManagedType.JSObject or KnownManagedType.Object
                 => "object",
             KnownManagedType.String => "string",
             KnownManagedType.Exception => "Error",
@@ -54,7 +54,7 @@ internal class TypeScriptTypeMapper(IEnumerable<ClassInfo> classInfos)
             KnownManagedType.DateTimeOffset => "Date",
             KnownManagedType.Nullable => throw new NotImplementedException("Nullable value-types are not yet supported"), // return "something | null" ?
             KnownManagedType.Task => $"Promise<{ToTypeScriptType(typeInfo.TypeArgument ?? typeInfo)}>",
-            KnownManagedType.Array or KnownManagedType.ArraySegment or KnownManagedType.Span 
+            KnownManagedType.Array or KnownManagedType.ArraySegment or KnownManagedType.Span
                 => $"Array<{ToTypeScriptType(typeInfo.TypeArgument ?? typeInfo)}>",
             KnownManagedType.Action => "(() => void)",
             KnownManagedType.Function => "Function", // TODO: try map signature ?

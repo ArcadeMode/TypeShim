@@ -1,11 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices.JavaScript;
-using System.Text;
-using TypeShim.Generator.CSharp;
 
 namespace TypeShim.Generator.Parsing;
 
@@ -32,8 +27,8 @@ internal sealed class InteropTypeInfo
     /// <summary>
     /// Tasks and Arrays _may_ have type arguments
     /// </summary>
-    internal required InteropTypeInfo? TypeArgument {  get; init; }
-    
+    internal required InteropTypeInfo? TypeArgument { get; init; }
+
     internal required bool RequiresCLRTypeConversion { get; init; }
 
     internal required bool IsTaskType { get; init; }
@@ -44,7 +39,7 @@ internal sealed class InteropTypeInfo
     /// Transforms this <see cref="InteropTypeInfo"/> into one suitable for interop method signatures.
     /// </summary>
     /// <returns></returns>
-    internal InteropTypeInfo AsInteropTypeInfo() 
+    internal InteropTypeInfo AsInteropTypeInfo()
     {
         if (TypeArgument == null && ManagedType == KnownManagedType.Object)
         {
@@ -79,11 +74,11 @@ internal sealed class InteropTypeInfo
         }
         else
         {
-            return this;   
+            return this;
         }
     }
 
-    internal static InteropTypeInfo CLRVoidTypeInfo = new ()
+    internal static InteropTypeInfo CLRVoidTypeInfo = new()
     {
         ManagedType = KnownManagedType.Void,
         JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Void"),

@@ -11,7 +11,7 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
     {
         RenderInteropModuleInterface();
         RenderUserModuleClass();
-        
+
         RenderInteropInterfaces();
         RenderUserClassInterfaces();
 

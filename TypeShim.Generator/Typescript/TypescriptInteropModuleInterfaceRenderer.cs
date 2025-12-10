@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
 
@@ -8,7 +7,7 @@ namespace TypeShim.Generator.Typescript;
 /// </summary>
 /// <param name="moduleHierarchyInfo"></param>
 internal class TypescriptInteropModuleInterfaceRenderer(ModuleHierarchyInfo moduleHierarchyInfo, TypescriptClassNameBuilder classNameBuilder)
-{   
+{
     private readonly StringBuilder sb = new();
 
     internal string Render()

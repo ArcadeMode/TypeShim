@@ -1,12 +1,12 @@
 ﻿using Microsoft.CodeAnalysis;
-using System.Reflection;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Reflection;
 
 namespace TypeShim.Generator.CSharp;
 
 internal static class CSharpPartialCompilation
 {
-   
+
     internal static CSharpCompilation CreatePartialCompilation(IEnumerable<SyntaxTree> syntaxTrees)
     {
         List<PortableExecutableReference> references = GetReferences();
@@ -34,5 +34,5 @@ internal static class CSharpPartialCompilation
         return references;
     }
 
-    
+
 }

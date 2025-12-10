@@ -1,8 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
 using TypeShim.Generator.Typescript;
@@ -185,7 +182,8 @@ export interface C1 {
         TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
         TypeScriptMethodRenderer methodRenderer = new(typeMapper);
 
-        ModuleInfo moduleInfo = new() { 
+        ModuleInfo moduleInfo = new()
+        {
             ExportedClasses = [classInfo],
             HierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], classNameBuilder),
         };

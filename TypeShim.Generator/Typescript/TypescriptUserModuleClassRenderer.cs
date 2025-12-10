@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Text;
+﻿using System.Text;
 using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
@@ -15,7 +12,7 @@ internal class TypescriptUserModuleClassRenderer(ClassInfo moduleClassInfo, Type
 
     internal string Render()
     {
-        RenderModuleClass(moduleClassInfo.Name, classNameBuilder.GetModuleInteropClassName()); 
+        RenderModuleClass(moduleClassInfo.Name, classNameBuilder.GetModuleInteropClassName());
         return sb.ToString();
     }
 

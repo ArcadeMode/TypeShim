@@ -1,7 +1,4 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Diagnostics;
-
-namespace TypeShim.Generator.Typescript;
+﻿namespace TypeShim.Generator.Typescript;
 
 internal class TypeScriptMethodRenderer(TypeScriptTypeMapper typeMapper)
 {

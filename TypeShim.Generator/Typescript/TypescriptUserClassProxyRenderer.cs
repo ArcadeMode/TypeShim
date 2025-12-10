@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using System.Text;
+﻿using System.Text;
 using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
