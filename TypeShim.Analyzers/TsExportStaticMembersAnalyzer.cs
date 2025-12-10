@@ -1,6 +1,6 @@
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Collections.Immutable;
 
 namespace TypeShim.Analyzers;
 
@@ -32,7 +32,7 @@ public sealed class TsExportStaticMembersAnalyzer : DiagnosticAnalyzer
         if (context.Symbol is not INamedTypeSymbol type || type.TypeKind != TypeKind.Class)
             return;
 
-        bool hasTSExport = HasAttribute(type, "TypeShim.TSExportAttribute");
+        bool hasTSExport = SymbolFacts.HasAttribute(type, "TypeShim.TSExportAttribute");
         if (!hasTSExport)
             return;
 
@@ -54,16 +54,5 @@ public sealed class TsExportStaticMembersAnalyzer : DiagnosticAnalyzer
     {
         var location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
         context.ReportDiagnostic(Diagnostic.Create(Rule, location, name));
-    }
-
-    private static bool HasAttribute(INamedTypeSymbol type, string fullName)
-    {
-        foreach (var attr in type.GetAttributes())
-        {
-            var attrClass = attr.AttributeClass;
-            if (attrClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == $"global::{fullName}")
-                return true;
-        }
-        return false;
     }
 }

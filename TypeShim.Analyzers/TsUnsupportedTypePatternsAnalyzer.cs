@@ -1,8 +1,6 @@
-using System;
-using System.Collections.Immutable;
-using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Collections.Immutable;
 
 namespace TypeShim.Analyzers;
 
@@ -54,8 +52,8 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
         if (context.Symbol is not INamedTypeSymbol type || type.TypeKind != TypeKind.Class)
             return;
 
-        bool hasTSExport = HasAttribute(type, "TypeShim.TSExportAttribute");
-        bool hasTSModule = HasAttribute(type, "TypeShim.TSModuleAttribute");
+        bool hasTSExport = SymbolFacts.HasAttribute(type, "TypeShim.TSExportAttribute");
+        bool hasTSModule = SymbolFacts.HasAttribute(type, "TypeShim.TSModuleAttribute");
         if (!hasTSExport && !hasTSModule)
             return;
 
@@ -75,98 +73,75 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
                     }
                     break;
                 case IPropertySymbol prop:
-                    CheckPropertyType(context, prop);
+                    CheckType(context, prop, prop.Type);
                     break;
             }
         }
     }
 
-    private static void CheckType(SymbolAnalysisContext context, IMethodSymbol method, ITypeSymbol type)
+    private static void CheckType(SymbolAnalysisContext context, ISymbol method, ITypeSymbol type)
     {
-        if (ContainsNonTSExportedClass(type))
+        if (IsClassWithoutTSExport(type))
         {
-            ReportNonTSExported(context, method.Name, type, method);
+            ReportNonTSExported(context, type, method);
         }
-        else if (ContainsUnderDevelopmentType(type))
+        else if (IsUnderDevelopment(type))
         {
             ReportUnderDevelopment(context, type, method);
         }
-        else if (ContainsUnsupportedPattern(type))
+        else if (IsUnsupported(type))
         {
             ReportUnsupported(context, type, method);
         }
-        else if (type is INamedTypeSymbol named && named.TypeKind == TypeKind.Class)
-        {
-            if (!IsClassTypeWithoutTSExportRequirement(named) && !HasAttribute(named, "TypeShim.TSExportAttribute"))
-            {
-                ReportNonTSExported(context, method.Name, type, method);
-            }
-        }
     }
 
-    private static bool ContainsNonTSExportedClass(ITypeSymbol type)
+    private static bool IsClassWithoutTSExport(ITypeSymbol type)
     {
-        if (type is INamedTypeSymbol named && named.TypeKind == TypeKind.Class)
+        if (type is INamedTypeSymbol { TypeKind: TypeKind.Class } namedClass)
         {
-            if (IsClassTypeWithoutTSExportRequirement(named))
-                return false;
-
-            if (HasAttribute(named, "TypeShim.TSExportAttribute"))
-                return false;
-            
-            return true;
+            return !SymbolFacts.HasAttribute(namedClass, "TypeShim.TSExportAttribute")
+                && !IsClassTypeWithoutTSExportRequirement(namedClass);
         }
         return false; // not a class
-    }
 
-    private static void CheckPropertyType(SymbolAnalysisContext context, IPropertySymbol prop)
-    {
-        ITypeSymbol type = prop.Type;
-        if (ContainsNonTSExportedClass(type))
+        static bool IsClassTypeWithoutTSExportRequirement(INamedTypeSymbol type)
         {
-            ReportNonTSExported(context, prop.Name, type, prop);
-        }
-        else if(ContainsUnderDevelopmentType(type))
-        {
-            ReportUnderDevelopment(context, type, prop);
-        }
-        else if (ContainsUnsupportedPattern(type))
-        {
-            ReportUnsupported(context, type, prop);
-        }
-        else if (type is INamedTypeSymbol named && named.TypeKind == TypeKind.Class)
-        {
-            if (!IsClassTypeWithoutTSExportRequirement(named) && !HasAttribute(named, "TypeShim.TSExportAttribute"))
+            var fullName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            if (fullName is "string" or "global::System.String"
+                or "global::System.Exception"
+                or "global::System.Runtime.InteropServices.JavaScript.JSObject"
+                || fullName.StartsWith("global::System.Threading.Tasks.Task"))
             {
-                ReportNonTSExported(context, prop.Name, type, prop);
+                return true;
             }
+            return false;
         }
     }
 
-    private static bool ContainsUnderDevelopmentType(ITypeSymbol type)
+    private static bool IsUnderDevelopment(ITypeSymbol type) // i.e. implementation planned but not done yet
     {
         if (type is INamedTypeSymbol named)
         {
             if (named.ConstructedFrom?.SpecialType == SpecialType.System_Nullable_T)
             {
-                return ContainsUnderDevelopmentType(named.TypeArguments[0]);
+                return IsUnderDevelopment(named.TypeArguments[0]);
             }
 
-            if (IsConstructedFrom(named, "global::System.Span<T>", out ITypeSymbol? spanArg))
+            if (SymbolFacts.IsConstructedFrom(named, "global::System.Span<T>", out ITypeSymbol? spanArg))
             {
                 if (IsAllowedSpanOrArraySegmentElement(spanArg))
                     return true; // under development
                 return false; // not supported by .net
             }
 
-            if (IsConstructedFrom(named, "global::System.ArraySegment<T>", out ITypeSymbol? segArg))
+            if (SymbolFacts.IsConstructedFrom(named, "global::System.ArraySegment<T>", out ITypeSymbol? segArg))
             {
                 if (IsAllowedSpanOrArraySegmentElement(segArg))
                     return true;
                 return false; // not supported by .net
             }
 
-            if (IsAction(named))
+            if (SymbolFacts.IsAction(named))
             {
                 int arity = named.TypeArguments.Length;
                 // TODO: recurse on type args, also for other diagnostics
@@ -174,7 +149,7 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
                     return true;
                 return false; // not supported by .net
             }
-            if (IsFunc(named))
+            if (SymbolFacts.IsFunc(named))
             {
                 int arity = named.TypeArguments.Length;
                 if (arity <= 4)
@@ -185,38 +160,38 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
 
         if (type is IArrayTypeSymbol arr)
         {
-            return ContainsUnderDevelopmentType(arr.ElementType);
+            return IsUnderDevelopment(arr.ElementType);
         }
 
-        if (IsConstructedFrom(type, "global::System.Threading.Tasks.Task<TResult>", out var taskArg))
+        if (SymbolFacts.IsConstructedFrom(type, "global::System.Threading.Tasks.Task<TResult>", out var taskArg))
         {
-            return taskArg != null && ContainsUnderDevelopmentType(taskArg);
+            return taskArg != null && IsUnderDevelopment(taskArg);
         }
 
         return false;
     }
 
-    private static bool ContainsUnsupportedPattern(ITypeSymbol type)
+    private static bool IsUnsupported(ITypeSymbol type)
     {
         if (type is IArrayTypeSymbol arrayType)
         {
             var elem = arrayType.ElementType;
-            if (IsNullable(elem))
+            if (SymbolFacts.IsNullable(elem))
             {
                 return true; // nullable element type unsupported
             }
-            return ContainsUnsupportedPattern(elem);
+            return IsUnsupported(elem);
         }
 
         if (type is INamedTypeSymbol named)
         {
-            if (IsConstructedFrom(named, "global::System.Span<T>", out var spanArg))
+            if (SymbolFacts.IsConstructedFrom(named, "global::System.Span<T>", out var spanArg))
             {
                 if (!IsAllowedSpanOrArraySegmentElement(spanArg))
                     return true;
                 return false;
             }
-            if (IsConstructedFrom(named, "global::System.ArraySegment<T>", out var segArg))
+            if (SymbolFacts.IsConstructedFrom(named, "global::System.ArraySegment<T>", out var segArg))
             {
                 if (!IsAllowedSpanOrArraySegmentElement(segArg))
                     return true;
@@ -235,7 +210,7 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
                 "global::System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>",
             })
             {
-                if (IsConstructedFrom(named, constructedFrom, out _))
+                if (SymbolFacts.IsConstructedFrom(named, constructedFrom, out _))
                 {
                     return true;
                 }
@@ -248,26 +223,25 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
                 {
                     return true;
                 }
-                return ContainsUnsupportedPattern(inner);
+                return IsUnsupported(inner);
             }
 
-            if (IsConstructedFrom(type, "global::System.Threading.Tasks.Task<TResult>", out ITypeSymbol? taskArg))
+            if (SymbolFacts.IsConstructedFrom(type, "global::System.Threading.Tasks.Task<TResult>", out ITypeSymbol? taskArg) && taskArg != null)
             {
-                if (taskArg is IArrayTypeSymbol || IsNullable(taskArg) || ContainsUnsupportedPattern(taskArg))
+                if (taskArg is IArrayTypeSymbol || SymbolFacts.IsNullable(taskArg) || IsUnsupported(taskArg))
                 {
                     return true;
                 }
                 return false;
             }
 
-            // Action / Func exceeding allowed arity
-            if (IsAction(named))
+            if (SymbolFacts.IsAction(named))
             {
                 if (named.TypeArguments.Length > 3)
                     return true;
                 return false;
             }
-            if (IsFunc(named))
+            if (SymbolFacts.IsFunc(named))
             {
                 if (named.TypeArguments.Length > 4)
                     return true;
@@ -278,59 +252,10 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
         return false;
     }
 
-    private static bool IsClassTypeWithoutTSExportRequirement(INamedTypeSymbol type)
-    {
-        var fullName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        if (fullName is "global::System.String" 
-            or "global::System.Exception" 
-            or "global::System.Runtime.InteropServices.JavaScript.JSObject"
-            || fullName.StartsWith("global::System.Threading.Tasks.Task"))
-        {
-            return true;
-        }
-        return false;
-    }
-
-    private static bool IsConstructedFrom(ITypeSymbol type, string constructedFromFullName, out ITypeSymbol? typeArg)
-    {
-        typeArg = null;
-        if (type is INamedTypeSymbol named && named.TypeArguments.Length == 1)
-        {
-            var constructed = named.ConstructedFrom.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-            if ($"global::{constructedFromFullName}" == constructed || constructed == constructedFromFullName)
-            {
-                typeArg = named.TypeArguments[0];
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static bool IsNullable(ITypeSymbol type)
-    {
-        if (type is INamedTypeSymbol named && named.ConstructedFrom?.SpecialType == SpecialType.System_Nullable_T)
-        {
-            return true;
-        }
-        return false;
-    }
-
     private static bool IsAllowedSpanOrArraySegmentElement(ITypeSymbol? elem)
     {
         if (elem == null) return false;
         return elem.SpecialType is SpecialType.System_Byte or SpecialType.System_Int32 or SpecialType.System_Double;
-    }
-
-    private static bool IsAction(INamedTypeSymbol type)
-    {
-        var full = type.ConstructedFrom?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? string.Empty;
-        return full.StartsWith("global::System.Action", StringComparison.Ordinal);
-    }
-
-    private static bool IsFunc(INamedTypeSymbol type)
-    {
-        var full = type.ConstructedFrom?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? string.Empty;
-        return full.StartsWith("global::System.Func", StringComparison.Ordinal);
     }
 
     private static void ReportUnsupported(SymbolAnalysisContext context, ITypeSymbol providedType, ISymbol symbol)
@@ -347,21 +272,10 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
         context.ReportDiagnostic(Diagnostic.Create(UnderDevelopmentTypeRule, location, typeText));
     }
 
-    private static void ReportNonTSExported(SymbolAnalysisContext context, string methodName, ITypeSymbol type, ISymbol symbol)
+    private static void ReportNonTSExported(SymbolAnalysisContext context, ITypeSymbol type, ISymbol symbol)
     {
         var location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
         var typeText = type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
         context.ReportDiagnostic(Diagnostic.Create(NonExportedTypeRule, location, typeText));
-    }
-
-    private static bool HasAttribute(INamedTypeSymbol type, string fullName)
-    {
-        foreach (var attr in type.GetAttributes())
-        {
-            var attrClass = attr.AttributeClass;
-            if (attrClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == $"global::{fullName}")
-                return true;
-        }
-        return false;
     }
 }

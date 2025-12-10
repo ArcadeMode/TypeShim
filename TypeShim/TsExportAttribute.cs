@@ -26,5 +26,6 @@
 /// </code>
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class TSExportAttribute : Attribute {
+public class TSExportAttribute : Attribute
+{
 }
