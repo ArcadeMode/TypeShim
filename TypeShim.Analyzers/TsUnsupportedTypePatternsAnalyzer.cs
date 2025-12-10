@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -15,7 +16,7 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor UnsupportedTypeRule = new(
         id: UnsupportedTypeId,
         title: "Unsupported type pattern",
-        messageFormat: "Member '{0}' uses unsupported type '{1}' in {2}",
+        messageFormat: "Type '{0}' is not supported by TypeShim nor .NET-JS type marshalling",
         category: "TypeChecking",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
@@ -24,7 +25,7 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor NonExportedTypeRule = new(
         id: NonExportedTypeId,
         title: "Non-TSExport type on the interop API",
-        messageFormat: "Member '{0}' uses '{1}' in {2}, which is not annotated with [TSExport], the type will be exported as 'object'",
+        messageFormat: "Class '{0}' is not annotated with [TSExport], it will be exported to TypeScript as 'object'",
         category: "Design",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
@@ -33,7 +34,7 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor UnderDevelopmentTypeRule = new(
         id: UnderDevelopmentTypeId,
         title: "Type under development",
-        messageFormat: "Member '{0}' uses type '{1}' in {2}, which is currently not supported",
+        messageFormat: "Type '{0}' is not yet implemented by TypeShim",
         category: "TypeChecking",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
@@ -58,6 +59,7 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
         if (!hasTSExport && !hasTSModule)
             return;
 
+        //Debugger.Launch();
         foreach (var member in type.GetMembers())
         {
             if (member.DeclaredAccessibility != Accessibility.Public)
@@ -66,15 +68,11 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
             switch (member)
             {
                 case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
-                    // Check return type
-                    CheckType(context, method, method.ReturnType, isReturn: true);
-                    // Check parameters
+                    CheckType(context, method, method.ReturnType);
                     foreach (var p in method.Parameters)
                     {
-                        CheckType(context, method, p.Type, isReturn: false);
+                        CheckType(context, method, p.Type);
                     }
-                    // Additional rule: warning when returning non-TSExport class
-                    CheckReturnNonExportedClass(context, method);
                     break;
                 case IPropertySymbol prop:
                     CheckPropertyType(context, prop);
@@ -83,93 +81,85 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static void CheckType(SymbolAnalysisContext context, IMethodSymbol method, ITypeSymbol type, bool isReturn)
+    private static void CheckType(SymbolAnalysisContext context, IMethodSymbol method, ITypeSymbol type)
     {
-        string pos = isReturn ? "return type" : "parameter";
-        if (ContainsUnderDevelopmentType(type))
+        if (ContainsNonTSExportedClass(type))
         {
-            ReportUnderDevelopment(context, method.Name, pos, type, method);
-        } 
+            ReportNonTSExported(context, method.Name, type, method);
+        }
+        else if (ContainsUnderDevelopmentType(type))
+        {
+            ReportUnderDevelopment(context, type, method);
+        }
         else if (ContainsUnsupportedPattern(type))
         {
-            ReportUnsupported(context, method.Name, pos, type, method);
+            ReportUnsupported(context, type, method);
         }
         else if (type is INamedTypeSymbol named && named.TypeKind == TypeKind.Class)
         {
-            if (!IsAllowedClassType(named) && !HasAttribute(named, "TypeShim.TSExportAttribute"))
+            if (!IsClassTypeWithoutTSExportRequirement(named) && !HasAttribute(named, "TypeShim.TSExportAttribute"))
             {
-                var location = method.Locations.Length > 0 ? method.Locations[0] : Location.None;
-                var typeText = type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-                context.ReportDiagnostic(Diagnostic.Create(NonExportedTypeRule, location, method.Name, typeText, pos));
+                ReportNonTSExported(context, method.Name, type, method);
             }
         }
     }
 
-    private static void CheckReturnNonExportedClass(SymbolAnalysisContext context, IMethodSymbol method)
+    private static bool ContainsNonTSExportedClass(ITypeSymbol type)
     {
-        ITypeSymbol returnType = method.ReturnType;
-        // Only consider class types; structs like Span<T> are ignored by virtue of not being classes
-        if (returnType is INamedTypeSymbol named && named.TypeKind == TypeKind.Class)
+        if (type is INamedTypeSymbol named && named.TypeKind == TypeKind.Class)
         {
-            // Skip allowed framework/simple types
-            if (IsAllowedClassType(named))
-                return;
+            if (IsClassTypeWithoutTSExportRequirement(named))
+                return false;
 
-            // If the class itself is TSExport, it's fine
             if (HasAttribute(named, "TypeShim.TSExportAttribute"))
-                return;
-
-            // Otherwise warn
-            var location = method.Locations.Length > 0 ? method.Locations[0] : Location.None;
-            var typeText = returnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-            context.ReportDiagnostic(Diagnostic.Create(NonExportedTypeRule, location, method.Name, typeText, "return type"));
+                return false;
+            
+            return true;
         }
+        return false; // not a class
     }
 
     private static void CheckPropertyType(SymbolAnalysisContext context, IPropertySymbol prop)
     {
-        var type = prop.Type;
-        const string pos = "property type";
-        if (ContainsUnderDevelopmentType(type))
+        ITypeSymbol type = prop.Type;
+        if (ContainsNonTSExportedClass(type))
         {
-            ReportUnderDevelopment(context, prop.Name, pos, type, prop);
+            ReportNonTSExported(context, prop.Name, type, prop);
+        }
+        else if(ContainsUnderDevelopmentType(type))
+        {
+            ReportUnderDevelopment(context, type, prop);
         }
         else if (ContainsUnsupportedPattern(type))
         {
-            ReportUnsupported(context, prop.Name, pos, type, prop);
+            ReportUnsupported(context, type, prop);
         }
         else if (type is INamedTypeSymbol named && named.TypeKind == TypeKind.Class)
         {
-            if (!IsAllowedClassType(named) && !HasAttribute(named, "TypeShim.TSExportAttribute"))
+            if (!IsClassTypeWithoutTSExportRequirement(named) && !HasAttribute(named, "TypeShim.TSExportAttribute"))
             {
-                var location = prop.Locations.Length > 0 ? prop.Locations[0] : Location.None;
-                var typeText = type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-                context.ReportDiagnostic(Diagnostic.Create(NonExportedTypeRule, location, prop.Name, typeText, pos));
+                ReportNonTSExported(context, prop.Name, type, prop);
             }
         }
     }
 
     private static bool ContainsUnderDevelopmentType(ITypeSymbol type)
     {
-        // Check direct
         if (type is INamedTypeSymbol named)
         {
-            // Nullable<T>
             if (named.ConstructedFrom?.SpecialType == SpecialType.System_Nullable_T)
             {
                 return ContainsUnderDevelopmentType(named.TypeArguments[0]);
             }
 
-            // Span<T>
-            if (IsConstructedFrom(named, "global::System.Span", out var spanArg))
+            if (IsConstructedFrom(named, "global::System.Span<T>", out ITypeSymbol? spanArg))
             {
                 if (IsAllowedSpanOrArraySegmentElement(spanArg))
-                    return true; 
+                    return true; // under development
                 return false; // not supported by .net
             }
 
-            // ArraySegment<T>
-            if (IsConstructedFrom(named, "global::System.ArraySegment", out var segArg))
+            if (IsConstructedFrom(named, "global::System.ArraySegment<T>", out ITypeSymbol? segArg))
             {
                 if (IsAllowedSpanOrArraySegmentElement(segArg))
                     return true;
@@ -193,14 +183,12 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
             }
         }
 
-        // Array element
         if (type is IArrayTypeSymbol arr)
         {
             return ContainsUnderDevelopmentType(arr.ElementType);
         }
 
-        // Task<T>
-        if (IsConstructedFrom(type, "global::System.Threading.Tasks.Task", out var taskArg))
+        if (IsConstructedFrom(type, "global::System.Threading.Tasks.Task<TResult>", out var taskArg))
         {
             return taskArg != null && ContainsUnderDevelopmentType(taskArg);
         }
@@ -210,40 +198,47 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
 
     private static bool ContainsUnsupportedPattern(ITypeSymbol type)
     {
-        // Unsupported if any array has a nullable element at any depth,
-        // or Task<T> where T contains such a pattern or is Nullable<T> or is an Array
         if (type is IArrayTypeSymbol arrayType)
         {
             var elem = arrayType.ElementType;
             if (IsNullable(elem))
             {
-                return true;
+                return true; // nullable element type unsupported
             }
             return ContainsUnsupportedPattern(elem);
         }
 
         if (type is INamedTypeSymbol named)
         {
-            // Span<T> with unsupported element types
-            if (IsConstructedFrom(named, "global::System.Span", out var spanArg))
+            if (IsConstructedFrom(named, "global::System.Span<T>", out var spanArg))
             {
                 if (!IsAllowedSpanOrArraySegmentElement(spanArg))
                     return true;
                 return false;
             }
-            // ArraySegment<T> with unsupported element types
-            if (IsConstructedFrom(named, "global::System.ArraySegment", out var segArg))
+            if (IsConstructedFrom(named, "global::System.ArraySegment<T>", out var segArg))
             {
                 if (!IsAllowedSpanOrArraySegmentElement(segArg))
                     return true;
                 return false;
             }
+            foreach (string constructedFrom in new[]
+            {
+                "global::System.ReadOnlySpan<T>",
+                "global::System.ReadOnlyMemory<T>",
+                "global::System.Memory<T>",
+                "global::System.Collections.Generic.IEnumerable<T>",
+            })
+            {
+                if (IsConstructedFrom(named, constructedFrom, out _))
+                {
+                    return true;
+                }
+            }
 
-            // Nullable<T>
             if (named.ConstructedFrom?.SpecialType == SpecialType.System_Nullable_T)
             {
                 var inner = named.TypeArguments[0];
-                // Nullable of array or of another unsupported nested pattern
                 if (inner is IArrayTypeSymbol)
                 {
                     return true;
@@ -251,10 +246,13 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
                 return ContainsUnsupportedPattern(inner);
             }
 
-            // Task<T>
-            if (IsConstructedFrom(type, "global::System.Threading.Tasks.Task", out var taskArg))
+            if (IsConstructedFrom(type, "global::System.Threading.Tasks.ValueTask<TResult>", out _))
             {
-                // Task of array OR Task of nullable OR Task of type that contains unsupported nested pattern
+                return true;
+            }
+
+            if (IsConstructedFrom(type, "global::System.Threading.Tasks.Task<TResult>", out ITypeSymbol? taskArg))
+            {
                 if (taskArg is IArrayTypeSymbol || IsNullable(taskArg) || ContainsUnsupportedPattern(taskArg))
                 {
                     return true;
@@ -280,11 +278,13 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
         return false;
     }
 
-    private static bool IsAllowedClassType(INamedTypeSymbol type)
+    private static bool IsClassTypeWithoutTSExportRequirement(INamedTypeSymbol type)
     {
-        // Allow string and common date types; Uri should warn; JSObject etc. could be allowed but keeping minimal per request
         var fullName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        if (fullName is "global::System.String" or "global::System.Exception" or "global::System.Runtime.InteropServices.JavaScript.JSObject")
+        if (fullName is "global::System.String" 
+            or "global::System.Exception" 
+            or "global::System.Runtime.InteropServices.JavaScript.JSObject"
+            || fullName.StartsWith("global::System.Threading.Tasks.Task"))
         {
             return true;
         }
@@ -333,19 +333,25 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
         return full.StartsWith("global::System.Func", StringComparison.Ordinal);
     }
 
-    private static void ReportUnsupported(SymbolAnalysisContext context, string memberName, string pos, ITypeSymbol providedType, ISymbol symbol)
+    private static void ReportUnsupported(SymbolAnalysisContext context, ITypeSymbol providedType, ISymbol symbol)
     {
         var location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
-        // Use minimally qualified format to resemble user code; include generics like Task<int[]>
         var typeText = providedType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        context.ReportDiagnostic(Diagnostic.Create(UnsupportedTypeRule, location, memberName, typeText, pos));
+        context.ReportDiagnostic(Diagnostic.Create(UnsupportedTypeRule, location, typeText));
     }
 
-    private static void ReportUnderDevelopment(SymbolAnalysisContext context, string memberName, string pos, ITypeSymbol providedType, ISymbol symbol)
+    private static void ReportUnderDevelopment(SymbolAnalysisContext context, ITypeSymbol providedType, ISymbol symbol)
     {
         var location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
         var typeText = providedType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        context.ReportDiagnostic(Diagnostic.Create(UnderDevelopmentTypeRule, location, memberName, typeText, pos));
+        context.ReportDiagnostic(Diagnostic.Create(UnderDevelopmentTypeRule, location, typeText));
+    }
+
+    private static void ReportNonTSExported(SymbolAnalysisContext context, string methodName, ITypeSymbol type, ISymbol symbol)
+    {
+        var location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
+        var typeText = type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+        context.ReportDiagnostic(Diagnostic.Create(NonExportedTypeRule, location, typeText));
     }
 
     private static bool HasAttribute(INamedTypeSymbol type, string fullName)
