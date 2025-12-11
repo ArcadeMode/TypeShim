@@ -54,7 +54,9 @@ jobs:
           "version=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       - name: Restore
-        run: dotnet restore TypeShim.slnx
+        run: >
+          dotnet nuget disable source LocalDev &&
+          dotnet restore TypeShim.slnx
 
       - name: Build
         run: dotnet build TypeShim.slnx -c Release --no-restore
