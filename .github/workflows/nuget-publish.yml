@@ -70,7 +70,7 @@ jobs:
         run: >
           dotnet pack TypeShim/TypeShim.csproj 
           -c Release 
-          -o .\.artifacts\nuget 
+          -o .\.artifacts 
           --no-build 
           -p:Version=$env:PKG_VERSION 
           -p:ContinuousIntegrationBuild=true
