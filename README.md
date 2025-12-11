@@ -265,14 +265,15 @@ TypeShim aims to continue to broaden its type support in order to improve the de
 | `Func<T1, T2, TResult>` | `Function`| 🚧   |      |
 | `Func<T1, T2, T3, TResult>` | `Function` | 🚧 |      |
 
-*<sub>For `[TSExport]` annotated classes</sub>
+*<sub>For `[TSExport]`/`[TSModule]` classes</sub>
 
 ## Run the sample
 
-In the Sample...
-
-TODO_EXPLAIN_LAUNCH_SAMPLE
-
+To build and run the project:
+```
+cd Sample/TypeShim.Sample.Client && npm run build && cd ../TypeShim.Sample.Server && dotnet run
+```
+The app should be available on [http://localhost:5012](http://localhost:5012)
 
 ## <a name="installing"></a>Installing
 
