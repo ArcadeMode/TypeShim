@@ -54,13 +54,13 @@ jobs:
           "version=$ver" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
       - name: Restore
-        run: dotnet restore TypeShim.sln
+        run: dotnet restore TypeShim.slnx
 
       - name: Build
-        run: dotnet build TypeShim.sln -c Release --no-restore
+        run: dotnet build TypeShim.slnx -c Release --no-restore
 
       - name: Test
-        run: dotnet test TypeShim.sln -c Release --no-build
+        run: dotnet test TypeShim.slnx -c Release --no-build
 
       - name: Pack TypeShim
         env:
