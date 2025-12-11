@@ -76,12 +76,10 @@ jobs:
           -p:ContinuousIntegrationBuild=true
 
       - name: Configure GitHub Packages source
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >
           dotnet nuget add source 
           --username ArcadeMode 
-          --password "$env:GITHUB_TOKEN" 
+          --password "${{ secrets.GITHUB_TOKEN }}" 
           --store-password-in-clear-text 
           --name github "https://nuget.pkg.github.com/ArcadeMode/index.json"
 
