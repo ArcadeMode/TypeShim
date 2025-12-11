@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { PeopleList, PeopleGrid } from '@typeshim/people-ui';
+import { PeopleRepository } from '@typeshim/people-ui';
+import type { AssemblyExports } from '@typeshim/wasm-exports';
 
-export default function People() {
+export default function People({ exportsPromise }: { exportsPromise: Promise<AssemblyExports> }) {
     const [view, setView] = useState<'list' | 'grid'>('list');
     const toggle = () => setView(v => (v === 'list' ? 'grid' : 'list'));
+    const repository = new PeopleRepository(exportsPromise);
     return (
     <div>
         <p>
@@ -46,9 +49,9 @@ export default function People() {
             {view === 'list' ? 'Switch to Grid' : 'Switch to List'}
         </button>
         {view === 'list' ? (
-        <PeopleList emptyText="No people yet." />
+        <PeopleList emptyText="No people yet." repository={repository} />
         ) : (
-        <PeopleGrid emptyText="No people yet." />
+        <PeopleGrid emptyText="No people yet." repository={repository} />
         )}
     </div>
     );

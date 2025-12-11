@@ -1,11 +1,21 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Home from './pages/Home';
 import People from './pages/People';
+import CapabilitiesPage from './pages/Capabilities';
+import type { AssemblyExports } from '@typeshim/wasm-exports';
 
-type Page = 'home' | 'people';
+type Page = 'home' | 'people' | 'capabilities';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
+
+  const exportsPromise: Promise<AssemblyExports> = useMemo(() => {
+    const starter = (window as any).wasmModuleStarter;
+    if (!starter || !starter.exports) {
+      throw new Error('wasmModuleStarter.exports not found. Ensure dotnet-start.js ran.');
+    }
+    return starter.exports as Promise<AssemblyExports>;
+  }, []);
 
   return (
     <div>
@@ -32,11 +42,19 @@ function App() {
           >
             People
           </a>
+          <a
+            href="#"
+            onClick={(e) => { e.preventDefault(); setCurrentPage('capabilities'); }}
+            style={{ color: currentPage === 'capabilities' ? '#61dafb' : '#ccc' }}
+          >
+            Capabilities
+          </a>
         </nav>
       </header>
       <main style={{ padding: '1rem', maxWidth: 800, margin: '0 auto' }}>
         {currentPage === 'home' && <Home />}
-        {currentPage === 'people' && <People />}
+        {currentPage === 'people' && <People exportsPromise={exportsPromise} />}
+        {currentPage === 'capabilities' && <CapabilitiesPage exportsPromise={exportsPromise} />}
       </main>
     </div>
   );

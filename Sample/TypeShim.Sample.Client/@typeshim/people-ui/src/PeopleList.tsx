@@ -2,14 +2,15 @@
 
 import React, { useEffect, useState } from 'react';
 import { PersonCard } from './PersonCard';
-import type { Person } from '@typeshim/people-exports';
-import { PeopleRepositoryInstance } from './PeopleRepository';
+import type { Person } from '@typeshim/wasm-exports';
+import { PeopleRepository } from './PeopleRepository';
 
 export interface PeopleListProps {
   emptyText?: string;
+  repository: PeopleRepository;
 }
 
-export const PeopleList: React.FC<PeopleListProps> = ({ emptyText = 'No people found.' }) => {
+export const PeopleList: React.FC<PeopleListProps> = ({ emptyText = 'No people found.', repository }) => {
   const [people, setPeople] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +18,7 @@ export const PeopleList: React.FC<PeopleListProps> = ({ emptyText = 'No people f
   useEffect(() => {
     const fetchPeople = async () => {
       try {
-        const data = await PeopleRepositoryInstance.getAllPeople();
+        const data = await repository.getAllPeople();
         setPeople(data);
       } catch (err) {
         console.error(err);

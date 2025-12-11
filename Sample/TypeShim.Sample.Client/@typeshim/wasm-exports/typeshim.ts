@@ -2,6 +2,11 @@
 export interface AssemblyExports {
     TypeShim: {
         Sample: {
+            Capabilities: {
+                CapabilitiesModuleInterop: CapabilitiesModuleInterop;
+                CapabilitiesInterop: CapabilitiesInterop;
+                StringCapabilityInterop: StringCapabilityInterop;
+            };
             DogInterop: DogInterop;
             PeopleInterop: PeopleInterop;
             PeopleProviderInterop: PeopleProviderInterop;
@@ -9,6 +14,26 @@ export interface AssemblyExports {
             TypeShimSampleModuleInterop: TypeShimSampleModuleInterop;
         };
     };
+}
+
+// Auto-generated TypeShim TSModule class. Source class: TypeShim.Sample.Capabilities.CapabilitiesModule
+export class CapabilitiesModule {
+  private interop: AssemblyExports;
+
+  constructor(interop: AssemblyExports) {
+    this.interop = interop;
+  }
+
+  public GetCapabilities(): Capabilities {
+    const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesModuleInterop.GetCapabilities();
+    return new CapabilitiesProxy(res, this.interop);
+  }
+
+  public get Capabilities(): Capabilities {
+    const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesModuleInterop.get_Capabilities();
+    return new CapabilitiesProxy(res, this.interop);
+  }
+
 }
 
 // Auto-generated TypeShim TSModule class. Source class: TypeShim.Sample.TypeShimSampleModule
@@ -24,6 +49,26 @@ export class TypeShimSampleModule {
     return res ? new PeopleProviderProxy(res, this.interop) : null;
   }
 
+}
+
+// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.CapabilitiesModule
+export interface CapabilitiesModuleInterop {
+    GetCapabilities(): object;
+    get_Capabilities(): object;
+}
+
+// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.Capabilities
+export interface CapabilitiesInterop {
+    VoidMethod(instance: object): void;
+    GetStringCapability(instance: object, baseString: string): object;
+}
+
+// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.StringCapability
+export interface StringCapabilityInterop {
+    GetBaseStringLength(instance: object): number;
+    ToUpperCase(instance: object, input: string): string;
+    ConcatStrings(instance: object, str1: string, str2: string): string;
+    get_BaseString(instance: object): string;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Dog
@@ -68,6 +113,20 @@ export interface TypeShimSampleModuleInterop {
     get_PeopleProvider(): object | null;
 }
 
+// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Capabilities.Capabilities
+export interface Capabilities {
+    VoidMethod(): void;
+    GetStringCapability(baseString: string): StringCapability;
+}
+
+// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Capabilities.StringCapability
+export interface StringCapability {
+    GetBaseStringLength(): number;
+    ToUpperCase(input: string): string;
+    ConcatStrings(str1: string, str2: string): string;
+    readonly BaseString: string;
+}
+
 // Auto-generated TypeScript interface. Source class: TypeShim.Sample.Dog
 export interface Dog {
     Bark(): string;
@@ -96,6 +155,55 @@ export interface Person {
     Name: string;
     Age: number;
     Pet: Dog | null;
+}
+
+// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Capabilities.Capabilities
+class CapabilitiesProxy implements Capabilities {
+  interop: AssemblyExports;
+  instance: object;
+
+  constructor(instance: object, interop: AssemblyExports) {
+    this.interop = interop;
+    this.instance = instance;
+  }
+
+  public VoidMethod(): void {
+    this.interop.TypeShim.Sample.Capabilities.CapabilitiesInterop.VoidMethod(this.instance);
+  }
+
+  public GetStringCapability(baseString: string): StringCapability {
+    const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesInterop.GetStringCapability(this.instance, baseString);
+    return new StringCapabilityProxy(res, this.interop);
+  }
+
+}
+
+// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Capabilities.StringCapability
+class StringCapabilityProxy implements StringCapability {
+  interop: AssemblyExports;
+  instance: object;
+
+  constructor(instance: object, interop: AssemblyExports) {
+    this.interop = interop;
+    this.instance = instance;
+  }
+
+  public GetBaseStringLength(): number {
+    return this.interop.TypeShim.Sample.Capabilities.StringCapabilityInterop.GetBaseStringLength(this.instance);
+  }
+
+  public ToUpperCase(input: string): string {
+    return this.interop.TypeShim.Sample.Capabilities.StringCapabilityInterop.ToUpperCase(this.instance, input);
+  }
+
+  public ConcatStrings(str1: string, str2: string): string {
+    return this.interop.TypeShim.Sample.Capabilities.StringCapabilityInterop.ConcatStrings(this.instance, str1, str2);
+  }
+
+  public get BaseString(): string {
+    return this.interop.TypeShim.Sample.Capabilities.StringCapabilityInterop.get_BaseString(this.instance);
+  }
+
 }
 
 // Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Dog

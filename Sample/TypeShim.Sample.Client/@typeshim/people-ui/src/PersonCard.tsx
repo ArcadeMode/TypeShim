@@ -1,5 +1,5 @@
 ﻿import React, { useState } from 'react';
-import type { Person } from '@typeshim/people-exports';
+import type { Person } from '@typeshim/wasm-exports';
 
 export interface PersonCardProps {
   initPerson: Person;
