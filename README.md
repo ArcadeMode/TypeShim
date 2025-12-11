@@ -271,7 +271,7 @@ TypeShim aims to continue to broaden its type support in order to improve the de
 
 To build and run the project:
 ```
-cd Sample/TypeShim.Sample.Client && npm run build && cd ../TypeShim.Sample.Server && dotnet run
+cd Sample/TypeShim.Sample.Client && npm install && npm run build && cd ../TypeShim.Sample.Server && dotnet run
 ```
 The app should be available on [http://localhost:5012](http://localhost:5012)
 
