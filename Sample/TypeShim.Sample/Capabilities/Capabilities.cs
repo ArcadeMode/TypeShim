@@ -8,17 +8,17 @@ namespace TypeShim.Sample.Capabilities;
 [TSModule]
 public static class CapabilitiesModule
 {
-    public static Capabilities Capabilities { get; } = new Capabilities();
+    public static CapabilitiesProvider GetCapabilitiesProvider() => new CapabilitiesProvider();
 }
 
 [TSExport]
-public class Capabilities
+public class CapabilitiesProvider
 {
     public void VoidMethod()
     {
     }
 
-    public PrimitivesCapability GetStringCapability(string baseString)
+    public PrimitivesDemo GetPrimitivesDemo(string baseString)
     {
         return new(baseString);
     }
@@ -47,7 +47,7 @@ public class Capabilities
 }
 
 [TSExport]
-public class PrimitivesCapability(string baseString)
+public class PrimitivesDemo(string baseString)
 {
     public string BaseString => baseString;
 

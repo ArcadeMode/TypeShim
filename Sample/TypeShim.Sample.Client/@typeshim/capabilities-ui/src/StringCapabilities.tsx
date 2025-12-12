@@ -1,19 +1,16 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import { AssemblyExports, Capabilities, PrimitivesCapability, CapabilitiesModule } from '@typeshim/wasm-exports/typeshim';
+import { AssemblyExports, CapabilitiesProvider, PrimitivesDemo, CapabilitiesModule } from '@typeshim/wasm-exports/typeshim';
 
 export interface StringCapabilitiesProps {
   exportsPromise?: Promise<AssemblyExports>;
 }
 
 export const StringCapabilities: React.FC<StringCapabilitiesProps> = ({ exportsPromise }) => {
-  const [cap, setCap] = useState<Capabilities | null>(null);
-  const [baseInput, setBaseInput] = useState('Hello');
-  const [stringCap, setStringCap] = useState<PrimitivesCapability | null>(null);
-  const [upperInput, setUpperInput] = useState('world');
-  const [concatA, setConcatA] = useState('foo');
-  const [concatB, setConcatB] = useState('bar');
+  const [cap, setCap] = useState<CapabilitiesProvider | null>(null);
+  const [newBaseInput, setNewBaseInput] = useState('Hello');
+  const [demos, setDemos] = useState<Array<{ instance: PrimitivesDemo; upperInput: string; concatA: string; concatB: string }>>([]);
 
   useEffect(() => {
     (async () => {
@@ -26,86 +23,83 @@ export const StringCapabilities: React.FC<StringCapabilitiesProps> = ({ exportsP
         exports = await (starter.exports as Promise<AssemblyExports>);
       }
       const module = new CapabilitiesModule(exports);
-      const capabilities = module.Capabilities;
+      const capabilities = module.GetCapabilitiesProvider();
       setCap(capabilities);
-      const sc = capabilities.GetStringCapability(baseInput);
-      setStringCap(sc);
     })().catch(console.error);
   }, [exportsPromise]);
 
-  useEffect(() => {
+  const createDemo = () => {
     if (!cap) return;
-    const sc = cap.GetStringCapability(baseInput);
-    setStringCap(sc);
-  }, [baseInput, cap]);
+    const instance = cap.GetPrimitivesDemo(newBaseInput);
+    setDemos(prev => [{ instance, upperInput: 'world', concatA: 'foo', concatB: 'bar' }, ...prev]);
+  };
 
   return (
     <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: '1rem' }}>
-      <h2>String Capabilities</h2>
+      <h2>Primitives</h2>
       <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.75rem', borderRadius: 6, marginBottom: '1rem' }}>
         <div>
           <span style={{ color: '#555' }}>const module</span>
           <span> = new CapabilitiesModule(exports)</span>
-          <span style={{ marginLeft: 8 }}>→ CapabilitiesModule</span>
+          <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ CapabilitiesModule</span>
           <br/>
           <span style={{ color: '#555' }}>const capabilities</span>
-          <span> = module.Capabilities</span>
-          <span style={{ marginLeft: 8 }}>→ Capabilities</span>
+          <span> = module.GetCapabilitiesProvider()</span>
+          <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ CapabilitiesProvider</span>
         </div>
       </div>
+
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+        <label style={{ fontFamily: 'monospace' }}>baseInput:</label>
+        <input value={newBaseInput} onChange={e => setNewBaseInput(e.target.value)} style={{ width: '50%' }} />
+      </div>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+        <button onClick={createDemo} disabled={!cap} style={{ padding: '0.5rem 0.75rem' }}>capabilities.GetPrimitivesDemo("{newBaseInput}")</button>
+      </div>
+      
+
       <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr' }}>
-        <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.75rem', borderRadius: 6 }}>
-          <div style={{ marginBottom: 6 }}>
-            <label style={{ marginRight: 8 }}>baseInput:</label>
-            <input value={baseInput} onChange={e => setBaseInput(e.target.value)} style={{ width: '60%' }} />
-          </div>
-          <div>
-            <span style={{ color: '#555' }}>const instance</span>
-            <span> = capabilities.ConstructPrimitivesCapability(baseInput)</span>
-            <span style={{ marginLeft: 8 }}>
-              → PrimitivesCapability
-            </span>
-          </div>
-          <div>
-            <span style={{ color: '#555' }}>length</span>
-            <span> = instance.GetStringLength()</span>
-            <span style={{ marginLeft: 8 }}>
-              → {stringCap ? stringCap.GetStringLength() : '-'}
-            </span>
-          </div>
-          <div>
-            <span style={{ color: '#555' }}>upper</span>
-            <span> = instance.ToUpperCase(upperInput)</span>
-            <span style={{ marginLeft: 8 }}>
-              → {stringCap ? stringCap.ToUpperCase() : '-'}
-            </span>
-          </div>
-          <div>
-            <span style={{ color: '#555' }}>baseString</span>
-            <span> = instance.BaseString</span>
-            <span style={{ marginLeft: 8 }}>
-              → {stringCap ? stringCap.BaseString : '-'}
-            </span>
-          </div>
-        </div>
+        {demos.map((demo, idx) => (
+          <div key={idx} style={{ border: '1px solid #eee', background: '#f0f0f0', borderRadius: 8, padding: '0.75rem' }}>
+            <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.5rem', borderRadius: 6, marginBottom: '0.5rem' }}>
+              <span style={{ color: '#555' }}>const instance</span>
+              <span> = capabilities.GetPrimitivesDemo("{demo.instance.BaseString}")</span>
+              <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ PrimitivesDemo</span>
+            </div>
 
-        <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.75rem', borderRadius: 6 }}>
-          <div style={{ marginBottom: 6 }}>
-            <label style={{ marginRight: 8 }}>concatA:</label>
-            <input value={concatA} onChange={e => setConcatA(e.target.value)} style={{ width: '30%' }} />
-            <br/>
-            <label style={{ marginRight: 8 }}>concatB:</label>
-            <input value={concatB} onChange={e => setConcatB(e.target.value)} style={{ width: '30%' }} />
-          </div>
-          <div>
-            <span style={{ color: '#555' }}>concat</span>
-            <span> = instance.ConcatStrings(concatA, concatB)</span>
-            <span style={{ marginLeft: 8 }}>
-              → {stringCap ? stringCap.Concat(concatA, concatB) : '-'}
-            </span>
-          </div>
-        </div>
+            <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.5rem', borderRadius: 6, marginBottom: '0.5rem' }}>
+              <div style={{ marginTop: 6 }}>
+                <span>instance.BaseString</span>
+                <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ {demo.instance.BaseString}</span>
+              </div>
+            </div>
+            <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.5rem', borderRadius: 6, marginBottom: '0.5rem' }}>
+              <div>
+                <span>instance.GetStringLength()</span>
+                <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ {demo.instance.GetStringLength()}</span>
+              </div>
+            </div>
+            <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.5rem', borderRadius: 6, marginBottom: '0.5rem' }}>
+              <div>
+                <span>instance.ContainsUpperCase()</span>
+                <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ {demo.instance.ContainsUpperCase() ? 'true' : 'false'}</span>
+              </div>
+            </div>
+            <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.5rem', borderRadius: 6, marginBottom: '0.5rem' }}>
+              <div>
+                <span>instance.ToUpperCase()</span>
+                <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ {demo.instance.ToUpperCase()}</span>
+              </div>
+            </div>
 
+            <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.5rem', borderRadius: 6, marginBottom: '0.5rem' }}>
+              <div>
+                <span>instance.ConcatStrings(str1: <input value={demo.concatA} onChange={e => setDemos(prev => prev.map((d, i) => i === idx ? { ...d, concatA: e.target.value } : d))} style={{ width: '60px' }} />, str2: <input value={demo.concatB} onChange={e => setDemos(prev => prev.map((d, i) => i === idx ? { ...d, concatB: e.target.value } : d))} style={{ width: '60px' }} />)</span>
+                <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ {demo.instance.Concat(demo.concatA, demo.concatB)}</span>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

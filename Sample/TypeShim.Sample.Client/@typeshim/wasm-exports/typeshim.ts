@@ -4,8 +4,8 @@ export interface AssemblyExports {
         Sample: {
             Capabilities: {
                 CapabilitiesModuleInterop: CapabilitiesModuleInterop;
-                CapabilitiesInterop: CapabilitiesInterop;
-                PrimitivesCapabilityInterop: PrimitivesCapabilityInterop;
+                CapabilitiesProviderInterop: CapabilitiesProviderInterop;
+                PrimitivesDemoInterop: PrimitivesDemoInterop;
             };
             DogInterop: DogInterop;
             PeopleInterop: PeopleInterop;
@@ -24,9 +24,9 @@ export class CapabilitiesModule {
     this.interop = interop;
   }
 
-  public get Capabilities(): Capabilities {
-    const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesModuleInterop.get_Capabilities();
-    return new CapabilitiesProxy(res, this.interop);
+  public GetCapabilitiesProvider(): CapabilitiesProvider {
+    const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesModuleInterop.GetCapabilitiesProvider();
+    return new CapabilitiesProviderProxy(res, this.interop);
   }
 
 }
@@ -48,17 +48,17 @@ export class TypeShimSampleModule {
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.CapabilitiesModule
 export interface CapabilitiesModuleInterop {
-    get_Capabilities(): object;
+    GetCapabilitiesProvider(): object;
 }
 
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.Capabilities
-export interface CapabilitiesInterop {
+// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.CapabilitiesProvider
+export interface CapabilitiesProviderInterop {
     VoidMethod(instance: object): void;
-    GetStringCapability(instance: object, baseString: string): object;
+    GetPrimitivesDemo(instance: object, baseString: string): object;
 }
 
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.PrimitivesCapability
-export interface PrimitivesCapabilityInterop {
+// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.PrimitivesDemo
+export interface PrimitivesDemoInterop {
     GetStringLength(instance: object): number;
     ToUpperCase(instance: object): string;
     Concat(instance: object, str1: string, str2: string): string;
@@ -108,14 +108,14 @@ export interface TypeShimSampleModuleInterop {
     get_PeopleProvider(): object | null;
 }
 
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Capabilities.Capabilities
-export interface Capabilities {
+// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Capabilities.CapabilitiesProvider
+export interface CapabilitiesProvider {
     VoidMethod(): void;
-    GetStringCapability(baseString: string): PrimitivesCapability;
+    GetPrimitivesDemo(baseString: string): PrimitivesDemo;
 }
 
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Capabilities.PrimitivesCapability
-export interface PrimitivesCapability {
+// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Capabilities.PrimitivesDemo
+export interface PrimitivesDemo {
     GetStringLength(): number;
     ToUpperCase(): string;
     Concat(str1: string, str2: string): string;
@@ -153,8 +153,8 @@ export interface Person {
     Pet: Dog | null;
 }
 
-// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Capabilities.Capabilities
-class CapabilitiesProxy implements Capabilities {
+// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Capabilities.CapabilitiesProvider
+class CapabilitiesProviderProxy implements CapabilitiesProvider {
   interop: AssemblyExports;
   instance: object;
 
@@ -164,18 +164,18 @@ class CapabilitiesProxy implements Capabilities {
   }
 
   public VoidMethod(): void {
-    this.interop.TypeShim.Sample.Capabilities.CapabilitiesInterop.VoidMethod(this.instance);
+    this.interop.TypeShim.Sample.Capabilities.CapabilitiesProviderInterop.VoidMethod(this.instance);
   }
 
-  public GetStringCapability(baseString: string): PrimitivesCapability {
-    const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesInterop.GetStringCapability(this.instance, baseString);
-    return new PrimitivesCapabilityProxy(res, this.interop);
+  public GetPrimitivesDemo(baseString: string): PrimitivesDemo {
+    const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesProviderInterop.GetPrimitivesDemo(this.instance, baseString);
+    return new PrimitivesDemoProxy(res, this.interop);
   }
 
 }
 
-// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Capabilities.PrimitivesCapability
-class PrimitivesCapabilityProxy implements PrimitivesCapability {
+// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Capabilities.PrimitivesDemo
+class PrimitivesDemoProxy implements PrimitivesDemo {
   interop: AssemblyExports;
   instance: object;
 
@@ -185,23 +185,23 @@ class PrimitivesCapabilityProxy implements PrimitivesCapability {
   }
 
   public GetStringLength(): number {
-    return this.interop.TypeShim.Sample.Capabilities.PrimitivesCapabilityInterop.GetStringLength(this.instance);
+    return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.GetStringLength(this.instance);
   }
 
   public ToUpperCase(): string {
-    return this.interop.TypeShim.Sample.Capabilities.PrimitivesCapabilityInterop.ToUpperCase(this.instance);
+    return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.ToUpperCase(this.instance);
   }
 
   public Concat(str1: string, str2: string): string {
-    return this.interop.TypeShim.Sample.Capabilities.PrimitivesCapabilityInterop.Concat(this.instance, str1, str2);
+    return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.Concat(this.instance, str1, str2);
   }
 
   public ContainsUpperCase(): boolean {
-    return this.interop.TypeShim.Sample.Capabilities.PrimitivesCapabilityInterop.ContainsUpperCase(this.instance);
+    return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.ContainsUpperCase(this.instance);
   }
 
   public get BaseString(): string {
-    return this.interop.TypeShim.Sample.Capabilities.PrimitivesCapabilityInterop.get_BaseString(this.instance);
+    return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.get_BaseString(this.instance);
   }
 
 }
