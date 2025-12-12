@@ -10,6 +10,7 @@ export interface ArraysDemoProps {
 type ArraysDemoState = {
   instance: ArraysDemo;
   appendValue: number;
+  setValue: number;
 };
 
 export const ArraysDemoComponent: React.FC<ArraysDemoProps> = ({ exportsPromise }) => {
@@ -35,7 +36,7 @@ export const ArraysDemoComponent: React.FC<ArraysDemoProps> = ({ exportsPromise 
   const createDemo = () => {
     if (!cap) return;
     const instance: ArraysDemo = cap.GetArraysDemo();
-    setDemos(prev => [{ instance, appendValue: 0 }, ...prev]);
+    setDemos(prev => [{ instance, appendValue: 0, setValue: 0 }, ...prev]);
   };
 
   return (
@@ -94,6 +95,19 @@ export const ArraysDemoComponent: React.FC<ArraysDemoProps> = ({ exportsPromise 
               <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ Void</span>
             </div>
 
+            <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.5rem', borderRadius: 6, marginBottom: '0.5rem' }}>
+              <span>instance.IntArrayProperty[0] =  
+                <input type="number" value={demo.setValue}
+                  onChange={e => {
+                    const val = Number(e.target.value);
+                    setDemos(prev => prev.map((d, i) => i === idx ? { ...d, setValue: Number.isFinite(val) ? val : 0 } : d))
+                  }}
+                  style={{ width: '60px' }} />
+                </span>
+              <button onClick={() => { demo.instance.IntArrayProperty[0] = demo.setValue; setDemos(prev => prev.map((d, i) => i === idx ? { ...d } : d)) }} 
+                      style={{ padding: '0.25rem 0.5rem', margin: '0 0.5rem', borderRadius: 4, borderWidth: 1 }}>Invoke</button>
+              <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ Void</span>
+            </div>
           </div>
         ))}
       </div>
