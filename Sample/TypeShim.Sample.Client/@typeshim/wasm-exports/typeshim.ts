@@ -53,7 +53,6 @@ export interface CapabilitiesModuleInterop {
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.CapabilitiesProvider
 export interface CapabilitiesProviderInterop {
-    VoidMethod(instance: object): void;
     GetPrimitivesDemo(instance: object, baseString: string): object;
 }
 
@@ -63,7 +62,11 @@ export interface PrimitivesDemoInterop {
     ToUpperCase(instance: object): string;
     Concat(instance: object, str1: string, str2: string): string;
     ContainsUpperCase(instance: object): boolean;
-    get_BaseString(instance: object): string;
+    ResetBaseString(instance: object): void;
+    MultiplyString(instance: object, times: number): void;
+    get_InitialStringProperty(instance: object): string;
+    get_StringProperty(instance: object): string;
+    set_StringProperty(instance: object, value: string): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Dog
@@ -110,7 +113,6 @@ export interface TypeShimSampleModuleInterop {
 
 // Auto-generated TypeScript interface. Source class: TypeShim.Sample.Capabilities.CapabilitiesProvider
 export interface CapabilitiesProvider {
-    VoidMethod(): void;
     GetPrimitivesDemo(baseString: string): PrimitivesDemo;
 }
 
@@ -120,7 +122,10 @@ export interface PrimitivesDemo {
     ToUpperCase(): string;
     Concat(str1: string, str2: string): string;
     ContainsUpperCase(): boolean;
-    readonly BaseString: string;
+    ResetBaseString(): void;
+    MultiplyString(times: number): void;
+    readonly InitialStringProperty: string;
+    StringProperty: string;
 }
 
 // Auto-generated TypeScript interface. Source class: TypeShim.Sample.Dog
@@ -163,10 +168,6 @@ class CapabilitiesProviderProxy implements CapabilitiesProvider {
     this.instance = instance;
   }
 
-  public VoidMethod(): void {
-    this.interop.TypeShim.Sample.Capabilities.CapabilitiesProviderInterop.VoidMethod(this.instance);
-  }
-
   public GetPrimitivesDemo(baseString: string): PrimitivesDemo {
     const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesProviderInterop.GetPrimitivesDemo(this.instance, baseString);
     return new PrimitivesDemoProxy(res, this.interop);
@@ -200,8 +201,24 @@ class PrimitivesDemoProxy implements PrimitivesDemo {
     return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.ContainsUpperCase(this.instance);
   }
 
-  public get BaseString(): string {
-    return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.get_BaseString(this.instance);
+  public ResetBaseString(): void {
+    this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.ResetBaseString(this.instance);
+  }
+
+  public MultiplyString(times: number): void {
+    this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.MultiplyString(this.instance, times);
+  }
+
+  public get InitialStringProperty(): string {
+    return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.get_InitialStringProperty(this.instance);
+  }
+
+  public get StringProperty(): string {
+    return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.get_StringProperty(this.instance);
+  }
+
+  public set StringProperty(value: string) {
+    this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.set_StringProperty(this.instance, value);
   }
 
 }

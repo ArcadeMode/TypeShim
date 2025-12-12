@@ -14,61 +14,59 @@ public static class CapabilitiesModule
 [TSExport]
 public class CapabilitiesProvider
 {
-    public void VoidMethod()
-    {
-    }
-
     public PrimitivesDemo GetPrimitivesDemo(string baseString)
     {
         return new(baseString);
     }
-
-    //public string StringMethod()
-    //{
-    //    return "Hello, TypeShim!";
-    //}
-
-    //public string[] ArrayMethod()
-    //{
-    //    return [ "One", "Two", "Three" ];
-    //}
-
-    //public async Task<int> IntMethodAsync()
-    //{
-    //    await Task.Delay(5);
-    //    return 42;
-    //}
-
-    //public async Task<string> StringMethodAsync()
-    //{
-    //    await Task.Delay(5);
-    //    return "Hello, TypeShim!";
-    //}
 }
 
 [TSExport]
 public class PrimitivesDemo(string baseString)
 {
-    public string BaseString => baseString;
+    public string InitialStringProperty { get; } = baseString;
+    public string StringProperty { get; set; } = baseString;
 
     public int GetStringLength()
     {
-        return baseString.Length;
+        return StringProperty.Length;
     }
-    
+
     public string ToUpperCase()
     {
-        return baseString.ToUpper();
+        return StringProperty.ToUpper();
     }
 
     public string Concat(string str1, string str2)
     {
-        return string.Concat(baseString, str1, str2);
+        return string.Concat(StringProperty, str1, str2);
     }
 
     public bool ContainsUpperCase()
     {
-        return baseString.Equals(baseString.ToLowerInvariant(), StringComparison.CurrentCultureIgnoreCase);
+        return StringProperty.Equals(StringProperty.ToLowerInvariant(), StringComparison.CurrentCultureIgnoreCase);
+    }
+    
+    public void ResetBaseString()
+    {
+        StringProperty = InitialStringProperty;
+    }
+
+    public void MultiplyString(int times)
+    {
+        if (times < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(times), "times must be non-negative");
+        }
+        if (times * InitialStringProperty.Length > 100_000)
+        {
+            throw new InvalidOperationException("Resulting string is too long");
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < times; i++)
+        {
+            sb.Append(StringProperty);
+        }
+        StringProperty = sb.ToString();
     }
 }
 
