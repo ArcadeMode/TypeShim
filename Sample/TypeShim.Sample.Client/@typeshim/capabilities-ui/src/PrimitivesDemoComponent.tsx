@@ -3,11 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import { AssemblyExports, CapabilitiesProvider, PrimitivesDemo, CapabilitiesModule } from '@typeshim/wasm-exports/typeshim';
 
-export interface StringCapabilitiesProps {
+export interface PrimitivesDemoProps {
   exportsPromise?: Promise<AssemblyExports>;
 }
 
-export const StringCapabilities: React.FC<StringCapabilitiesProps> = ({ exportsPromise }) => {
+export const PrimitivesDemoComponent: React.FC<PrimitivesDemoProps> = ({ exportsPromise }) => {
   const [cap, setCap] = useState<CapabilitiesProvider | null>(null);
   const [newBaseInput, setNewBaseInput] = useState('Hello');
   const [demos, setDemos] = useState<Array<{ instance: PrimitivesDemo; concatA: string; concatB: string; multiplyCount: number; multiplyResult?: string }>>([]);
@@ -49,14 +49,10 @@ export const StringCapabilities: React.FC<StringCapabilitiesProps> = ({ exportsP
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-        <label style={{ fontFamily: 'monospace' }}>baseInput:</label>
-        <input value={newBaseInput} onChange={e => setNewBaseInput(e.target.value)} style={{ width: '50%' }} />
-      </div>
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-        <button onClick={createDemo} disabled={!cap} style={{ padding: '0.5rem 0.75rem', borderRadius: 4, borderWidth: 1 }}>capabilities.GetPrimitivesDemo("{newBaseInput}")</button>
-      </div>
-      
+      <div style={{ marginBottom: '1rem', padding: '0.75rem' }}>
+        capabilities.GetPrimitivesDemo(<input value={newBaseInput} onChange={e => setNewBaseInput(e.target.value)} style={{ width: '60px' }} />)
+        <button onClick={createDemo} disabled={!cap} style={{ padding: '0.25rem 0.5rem', margin: '0 0.5rem', borderRadius: 4, borderWidth: 1 }}>Invoke</button>
+      </div>      
 
       <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr' }}>
         {demos.map((demo, idx) => (
@@ -74,7 +70,9 @@ export const StringCapabilities: React.FC<StringCapabilitiesProps> = ({ exportsP
               </div>
             </div>
             <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.5rem', borderRadius: 6, marginBottom: '0.5rem' }}>
-              <span>instance.StringProperty = <input value={demo.instance.StringProperty} onChange={e => { demo.instance.StringProperty = e.target.value; setDemos(prev => prev.map((d, i) => i === idx ? { ...d } : d))}}/></span>
+              <span>instance.StringProperty = <input value={demo.instance.StringProperty} 
+                                                     onChange={e => { demo.instance.StringProperty = e.target.value; setDemos(prev => prev.map((d, i) => i === idx ? { ...d } : d))}}
+                                                     style={{ width: '60px' }}/></span>
               <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ Void</span>
             </div>
             <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.5rem', borderRadius: 6, marginBottom: '0.5rem' }}>
@@ -111,18 +109,16 @@ export const StringCapabilities: React.FC<StringCapabilitiesProps> = ({ exportsP
             </div>
 
             <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.5rem', borderRadius: 6, marginBottom: '0.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span>instance.MultiplyString(count: 
-                  <input type="number" value={demo.multiplyCount}
-                    onChange={e => {
-                      const val = Number(e.target.value);
-                      setDemos(prev => prev.map((d, i) => i === idx ? { ...d, multiplyCount: Number.isFinite(val) ? val : 0 } : d))
-                    }}
-                    style={{ width: '40px' }} />)</span>
-                <button onClick={() => { demo.instance.MultiplyString(demo.multiplyCount); setDemos(prev => prev.map((d, i) => i === idx ? { ...d, } : d)) }}
-                        style={{ padding: '0.25rem 0.5rem', borderRadius: 4, borderWidth: 1 }}>Invoke</button>
-                <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ Void</span>
-              </div>
+              <span>instance.MultiplyString(count: 
+                <input type="number" value={demo.multiplyCount}
+                  onChange={e => {
+                    const val = Number(e.target.value);
+                    setDemos(prev => prev.map((d, i) => i === idx ? { ...d, multiplyCount: Number.isFinite(val) ? val : 0 } : d))
+                  }}
+                  style={{ width: '40px' }} />)</span>
+              <button onClick={() => { demo.instance.MultiplyString(demo.multiplyCount); setDemos(prev => prev.map((d, i) => i === idx ? { ...d, } : d)) }}
+                      style={{ padding: '0.25rem 0.5rem', margin: '0 0.5rem', borderRadius: 4, borderWidth: 1 }}>Invoke</button>
+              <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ Void</span>
             </div>
           </div>
         ))}

@@ -1,1 +1,1 @@
-export * from './StringCapabilities';
+export * from './PrimitivesDemoComponent';
