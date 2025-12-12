@@ -6,6 +6,7 @@ export interface AssemblyExports {
                 CapabilitiesModuleInterop: CapabilitiesModuleInterop;
                 CapabilitiesProviderInterop: CapabilitiesProviderInterop;
                 PrimitivesDemoInterop: PrimitivesDemoInterop;
+                ArraysDemoInterop: ArraysDemoInterop;
             };
             DogInterop: DogInterop;
             PeopleInterop: PeopleInterop;
@@ -54,6 +55,7 @@ export interface CapabilitiesModuleInterop {
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.CapabilitiesProvider
 export interface CapabilitiesProviderInterop {
     GetPrimitivesDemo(instance: object, baseString: string): object;
+    GetArraysDemo(instance: object): object;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.PrimitivesDemo
@@ -67,6 +69,14 @@ export interface PrimitivesDemoInterop {
     get_InitialStringProperty(instance: object): string;
     get_StringProperty(instance: object): string;
     set_StringProperty(instance: object, value: string): void;
+}
+
+// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.ArraysDemo
+export interface ArraysDemoInterop {
+    SumIntArray(instance: object): number;
+    AppendToIntArray(instance: object, value: number): void;
+    get_IntArrayProperty(instance: object): Array<number>;
+    set_IntArrayProperty(instance: object, value: Array<number>): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Dog
@@ -114,6 +124,7 @@ export interface TypeShimSampleModuleInterop {
 // Auto-generated TypeScript interface. Source class: TypeShim.Sample.Capabilities.CapabilitiesProvider
 export interface CapabilitiesProvider {
     GetPrimitivesDemo(baseString: string): PrimitivesDemo;
+    GetArraysDemo(): ArraysDemo;
 }
 
 // Auto-generated TypeScript interface. Source class: TypeShim.Sample.Capabilities.PrimitivesDemo
@@ -126,6 +137,13 @@ export interface PrimitivesDemo {
     MultiplyString(times: number): void;
     readonly InitialStringProperty: string;
     StringProperty: string;
+}
+
+// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Capabilities.ArraysDemo
+export interface ArraysDemo {
+    SumIntArray(): number;
+    AppendToIntArray(value: number): void;
+    IntArrayProperty: Array<number>;
 }
 
 // Auto-generated TypeScript interface. Source class: TypeShim.Sample.Dog
@@ -171,6 +189,11 @@ class CapabilitiesProviderProxy implements CapabilitiesProvider {
   public GetPrimitivesDemo(baseString: string): PrimitivesDemo {
     const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesProviderInterop.GetPrimitivesDemo(this.instance, baseString);
     return new PrimitivesDemoProxy(res, this.interop);
+  }
+
+  public GetArraysDemo(): ArraysDemo {
+    const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesProviderInterop.GetArraysDemo(this.instance);
+    return new ArraysDemoProxy(res, this.interop);
   }
 
 }
@@ -219,6 +242,34 @@ class PrimitivesDemoProxy implements PrimitivesDemo {
 
   public set StringProperty(value: string) {
     this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.set_StringProperty(this.instance, value);
+  }
+
+}
+
+// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Capabilities.ArraysDemo
+class ArraysDemoProxy implements ArraysDemo {
+  interop: AssemblyExports;
+  instance: object;
+
+  constructor(instance: object, interop: AssemblyExports) {
+    this.interop = interop;
+    this.instance = instance;
+  }
+
+  public SumIntArray(): number {
+    return this.interop.TypeShim.Sample.Capabilities.ArraysDemoInterop.SumIntArray(this.instance);
+  }
+
+  public AppendToIntArray(value: number): void {
+    this.interop.TypeShim.Sample.Capabilities.ArraysDemoInterop.AppendToIntArray(this.instance, value);
+  }
+
+  public get IntArrayProperty(): Array<number> {
+    return this.interop.TypeShim.Sample.Capabilities.ArraysDemoInterop.get_IntArrayProperty(this.instance);
+  }
+
+  public set IntArrayProperty(value: Array<number>) {
+    this.interop.TypeShim.Sample.Capabilities.ArraysDemoInterop.set_IntArrayProperty(this.instance, value);
   }
 
 }

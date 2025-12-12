@@ -18,6 +18,11 @@ public class CapabilitiesProvider
     {
         return new(baseString);
     }
+
+    public ArraysDemo GetArraysDemo()
+    {
+        return new();
+    }
 }
 
 [TSExport]
@@ -70,5 +75,24 @@ public class PrimitivesDemo(string baseString)
     }
 }
 
-//[TSExport]
-//public class 
+[TSExport]
+public class ArraysDemo
+{
+    public int[] IntArrayProperty { get; set; } = Array.Empty<int>();
+    
+    public int SumIntArray()
+    {
+        int sum = 0;
+        foreach (var item in IntArrayProperty)
+        {
+            sum += item;
+        }
+        return sum;
+    }
+    public void AppendToIntArray(int value)
+    {
+        var list = new List<int>(IntArrayProperty) { value };
+        IntArrayProperty = list.ToArray();
+    }
+
+}

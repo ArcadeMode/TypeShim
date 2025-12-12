@@ -31,12 +31,30 @@ export const PrimitivesDemoComponent: React.FC<PrimitivesDemoProps> = ({ exports
   const createDemo = () => {
     if (!cap) return;
     const instance = cap.GetPrimitivesDemo(newBaseInput);
-    setDemos(prev => [{ instance, concatA: 'foo', concatB: 'bar', multiplyCount: 2 }, ...prev]);
+    setDemos(prev => [{ instance, concatA: 'foo', concatB: 'bar', multiplyCount: 2, multiplyResult: 'Void' }, ...prev]);
+  };
+
+  const handleMultiplyInvoke = (idx: number) => {
+    setDemos(prev => {
+      const current = prev[idx];
+      let result = 'Void';
+      try {
+        current.instance.MultiplyString(current.multiplyCount)
+        
+      } catch (err: any) {
+        const message = err?.message ? String(err.message) : String(err);
+        debugger;
+        result = `Error: ${message}`;        
+      }
+      const next = [...prev];
+      next[idx] = { ...current, multiplyResult: result };
+      return next;
+    });
   };
 
   return (
     <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: '1rem' }}>
-      <h2>Primitives</h2>
+      <h2 style={{ margin: 0, paddingLeft: '0.5em'}}>Primitives</h2>
       <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.75rem', borderRadius: 6, marginBottom: '1rem' }}>
         <div>
           <span style={{ color: '#555' }}>const module</span>
@@ -116,9 +134,9 @@ export const PrimitivesDemoComponent: React.FC<PrimitivesDemoProps> = ({ exports
                     setDemos(prev => prev.map((d, i) => i === idx ? { ...d, multiplyCount: Number.isFinite(val) ? val : 0 } : d))
                   }}
                   style={{ width: '40px' }} />)</span>
-              <button onClick={() => { demo.instance.MultiplyString(demo.multiplyCount); setDemos(prev => prev.map((d, i) => i === idx ? { ...d, } : d)) }}
+              <button onClick={() => handleMultiplyInvoke(idx)}
                       style={{ padding: '0.25rem 0.5rem', margin: '0 0.5rem', borderRadius: 4, borderWidth: 1 }}>Invoke</button>
-              <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ Void</span>
+              <span style={{ marginLeft: 8, color: (demo.multiplyResult?.startsWith('Error:') ? 'red' : 'rebeccapurple') }}>→ {demo.multiplyResult}</span>
             </div>
           </div>
         ))}
