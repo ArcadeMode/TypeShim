@@ -9,7 +9,6 @@ namespace TypeShim.Sample.Capabilities;
 public static class CapabilitiesModule
 {
     public static Capabilities Capabilities { get; } = new Capabilities();
-    public static Capabilities GetCapabilities() => new Capabilities();
 }
 
 [TSExport]
@@ -19,7 +18,7 @@ public class Capabilities
     {
     }
 
-    public StringCapability GetStringCapability(string baseString)
+    public PrimitivesCapability GetStringCapability(string baseString)
     {
         return new(baseString);
     }
@@ -48,22 +47,30 @@ public class Capabilities
 }
 
 [TSExport]
-public class StringCapability(string baseString)
+public class PrimitivesCapability(string baseString)
 {
     public string BaseString => baseString;
 
-    public int GetBaseStringLength()
+    public int GetStringLength()
     {
         return baseString.Length;
     }
     
-    public string ToUpperCase(string input)
+    public string ToUpperCase()
     {
-        return input.ToUpper();
+        return baseString.ToUpper();
     }
 
-    public string ConcatStrings(string str1, string str2)
+    public string Concat(string str1, string str2)
     {
         return string.Concat(baseString, str1, str2);
     }
+
+    public bool ContainsUpperCase()
+    {
+        return baseString.Equals(baseString.ToLowerInvariant(), StringComparison.CurrentCultureIgnoreCase);
+    }
 }
+
+//[TSExport]
+//public class 

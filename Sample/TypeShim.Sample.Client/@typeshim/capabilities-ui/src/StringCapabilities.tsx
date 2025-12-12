@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import { AssemblyExports, Capabilities, StringCapability, CapabilitiesModule } from '@typeshim/wasm-exports/typeshim';
+import { AssemblyExports, Capabilities, PrimitivesCapability, CapabilitiesModule } from '@typeshim/wasm-exports/typeshim';
 
 export interface StringCapabilitiesProps {
   exportsPromise?: Promise<AssemblyExports>;
@@ -10,7 +10,7 @@ export interface StringCapabilitiesProps {
 export const StringCapabilities: React.FC<StringCapabilitiesProps> = ({ exportsPromise }) => {
   const [cap, setCap] = useState<Capabilities | null>(null);
   const [baseInput, setBaseInput] = useState('Hello');
-  const [stringCap, setStringCap] = useState<StringCapability | null>(null);
+  const [stringCap, setStringCap] = useState<PrimitivesCapability | null>(null);
   const [upperInput, setUpperInput] = useState('world');
   const [concatA, setConcatA] = useState('foo');
   const [concatB, setConcatB] = useState('bar');
@@ -26,7 +26,7 @@ export const StringCapabilities: React.FC<StringCapabilitiesProps> = ({ exportsP
         exports = await (starter.exports as Promise<AssemblyExports>);
       }
       const module = new CapabilitiesModule(exports);
-      const capabilities = module.GetCapabilities();
+      const capabilities = module.Capabilities;
       setCap(capabilities);
       const sc = capabilities.GetStringCapability(baseInput);
       setStringCap(sc);
@@ -49,7 +49,7 @@ export const StringCapabilities: React.FC<StringCapabilitiesProps> = ({ exportsP
           <span style={{ marginLeft: 8 }}>→ CapabilitiesModule</span>
           <br/>
           <span style={{ color: '#555' }}>const capabilities</span>
-          <span> = module.GetCapabilities()</span>
+          <span> = module.Capabilities</span>
           <span style={{ marginLeft: 8 }}>→ Capabilities</span>
         </div>
       </div>
@@ -61,30 +61,30 @@ export const StringCapabilities: React.FC<StringCapabilitiesProps> = ({ exportsP
           </div>
           <div>
             <span style={{ color: '#555' }}>const instance</span>
-            <span> = capabilities.GetStringCapability(baseInput)</span>
+            <span> = capabilities.ConstructPrimitivesCapability(baseInput)</span>
             <span style={{ marginLeft: 8 }}>
-              → StringCapability
+              → PrimitivesCapability
             </span>
           </div>
           <div>
             <span style={{ color: '#555' }}>length</span>
-            <span> = instance.GetBaseStringLength()</span>
+            <span> = instance.GetStringLength()</span>
             <span style={{ marginLeft: 8 }}>
-              → {stringCap ? stringCap.GetBaseStringLength() : '-'}
+              → {stringCap ? stringCap.GetStringLength() : '-'}
             </span>
-          </div>
-        </div>
-
-        <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.75rem', borderRadius: 6 }}>
-          <div style={{ marginBottom: 6 }}>
-            <label style={{ marginRight: 8 }}>upperInput:</label>
-            <input value={upperInput} onChange={e => setUpperInput(e.target.value)} style={{ width: '60%' }} />
           </div>
           <div>
             <span style={{ color: '#555' }}>upper</span>
             <span> = instance.ToUpperCase(upperInput)</span>
             <span style={{ marginLeft: 8 }}>
-              → {stringCap ? stringCap.ToUpperCase(upperInput) : '-'}
+              → {stringCap ? stringCap.ToUpperCase() : '-'}
+            </span>
+          </div>
+          <div>
+            <span style={{ color: '#555' }}>baseString</span>
+            <span> = instance.BaseString</span>
+            <span style={{ marginLeft: 8 }}>
+              → {stringCap ? stringCap.BaseString : '-'}
             </span>
           </div>
         </div>
@@ -101,20 +101,11 @@ export const StringCapabilities: React.FC<StringCapabilitiesProps> = ({ exportsP
             <span style={{ color: '#555' }}>concat</span>
             <span> = instance.ConcatStrings(concatA, concatB)</span>
             <span style={{ marginLeft: 8 }}>
-              → {stringCap ? stringCap.ConcatStrings(concatA, concatB) : '-'}
+              → {stringCap ? stringCap.Concat(concatA, concatB) : '-'}
             </span>
           </div>
         </div>
 
-        <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.75rem', borderRadius: 6 }}>
-          <div>
-            <span style={{ color: '#555' }}>baseString</span>
-            <span> = instance.BaseString</span>
-            <span style={{ marginLeft: 8 }}>
-              → {stringCap ? stringCap.BaseString : '-'}
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );
