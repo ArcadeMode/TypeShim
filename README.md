@@ -4,20 +4,17 @@
 </p>
 
 ## Why TypeShim
-The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), lacks type information, exclusively supports static methods and overal lacks ergonomics. You need to learn various details about type marshalling and frankly, you just wanted to run your C# code in the browser..
+The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), while powerful, lacks type information and exclusively supports static methods. Generally it requires repetitive code patterns to achieve reasonable ergonomics in your code. It takes júst a little too much effort..
 
-Enter: _TypeShim_. Drop a `[TSExport]` on your C# class and _voilà_, a typescript class you can interact with. Generated C# interop ánd TypeScript classes that look and behave _just_ like your C# classes. Get a class instance from the dotnet runtime and use its methods and properties, just like you wanted to do in the first place. 
+Enter: _TypeShim_. Drop a `[TSExport]`/`[TSModule]` on your C# class and _voilà_, TypeShim generates a set of JSExport methods and TypeScript classes to access your .NET class as if its truely exported to TypeScript.
 
-> Fully automated construction of your Wasm interop facade and a matching TypeScript library to boot.
-
-### Getting started
- It only takes [one command to install](#installing) in your project!
-<sub>and maybe one or two [project settings](#configuration).</sub>
+> TypeShim delivers you fully automated construction of your .NET-JS interop by building your C# JSExport facade with a matching TypeScript library to boot.
 
 ## Features at a glance
+- Minimal setup: just [NuGet install](#installing)
 - One attribute opt-in to interop
-    - Generated JSExport shims
-    - Generated TypeScript shims
+    - Compile-time generated JSExport shims
+    - Compile-time generated TypeScript shims
 - [Enriched type marshalling](#enriched-type-support) 
     - _Your_ classes accessible from TypeScript.
     - Code generation ensures Type-safety across the interop boundary.
@@ -277,7 +274,8 @@ The app should be available on [http://localhost:5012](http://localhost:5012)
 
 ## <a name="installing"></a>Installing
 
-To use TypeShim all you have to do is install it directly into your `Microsoft.NET.Sdk.WebAssembly`-powered project.
+To use TypeShim all you have to do is install it directly into your `Microsoft.NET.Sdk.WebAssembly`-powered project. Check the [configuration](#configuration) section for configuration you might want to adjust to your project.
+
 ```
 nuget install TypeShim
 ```
