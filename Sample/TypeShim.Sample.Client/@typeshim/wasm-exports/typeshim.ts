@@ -141,8 +141,14 @@ export namespace CapabilitiesProvider {
       return new ArraysDemo.Proxy(res, this.interop);
     }
 
-}
+  }
 
+  export interface Snapshot {
+  }
+  export function snapshot(proxy: CapabilitiesProvider.Proxy): CapabilitiesProvider.Snapshot {
+    return {
+    };
+  }
 }
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.PrimitivesDemo
@@ -192,8 +198,18 @@ export namespace PrimitivesDemo {
       this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.set_StringProperty(this.instance, value);
     }
 
-}
+  }
 
+  export interface Snapshot {
+    InitialStringProperty: string;
+    StringProperty: string;
+  }
+  export function snapshot(proxy: PrimitivesDemo.Proxy): PrimitivesDemo.Snapshot {
+    return {
+      InitialStringProperty: proxy.InitialStringProperty,
+      StringProperty: proxy.StringProperty,
+    };
+  }
 }
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.ArraysDemo
@@ -223,8 +239,16 @@ export namespace ArraysDemo {
       this.interop.TypeShim.Sample.Capabilities.ArraysDemoInterop.set_IntArrayProperty(this.instance, value);
     }
 
-}
+  }
 
+  export interface Snapshot {
+    IntArrayProperty: Array<number>;
+  }
+  export function snapshot(proxy: ArraysDemo.Proxy): ArraysDemo.Snapshot {
+    return {
+      IntArrayProperty: proxy.IntArrayProperty.map(item => item),
+    };
+  }
 }
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.People
@@ -243,8 +267,16 @@ export namespace People {
       return res.map(item => new Person.Proxy(item, this.interop));
     }
 
-}
+  }
 
+  export interface Snapshot {
+    All: Array<Person.Snapshot>;
+  }
+  export function snapshot(proxy: People.Proxy): People.Snapshot {
+    return {
+      All: proxy.All.map(item => Person.snapshot(item)),
+    };
+  }
 }
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Person
@@ -301,8 +333,22 @@ export namespace Person {
       this.interop.TypeShim.Sample.PersonInterop.set_Pet(this.instance, valueInstance);
     }
 
-}
+  }
 
+  export interface Snapshot {
+    Id: number;
+    Name: string;
+    Age: number;
+    Pet: Dog.Snapshot | null;
+  }
+  export function snapshot(proxy: Person.Proxy): Person.Snapshot {
+    return {
+      Id: proxy.Id,
+      Name: proxy.Name,
+      Age: proxy.Age,
+      Pet: proxy.Pet ? Dog.snapshot(proxy.Pet) : null,
+    };
+  }
 }
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Dog
@@ -348,8 +394,20 @@ export namespace Dog {
       this.interop.TypeShim.Sample.DogInterop.set_Age(this.instance, value);
     }
 
-}
+  }
 
+  export interface Snapshot {
+    Name: string;
+    Breed: string;
+    Age: number;
+  }
+  export function snapshot(proxy: Dog.Proxy): Dog.Snapshot {
+    return {
+      Name: proxy.Name,
+      Breed: proxy.Breed,
+      Age: proxy.Age,
+    };
+  }
 }
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.PeopleProvider
@@ -368,7 +426,13 @@ export namespace PeopleProvider {
       return new People.Proxy(res, this.interop);
     }
 
-}
+  }
 
+  export interface Snapshot {
+  }
+  export function snapshot(proxy: PeopleProvider.Proxy): PeopleProvider.Snapshot {
+    return {
+    };
+  }
 }
 

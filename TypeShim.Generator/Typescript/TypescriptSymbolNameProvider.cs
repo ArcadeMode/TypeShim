@@ -22,6 +22,16 @@ internal class TypescriptSymbolNameProvider(TypeScriptTypeMapper typeMapper)
     }
     private string RenderUserClassProxyReferenceName(InteropTypeInfo typeInfo) => $"{typeMapper.ToTypeScriptType(typeInfo).Render(suffix: $".{GetProxyDefinitionName()}")}";
 
+    internal string GetSnapshotDefinitionName() => $"Snapshot";
+    internal string GetSnapshotReferenceName(ClassInfo classInfo) => RenderUserClassSnapshotReferenceName(classInfo.Type);
+    internal string? GetSnapshotReferenceNameIfExists(InteropTypeInfo typeInfo)
+    {
+        return typeMapper.IsUserType(typeInfo) || (typeInfo.TypeArgument is InteropTypeInfo argTypeInfo && typeMapper.IsUserType(argTypeInfo))
+            ? RenderUserClassSnapshotReferenceName(typeInfo)
+            : null;
+    }
+    private string RenderUserClassSnapshotReferenceName(InteropTypeInfo typeInfo) => $"{typeMapper.ToTypeScriptType(typeInfo).Render(suffix: $".{GetSnapshotDefinitionName()}")}";
+
     /// <summary>
     /// returns the TypeScript type name without any proxy or snapshot suffixes. Mostly useful for non-user types like string, int with accomodations for Tasks, arrays etc.
     /// </summary>
@@ -29,13 +39,4 @@ internal class TypescriptSymbolNameProvider(TypeScriptTypeMapper typeMapper)
     /// <returns></returns>
     internal string GetNakedSymbolReference(InteropTypeInfo typeInfo) => typeMapper.ToTypeScriptType(typeInfo).Render(suffix: string.Empty);
 
-
-
-}
-
-enum SymbolReferenceType
-{
-    None,
-    Proxy,
-    Snapshot
 }

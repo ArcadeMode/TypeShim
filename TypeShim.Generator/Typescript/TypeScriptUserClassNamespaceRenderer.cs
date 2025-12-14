@@ -1,20 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text;
 using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
 
-internal class TypeScriptUserClassNamespaceRenderer(ClassInfo classInfo, TypeScriptMethodRenderer methodRenderer, TypescriptSymbolNameProvider symbolNameProvider)
+internal sealed class TypeScriptUserClassNamespaceRenderer(ClassInfo classInfo, TypeScriptMethodRenderer methodRenderer, TypescriptSymbolNameProvider symbolNameProvider)
 {
     private readonly StringBuilder sb = new();
     internal string Render()
     {
-        TypescriptUserClassProxyRenderer proxyRenderer = new(classInfo, methodRenderer, symbolNameProvider);
-
         sb.AppendLine($"// Auto-generated TypeScript namespace for class: {classInfo.Namespace}.{classInfo.Name}");
         sb.AppendLine($"export namespace {symbolNameProvider.GetUserClassNamespace(classInfo)} {{");
+        TypescriptUserClassProxyRenderer proxyRenderer = new(classInfo, methodRenderer, symbolNameProvider);
         sb.AppendLine(proxyRenderer.Render(depth: 1));
+        
+        if (classInfo.Properties.Any(p => p.Type.IsSnapshotCompatible))
+        {
+            TypeScriptUserClassSnapshotRenderer snapshotRenderer = new(classInfo, symbolNameProvider);
+            sb.AppendLine(snapshotRenderer.Render(depth: 1));
+        }
         sb.AppendLine($"}}");
         return sb.ToString();
     }

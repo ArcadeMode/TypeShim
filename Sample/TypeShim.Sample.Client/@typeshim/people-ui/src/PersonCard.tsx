@@ -1,5 +1,5 @@
 ﻿import React, { useState } from 'react';
-import type { Person } from '@typeshim/wasm-exports';
+import { Person } from '@typeshim/wasm-exports';
 
 export interface PersonCardProps {
   initPerson: Person.Proxy;
@@ -7,8 +7,10 @@ export interface PersonCardProps {
 
 export const PersonCard: React.FC<PersonCardProps> = ({ initPerson }) => {
   const [wrapper, setPerson] = useState<{person: Person.Proxy}>({person: initPerson});
-  const person = wrapper.person;
-  const pet = person.Pet;
+  const personSnapshot = Person.snapshot(wrapper.person);
+  const petSnapshot = personSnapshot.Pet;
+  const personProxy = wrapper.person;
+  const petProxy = personProxy.Pet;
   return (
       <div
           style={{
@@ -21,11 +23,11 @@ export const PersonCard: React.FC<PersonCardProps> = ({ initPerson }) => {
               flexDirection: 'row',
               justifyContent: 'space-between',
           }}>
-      <div title={`${person.Name} (Id: ${person.Id})`} style={{ padding: '0.5rem' }}>
-        <h3 style={{ margin: '0 0 0.25rem 0' }}>{person.Name}</h3>
-        <p style={{ margin: 0, fontSize: '0.875rem', color: '#555' }}>Age: {person.Age}</p>
+      <div title={`${personSnapshot.Name} (Id: ${personSnapshot.Id})`} style={{ padding: '0.5rem' }}>
+        <h3 style={{ margin: '0 0 0.25rem 0' }}>{personSnapshot.Name}</h3>
+        <p style={{ margin: 0, fontSize: '0.875rem', color: '#555' }}>Age: {personSnapshot.Age}</p>
       </div>
-      {pet && (
+      {petSnapshot && petProxy && (
         <div>
           <span style={{
             display: 'inline-block',
@@ -36,12 +38,12 @@ export const PersonCard: React.FC<PersonCardProps> = ({ initPerson }) => {
             color: '#1e3a8a',
             fontSize: '0.75rem',
             border: '1px solid #cfe0ff'
-          }} title={`Pet: ${pet.Name} (Breed: ${pet.Breed})`}>
-            Pet: {pet.Name} {pet.GetAge(false)} years/{pet.GetAge(true)} years ({pet.Breed}) - {pet.Bark()}
+          }} title={`Pet: ${petSnapshot.Name} (Breed: ${petSnapshot.Breed})`}>
+            Pet: {petSnapshot.Name} {petProxy.GetAge(false)} years/{petProxy.GetAge(true)} years ({petSnapshot.Breed}) - {petProxy.Bark()}
           </span>
         </div>
       )}
-      {!pet && (
+      {!petSnapshot && (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <button 
             style={{
@@ -57,7 +59,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({ initPerson }) => {
               cursor: 'pointer'
             }}
             onClick={() => {
-              person.AdoptPet(); 
+              personProxy.AdoptPet(); 
               setPerson({...wrapper}); 
             }}>
             Adopt a pet!

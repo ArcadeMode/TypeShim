@@ -33,7 +33,8 @@ internal sealed class InteropTypeInfo
 
     internal required bool IsTaskType { get; init; }
     internal required bool IsArrayType { get; init; }
-    internal required bool IsNullableType { get; init; } //TODO: factor out, terrible modelling. include Array<T?>, Array<T>, T? better.
+    internal required bool IsNullableType { get; init; }
+    internal required bool IsSnapshotCompatible { get; init; }
 
     /// <summary>
     /// Transforms this <see cref="InteropTypeInfo"/> into one suitable for interop method signatures.
@@ -53,7 +54,8 @@ internal sealed class InteropTypeInfo
                 IsArrayType = false,
                 IsNullableType = this.IsNullableType,
                 RequiresCLRTypeConversion = false,
-                TypeArgument = null
+                TypeArgument = null,
+                IsSnapshotCompatible = this.IsSnapshotCompatible,
             };
 
         }
@@ -69,7 +71,8 @@ internal sealed class InteropTypeInfo
                 IsArrayType = this.IsArrayType,
                 IsNullableType = this.IsNullableType,
                 RequiresCLRTypeConversion = false,
-                TypeArgument = CLRObjectTypeInfo
+                TypeArgument = CLRObjectTypeInfo,
+                IsSnapshotCompatible = this.IsSnapshotCompatible,
             };
         }
         else
@@ -78,20 +81,7 @@ internal sealed class InteropTypeInfo
         }
     }
 
-    internal static InteropTypeInfo CLRVoidTypeInfo = new()
-    {
-        ManagedType = KnownManagedType.Void,
-        JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Void"),
-        InteropTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
-        CLRTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
-        IsTaskType = false,
-        IsArrayType = false,
-        IsNullableType = false,
-        RequiresCLRTypeConversion = false,
-        TypeArgument = null,
-    };
-
-    internal static readonly InteropTypeInfo CLRObjectTypeInfo = new()
+    private static readonly InteropTypeInfo CLRObjectTypeInfo = new()
     {
         ManagedType = KnownManagedType.Object,
         JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Any"),
@@ -102,5 +92,6 @@ internal sealed class InteropTypeInfo
         IsNullableType = false,
         RequiresCLRTypeConversion = false,
         TypeArgument = null,
+        IsSnapshotCompatible = true,
     };
 }

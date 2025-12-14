@@ -34,7 +34,8 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
             RequiresCLRTypeConversion = simpleTypeInfo.KnownType == KnownManagedType.Object,
             IsTaskType = false,
             IsArrayType = false,
-            IsNullableType = clrTypeSyntax is NullableTypeSyntax
+            IsNullableType = clrTypeSyntax is NullableTypeSyntax,
+            IsSnapshotCompatible = true
         };
     }
 
@@ -53,7 +54,8 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
             RequiresCLRTypeConversion = elementTypeInfo.RequiresCLRTypeConversion,
             IsTaskType = false,
             IsArrayType = true,
-            IsNullableType = false
+            IsNullableType = false,
+            IsSnapshotCompatible = elementTypeInfo.IsSnapshotCompatible
         };
 
         static ITypeSymbol? GetTypeArgument(ITypeSymbol typeSymbol)
@@ -88,7 +90,8 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
             RequiresCLRTypeConversion = taskReturnTypeInfo?.RequiresCLRTypeConversion ?? false,
             IsTaskType = true,
             IsArrayType = false,
-            IsNullableType = false
+            IsNullableType = false,
+            IsSnapshotCompatible = false // task completion cannot be snapshotted
         };
 
         static ITypeSymbol? GetTypeArgument(ITypeSymbol typeSymbol)
@@ -119,7 +122,8 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
             RequiresCLRTypeConversion = innerTypeInfo.RequiresCLRTypeConversion,
             IsTaskType = false,
             IsArrayType = false,
-            IsNullableType = true
+            IsNullableType = true,
+            IsSnapshotCompatible = innerTypeInfo.IsSnapshotCompatible
         };
 
         static ITypeSymbol? GetTypeArgument(ITypeSymbol typeSymbol)
@@ -145,7 +149,8 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
             RequiresCLRTypeConversion = innerTypeInfo.RequiresCLRTypeConversion,
             IsTaskType = false,
             IsArrayType = false,
-            IsNullableType = true
+            IsNullableType = true,
+            IsSnapshotCompatible = innerTypeInfo.IsSnapshotCompatible
         };
 
         static ITypeSymbol? GetTypeArgument(ITypeSymbol typeSymbol)
