@@ -48,7 +48,6 @@ internal sealed class ProgramArguments
             fileInfos[i] = new CSharpFileInfo
             {
                 SyntaxTree = CSharpSyntaxTree.ParseText(code),
-                Path = csFilePath
             };
         }
         return fileInfos;
