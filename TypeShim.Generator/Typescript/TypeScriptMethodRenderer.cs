@@ -1,32 +1,44 @@
 ﻿namespace TypeShim.Generator.Typescript;
 
-internal class TypeScriptMethodRenderer(TypeScriptTypeMapper typeMapper)
+internal class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symbolNameProvider)
 {
-    internal string RenderPropertyGetterSignatureForClass(MethodInfo methodInfo)
+    internal string RenderProxyPropertyGetterSignature(MethodInfo methodInfo)
     {
-
-        return $"get {methodInfo.Name.TrimStart("get_")}({RenderMethodParameters(methodInfo)}): {typeMapper.ToTypeScriptType(methodInfo.ReturnType)}";
+        string returnType = symbolNameProvider.GetProxyReferenceNameIfExists(methodInfo.ReturnType) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
+        return $"get {methodInfo.Name.TrimStart("get_")}({RenderProxyMethodParameters(methodInfo)}): {returnType}";
     }
 
-    internal string RenderPropertySetterSignatureForClass(MethodInfo methodInfo)
+    internal string RenderProxyPropertySetterSignature(MethodInfo methodInfo)
     {
-        return $"set {methodInfo.Name.TrimStart("set_")}({RenderMethodParameters(methodInfo)})";
+        return $"set {methodInfo.Name.TrimStart("set_")}({RenderProxyMethodParameters(methodInfo)})";
     }
 
-    internal string RenderMethodSignatureForClass(MethodInfo methodInfo)
+    internal string RenderProxyMethodSignature(MethodInfo methodInfo)
     {
+        string returnType = symbolNameProvider.GetProxyReferenceNameIfExists(methodInfo.ReturnType) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
+
         string optionalAsync = methodInfo.ReturnType.IsTaskType ? "async " : string.Empty;
-        return $"{optionalAsync}{RenderMethodSignatureForInterface(methodInfo)}";
+        return $"{optionalAsync}{methodInfo.Name}({RenderProxyMethodParameters(methodInfo)}): {returnType}";
     }
 
-    internal string RenderMethodSignatureForInterface(MethodInfo methodInfo)
+    private string RenderProxyMethodParameters(MethodInfo methodInfo)
     {
-        return $"{methodInfo.Name}({RenderMethodParameters(methodInfo)}): {typeMapper.ToTypeScriptType(methodInfo.ReturnType)}";
+        return string.Join(", ", methodInfo.MethodParameters.Select(p =>
+        {
+            string returnType = symbolNameProvider.GetProxyReferenceNameIfExists(p.Type) ?? symbolNameProvider.GetNakedSymbolReference(p.Type);
+            return $"{p.Name}: {returnType}";
+        }));
     }
 
-    private string RenderMethodParameters(MethodInfo methodInfo)
+    internal string RenderInteropMethodSignature(MethodInfo methodInfo)
     {
-        return string.Join(", ", methodInfo.MethodParameters
-            .Select(p => $"{p.Name}: {typeMapper.ToTypeScriptType(p.Type)}"));
+        string returnType = symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
+        return $"{methodInfo.Name}({RenderInteropMethodParameters(methodInfo)}): {returnType}";
+
+        string RenderInteropMethodParameters(MethodInfo methodInfo)
+        {
+            return string.Join(", ", methodInfo.MethodParameters
+                .Select(p => $"{p.Name}: {symbolNameProvider.GetNakedSymbolReference(p.Type)}"));
+        }
     }
 }

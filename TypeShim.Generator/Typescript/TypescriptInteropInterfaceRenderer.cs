@@ -10,25 +10,25 @@ namespace TypeShim.Generator.Typescript;
 /// </summary>
 /// <param name="classInfo"></param>
 /// <param name="methodRenderer"></param>
-/// <param name="classNameBuilder"></param>
-internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypeScriptMethodRenderer methodRenderer, TypescriptClassNameBuilder classNameBuilder)
+/// <param name="symbolNameProvider"></param>
+internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypeScriptMethodRenderer methodRenderer, TypescriptSymbolNameProvider symbolNameProvider)
 {
     private readonly StringBuilder sb = new();
 
     internal string Render()
     {
         sb.AppendLine($"// Auto-generated TypeScript interop interface. Source class: {classInfo.Namespace}.{classInfo.Name}");
-        sb.AppendLine($"export interface {classNameBuilder.GetInteropInterfaceName(classInfo)} {{");
+        sb.AppendLine($"export interface {symbolNameProvider.GetInteropInterfaceName(classInfo)} {{");
         foreach (MethodInfo methodInfo in classInfo.Methods)
         {
-            sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(methodInfo.WithInteropTypeInfo())};");
+            sb.AppendLine($"    {methodRenderer.RenderInteropMethodSignature(methodInfo.WithInteropTypeInfo())};");
         }
         foreach (PropertyInfo propertyInfo in classInfo.Properties)
         {
-            sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(propertyInfo.GetMethod.WithInteropTypeInfo())};");
+            sb.AppendLine($"    {methodRenderer.RenderInteropMethodSignature(propertyInfo.GetMethod.WithInteropTypeInfo())};");
             if (propertyInfo.SetMethod is MethodInfo setMethod)
             {
-                sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(setMethod.WithInteropTypeInfo())};");
+                sb.AppendLine($"    {methodRenderer.RenderInteropMethodSignature(setMethod.WithInteropTypeInfo())};");
             }
         }
         sb.AppendLine("}");
