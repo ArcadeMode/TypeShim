@@ -1,30 +1,33 @@
-<h1 align=center tabindex=-1>TypeShim - Typesafe .NET ↔︎ TypeScript interop</h1>
+<h1 align=center tabindex=-1>TypeShim</h1>
 <p align=center tabindex=-1>
-  <i>Wasm powered .NET, accessible from TypeScript</i>
+  <i>Generated .NET-JS interop facades from C# to TypeScript.</i>
 </p>
 
 ## Why TypeShim
-The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), while powerful, lacks type information and exclusively supports static methods. Generally it requires repetitive code patterns to achieve reasonable ergonomics in your code. It takes júst a little too much effort..
+The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), while powerful, lacks type information and exclusively supports static methods. It requires repetitive code patterns for type transformation and quite some boilerplate to achieve reasonable ergonomics in your code.
 
-Enter: _TypeShim_. Drop a `[TSExport]`/`[TSModule]` on your C# class and _voilà_, TypeShim generates a set of JSExport methods and TypeScript classes to access your .NET class as if its truely exported to TypeScript.
-
-> TypeShim delivers you fully automated construction of your .NET-JS interop by building your C# JSExport facade with a matching TypeScript library to boot.
+Enter: _TypeShim_. Drop a `[TSExport]`/`[TSModule]` on your C# class and _voilà_, TypeShim generates a set of JSExport methods and TypeScript classes to access your .NET class as if it were truely exported to TypeScript.
 
 ## Features at a glance
-- Minimal setup: just [NuGet install](#installing)
-- One attribute opt-in to interop
-    - Compile-time generated JSExport shims
-    - Compile-time generated TypeScript shims
+
 - [Enriched type marshalling](#enriched-type-support) 
     - _Your_ classes accessible from TypeScript.
     - Code generation ensures Type-safety across the interop boundary.
-- Enriched member access:
-    - Static methods
-    - Static _properties_
-    - _Instance methods_
-    - _Instance properties_
-- Analyzers catch type mistakes fast
-    - No more compile errors after JSExport generates your method
+- Compile-time generated TypeScript shims
+    - Your classes including _all_ their public members.
+        - Static methods _and properties_ 
+        - _Instance methods and properties_
+    - Powerful state locality semantics 🚧
+        - Proxies to access your instances in .NET
+        - Snapshots to create or materialize instances in JS.
+        - Flexible, Proxies/Snapshots can be used interchangeably with the interop facade.
+- Compile-time generated C# shims
+    - JSExport/JSImport tailored to work with the TypeScript shims
+    - Repetitive type conversions are generated automatically 
+    - JSObjects get mapped to your C# classes
+s automatically.  
+- Lightweight: won't interfere with existing JSExport/JSImports.
+- Minimal setup: just [NuGet install](#installing) and add one attribute to your class.
 
 ## Feature: instance member access from TypeScript
 
