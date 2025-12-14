@@ -174,6 +174,12 @@ public partial class C1Interop
         MyClass? typed_value = (MyClass?)value;
         typed_instance.P1 = typed_value;
     }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        return new() {
+            P1 = MyClassInterop.FromJSObject(jsObject.GetPropertyAsJSObject("P1")),
+        };
+    }
 }
 
 """));

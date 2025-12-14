@@ -15,4 +15,14 @@ internal class MethodParameterInfo
             Type = Type.AsInteropTypeInfo(),
         };
     }
+
+    internal MethodParameterInfo WithJSObjectTypeInfo()
+    {
+        return new MethodParameterInfo
+        {
+            Name = this.Name,
+            IsInjectedInstanceParameter = this.IsInjectedInstanceParameter,
+            Type = Type.AsJSObjectTypeInfo(),
+        };
+    }
 }

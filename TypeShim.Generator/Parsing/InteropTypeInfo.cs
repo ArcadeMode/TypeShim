@@ -81,6 +81,48 @@ internal sealed class InteropTypeInfo
         }
     }
 
+    internal InteropTypeInfo AsJSObjectTypeInfo()
+    {
+        if (this.TypeArgument == null)
+        {
+            return new()
+            {
+                ManagedType = KnownManagedType.JSObject,
+                JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Object"),
+                InteropTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
+                CLRTypeSyntax = this.CLRTypeSyntax,
+                IsTaskType = this.IsTaskType,
+                IsArrayType = this.IsArrayType,
+                IsNullableType = this.IsNullableType,
+                RequiresCLRTypeConversion = this.RequiresCLRTypeConversion,
+                TypeArgument = null,
+                IsSnapshotCompatible = this.IsSnapshotCompatible,
+            };
+        }
+        else
+        {
+            return new()
+            {
+                ManagedType = this.ManagedType,
+                JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Promise<JSType.Object>"),
+                InteropTypeSyntax = this.IsTaskType 
+                    ? SyntaxFactory.ParseTypeName("Task<JSObject>") 
+                    : this.IsArrayType
+                    ? SyntaxFactory.ParseTypeName("JSObject[]")
+                    : SyntaxFactory.ParseTypeName("JSObject"),
+                CLRTypeSyntax = this.CLRTypeSyntax,
+                IsTaskType = this.IsTaskType,
+                IsArrayType = this.IsArrayType,
+                IsNullableType = this.IsNullableType,
+                RequiresCLRTypeConversion = this.RequiresCLRTypeConversion,
+                TypeArgument = this.TypeArgument.AsJSObjectTypeInfo(),
+                IsSnapshotCompatible = this.IsSnapshotCompatible,
+            };
+        }
+
+        
+    }
+
     private static readonly InteropTypeInfo CLRObjectTypeInfo = new()
     {
         ManagedType = KnownManagedType.Object,
