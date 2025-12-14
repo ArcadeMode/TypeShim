@@ -1,6 +1,14 @@
 ﻿using Microsoft.CodeAnalysis;
 
-class CSharpFileInfo
+internal class CSharpFileInfo
 {
-    public SyntaxTree SyntaxTree { get; set; } = null!;
+    internal SyntaxTree SyntaxTree { get; private init; } = null!;
+
+    internal static CSharpFileInfo Create(SyntaxTree syntaxTree)
+    {
+        return new CSharpFileInfo
+        {
+            SyntaxTree = syntaxTree
+        };
+    }
 }

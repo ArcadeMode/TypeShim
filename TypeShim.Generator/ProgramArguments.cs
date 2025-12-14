@@ -45,10 +45,7 @@ internal sealed class ProgramArguments
             }
 
             string code = File.ReadAllText(csFilePath);
-            fileInfos[i] = new CSharpFileInfo
-            {
-                SyntaxTree = CSharpSyntaxTree.ParseText(code),
-            };
+            fileInfos[i] = CSharpFileInfo.Create(CSharpSyntaxTree.ParseText(code));
         }
         return fileInfos;
     }

@@ -25,8 +25,8 @@ internal class TypeScriptUserClassProxyRendererTests_Methods
             }
         """.Replace("{{typeExpression}}", typeExpression));
 
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
@@ -83,11 +83,8 @@ export class Proxy {
             }
         """);
 
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree, userClass]);
-        List<INamedTypeSymbol> exportedClasses = [
-            ..TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot()),
-            ..TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(userClass), userClass.GetRoot()),
-        ];
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
@@ -147,11 +144,8 @@ export class Proxy {
             }
         """);
 
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree, userClass]);
-        List<INamedTypeSymbol> exportedClasses = [
-            ..TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot()),
-            ..TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(userClass), userClass.GetRoot()),
-        ];
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
@@ -211,11 +205,8 @@ export class Proxy {
             }
         """);
 
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree, userClass]);
-        List<INamedTypeSymbol> exportedClasses = [
-            ..TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot()),
-            ..TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(userClass), userClass.GetRoot()),
-        ];
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
@@ -274,11 +265,8 @@ export class Proxy {
             }
         """);
 
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree, userClass]);
-        List<INamedTypeSymbol> exportedClasses = [
-            ..TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot()),
-            ..TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(userClass), userClass.GetRoot()),
-        ];
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
@@ -337,11 +325,8 @@ export class Proxy {
             }
         """);
 
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree, userClass]);
-        List<INamedTypeSymbol> exportedClasses = [
-            ..TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot()),
-            ..TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(userClass), userClass.GetRoot()),
-        ];
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
@@ -399,11 +384,8 @@ export class Proxy {
             }
         """);
 
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree, userClass]);
-        List<INamedTypeSymbol> exportedClasses = [
-            ..TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot()),
-            ..TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(userClass), userClass.GetRoot()),
-        ];
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
