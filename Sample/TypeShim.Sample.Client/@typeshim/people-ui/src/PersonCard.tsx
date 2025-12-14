@@ -2,11 +2,11 @@
 import type { Person } from '@typeshim/wasm-exports';
 
 export interface PersonCardProps {
-  initPerson: Person;
+  initPerson: Person.Proxy;
 }
 
 export const PersonCard: React.FC<PersonCardProps> = ({ initPerson }) => {
-  const [wrapper, setPerson] = useState<{person: Person}>({person: initPerson});
+  const [wrapper, setPerson] = useState<{person: Person.Proxy}>({person: initPerson});
   const person = wrapper.person;
   const pet = person.Pet;
   return (

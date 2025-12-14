@@ -25,9 +25,9 @@ export class CapabilitiesModule {
     this.interop = interop;
   }
 
-  public GetCapabilitiesProvider(): CapabilitiesProvider {
+  public GetCapabilitiesProvider(): CapabilitiesProvider.Proxy {
     const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesModuleInterop.GetCapabilitiesProvider();
-    return new CapabilitiesProviderProxy(res, this.interop);
+    return new CapabilitiesProvider.Proxy(res, this.interop);
   }
 
 }
@@ -40,9 +40,9 @@ export class TypeShimSampleModule {
     this.interop = interop;
   }
 
-  public get PeopleProvider(): PeopleProvider | null {
+  public get PeopleProvider(): PeopleProvider.Proxy | null {
     const res = this.interop.TypeShim.Sample.TypeShimSampleModuleInterop.get_PeopleProvider();
-    return res ? new PeopleProviderProxy(res, this.interop) : null;
+    return res ? new PeopleProvider.Proxy(res, this.interop) : null;
   }
 
 }
@@ -120,288 +120,255 @@ export interface TypeShimSampleModuleInterop {
     get_PeopleProvider(): object | null;
 }
 
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Capabilities.CapabilitiesProvider
-export interface CapabilitiesProvider {
-    GetPrimitivesDemo(baseString: string): PrimitivesDemo;
-    GetArraysDemo(): ArraysDemo;
-}
+// Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.CapabilitiesProvider
+export namespace CapabilitiesProvider {
+  export class Proxy {
+    interop: AssemblyExports;
+    instance: object;
 
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Capabilities.PrimitivesDemo
-export interface PrimitivesDemo {
-    GetStringLength(): number;
-    ToUpperCase(): string;
-    Concat(str1: string, str2: string): string;
-    ContainsUpperCase(): boolean;
-    ResetBaseString(): void;
-    MultiplyString(times: number): void;
-    readonly InitialStringProperty: string;
-    StringProperty: string;
-}
+    constructor(instance: object, interop: AssemblyExports) {
+      this.interop = interop;
+      this.instance = instance;
+    }
 
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Capabilities.ArraysDemo
-export interface ArraysDemo {
-    SumIntArray(): number;
-    AppendToIntArray(value: number): void;
-    IntArrayProperty: Array<number>;
-}
+    public GetPrimitivesDemo(baseString: string): PrimitivesDemo.Proxy {
+      const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesProviderInterop.GetPrimitivesDemo(this.instance, baseString);
+      return new PrimitivesDemo.Proxy(res, this.interop);
+    }
 
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.People
-export interface People {
-    readonly All: Array<Person>;
-}
-
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Person
-export interface Person {
-    IsOlderThan(other: Person): boolean;
-    AdoptPet(): void;
-    Id: number;
-    Name: string;
-    Age: number;
-    Pet: Dog | null;
-}
-
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.Dog
-export interface Dog {
-    Bark(): string;
-    GetAge(asHumanYears: boolean): number;
-    Name: string;
-    Breed: string;
-    Age: number;
-}
-
-// Auto-generated TypeScript interface. Source class: TypeShim.Sample.PeopleProvider
-export interface PeopleProvider {
-    FetchPeopleAsync(): Promise<People>;
-}
-
-// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Capabilities.CapabilitiesProvider
-class CapabilitiesProviderProxy implements CapabilitiesProvider {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
-  }
-
-  public GetPrimitivesDemo(baseString: string): PrimitivesDemo {
-    const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesProviderInterop.GetPrimitivesDemo(this.instance, baseString);
-    return new PrimitivesDemoProxy(res, this.interop);
-  }
-
-  public GetArraysDemo(): ArraysDemo {
-    const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesProviderInterop.GetArraysDemo(this.instance);
-    return new ArraysDemoProxy(res, this.interop);
-  }
+    public GetArraysDemo(): ArraysDemo.Proxy {
+      const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesProviderInterop.GetArraysDemo(this.instance);
+      return new ArraysDemo.Proxy(res, this.interop);
+    }
 
 }
 
-// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Capabilities.PrimitivesDemo
-class PrimitivesDemoProxy implements PrimitivesDemo {
-  interop: AssemblyExports;
-  instance: object;
+}
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
-  }
+// Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.PrimitivesDemo
+export namespace PrimitivesDemo {
+  export class Proxy {
+    interop: AssemblyExports;
+    instance: object;
 
-  public GetStringLength(): number {
-    return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.GetStringLength(this.instance);
-  }
+    constructor(instance: object, interop: AssemblyExports) {
+      this.interop = interop;
+      this.instance = instance;
+    }
 
-  public ToUpperCase(): string {
-    return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.ToUpperCase(this.instance);
-  }
+    public GetStringLength(): number {
+      return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.GetStringLength(this.instance);
+    }
 
-  public Concat(str1: string, str2: string): string {
-    return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.Concat(this.instance, str1, str2);
-  }
+    public ToUpperCase(): string {
+      return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.ToUpperCase(this.instance);
+    }
 
-  public ContainsUpperCase(): boolean {
-    return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.ContainsUpperCase(this.instance);
-  }
+    public Concat(str1: string, str2: string): string {
+      return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.Concat(this.instance, str1, str2);
+    }
 
-  public ResetBaseString(): void {
-    this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.ResetBaseString(this.instance);
-  }
+    public ContainsUpperCase(): boolean {
+      return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.ContainsUpperCase(this.instance);
+    }
 
-  public MultiplyString(times: number): void {
-    this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.MultiplyString(this.instance, times);
-  }
+    public ResetBaseString(): void {
+      this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.ResetBaseString(this.instance);
+    }
 
-  public get InitialStringProperty(): string {
-    return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.get_InitialStringProperty(this.instance);
-  }
+    public MultiplyString(times: number): void {
+      this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.MultiplyString(this.instance, times);
+    }
 
-  public get StringProperty(): string {
-    return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.get_StringProperty(this.instance);
-  }
+    public get InitialStringProperty(): string {
+      return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.get_InitialStringProperty(this.instance);
+    }
 
-  public set StringProperty(value: string) {
-    this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.set_StringProperty(this.instance, value);
-  }
+    public get StringProperty(): string {
+      return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.get_StringProperty(this.instance);
+    }
+
+    public set StringProperty(value: string) {
+      this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.set_StringProperty(this.instance, value);
+    }
 
 }
 
-// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Capabilities.ArraysDemo
-class ArraysDemoProxy implements ArraysDemo {
-  interop: AssemblyExports;
-  instance: object;
+}
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
-  }
+// Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.ArraysDemo
+export namespace ArraysDemo {
+  export class Proxy {
+    interop: AssemblyExports;
+    instance: object;
 
-  public SumIntArray(): number {
-    return this.interop.TypeShim.Sample.Capabilities.ArraysDemoInterop.SumIntArray(this.instance);
-  }
+    constructor(instance: object, interop: AssemblyExports) {
+      this.interop = interop;
+      this.instance = instance;
+    }
 
-  public AppendToIntArray(value: number): void {
-    this.interop.TypeShim.Sample.Capabilities.ArraysDemoInterop.AppendToIntArray(this.instance, value);
-  }
+    public SumIntArray(): number {
+      return this.interop.TypeShim.Sample.Capabilities.ArraysDemoInterop.SumIntArray(this.instance);
+    }
 
-  public get IntArrayProperty(): Array<number> {
-    return this.interop.TypeShim.Sample.Capabilities.ArraysDemoInterop.get_IntArrayProperty(this.instance);
-  }
+    public AppendToIntArray(value: number): void {
+      this.interop.TypeShim.Sample.Capabilities.ArraysDemoInterop.AppendToIntArray(this.instance, value);
+    }
 
-  public set IntArrayProperty(value: Array<number>) {
-    this.interop.TypeShim.Sample.Capabilities.ArraysDemoInterop.set_IntArrayProperty(this.instance, value);
-  }
+    public get IntArrayProperty(): Array<number> {
+      return this.interop.TypeShim.Sample.Capabilities.ArraysDemoInterop.get_IntArrayProperty(this.instance);
+    }
+
+    public set IntArrayProperty(value: Array<number>) {
+      this.interop.TypeShim.Sample.Capabilities.ArraysDemoInterop.set_IntArrayProperty(this.instance, value);
+    }
 
 }
 
-// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.People
-class PeopleProxy implements People {
-  interop: AssemblyExports;
-  instance: object;
+}
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
-  }
+// Auto-generated TypeScript namespace for class: TypeShim.Sample.People
+export namespace People {
+  export class Proxy {
+    interop: AssemblyExports;
+    instance: object;
 
-  public get All(): Array<Person> {
-    const res = this.interop.TypeShim.Sample.PeopleInterop.get_All(this.instance);
-    return res.map(item => new PersonProxy(item, this.interop));
-  }
+    constructor(instance: object, interop: AssemblyExports) {
+      this.interop = interop;
+      this.instance = instance;
+    }
+
+    public get All(): Array<Person.Proxy> {
+      const res = this.interop.TypeShim.Sample.PeopleInterop.get_All(this.instance);
+      return res.map(item => new Person.Proxy(item, this.interop));
+    }
 
 }
 
-// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Person
-class PersonProxy implements Person {
-  interop: AssemblyExports;
-  instance: object;
+}
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
-  }
+// Auto-generated TypeScript namespace for class: TypeShim.Sample.Person
+export namespace Person {
+  export class Proxy {
+    interop: AssemblyExports;
+    instance: object;
 
-  public IsOlderThan(other: Person): boolean {
-    const otherInstance = other instanceof PersonProxy ? other.instance : other;
-    return this.interop.TypeShim.Sample.PersonInterop.IsOlderThan(this.instance, otherInstance);
-  }
+    constructor(instance: object, interop: AssemblyExports) {
+      this.interop = interop;
+      this.instance = instance;
+    }
 
-  public AdoptPet(): void {
-    this.interop.TypeShim.Sample.PersonInterop.AdoptPet(this.instance);
-  }
+    public IsOlderThan(other: Person.Proxy): boolean {
+      const otherInstance = other instanceof Person.Proxy ? other.instance : other;
+      return this.interop.TypeShim.Sample.PersonInterop.IsOlderThan(this.instance, otherInstance);
+    }
 
-  public get Id(): number {
-    return this.interop.TypeShim.Sample.PersonInterop.get_Id(this.instance);
-  }
+    public AdoptPet(): void {
+      this.interop.TypeShim.Sample.PersonInterop.AdoptPet(this.instance);
+    }
 
-  public set Id(value: number) {
-    this.interop.TypeShim.Sample.PersonInterop.set_Id(this.instance, value);
-  }
+    public get Id(): number {
+      return this.interop.TypeShim.Sample.PersonInterop.get_Id(this.instance);
+    }
 
-  public get Name(): string {
-    return this.interop.TypeShim.Sample.PersonInterop.get_Name(this.instance);
-  }
+    public set Id(value: number) {
+      this.interop.TypeShim.Sample.PersonInterop.set_Id(this.instance, value);
+    }
 
-  public set Name(value: string) {
-    this.interop.TypeShim.Sample.PersonInterop.set_Name(this.instance, value);
-  }
+    public get Name(): string {
+      return this.interop.TypeShim.Sample.PersonInterop.get_Name(this.instance);
+    }
 
-  public get Age(): number {
-    return this.interop.TypeShim.Sample.PersonInterop.get_Age(this.instance);
-  }
+    public set Name(value: string) {
+      this.interop.TypeShim.Sample.PersonInterop.set_Name(this.instance, value);
+    }
 
-  public set Age(value: number) {
-    this.interop.TypeShim.Sample.PersonInterop.set_Age(this.instance, value);
-  }
+    public get Age(): number {
+      return this.interop.TypeShim.Sample.PersonInterop.get_Age(this.instance);
+    }
 
-  public get Pet(): Dog | null {
-    const res = this.interop.TypeShim.Sample.PersonInterop.get_Pet(this.instance);
-    return res ? new DogProxy(res, this.interop) : null;
-  }
+    public set Age(value: number) {
+      this.interop.TypeShim.Sample.PersonInterop.set_Age(this.instance, value);
+    }
 
-  public set Pet(value: Dog | null) {
-    const valueInstance = value instanceof DogProxy ? value.instance : value;
-    this.interop.TypeShim.Sample.PersonInterop.set_Pet(this.instance, valueInstance);
-  }
+    public get Pet(): Dog.Proxy | null {
+      const res = this.interop.TypeShim.Sample.PersonInterop.get_Pet(this.instance);
+      return res ? new Dog.Proxy(res, this.interop) : null;
+    }
+
+    public set Pet(value: Dog.Proxy | null) {
+      const valueInstance = value instanceof Dog.Proxy ? value.instance : value;
+      this.interop.TypeShim.Sample.PersonInterop.set_Pet(this.instance, valueInstance);
+    }
 
 }
 
-// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.Dog
-class DogProxy implements Dog {
-  interop: AssemblyExports;
-  instance: object;
+}
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
-  }
+// Auto-generated TypeScript namespace for class: TypeShim.Sample.Dog
+export namespace Dog {
+  export class Proxy {
+    interop: AssemblyExports;
+    instance: object;
 
-  public Bark(): string {
-    return this.interop.TypeShim.Sample.DogInterop.Bark(this.instance);
-  }
+    constructor(instance: object, interop: AssemblyExports) {
+      this.interop = interop;
+      this.instance = instance;
+    }
 
-  public GetAge(asHumanYears: boolean): number {
-    return this.interop.TypeShim.Sample.DogInterop.GetAge(this.instance, asHumanYears);
-  }
+    public Bark(): string {
+      return this.interop.TypeShim.Sample.DogInterop.Bark(this.instance);
+    }
 
-  public get Name(): string {
-    return this.interop.TypeShim.Sample.DogInterop.get_Name(this.instance);
-  }
+    public GetAge(asHumanYears: boolean): number {
+      return this.interop.TypeShim.Sample.DogInterop.GetAge(this.instance, asHumanYears);
+    }
 
-  public set Name(value: string) {
-    this.interop.TypeShim.Sample.DogInterop.set_Name(this.instance, value);
-  }
+    public get Name(): string {
+      return this.interop.TypeShim.Sample.DogInterop.get_Name(this.instance);
+    }
 
-  public get Breed(): string {
-    return this.interop.TypeShim.Sample.DogInterop.get_Breed(this.instance);
-  }
+    public set Name(value: string) {
+      this.interop.TypeShim.Sample.DogInterop.set_Name(this.instance, value);
+    }
 
-  public set Breed(value: string) {
-    this.interop.TypeShim.Sample.DogInterop.set_Breed(this.instance, value);
-  }
+    public get Breed(): string {
+      return this.interop.TypeShim.Sample.DogInterop.get_Breed(this.instance);
+    }
 
-  public get Age(): number {
-    return this.interop.TypeShim.Sample.DogInterop.get_Age(this.instance);
-  }
+    public set Breed(value: string) {
+      this.interop.TypeShim.Sample.DogInterop.set_Breed(this.instance, value);
+    }
 
-  public set Age(value: number) {
-    this.interop.TypeShim.Sample.DogInterop.set_Age(this.instance, value);
-  }
+    public get Age(): number {
+      return this.interop.TypeShim.Sample.DogInterop.get_Age(this.instance);
+    }
+
+    public set Age(value: number) {
+      this.interop.TypeShim.Sample.DogInterop.set_Age(this.instance, value);
+    }
 
 }
 
-// Auto-generated TypeScript proxy class. Source class: TypeShim.Sample.PeopleProvider
-class PeopleProviderProxy implements PeopleProvider {
-  interop: AssemblyExports;
-  instance: object;
+}
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
-  }
+// Auto-generated TypeScript namespace for class: TypeShim.Sample.PeopleProvider
+export namespace PeopleProvider {
+  export class Proxy {
+    interop: AssemblyExports;
+    instance: object;
 
-  public async FetchPeopleAsync(): Promise<People> {
-    const res = await this.interop.TypeShim.Sample.PeopleProviderInterop.FetchPeopleAsync(this.instance);
-    return new PeopleProxy(res, this.interop);
-  }
+    constructor(instance: object, interop: AssemblyExports) {
+      this.interop = interop;
+      this.instance = instance;
+    }
+
+    public async FetchPeopleAsync(): Promise<People.Proxy> {
+      const res = await this.interop.TypeShim.Sample.PeopleProviderInterop.FetchPeopleAsync(this.instance);
+      return new People.Proxy(res, this.interop);
+    }
+
+}
 
 }
 

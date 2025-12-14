@@ -8,9 +8,9 @@ export interface PrimitivesDemoProps {
 }
 
 export const PrimitivesDemoComponent: React.FC<PrimitivesDemoProps> = ({ exportsPromise }) => {
-  const [cap, setCap] = useState<CapabilitiesProvider | null>(null);
+  const [cap, setCap] = useState<CapabilitiesProvider.Proxy | null>(null);
   const [newBaseInput, setNewBaseInput] = useState('Hello');
-  const [demos, setDemos] = useState<Array<{ instance: PrimitivesDemo; concatA: string; concatB: string; multiplyCount: number; multiplyResult?: string }>>([]);
+  const [demos, setDemos] = useState<Array<{ instance: PrimitivesDemo.Proxy; concatA: string; concatB: string; multiplyCount: number; multiplyResult?: string }>>([]);
 
   useEffect(() => {
     (async () => {
