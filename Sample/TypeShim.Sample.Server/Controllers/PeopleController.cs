@@ -17,16 +17,5 @@ public class PeopleController(PersonRepository repository) : ControllerBase
             People = [.. elderlyPeople.Select(PersonDto.FromPerson)]
         };
     }
-
-    [HttpGet]
-    [Route("elderly")]
-    public PeopleDto GetElderly()
-    {
-        IEnumerable<Person> elderlyPeople = repository.GetElderlyPeople();
-        return new PeopleDto
-        {
-            People = [.. elderlyPeople.Select(PersonDto.FromPerson)]
-        };
-    }
 }
 

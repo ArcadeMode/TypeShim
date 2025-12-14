@@ -95,7 +95,11 @@ export const ArraysDemoComponent: React.FC<ArraysDemoProps> = ({ exportsPromise 
               <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ Void</span>
             </div>
 
-            <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.5rem', borderRadius: 6, marginBottom: '0.5rem' }}>
+            {/* 
+              Below demos array indexer setting, which .NET currently does not support as arrays are copied by value over the interop boundary
+              https://github.com/ArcadeMode/TypeShim/issues/36 is set to adres this 
+              */}
+            {/* <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.5rem', borderRadius: 6, marginBottom: '0.5rem' }}>
               <span>instance.IntArrayProperty[0] =  
                 <input type="number" value={demo.setValue}
                   onChange={e => {
@@ -107,7 +111,7 @@ export const ArraysDemoComponent: React.FC<ArraysDemoProps> = ({ exportsPromise 
               <button onClick={() => { demo.instance.IntArrayProperty[0] = demo.setValue; setDemos(prev => prev.map((d, i) => i === idx ? { ...d } : d)) }} 
                       style={{ padding: '0.25rem 0.5rem', margin: '0 0.5rem', borderRadius: 4, borderWidth: 1 }}>Invoke</button>
               <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ Void</span>
-            </div>
+            </div> */}
           </div>
         ))}
       </div>

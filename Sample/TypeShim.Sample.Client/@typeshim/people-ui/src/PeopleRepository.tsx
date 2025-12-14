@@ -19,17 +19,8 @@ export class PeopleRepository {
         return people.All;
     }
 
-    public async getElderlyPeople(): Promise<Person[]> {
-        const sampleModule: TypeShimSampleModule = await this.wasmModulePromise;
-        const peopleProvider: PeopleProvider | null = sampleModule.PeopleProvider;
-        if (!peopleProvider) {
-            throw new Error("PeopleProvider is null");
-        }
-        const people: People = await peopleProvider.FetchElderlyPeopleAsync();
-        return people.All;
-    }
-
-    private PrintAgeMethodUsage(people: People){
+    private PrintAgeMethodUsage(people: People) {
+        console.log("Demonstrating Person.IsOlderThan method:");
         const persons: Person[] = people.All;
         const person1 = persons[(Math.random() * persons.length) | 0];
         const person2 = persons[(Math.random() * persons.length) | 0];
