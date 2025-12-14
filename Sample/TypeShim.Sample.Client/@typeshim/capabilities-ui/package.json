@@ -1,7 +1,7 @@
 {
-  "name": "@typeshim/people-ui",
+  "name": "@typeshim/capabilities-ui",
   "version": "1.0.0",
-  "description": "",
+  "description": "UI components to demo StringCapability methods",
   "types": "src/index.ts",
   "main": "src/index.ts",
   "module": "src/index.ts",
@@ -12,17 +12,13 @@
     }
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -p tsconfig.json"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@typeshim/wasm-exports": "*"
   },
   "peerDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
+  },
+  "dependencies": {
+    "@typeshim/wasm-exports": "*"
   }
 }
