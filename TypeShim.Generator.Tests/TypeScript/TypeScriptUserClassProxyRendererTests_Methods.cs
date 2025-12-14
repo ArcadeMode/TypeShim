@@ -33,15 +33,14 @@ internal class TypeScriptUserClassProxyRendererTests_Methods
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, classNameBuilder).Render();
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript proxy class. Source class: N1.C1
-class C1Proxy implements C1 {
+export class Proxy {
   interop: AssemblyExports;
   instance: object;
 
@@ -97,15 +96,14 @@ class C1Proxy implements C1 {
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, classNameBuilder).Render();
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript proxy class. Source class: N1.C1
-class C1Proxy implements C1 {
+export class Proxy {
   interop: AssemblyExports;
   instance: object;
 
@@ -114,9 +112,9 @@ class C1Proxy implements C1 {
     this.instance = instance;
   }
 
-  public GetAll(): Array<UserClass> {
+  public GetAll(): Array<UserClass.Proxy> {
     const res = this.interop.N1.C1Interop.GetAll(this.instance);
-    return res.map(item => new UserClassProxy(item, this.interop));
+    return res.map(item => new UserClass.Proxy(item, this.interop));
   }
 
 }
@@ -162,15 +160,14 @@ class C1Proxy implements C1 {
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, classNameBuilder).Render();
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript proxy class. Source class: N1.C1
-class C1Proxy implements C1 {
+export class Proxy {
   interop: AssemblyExports;
   instance: object;
 
@@ -179,9 +176,9 @@ class C1Proxy implements C1 {
     this.instance = instance;
   }
 
-  public GetMaybe(): UserClass | null {
+  public GetMaybe(): UserClass.Proxy | null {
     const res = this.interop.N1.C1Interop.GetMaybe(this.instance);
-    return res ? new UserClassProxy(res, this.interop) : null;
+    return res ? new UserClass.Proxy(res, this.interop) : null;
   }
 
 }
@@ -227,14 +224,13 @@ class C1Proxy implements C1 {
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, classNameBuilder).Render();
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript proxy class. Source class: N1.C1
-class C1Proxy implements C1 {
+export class Proxy {
   interop: AssemblyExports;
   instance: object;
 
@@ -243,8 +239,8 @@ class C1Proxy implements C1 {
     this.instance = instance;
   }
 
-  public DoStuff(u: UserClass): void {
-    const uInstance = u instanceof UserClassProxy ? u.instance : u;
+  public DoStuff(u: UserClass.Proxy): void {
+    const uInstance = u instanceof UserClass.Proxy ? u.instance : u;
     this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
 
@@ -291,14 +287,13 @@ class C1Proxy implements C1 {
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, classNameBuilder).Render();
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript proxy class. Source class: N1.C1
-class C1Proxy implements C1 {
+export class Proxy {
   interop: AssemblyExports;
   instance: object;
 
@@ -307,8 +302,8 @@ class C1Proxy implements C1 {
     this.instance = instance;
   }
 
-  public DoStuff(u: UserClass | null): void {
-    const uInstance = u instanceof UserClassProxy ? u.instance : u;
+  public DoStuff(u: UserClass.Proxy | null): void {
+    const uInstance = u instanceof UserClass.Proxy ? u.instance : u;
     this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
 
@@ -355,14 +350,13 @@ class C1Proxy implements C1 {
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, classNameBuilder).Render();
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript proxy class. Source class: N1.C1
-class C1Proxy implements C1 {
+export class Proxy {
   interop: AssemblyExports;
   instance: object;
 
@@ -371,8 +365,8 @@ class C1Proxy implements C1 {
     this.instance = instance;
   }
 
-  public DoStuff(u: Array<UserClass>): void {
-    const uInstance = u.map(item => item instanceof UserClassProxy ? item.instance : item);
+  public DoStuff(u: Array<UserClass.Proxy>): void {
+    const uInstance = u.map(item => item instanceof UserClass.Proxy ? item.instance : item);
     this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
 
@@ -418,14 +412,13 @@ class C1Proxy implements C1 {
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, classNameBuilder).Render();
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript proxy class. Source class: N1.C1
-class C1Proxy implements C1 {
+export class Proxy {
   interop: AssemblyExports;
   instance: object;
 
@@ -434,8 +427,8 @@ class C1Proxy implements C1 {
     this.instance = instance;
   }
 
-  public DoStuff(u: Promise<UserClass>): void {
-    const uInstance = u.then(item => item instanceof UserClassProxy ? item.instance : item);
+  public DoStuff(u: Promise<UserClass.Proxy>): void {
+    const uInstance = u.then(item => item instanceof UserClass.Proxy ? item.instance : item);
     this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
 

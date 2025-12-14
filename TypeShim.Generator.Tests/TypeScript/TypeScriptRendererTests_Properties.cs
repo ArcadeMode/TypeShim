@@ -32,15 +32,14 @@ internal class TypeScriptRendererTests_Properties
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, classNameBuilder).Render();
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript proxy class. Source class: N1.C1
-class C1Proxy implements C1 {
+export class Proxy {
   interop: AssemblyExports;
   instance: object;
 
@@ -86,15 +85,14 @@ class C1Proxy implements C1 {
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, classNameBuilder).Render();
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript proxy class. Source class: N1.C1
-class C1Proxy implements C1 {
+export class Proxy {
   interop: AssemblyExports;
   instance: object;
 
@@ -103,50 +101,6 @@ class C1Proxy implements C1 {
     this.instance = instance;
   }
 
-}
-
-""".Replace("{{typeScriptType}}", typeScriptType)));
-    }
-
-    [TestCase("string", "string")]
-    [TestCase("double", "number")]
-    [TestCase("bool", "boolean")]
-    public void TypeScriptUserClassInterface_InstanceProperty_GeneratesGetAndSetFunctions(string typeExpression, string typeScriptType)
-    {
-        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
-            using System;
-            using System.Threading.Tasks;
-            namespace N1;
-            [TSExport]
-            public class C1
-            {
-                public {{typeExpression}} P1 { get; set; }
-                public {{typeExpression}} P2 { get; init; }
-                public {{typeExpression}} P3 { get; }
-                public {{typeExpression}} P4 => 1
-            }
-        """.Replace("{{typeExpression}}", typeExpression));
-
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
-        Assert.That(exportedClasses, Has.Count.EqualTo(1));
-        INamedTypeSymbol classSymbol = exportedClasses[0];
-
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
-
-        string interopClass = new TypescriptUserClassInterfaceRenderer(classInfo, methodRenderer, typeMapper).Render();
-
-        Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript interface. Source class: N1.C1
-export interface C1 {
-    P1: {{typeScriptType}};
-    readonly P2: {{typeScriptType}};
-    readonly P3: {{typeScriptType}};
-    readonly P4: {{typeScriptType}};
 }
 
 """.Replace("{{typeScriptType}}", typeScriptType)));
@@ -179,16 +133,16 @@ export interface C1 {
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
         ModuleInfo moduleInfo = new()
         {
             ExportedClasses = [classInfo],
-            HierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], classNameBuilder),
+            HierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider),
         };
 
-        string interopClass = new TypescriptUserModuleClassRenderer(classInfo, methodRenderer, classNameBuilder).Render();
+        string interopClass = new TypescriptUserModuleClassRenderer(classInfo, methodRenderer, symbolNameProvider).Render();
 
         Assert.That(interopClass, Is.EqualTo("""
 // Auto-generated TypeShim TSModule class. Source class: N1.C1
