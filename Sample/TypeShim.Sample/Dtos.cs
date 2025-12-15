@@ -26,7 +26,13 @@ public class PersonDto
     public Person ToPerson()
     {
         Dog? dog = Pet != null ? new Dog { Name = Pet.Name, Breed = Pet.Breed, Age = Pet.Age } : null;
-        return new Person(Id, Name, Age, dog);
+        return new Person()
+        {
+            Id = Id,
+            Name = Name,
+            Age = Age,
+            Pet = dog
+        };
     }
 }
 

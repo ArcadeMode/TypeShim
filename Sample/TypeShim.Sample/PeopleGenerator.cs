@@ -57,7 +57,13 @@ public class RandomEntityGenerator
                 pet = GenerateDog();
             }
 
-            persons.Add(new Person(i, fullName, age, pet));
+            persons.Add(new Person()
+            {
+                Id = i,
+                Name = fullName,
+                Age = age,
+                Pet = pet
+            });
         }
 
         return persons;

@@ -30,33 +30,30 @@ internal sealed class MethodInfo
         };
     }
 
-    public IEnumerable<(MethodInfo Original, MethodInfo Permutation)> AllJSObjectParameterPermutations()
+    public MethodInfo? WithJSObjectParameters()
     {
-        var jsObjectParameterIndices = this.MethodParameters
+        int[] indicesToSwap = [.. this.MethodParameters
             .Select((param, index) => (param, index))
-            .Where(t => t.param.Type.RequiresCLRTypeConversion // user types require conversion
-                && !t.param.IsInjectedInstanceParameter) // skip instance parameter, cannot invoke c# methods on JSObject instance
-            .Select(t => t.index)
-            .ToArray();
-        int permutationCount = 1 << jsObjectParameterIndices.Length;
-        for (int i = 0; i < permutationCount; i++)
+            .Where(t => t.param.Type.RequiresCLRTypeConversion && !t.param.IsInjectedInstanceParameter)
+            .Select(t => t.index)];
+
+        if (indicesToSwap.Length == 0)
         {
-            MethodParameterInfo[] newParameters = [.. this.MethodParameters];
-            for (int bitIndex = 0; bitIndex < jsObjectParameterIndices.Length; bitIndex++)
-            {
-                int parameterIndex = jsObjectParameterIndices[bitIndex];
-                if ((i & (1 << bitIndex)) != 0)
-                {
-                    newParameters[parameterIndex] = newParameters[parameterIndex].WithJSObjectTypeInfo();
-                }
-            }
-            yield return (Original: this, Permutation: new MethodInfo
-            {
-                IsStatic = this.IsStatic,
-                Name = this.Name,
-                MethodParameters = newParameters,
-                ReturnType = this.ReturnType,
-            });
+            return null;
         }
+
+        MethodParameterInfo[] newParameters = [.. this.MethodParameters];
+        foreach (var parameterIndex in indicesToSwap)
+        {
+            newParameters[parameterIndex] = newParameters[parameterIndex].WithJSObjectTypeInfo();
+        }
+
+        return new MethodInfo
+        {
+            IsStatic = this.IsStatic,
+            Name = $"_{this.Name}", //TODO: Decide on a better naming strategy for JSObject methods BEEPBOOP
+            MethodParameters = newParameters,
+            ReturnType = this.ReturnType,
+        };
     }
 }

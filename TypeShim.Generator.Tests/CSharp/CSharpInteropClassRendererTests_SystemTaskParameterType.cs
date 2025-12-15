@@ -129,7 +129,7 @@ public partial class C1Interop
     }
 
     [Test]
-    public void CSharpInteropClass_DynamicMethod_HasJSTypePromiseAny_ForUserClassTaskParameterType()
+    public void CSharpInteropClass_InstanceMethod_HasJSTypePromiseAny_ForUserClassTaskParameterType()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -186,7 +186,7 @@ public partial class C1Interop
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
-    public static void M1([JSMarshalAs<JSType.Promise<JSType.Object>>] Task<JSObject> task)
+    public static void _M1([JSMarshalAs<JSType.Promise<JSType.Object>>] Task<JSObject> task)
     {
         TaskCompletionSource<MyClass> taskTcs = new();
         task.ContinueWith(t =>

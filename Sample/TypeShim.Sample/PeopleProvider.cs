@@ -24,7 +24,7 @@ public class PeopleProvider(PeopleApiClient _apiClient)
             {
                 Console.WriteLine("Returning cached people data from wasm.  Count: " + AllPeople.Length);
             }
-            return new People(AllPeople);
+            return new People() { All = AllPeople };
         }
         catch (Exception e)
         {

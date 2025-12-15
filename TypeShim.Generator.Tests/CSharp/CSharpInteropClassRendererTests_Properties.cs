@@ -7,10 +7,10 @@ namespace TypeShim.Generator.Tests.CSharp;
 
 internal class CSharpInteropClassRendererTests_Properties
 {
-    [TestCase("string", "string", "JSType.String")]
-    [TestCase("double", "double", "JSType.Number")]
-    [TestCase("bool", "bool", "JSType.Boolean")]
-    public void CSharpInteropClass_InstanceProperty_GeneratesGetAndSetFunctions(string typeExpression, string interopTypeExpression, string jsType)
+    [TestCase("string", "string", "JSType.String", "GetPropertyAsString")]
+    [TestCase("double", "double", "JSType.Number", "GetPropertyAsDouble")]
+    [TestCase("bool", "bool", "JSType.Boolean", "GetPropertyAsBoolean")]
+    public void CSharpInteropClass_InstanceProperty_GeneratesGetAndSetFunctions(string typeExpression, string interopTypeExpression, string jsType, string jsObjectMethod)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -52,9 +52,17 @@ public partial class C1Interop
         C1 typed_instance = (C1)instance;
         typed_instance.P1 = value;
     }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        return new() {
+            P1 = jsObject.{{jsObjectMethod}}("P1"),
+        };
+    }
 }
 
-""".Replace("{{typeExpression}}", interopTypeExpression).Replace("{{jsType}}", jsType)));
+""".Replace("{{typeExpression}}", interopTypeExpression)
+   .Replace("{{jsType}}", jsType)
+   .Replace("{{jsObjectMethod}}", jsObjectMethod)));
     }
 
     [Test]
@@ -112,6 +120,12 @@ public partial class C1Interop
         C1 typed_instance = (C1)instance;
         MyClass typed_value = (MyClass)value;
         typed_instance.P1 = typed_value;
+    }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        return new() {
+            P1 = MyClassInterop.FromJSObject(jsObject.GetPropertyAsJSObject("P1")),
+        };
     }
 }
 
@@ -178,6 +192,126 @@ public partial class C1Interop
     {
         return new() {
             P1 = MyClassInterop.FromJSObject(jsObject.GetPropertyAsJSObject("P1")),
+        };
+    }
+}
+
+"""));
+    }
+
+    [Test]
+    public void CSharpInteropClass_InstanceProperty_WithIntArrayType()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public int[] P1 { get; set; }
+            }
+        """);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+
+        Assert.That(interopClass, Is.EqualTo("""    
+// Auto-generated TypeScript interop definitions
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Array<JSType.Number>>]
+    public static int[] get_P1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return typed_instance.P1;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Array<JSType.Number>>] int[] value)
+    {
+        C1 typed_instance = (C1)instance;
+        typed_instance.P1 = value;
+    }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        return new() {
+            P1 = [],//MarshallAsP1(jsObject.GetPropertyAsJSObject("P1")),
+        };
+    }
+}
+
+"""));
+    }
+
+    [Test]
+    public void CSharpInteropClass_InstanceProperty_WithUserClassArrayType()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class MyClass
+            {
+                public void M1()
+                {
+                }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public MyClass[] P1 { get; set; }
+            }
+        """);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+
+        Assert.That(interopClass, Is.EqualTo("""    
+// Auto-generated TypeScript interop definitions
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Array<JSType.Any>>]
+    public static object[] get_P1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return typed_instance.P1;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Array<JSType.Any>>] object[] value)
+    {
+        C1 typed_instance = (C1)instance;
+        MyClass[] typed_value = (MyClass[])value;
+        typed_instance.P1 = typed_value;
+    }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        return new() {
+            P1 = [],//MarshallAsP1(jsObject.GetPropertyAsJSObject("P1")),
         };
     }
 }

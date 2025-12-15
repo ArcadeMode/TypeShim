@@ -12,5 +12,5 @@ internal sealed class ClassInfo
     internal required IEnumerable<MethodInfo> Methods { get; init; }
     internal required IEnumerable<PropertyInfo> Properties { get; init; }
 
-    internal bool IsSnapshotCompatible() => Properties.Any(p => p.Type.IsSnapshotCompatible);
+    internal bool IsSnapshotCompatible() => !IsModule && Properties.Any(p => p.Type.IsSnapshotCompatible);
 }

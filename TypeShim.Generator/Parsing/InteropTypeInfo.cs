@@ -104,7 +104,11 @@ internal sealed class InteropTypeInfo
             return new()
             {
                 ManagedType = this.ManagedType,
-                JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Promise<JSType.Object>"),
+                JSTypeSyntax = this.IsTaskType
+                    ? SyntaxFactory.ParseTypeName("JSType.Promise<JSType.Object>")
+                    : this.IsArrayType
+                    ? SyntaxFactory.ParseTypeName("JSType.Array<JSType.Object>")
+                    : SyntaxFactory.ParseTypeName("JSObject"),
                 InteropTypeSyntax = this.IsTaskType 
                     ? SyntaxFactory.ParseTypeName("Task<JSObject>") 
                     : this.IsArrayType
@@ -119,8 +123,6 @@ internal sealed class InteropTypeInfo
                 IsSnapshotCompatible = this.IsSnapshotCompatible,
             };
         }
-
-        
     }
 
     private static readonly InteropTypeInfo CLRObjectTypeInfo = new()

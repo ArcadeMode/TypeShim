@@ -1,5 +1,5 @@
 ﻿import React, { useState } from 'react';
-import { Person } from '@typeshim/wasm-exports';
+import { Person, Dog } from '@typeshim/wasm-exports';
 
 export interface PersonCardProps {
   initPerson: Person.Proxy;
@@ -59,7 +59,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({ initPerson }) => {
               cursor: 'pointer'
             }}
             onClick={() => {
-              personProxy.AdoptPet(); 
+              personProxy.Adopt({ Name: "New Pet", Breed: "Unknown", Age: 1 } as Dog.Snapshot as any); 
               setPerson({...wrapper}); 
             }}>
             Adopt a pet!

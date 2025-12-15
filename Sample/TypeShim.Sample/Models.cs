@@ -3,27 +3,18 @@
 namespace TypeShim.Sample;
 
 [TSExport]
-public class People(Person[] people)
+public class People()
 {
-    public Person[] All => people;
+    public required Person[] All { get; set; }
 }
-
 
 [TSExport]
 public class Person
 {
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public int Age { get; set; }
-    public Dog? Pet { get; set; }
-
-    internal Person(int id, string name, int age, Dog? pet = null)
-    {
-        Id = id;
-        Name = name;
-        Age = age;
-        Pet = pet;
-    }
+    public required int Id { get; set; }
+    public required string Name { get; set; }
+    public required int Age { get; set; }
+    public required Dog? Pet { get; set; }
 
     public bool IsOlderThan(Person other)
     {
@@ -39,6 +30,17 @@ public class Person
         }
         RandomEntityGenerator generator = new();
         Pet = generator.GenerateDog();
+        Console.WriteLine($"{Name} has adopted a new pet named {Pet.Name}.");
+    }
+
+    public void Adopt(Dog newPet)
+    {
+        if (Pet != null)
+        {
+            Console.WriteLine($"{Name} already has a pet named {Pet.Name}. Cannot adopt {newPet.Name}");
+            return;
+        }
+        Pet = newPet;
         Console.WriteLine($"{Name} has adopted a new pet named {Pet.Name}.");
     }
 }
