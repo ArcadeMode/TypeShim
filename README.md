@@ -10,23 +10,14 @@ Enter: _TypeShim_. Drop a `[TSExport]`/`[TSModule]` on your C# class and _voilà
 
 ## Features at a glance
 
-- [Enriched type marshalling](#enriched-type-support) 
-    - _Your_ classes accessible from TypeScript.
-    - Code generation ensures Type-safety across the interop boundary.
-- Compile-time generated TypeScript shims
-    - Access _all_ public members of your classes.
-        - Static methods _and properties_ 
-        - _Instance methods and properties_
-    - Powerful state locality semantics 🚧
-        - Proxies to access your instances in .NET
-        - Snapshots to create or materialize instances in JS.
-        - Flexible, use Proxies/Snapshots interchangeably with the interop facade.
-- Compile-time generated C# shims
-    - JSExport/JSImport tailored to work with the TypeScript shims
-    - Repetitive type conversions are generated automatically 
-    - JSObjects mapping to your C# classes, generated automatically.  
-- Lightweight: won't interfere with existing JSExport/JSImports.
-- Minimal setup: just [NuGet install](#installing) and add one attribute to your class.
+- 🏭 Generated for _your_ project, recognizable class names in TypeScript.
+- 💰 [Enriched type marshalling](#enriched-type-support) 
+- 🛡 Type-safety across the interop boundary
+- 🔃 Powerful state locality semantics 🚧
+- 🏷️ Enhanced member access (methods and properties)
+- 🦜 Repetitive interop patterns generated automatically
+- 🪶 Lightweight: won't interfere with existing JSExport/JSImports.
+- 👍 Minimal setup: just [NuGet install](#installing) and add one attribute to your class.
 
 ## Semantically rich TypeScript interop library
 
