@@ -1,12 +1,12 @@
 <h1 align=center tabindex=-1>TypeShim</h1>
 <p align=center tabindex=-1>
-  <i>Generated .NET-JS interop facades from C# to TypeScript.</i>
+  <i>Generated strongly-typed .NET-JS interop facades with rich semantics.</i>
 </p>
 
 ## Why TypeShim
 The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), while powerful, lacks type information and exclusively supports static methods. It requires repetitive code patterns for type transformation and quite some boilerplate to achieve reasonable ergonomics in your code.
 
-Enter: _TypeShim_. Drop a `[TSExport]`/`[TSModule]` on your C# class and _voilà_, TypeShim generates a set of JSExport methods and TypeScript classes to access your .NET class as if it were truely exported to TypeScript.
+Enter: _TypeShim_. Drop a `[TSExport]`/`[TSModule]` on your C# class and _voilà_, TypeShim generates a set of JSExport methods which are neatly wrapped by TypeScript classes to provide access to your .NET class as if it were truely exported to TypeScript.
 
 ## Features at a glance
 
@@ -14,23 +14,36 @@ Enter: _TypeShim_. Drop a `[TSExport]`/`[TSModule]` on your C# class and _voilà
     - _Your_ classes accessible from TypeScript.
     - Code generation ensures Type-safety across the interop boundary.
 - Compile-time generated TypeScript shims
-    - Your classes including _all_ their public members.
+    - Access _all_ public members of your classes.
         - Static methods _and properties_ 
         - _Instance methods and properties_
     - Powerful state locality semantics 🚧
         - Proxies to access your instances in .NET
         - Snapshots to create or materialize instances in JS.
-        - Flexible, Proxies/Snapshots can be used interchangeably with the interop facade.
+        - Flexible, use Proxies/Snapshots interchangeably with the interop facade.
 - Compile-time generated C# shims
     - JSExport/JSImport tailored to work with the TypeScript shims
     - Repetitive type conversions are generated automatically 
-    - JSObjects get mapped to your C# classes
-s automatically.  
+    - JSObjects mapping to your C# classes, generated automatically.  
 - Lightweight: won't interfere with existing JSExport/JSImports.
 - Minimal setup: just [NuGet install](#installing) and add one attribute to your class.
 
-## Feature: instance member access from TypeScript
+## Semantically rich TypeScript interop library
 
+TypeShim doesn't just export your C# classes but provides you with a rich interop API which orients around data locality. The following components are central in the generated interop: 
+
+#### `[TSModule]` makes your static classes accessible in TypeScript.
+A TSModule acts as an interop entrypoint, from a TSModule you can return your first `[TSExport]`ed class instances. The associated TypeScript class can be constructed with your WASM [getAssemblyExports() result](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-) as constructor parameter. On the C# side you are free to construct/populate these static classes however you see fit. Supports both methods and properties.
+
+#### `[TSExport]` makes your instance classes accessible in TypeScript.
+Simply return these types from any method or property getter. Even use them as method parameters and in property setters. All public properties and methods are accessible in TypeScript, internal and private members are not exported.
+These classes have two interop 'modis':
+
+`Proxy` a proxy class lives in the dotnet runtime. Its public methods and properties will be transparently accessed through interop, so a method invoke or property assignment will reflect in the dotnet runtime.
+
+`Snapshot` a snapshot lives in the JS runtime. Snapshots are property only objects in JS, methods cannot be snapshotted, nor can delegate type properties. A snapshot can either be 'taken' from a proxy or constructed as a new JS object. Snapshots can be passed into methods and properties of proxies and TSModule instances, TypeShim will generate mappings from JSObject into C# class instances. The primary use cases of snapshots are read-heavy contexts and passing objects as input into dotnet.
+
+### Samples
 Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your wasm browserapp as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-) in order to retrieve its `exports`. 
 
 
@@ -64,13 +77,18 @@ public class PeopleRepository
         new Person()
         {
             Name = "Bob",
-            Age = 29,
+            Age = 28,
         }
     ];
 
     public Person GetPerson(int i)
     {
         return People[i];
+    }
+
+    public void AddPerson(Person p)
+    {
+        People.Add(p);
     }
 }
 
@@ -91,12 +109,20 @@ public class Person
  ```js
 public UsingTypeShim(exports: AssemblyExports) {
     const module = new PeopleModule(exports)
-    const alice: Person = module.PeopleRepository.GetPerson(0);
-    const bob: Person = module.PeopleRepository.GetPerson(1);
+    const alice: Person.Proxy = module.PeopleRepository.GetPerson(0);
+    const bob: Person.Proxy = module.PeopleRepository.GetPerson(1);
     console.log(alice.Name, bob.Name); // prints "Alice", "Bob"
     console.log(alice.IsOlderThan(bob)) // prints false
     alice.Age = 30;
     console.log(alice.IsOlderThan(bob)) // prints true
+
+    const _charlie: Person.Snapshot = { Name: "Charlie", Age: 29 }
+    module.PeopleRepository.AddPerson(_charlie);
+    const charlie: Person.Proxy = module.PeopleRepository.GetPerson(2);
+    console.log(alice.IsOlderThan(charlie)) // prints false
+    console.log(bob.IsOlderThan(charlie)) // prints true
+    const _bob: Person.Snapshot = Person.snapshot(bob);
+    console.log(_bob.Age) // prints 28
 }
 ```
 
@@ -208,7 +234,7 @@ public UsingRawJSExport(exports: any) {
 }
 ```
 
-## <a name="enriched-type-support"></a> Feature: Enriched Type support
+## <a name="enriched-type-support"></a> Enriched Type support
 
 TypeShim enriches the supported types by JSExport by adding _your_ classes to the [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings). Repetitive patterns for type transformation and higher order types that you'd have to lower into the supported types yourself are readily supported and tested in TypeShim.
 
