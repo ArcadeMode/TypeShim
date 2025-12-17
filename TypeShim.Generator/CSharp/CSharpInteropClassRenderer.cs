@@ -36,10 +36,10 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine("{");
         foreach (MethodInfo methodInfo in classInfo.Methods)
         {
-            RenderJSObjectMethod(methodInfo, methodInfo);
-            if (methodInfo.WithJSObjectParameters() is MethodInfo jsObjectMethodInfo)
+            RenderMethod(methodInfo, methodInfo);
+            foreach (MethodInfo overloadMethodInfo in methodInfo.SnapshotOverloads)
             {
-                RenderJSObjectMethod(jsObjectMethodInfo, methodInfo);
+                RenderMethod(overloadMethodInfo, methodInfo);
             }
         }
         foreach (PropertyInfo propertyInfo in classInfo.Properties)
@@ -48,7 +48,7 @@ internal sealed class CSharpInteropClassRenderer
         }
         if (classInfo.IsSnapshotCompatible())
         {
-            RenderFromJSObjectHelper(depth: 1);
+            RenderFromJSObjectMapper(depth: 1);
         }
         
         sb.AppendLine("}");
@@ -105,20 +105,20 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine("}");
     }
 
-    private void RenderJSObjectMethod(MethodInfo methodInfo, MethodInfo originalMethodInfo)
+    private void RenderMethod(MethodInfo overloadMethodInfo, MethodInfo originalMethodInfo)
     {
         string indent = new(' ', 4);
-        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(methodInfo.ReturnType);
+        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(overloadMethodInfo.ReturnType);
         sb.Append(indent);
         sb.AppendLine(marshalAsAttributeRenderer.RenderJSExportAttribute().NormalizeWhitespace().ToFullString());
         sb.Append(indent);
         sb.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
 
-        RenderMethodSignature(methodInfo, depth: 1);
+        RenderMethodSignature(overloadMethodInfo, depth: 1);
 
         sb.Append(indent);
         sb.AppendLine("{");
-        foreach ((MethodParameterInfo paramInfo, MethodParameterInfo originalParamInfo) in methodInfo.MethodParameters.Zip(originalMethodInfo.MethodParameters))
+        foreach ((MethodParameterInfo paramInfo, MethodParameterInfo originalParamInfo) in overloadMethodInfo.MethodParameters.Zip(originalMethodInfo.MethodParameters))
         {
             RenderParameterTypeConversion(paramInfo, depth: 2, originalParamInfo);
         }
@@ -249,7 +249,7 @@ internal sealed class CSharpInteropClassRenderer
         sb.Length -= 2; // Remove last ", "
     }
 
-    private void RenderFromJSObjectHelper(int depth)
+    private void RenderFromJSObjectMapper(int depth)
     {
         // available methods:
         //obj.GetPropertyAsBoolean("a");

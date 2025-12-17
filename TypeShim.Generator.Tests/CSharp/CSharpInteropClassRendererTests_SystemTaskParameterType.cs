@@ -123,6 +123,18 @@ public partial class C1Interop
         Task<MyClass> typed_task = taskTcs.Task;
         C1.M1(typed_task);
     }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void M1_0([JSMarshalAs<JSType.Promise<JSType.Object>>] Task<JSObject> task)
+    {
+        TaskCompletionSource<MyClass> taskTcs = new();
+        task.ContinueWith(t =>
+            t.IsFaulted ? taskTcs.SetException(t.Exception.InnerExceptions)
+            : t.IsCanceled ? taskTcs.SetCanceled()
+            : taskTcs.SetResult(MyClassInterop.FromJSObject(t.Result)), TaskContinuationOptions.ExecuteSynchronously);
+        Task<MyClass> typed_task = taskTcs.Task;
+        C1.M1(typed_task);
+    }
 }
 
 """));
@@ -186,7 +198,7 @@ public partial class C1Interop
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
-    public static void _M1([JSMarshalAs<JSType.Promise<JSType.Object>>] Task<JSObject> task)
+    public static void M1_0([JSMarshalAs<JSType.Promise<JSType.Object>>] Task<JSObject> task)
     {
         TaskCompletionSource<MyClass> taskTcs = new();
         task.ContinueWith(t =>
@@ -247,6 +259,6 @@ public partial class C1Interop
     }
 }
 
-""".Replace("{{typeName}}", typeName)));
+""".Replace("{{typeName}}", typeName))); // TODO: reject unannotated classes from interop
     }
 }
