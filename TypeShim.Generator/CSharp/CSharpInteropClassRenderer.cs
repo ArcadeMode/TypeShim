@@ -36,10 +36,10 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine("{");
         foreach (MethodInfo methodInfo in classInfo.Methods)
         {
-            RenderMethod(methodInfo, methodInfo);
-            foreach (MethodInfo overloadMethodInfo in methodInfo.SnapshotOverloads)
+            RenderMethod(methodInfo);
+            foreach (MethodOverloadInfo overloadInfo in methodInfo.Overloads)
             {
-                RenderMethod(overloadMethodInfo, methodInfo);
+                RenderMethod(methodInfo, overloadInfo);
             }
         }
         foreach (PropertyInfo propertyInfo in classInfo.Properties)
@@ -81,13 +81,13 @@ internal sealed class CSharpInteropClassRenderer
         sb.Append(indent);
         sb.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
 
-        RenderMethodSignature(methodInfo, depth: 1);
+        RenderMethodSignature(depth: 1, methodInfo);
 
         sb.Append(indent);
         sb.AppendLine("{");
         foreach (MethodParameterInfo paramInfo in methodInfo.MethodParameters)
         {
-            RenderParameterTypeConversion(paramInfo, depth: 2);
+            RenderParameterTypeConversion(depth: 2, paramInfo, overloadParamInfo: null);
         }
 
         string accessorName = methodInfo.IsStatic ? classInfo.Name : GetTypedParameterName(methodInfo.MethodParameters.ElementAt(0));
@@ -105,29 +105,31 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine("}");
     }
 
-    private void RenderMethod(MethodInfo overloadMethodInfo, MethodInfo originalMethodInfo)
+    private void RenderMethod(MethodInfo methodInfo, MethodOverloadInfo? overloadInfo = null)
     {
         string indent = new(' ', 4);
-        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(overloadMethodInfo.ReturnType);
+        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(methodInfo.ReturnType);
         sb.Append(indent);
         sb.AppendLine(marshalAsAttributeRenderer.RenderJSExportAttribute().NormalizeWhitespace().ToFullString());
         sb.Append(indent);
         sb.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
 
-        RenderMethodSignature(overloadMethodInfo, depth: 1);
+        RenderMethodSignature(depth: 1, methodInfo, overloadInfo);
 
         sb.Append(indent);
         sb.AppendLine("{");
-        foreach ((MethodParameterInfo paramInfo, MethodParameterInfo originalParamInfo) in overloadMethodInfo.MethodParameters.Zip(originalMethodInfo.MethodParameters))
+
+        IEnumerable<MethodParameterInfo?> overloadParams = overloadInfo?.MethodParameters ?? Enumerable.Repeat<MethodParameterInfo?>(null, methodInfo.MethodParameters.Count);
+        foreach ((MethodParameterInfo originalParamInfo, MethodParameterInfo ? overloadParamInfo) in methodInfo.MethodParameters.Zip(overloadParams))
         {
-            RenderParameterTypeConversion(paramInfo, depth: 2, originalParamInfo);
+            RenderParameterTypeConversion(depth: 2, originalParamInfo, overloadParamInfo);
         }
-        RenderUserMethodInvocation(originalMethodInfo, depth: 2);
+        RenderUserMethodInvocation(methodInfo, depth: 2);
         sb.Append(indent);
         sb.AppendLine("}");
     }
 
-    private void RenderMethodSignature(MethodInfo methodInfo, int depth)
+    private void RenderMethodSignature(int depth, MethodInfo methodInfo, MethodOverloadInfo? overloadInfo = null)
     {
         string indent = new(' ', depth * 4);
         sb.Append(indent);
@@ -139,9 +141,9 @@ internal sealed class CSharpInteropClassRenderer
 
         sb.Append(methodInfo.ReturnType.InteropTypeSyntax);
         sb.Append(' ');
-        sb.Append(methodInfo.Name);
+        sb.Append(overloadInfo?.Name ?? methodInfo.Name);
         sb.Append('(');
-        RenderMethodParameters(methodInfo.MethodParameters);
+        RenderMethodParameters(overloadInfo?.MethodParameters ?? methodInfo.MethodParameters);
         sb.Append(')');
         sb.AppendLine();
     }
@@ -174,14 +176,14 @@ internal sealed class CSharpInteropClassRenderer
 
     private string GetTypedParameterName(MethodParameterInfo paramInfo) => paramInfo.Type.RequiresCLRTypeConversion ? $"typed_{paramInfo.Name}" : paramInfo.Name;
 
-    private void RenderParameterTypeConversion(MethodParameterInfo paramInfo, int depth, MethodParameterInfo? originalParamInfo = null)
+    private void RenderParameterTypeConversion(int depth, MethodParameterInfo originalParamInfo, MethodParameterInfo? overloadParamInfo = null)
     {
-        if (!paramInfo.Type.RequiresCLRTypeConversion)
+        if (!originalParamInfo.Type.RequiresCLRTypeConversion)
             return;
 
         string indent = new(' ', depth * 4);
 
-        if (paramInfo.Type.IsTaskType)
+        if (originalParamInfo.Type.IsTaskType)
         {
             //task.ContinueWith(t => {
             //    if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
@@ -189,12 +191,11 @@ internal sealed class CSharpInteropClassRenderer
             //    else taskTcs.SetResult((MyClass)t.Result);
             //}, TaskContinuationOptions.ExecuteSynchronously);
 
-            //BEEPBOOP
             //TODO: fix invalid void ternary
-            InteropTypeInfo returnTypeInfo = paramInfo.Type.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
-            string tcsVarName = $"{paramInfo.Name}Tcs";
+            InteropTypeInfo userParamTypeInfo = originalParamInfo.Type.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
+            string tcsVarName = $"{originalParamInfo.Name}Tcs";
             sb.Append(indent);
-            sb.AppendLine($"TaskCompletionSource<{returnTypeInfo.CLRTypeSyntax}> {tcsVarName} = new();");
+            sb.AppendLine($"TaskCompletionSource<{userParamTypeInfo.CLRTypeSyntax}> {tcsVarName} = new();");
             sb.Append(indent);
             sb.AppendLine("task.ContinueWith(t =>");
             string lambdaIndent = new(' ', (depth + 1) * 4);
@@ -204,30 +205,25 @@ internal sealed class CSharpInteropClassRenderer
             sb.AppendLine($": t.IsCanceled ? {tcsVarName}.SetCanceled()");
             sb.Append(lambdaIndent);
 
-            string resultConversion = returnTypeInfo.ManagedType == KnownManagedType.JSObject && originalParamInfo != null
-                ? $"{GetInteropClassName(returnTypeInfo.CLRTypeSyntax.ToString())}.FromJSObject(t.Result)"
-                : $"({returnTypeInfo.CLRTypeSyntax})t.Result";
-            sb.AppendLine($": {tcsVarName}.SetResult({resultConversion}), TaskContinuationOptions.ExecuteSynchronously);");
+            string resultConversionExpression = overloadParamInfo?.Type.TypeArgument?.ManagedType == KnownManagedType.JSObject
+                ? $"{GetInteropClassName(userParamTypeInfo.CLRTypeSyntax.ToString())}.FromJSObject(t.Result)" // only typeshim overloads get JSObject conversion, user can also use jsobject, they'll want to handle it themselves
+                : $"({userParamTypeInfo.CLRTypeSyntax})t.Result";
+            sb.AppendLine($": {tcsVarName}.SetResult({resultConversionExpression}), TaskContinuationOptions.ExecuteSynchronously);");
             sb.Append(indent);
-            sb.AppendLine($"Task<{returnTypeInfo.CLRTypeSyntax}> {GetTypedParameterName(paramInfo)} = {tcsVarName}.Task;");
+            sb.AppendLine($"Task<{userParamTypeInfo.CLRTypeSyntax}> {GetTypedParameterName(originalParamInfo)} = {tcsVarName}.Task;");
         }
-        else if (paramInfo.Type.ManagedType == KnownManagedType.JSObject)
+        else if (overloadParamInfo?.Type.ManagedType == KnownManagedType.JSObject)
         {
-            if (originalParamInfo == null)
-            {
-                throw new InvalidOperationException("JSObject type parameter must have original parameter info for conversion.");
-            }
-
             InteropTypeInfo targetType = originalParamInfo.Type.TypeArgument ?? originalParamInfo.Type;
             string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
-            sb.AppendLine($"{indent}{targetType.CLRTypeSyntax} {GetTypedParameterName(paramInfo)} = {targetInteropClass}.FromJSObject({paramInfo.Name});");
+            sb.AppendLine($"{indent}{targetType.CLRTypeSyntax} {GetTypedParameterName(originalParamInfo)} = {targetInteropClass}.FromJSObject({originalParamInfo.Name});");
         }
         else
         {
-            Debug.Assert(paramInfo.Type.ManagedType is KnownManagedType.Object or KnownManagedType.Array, "Unexpected non-object or non-array type with required type conversion");
+            Debug.Assert(originalParamInfo.Type.ManagedType is KnownManagedType.Object or KnownManagedType.Array, "Unexpected non-object or non-array type with required type conversion");
             sb.Append(indent);
             // covariance can be assumed here for objects (and arrays)
-            sb.AppendLine($"{paramInfo.Type.CLRTypeSyntax} {GetTypedParameterName(paramInfo)} = ({paramInfo.Type.CLRTypeSyntax}){paramInfo.Name};");
+            sb.AppendLine($"{originalParamInfo.Type.CLRTypeSyntax} {GetTypedParameterName(originalParamInfo)} = ({originalParamInfo.Type.CLRTypeSyntax}){originalParamInfo.Name};");
         }
     }
 

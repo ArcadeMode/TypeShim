@@ -11,7 +11,8 @@ internal sealed class MethodInfo
     /// <summary>
     /// A collection of method overloads that share the same public name but differ in their parameter types.
     /// </summary>
-    internal required IEnumerable<MethodInfo> SnapshotOverloads { get; init; } 
+    internal required IEnumerable<MethodOverloadInfo> Overloads { get; init; } 
+    
     public MethodInfo WithoutInstanceParameter()
     {
         return new MethodInfo
@@ -20,7 +21,7 @@ internal sealed class MethodInfo
             Name = this.Name,
             MethodParameters = [.. this.MethodParameters.Where(p => !p.IsInjectedInstanceParameter)],
             ReturnType = this.ReturnType,
-            SnapshotOverloads = this.SnapshotOverloads,
+            Overloads = this.Overloads,
         };
     }
 
@@ -32,7 +33,13 @@ internal sealed class MethodInfo
             Name = this.Name,
             MethodParameters = [.. this.MethodParameters.Select(p => p.WithInteropTypeInfo())],
             ReturnType = this.ReturnType.AsInteropTypeInfo(),
-            SnapshotOverloads = this.SnapshotOverloads,
+            Overloads = this.Overloads,
         };
     }
+}
+
+internal sealed class MethodOverloadInfo
+{
+    internal required string Name { get; init; }
+    internal required IReadOnlyCollection<MethodParameterInfo> MethodParameters { get; init; }
 }

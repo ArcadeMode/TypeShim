@@ -25,24 +25,21 @@ internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSym
             Name = memberMethod.Name,
             MethodParameters = parameters,
             ReturnType = returnType,
-            SnapshotOverloads = [.. GenerateOverloadsWithJSObjectParameters(parameters, memberMethod.Name, memberMethod.IsStatic, returnType)]
+            Overloads = [.. GenerateOverloadsWithJSObjectParameters(parameters, memberMethod.Name)]
         };
 
         return baseMethod;
     }
 
-    private IEnumerable<MethodInfo> GenerateOverloadsWithJSObjectParameters(IReadOnlyCollection<MethodParameterInfo> parameters, string name, bool isStatic, InteropTypeInfo returnType)
+    private static IEnumerable<MethodOverloadInfo> GenerateOverloadsWithJSObjectParameters(IReadOnlyCollection<MethodParameterInfo> parameters, string originalMethodName)
     {
         foreach (JSObjectOverload overload in WithJSObjectParameters(parameters))
         {
             string subsetSuffix = string.Join("", overload.SwappedParameterIndices);
-            yield return new MethodInfo
+            yield return new MethodOverloadInfo
             {
-                IsStatic = isStatic,
-                Name = $"{name}_{subsetSuffix}", // Method_13 for parameters at index 1 and 3 swapped for jsobject
+                Name = $"{originalMethodName}_{subsetSuffix}", // Method_13 for parameters at index 1 and 3 swapped for jsobject
                 MethodParameters = [.. overload.ParameterInfos],
-                ReturnType = returnType,
-                SnapshotOverloads = []
             };
         }
     }
