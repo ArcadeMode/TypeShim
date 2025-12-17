@@ -56,29 +56,29 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
         foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.Type.IsSnapshotCompatible))
         {
             InteropTypeInfo typeInfo = propertyInfo.Type;
-            string prop = propertyInfo.Name;
+            string propertyName = propertyInfo.Name;
 
             if (typeInfo.IsArrayType)
             {
                 InteropTypeInfo elementType = typeInfo.TypeArgument ?? throw new ArgumentException("Array element type is not specified");
-                string targetSnapshot = symbolNameProvider.GetSnapshotReferenceNameIfExists(elementType) ?? symbolNameProvider.GetNakedSymbolReference(elementType);
-                checks.Add($"Array.isArray(o.{prop}) && o.{prop}.every(e => e instanceof {targetSnapshot})");
+                string expectedTypeSymbol = symbolNameProvider.GetSnapshotReferenceNameIfExists(elementType) ?? symbolNameProvider.GetNakedSymbolReference(elementType);
+                checks.Add($"Array.isArray(o.{propertyName}) && o.{propertyName}.every((e: any) => {GetBooleanTypeAssertion(expectedTypeSymbol, "e")})");
             }
             else if (typeInfo.IsNullableType)
             {
                 InteropTypeInfo innerType = typeInfo.TypeArgument ?? throw new ArgumentException("Nullable's type argument is not specified"); ;
-                string targetSnapshot = symbolNameProvider.GetSnapshotReferenceNameIfExists(innerType) ?? symbolNameProvider.GetNakedSymbolReference(innerType);
-                checks.Add($"(o.{prop} === null || (o.{prop} instanceof {targetSnapshot}))");
+                string expectedTypeSymbol = symbolNameProvider.GetSnapshotReferenceNameIfExists(innerType) ?? symbolNameProvider.GetNakedSymbolReference(innerType);
+                checks.Add($"(o.{propertyName} === null || ({GetBooleanTypeAssertion(expectedTypeSymbol, $"o.{propertyName}")}))");
             }
             else if (typeInfo.IsTaskType)
             {
                 // thenable check over instanceof Promise (cross‑realm safe)
-                checks.Add($"(o.{prop} !== null && typeof (o.{prop} as any).then === 'function')");
+                checks.Add($"(o.{propertyName} !== null && typeof (o.{propertyName} as any).then === 'function')");
             }
             else // Simple type or snapshot
             {
-                string targetSnapshot = symbolNameProvider.GetSnapshotReferenceNameIfExists(typeInfo) ?? symbolNameProvider.GetNakedSymbolReference(typeInfo);
-                checks.Add($"(o.{prop} instanceof {targetSnapshot})");
+                string expectedTypeSymbol = symbolNameProvider.GetSnapshotReferenceNameIfExists(typeInfo) ?? symbolNameProvider.GetNakedSymbolReference(typeInfo);
+                checks.Add($"({GetBooleanTypeAssertion(expectedTypeSymbol, $"o.{propertyName}")})");
             }
         }
 
@@ -93,6 +93,18 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
 
         sb.AppendLine($"{indent}  }}");
         sb.AppendLine($"{indent}}};");
+
+        string GetBooleanTypeAssertion(string symbol, string referenceExpression)
+        {
+            return RequiresTypeofExpression(symbol)
+                ? $"typeof {referenceExpression} === '{symbol}'"
+                : $"{referenceExpression} instanceof {symbol}";
+        }
+
+        bool RequiresTypeofExpression(string symbol)
+        {
+            return symbol == "string" || symbol == "number" || symbol == "boolean" || symbol == "bigint" || symbol == "symbol" || symbol == "undefined";
+        }
     }
 
     private void RenderSnapshotFunction(int depth, string proxyParamName)

@@ -49,7 +49,7 @@ export const Snapshot: {
   [Symbol.hasInstance](v: unknown) {
     if (!v || typeof v !== 'object') return false;
     const o = v as any;
-    return (o.P1 instanceof {{typeScriptType}});
+    return (typeof o.P1 === '{{typeScriptType}}');
   }
 };
 export function snapshot(proxy: C1.Proxy): C1.Snapshot {
@@ -98,7 +98,7 @@ export const Snapshot: {
   [Symbol.hasInstance](v: unknown) {
     if (!v || typeof v !== 'object') return false;
     const o = v as any;
-    return Array.isArray(o.P1) && o.P1.every(e => e instanceof {{typeScriptElementType}});
+    return Array.isArray(o.P1) && o.P1.every((e: any) => typeof e === '{{typeScriptElementType}}');
   }
 };
 export function snapshot(proxy: C1.Proxy): C1.Snapshot {
