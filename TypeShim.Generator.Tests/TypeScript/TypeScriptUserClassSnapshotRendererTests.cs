@@ -43,6 +43,15 @@ internal class TypeScriptUserClassSnapshotRendererTests
 export interface Snapshot {
   P1: {{typeScriptType}};
 }
+export const Snapshot: {
+  [Symbol.hasInstance](v: unknown): boolean;
+} = {
+  [Symbol.hasInstance](v: unknown) {
+    if (!v || typeof v !== 'object') return false;
+    const o = v as any;
+    return (o.P1 instanceof {{typeScriptType}});
+  }
+};
 export function snapshot(proxy: C1.Proxy): C1.Snapshot {
   return {
     P1: proxy.P1,
@@ -51,9 +60,9 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
 """.Replace("{{typeScriptType}}", typeScriptType)));
     }
 
-    [TestCase("string[]", "Array<string>")]
-    [TestCase("double[]", "Array<number>")]
-    public void TypeScriptUserClassSnapshot_InstancePropertyOfArrayType_GeneratesProperty(string typeExpression, string typeScriptType)
+    [TestCase("string[]", "Array<string>", "string")]
+    [TestCase("double[]", "Array<number>", "number")]
+    public void TypeScriptUserClassSnapshot_InstancePropertyOfArrayType_GeneratesProperty(string typeExpression, string typeScriptType, string typeScriptElementType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -83,12 +92,21 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
 export interface Snapshot {
   P1: {{typeScriptType}};
 }
+export const Snapshot: {
+  [Symbol.hasInstance](v: unknown): boolean;
+} = {
+  [Symbol.hasInstance](v: unknown) {
+    if (!v || typeof v !== 'object') return false;
+    const o = v as any;
+    return Array.isArray(o.P1) && o.P1.every(e => e instanceof {{typeScriptElementType}});
+  }
+};
 export function snapshot(proxy: C1.Proxy): C1.Snapshot {
   return {
     P1: proxy.P1,
   };
 }
-""".Replace("{{typeScriptType}}", typeScriptType)));
+""".Replace("{{typeScriptType}}", typeScriptType).Replace("{{typeScriptElementType}}", typeScriptElementType)));
     }
 
     [TestCase("Task<string>")]
@@ -164,9 +182,77 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
 export interface Snapshot {
   P1: UserClass.Snapshot;
 }
+export const Snapshot: {
+  [Symbol.hasInstance](v: unknown): boolean;
+} = {
+  [Symbol.hasInstance](v: unknown) {
+    if (!v || typeof v !== 'object') return false;
+    const o = v as any;
+    return (o.P1 instanceof UserClass.Snapshot);
+  }
+};
 export function snapshot(proxy: C1.Proxy): C1.Snapshot {
   return {
     P1: UserClass.snapshot(proxy.P1),
+  };
+}
+"""));
+    }
+
+    [Test]
+    public void TypeScriptUserClassSnapshot_InstancePropertyOfNullableUserClassType_GeneratesProperty()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public UserClass? P1 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First()).Build();
+        ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
+
+        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
+
+        Assert.That(interopClass, Is.EqualTo("""    
+export interface Snapshot {
+  P1: UserClass.Snapshot | null;
+}
+export const Snapshot: {
+  [Symbol.hasInstance](v: unknown): boolean;
+} = {
+  [Symbol.hasInstance](v: unknown) {
+    if (!v || typeof v !== 'object') return false;
+    const o = v as any;
+    return (o.P1 === null || (o.P1 instanceof UserClass.Snapshot));
+  }
+};
+export function snapshot(proxy: C1.Proxy): C1.Snapshot {
+  return {
+    P1: proxy.P1 ? UserClass.snapshot(proxy.P1) : null,
   };
 }
 """));

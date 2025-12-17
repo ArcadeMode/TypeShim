@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Text;
 using TypeShim.Generator.Parsing;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TypeShim.Generator.Typescript;
 
@@ -17,6 +18,8 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
         RenderInterfaceProperties(depth + 1);
         sb.AppendLine($"{indent}}}");
 
+        RenderInstanceOfRuntimeCheck(depth);
+
         const string proxyParamName = "proxy";
         sb.AppendLine($"{indent}export function snapshot({proxyParamName}: {symbolNameProvider.GetProxyReferenceName(classInfo)}): {symbolNameProvider.GetSnapshotReferenceName(classInfo)} {{");
         RenderSnapshotFunction(depth + 1, proxyParamName);
@@ -32,6 +35,64 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
             string propertyType = symbolNameProvider.GetSnapshotReferenceNameIfExists(propertyInfo.Type) ?? symbolNameProvider.GetNakedSymbolReference(propertyInfo.Type);
             sb.AppendLine($"{indent}{propertyInfo.Name}: {propertyType};");
         }
+    }
+
+    private void RenderInstanceOfRuntimeCheck(int depth)
+    {
+        string indent = new(' ', depth * 2);
+        // Emit a runtime value with Symbol.hasInstance so snapshot interfaces can be checked via `instanceof`.
+        // It validates that `v` is an object and that all snapshot-compatible properties exist,
+        // and performs array and nested snapshot checks where applicable.
+
+        string snapshotConstName = symbolNameProvider.GetSnapshotDefinitionName();
+        sb.AppendLine($"{indent}export const {snapshotConstName}: {{");
+        sb.AppendLine($"{indent}  [Symbol.hasInstance](v: unknown): boolean;");
+        sb.AppendLine($"{indent}}} = {{");
+        sb.AppendLine($"{indent}  [Symbol.hasInstance](v: unknown) {{");
+        sb.AppendLine($"{indent}    if (!v || typeof v !== 'object') return false;");
+        sb.AppendLine($"{indent}    const o = v as any;");
+
+        List<string> checks = new();
+        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.Type.IsSnapshotCompatible))
+        {
+            InteropTypeInfo typeInfo = propertyInfo.Type;
+            string prop = propertyInfo.Name;
+
+            if (typeInfo.IsArrayType)
+            {
+                InteropTypeInfo elementType = typeInfo.TypeArgument ?? throw new ArgumentException("Array element type is not specified");
+                string targetSnapshot = symbolNameProvider.GetSnapshotReferenceNameIfExists(elementType) ?? symbolNameProvider.GetNakedSymbolReference(elementType);
+                checks.Add($"Array.isArray(o.{prop}) && o.{prop}.every(e => e instanceof {targetSnapshot})");
+            }
+            else if (typeInfo.IsNullableType)
+            {
+                InteropTypeInfo innerType = typeInfo.TypeArgument ?? throw new ArgumentException("Nullable's type argument is not specified"); ;
+                string targetSnapshot = symbolNameProvider.GetSnapshotReferenceNameIfExists(innerType) ?? symbolNameProvider.GetNakedSymbolReference(innerType);
+                checks.Add($"(o.{prop} === null || (o.{prop} instanceof {targetSnapshot}))");
+            }
+            else if (typeInfo.IsTaskType)
+            {
+                // thenable check over instanceof Promise (cross‑realm safe)
+                checks.Add($"(o.{prop} !== null && typeof (o.{prop} as any).then === 'function')");
+            }
+            else // Simple type or snapshot
+            {
+                string targetSnapshot = symbolNameProvider.GetSnapshotReferenceNameIfExists(typeInfo) ?? symbolNameProvider.GetNakedSymbolReference(typeInfo);
+                checks.Add($"(o.{prop} instanceof {targetSnapshot})");
+            }
+        }
+
+        if (checks.Count > 0)
+        {
+            sb.AppendLine($"{indent}    return " + string.Join(" && ", checks) + ";");
+        }
+        else
+        {
+            sb.AppendLine($"{indent}    return true;");
+        }
+
+        sb.AppendLine($"{indent}  }}");
+        sb.AppendLine($"{indent}}};");
     }
 
     private void RenderSnapshotFunction(int depth, string proxyParamName)
