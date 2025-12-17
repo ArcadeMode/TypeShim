@@ -25,7 +25,7 @@ internal class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symbolNameP
     {
         return string.Join(", ", methodInfo.MethodParameters.Select(p =>
         {
-            string returnType = symbolNameProvider.GetProxyReferenceNameIfExists(p.Type) ?? symbolNameProvider.GetNakedSymbolReference(p.Type);
+            string returnType = symbolNameProvider.GetProxySnapshotUnionIfExists(p.Type) ?? symbolNameProvider.GetNakedSymbolReference(p.Type);
             return $"{p.Name}: {returnType}";
         }));
     }

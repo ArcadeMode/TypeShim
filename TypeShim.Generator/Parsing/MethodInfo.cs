@@ -11,8 +11,10 @@ internal sealed class MethodInfo
     /// <summary>
     /// A collection of method overloads that share the same public name but differ in their parameter types.
     /// </summary>
-    internal required IEnumerable<MethodOverloadInfo> Overloads { get; init; } 
-    
+    internal required IEnumerable<MethodOverloadInfo> Overloads { get; init; }
+
+    internal bool IsSnapshotOverloaded() => MethodParameters.Any(p => !p.IsInjectedInstanceParameter && p.Type.RequiresCLRTypeConversion) && Overloads.Any();
+
     public MethodInfo WithoutInstanceParameter()
     {
         return new MethodInfo

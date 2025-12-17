@@ -30,6 +30,22 @@ internal class TypescriptSymbolNameProvider(TypeScriptTypeMapper typeMapper)
             ? RenderUserClassSnapshotReferenceName(typeInfo)
             : null;
     }
+
+    internal string? GetProxySnapshotUnionIfExists(InteropTypeInfo typeInfo)
+    {
+        if (typeMapper.IsUserType(typeInfo))
+        {
+            return $"{RenderUserClassProxyReferenceName(typeInfo)} | {RenderUserClassSnapshotReferenceName(typeInfo)}"; // T.Proxy | T.Snapshot
+        }
+
+        if (typeInfo.TypeArgument is InteropTypeInfo argTypeInfo && typeMapper.IsUserType(argTypeInfo))
+        {
+            return $"{typeMapper.ToTypeScriptType(typeInfo).Render(suffix: $".{GetProxyDefinitionName()} | {RenderUserClassSnapshotReferenceName(argTypeInfo)}")}"; // Array<T.Proxy | T.Snapshot>, Promise, null
+        }
+
+        return null;
+    }
+
     private string RenderUserClassSnapshotReferenceName(InteropTypeInfo typeInfo) => $"{typeMapper.ToTypeScriptType(typeInfo).Render(suffix: $".{GetSnapshotDefinitionName()}")}";
 
     /// <summary>
