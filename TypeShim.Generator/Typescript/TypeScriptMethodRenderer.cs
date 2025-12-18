@@ -30,15 +30,14 @@ internal class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symbolNameP
         }));
     }
 
-    internal string RenderInteropMethodSignature(MethodInfo methodInfo)
+    internal string RenderInteropMethodSignature(MethodInfo methodInfo, MethodOverloadInfo? overloadInfo = null)
     {
         string returnType = symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
-        return $"{methodInfo.Name}({RenderInteropMethodParameters(methodInfo)}): {returnType}";
+        return $"{overloadInfo?.Name ?? methodInfo.Name}({RenderInteropMethodParameters(overloadInfo?.MethodParameters ?? methodInfo.MethodParameters)}): {returnType}";
 
-        string RenderInteropMethodParameters(MethodInfo methodInfo)
+        string RenderInteropMethodParameters(IEnumerable<MethodParameterInfo> parameterInfos)
         {
-            return string.Join(", ", methodInfo.MethodParameters
-                .Select(p => $"{p.Name}: {symbolNameProvider.GetNakedSymbolReference(p.Type)}"));
+            return string.Join(", ", parameterInfos.Select(p => $"{p.Name}: {symbolNameProvider.GetNakedSymbolReference(p.Type)}"));
         }
     }
 }

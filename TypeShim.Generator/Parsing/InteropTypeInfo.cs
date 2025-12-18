@@ -48,7 +48,7 @@ internal sealed class InteropTypeInfo
     /// <returns></returns>
     internal InteropTypeInfo AsInteropTypeInfo()
     {
-        if (TypeArgument == null && ManagedType == KnownManagedType.Object)
+        if (TypeArgument == null && ManagedType is KnownManagedType.Object or KnownManagedType.JSObject)
         {
             return new InteropTypeInfo
             {
@@ -65,7 +65,7 @@ internal sealed class InteropTypeInfo
             };
 
         }
-        else if (TypeArgument?.ManagedType == KnownManagedType.Object)
+        else if (TypeArgument?.ManagedType is KnownManagedType.Object or KnownManagedType.JSObject)
         {
             return new InteropTypeInfo
             {

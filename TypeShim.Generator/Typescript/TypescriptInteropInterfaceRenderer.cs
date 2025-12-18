@@ -19,19 +19,42 @@ internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypeScrip
     {
         sb.AppendLine($"// Auto-generated TypeScript interop interface. Source class: {classInfo.Namespace}.{classInfo.Name}");
         sb.AppendLine($"export interface {symbolNameProvider.GetInteropInterfaceName(classInfo)} {{");
-        foreach (MethodInfo methodInfo in classInfo.Methods)
+        
+        foreach ((MethodInfo methodInfo, MethodOverloadInfo? overloadInfo) in GetAllMethods())
         {
-            sb.AppendLine($"    {methodRenderer.RenderInteropMethodSignature(methodInfo.WithInteropTypeInfo())};");
+            sb.AppendLine($"    {methodRenderer.RenderInteropMethodSignature(methodInfo, overloadInfo)};");
         }
-        foreach (PropertyInfo propertyInfo in classInfo.Properties)
-        {
-            sb.AppendLine($"    {methodRenderer.RenderInteropMethodSignature(propertyInfo.GetMethod.WithInteropTypeInfo())};");
-            if (propertyInfo.SetMethod is MethodInfo setMethod)
-            {
-                sb.AppendLine($"    {methodRenderer.RenderInteropMethodSignature(setMethod.WithInteropTypeInfo())};");
-            }
-        }
+
         sb.AppendLine("}");
         return sb.ToString();
+    }
+
+    private IEnumerable<(MethodInfo MethodInfo, MethodOverloadInfo? OverloadInfo)> GetAllMethods()
+    {
+        foreach (MethodInfo methodInfo in classInfo.Methods.Select(m => m.WithInteropTypeInfo()))
+        {
+            yield return (methodInfo, null);
+            foreach (MethodOverloadInfo overloadInfo in methodInfo.Overloads)
+            {
+                yield return (methodInfo, overloadInfo);
+            }
+        }
+        foreach (PropertyInfo propertyInfo in classInfo.Properties.Select(p => p.WithInteropTypeInfo()))
+        {
+            yield return (propertyInfo.GetMethod, null);
+            foreach (MethodOverloadInfo overloadInfo in propertyInfo.GetMethod.Overloads)
+            {
+                yield return (propertyInfo.GetMethod, overloadInfo);
+            }
+            if (propertyInfo.SetMethod is not MethodInfo setMethod)
+            {
+                continue;
+            }
+            yield return (setMethod, null);
+            foreach (MethodOverloadInfo overloadInfo in setMethod.Overloads)
+            {
+                yield return (setMethod, overloadInfo);
+            }
+        }
     }
 }

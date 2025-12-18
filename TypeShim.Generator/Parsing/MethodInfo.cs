@@ -23,7 +23,7 @@ internal sealed class MethodInfo
             Name = this.Name,
             MethodParameters = [.. this.MethodParameters.Where(p => !p.IsInjectedInstanceParameter)],
             ReturnType = this.ReturnType,
-            Overloads = this.Overloads,
+            Overloads = this.Overloads.Select(o => o.WithoutInstanceParameter()),
         };
     }
 
@@ -35,7 +35,7 @@ internal sealed class MethodInfo
             Name = this.Name,
             MethodParameters = [.. this.MethodParameters.Select(p => p.WithInteropTypeInfo())],
             ReturnType = this.ReturnType.AsInteropTypeInfo(),
-            Overloads = this.Overloads,
+            Overloads = this.Overloads.Select(o => o.WithInteropTypeInfo()),
         };
     }
 }
@@ -44,4 +44,22 @@ internal sealed class MethodOverloadInfo
 {
     internal required string Name { get; init; }
     internal required IReadOnlyCollection<MethodParameterInfo> MethodParameters { get; init; }
+
+    public MethodOverloadInfo WithInteropTypeInfo()
+    {
+        return new MethodOverloadInfo
+        {
+            Name = this.Name,
+            MethodParameters = [.. this.MethodParameters.Select(p => p.WithInteropTypeInfo())],
+        };
+    }
+
+    public MethodOverloadInfo WithoutInstanceParameter()
+    {
+        return new MethodOverloadInfo
+        {
+            Name = this.Name,
+            MethodParameters = [.. this.MethodParameters.Where(p => !p.IsInjectedInstanceParameter)],
+        };
+    }
 }
