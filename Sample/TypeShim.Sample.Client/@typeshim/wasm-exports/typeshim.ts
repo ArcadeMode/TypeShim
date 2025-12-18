@@ -67,6 +67,7 @@ export interface PrimitivesDemoInterop {
     ResetBaseString(instance: object): void;
     MultiplyString(instance: object, times: number): void;
     get_InitialStringProperty(instance: object): string;
+    set_InitialStringProperty(instance: object, value: string): void;
     get_StringProperty(instance: object): string;
     set_StringProperty(instance: object, value: string): void;
 }
@@ -82,12 +83,17 @@ export interface ArraysDemoInterop {
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.People
 export interface PeopleInterop {
     get_All(instance: object): Array<object>;
+    set_All(instance: object, value: Array<object>): void;
+    set_All_1(instance: object, value: Array<object>): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Person
 export interface PersonInterop {
     IsOlderThan(instance: object, other: object): boolean;
+    IsOlderThan_1(instance: object, other: object): boolean;
     AdoptPet(instance: object): void;
+    Adopt(instance: object, newPet: object): void;
+    Adopt_1(instance: object, newPet: object): void;
     get_Id(instance: object): number;
     set_Id(instance: object, value: number): void;
     get_Name(instance: object): string;
@@ -96,6 +102,7 @@ export interface PersonInterop {
     set_Age(instance: object, value: number): void;
     get_Pet(instance: object): object | null;
     set_Pet(instance: object, value: object | null): void;
+    set_Pet_1(instance: object, value: object | null): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Dog
@@ -143,12 +150,6 @@ export namespace CapabilitiesProvider {
 
   }
 
-  export interface Snapshot {
-  }
-  export function snapshot(proxy: CapabilitiesProvider.Proxy): CapabilitiesProvider.Snapshot {
-    return {
-    };
-  }
 }
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.PrimitivesDemo
@@ -190,6 +191,10 @@ export namespace PrimitivesDemo {
       return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.get_InitialStringProperty(this.instance);
     }
 
+    public set InitialStringProperty(value: string) {
+      this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.set_InitialStringProperty(this.instance, value);
+    }
+
     public get StringProperty(): string {
       return this.interop.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.get_StringProperty(this.instance);
     }
@@ -204,6 +209,15 @@ export namespace PrimitivesDemo {
     InitialStringProperty: string;
     StringProperty: string;
   }
+  export const Snapshot: {
+    [Symbol.hasInstance](v: unknown): boolean;
+  } = {
+    [Symbol.hasInstance](v: unknown) {
+      if (!v || typeof v !== 'object') return false;
+      const o = v as any;
+      return (typeof o.InitialStringProperty === 'string') && (typeof o.StringProperty === 'string');
+    }
+  };
   export function snapshot(proxy: PrimitivesDemo.Proxy): PrimitivesDemo.Snapshot {
     return {
       InitialStringProperty: proxy.InitialStringProperty,
@@ -244,9 +258,18 @@ export namespace ArraysDemo {
   export interface Snapshot {
     IntArrayProperty: Array<number>;
   }
+  export const Snapshot: {
+    [Symbol.hasInstance](v: unknown): boolean;
+  } = {
+    [Symbol.hasInstance](v: unknown) {
+      if (!v || typeof v !== 'object') return false;
+      const o = v as any;
+      return Array.isArray(o.IntArrayProperty) && o.IntArrayProperty.every((e: any) => typeof e === 'number');
+    }
+  };
   export function snapshot(proxy: ArraysDemo.Proxy): ArraysDemo.Snapshot {
     return {
-      IntArrayProperty: proxy.IntArrayProperty.map(item => item),
+      IntArrayProperty: proxy.IntArrayProperty,
     };
   }
 }
@@ -264,7 +287,18 @@ export namespace People {
 
     public get All(): Array<Person.Proxy> {
       const res = this.interop.TypeShim.Sample.PeopleInterop.get_All(this.instance);
-      return res.map(item => new Person.Proxy(item, this.interop));
+      return res.map(e => new Person.Proxy(e, this.interop));
+    }
+
+    public set All(value: Array<Person.Proxy | Person.Snapshot>) {
+      if (value.every(e => e instanceof Person.Proxy)) {
+        const valueInstance = value.map(e => e.instance);
+        this.interop.TypeShim.Sample.PeopleInterop.set_All(this.instance, valueInstance);
+      } else if (value.every(e => e instanceof Person.Snapshot)) {
+        this.interop.TypeShim.Sample.PeopleInterop.set_All_1(this.instance, value);
+      } else {
+        throw new Error("No overload for interop method 'set_All' matches the provided arguments.");
+      }
     }
 
   }
@@ -272,6 +306,15 @@ export namespace People {
   export interface Snapshot {
     All: Array<Person.Snapshot>;
   }
+  export const Snapshot: {
+    [Symbol.hasInstance](v: unknown): boolean;
+  } = {
+    [Symbol.hasInstance](v: unknown) {
+      if (!v || typeof v !== 'object') return false;
+      const o = v as any;
+      return Array.isArray(o.All) && o.All.every((e: any) => e instanceof Person.Snapshot);
+    }
+  };
   export function snapshot(proxy: People.Proxy): People.Snapshot {
     return {
       All: proxy.All.map(item => Person.snapshot(item)),
@@ -290,13 +333,30 @@ export namespace Person {
       this.instance = instance;
     }
 
-    public IsOlderThan(other: Person.Proxy): boolean {
-      const otherInstance = other instanceof Person.Proxy ? other.instance : other;
-      return this.interop.TypeShim.Sample.PersonInterop.IsOlderThan(this.instance, otherInstance);
+    public IsOlderThan(other: Person.Proxy | Person.Snapshot): boolean {
+      if (other instanceof Person.Proxy) {
+        const otherInstance = other.instance;
+        return this.interop.TypeShim.Sample.PersonInterop.IsOlderThan(this.instance, otherInstance);
+      } else if (other instanceof Person.Snapshot) {
+        return this.interop.TypeShim.Sample.PersonInterop.IsOlderThan_1(this.instance, other);
+      } else {
+        throw new Error("No overload for interop method 'IsOlderThan' matches the provided arguments.");
+      }
     }
 
     public AdoptPet(): void {
       this.interop.TypeShim.Sample.PersonInterop.AdoptPet(this.instance);
+    }
+
+    public Adopt(newPet: Dog.Proxy | Dog.Snapshot): void {
+      if (newPet instanceof Dog.Proxy) {
+        const newPetInstance = newPet.instance;
+        this.interop.TypeShim.Sample.PersonInterop.Adopt(this.instance, newPetInstance);
+      } else if (newPet instanceof Dog.Snapshot) {
+        this.interop.TypeShim.Sample.PersonInterop.Adopt_1(this.instance, newPet);
+      } else {
+        throw new Error("No overload for interop method 'Adopt' matches the provided arguments.");
+      }
     }
 
     public get Id(): number {
@@ -328,9 +388,15 @@ export namespace Person {
       return res ? new Dog.Proxy(res, this.interop) : null;
     }
 
-    public set Pet(value: Dog.Proxy | null) {
-      const valueInstance = value instanceof Dog.Proxy ? value.instance : value;
-      this.interop.TypeShim.Sample.PersonInterop.set_Pet(this.instance, valueInstance);
+    public set Pet(value: Dog.Proxy | Dog.Snapshot | null) {
+      if (value instanceof Dog.Proxy) {
+        const valueInstance = value.instance;
+        this.interop.TypeShim.Sample.PersonInterop.set_Pet(this.instance, valueInstance);
+      } else if (value instanceof Dog.Snapshot) {
+        this.interop.TypeShim.Sample.PersonInterop.set_Pet_1(this.instance, value);
+      } else {
+        throw new Error("No overload for interop method 'set_Pet' matches the provided arguments.");
+      }
     }
 
   }
@@ -341,6 +407,15 @@ export namespace Person {
     Age: number;
     Pet: Dog.Snapshot | null;
   }
+  export const Snapshot: {
+    [Symbol.hasInstance](v: unknown): boolean;
+  } = {
+    [Symbol.hasInstance](v: unknown) {
+      if (!v || typeof v !== 'object') return false;
+      const o = v as any;
+      return (typeof o.Id === 'number') && (typeof o.Name === 'string') && (typeof o.Age === 'number') && (o.Pet === null || (o.Pet instanceof Dog.Snapshot));
+    }
+  };
   export function snapshot(proxy: Person.Proxy): Person.Snapshot {
     return {
       Id: proxy.Id,
@@ -401,6 +476,15 @@ export namespace Dog {
     Breed: string;
     Age: number;
   }
+  export const Snapshot: {
+    [Symbol.hasInstance](v: unknown): boolean;
+  } = {
+    [Symbol.hasInstance](v: unknown) {
+      if (!v || typeof v !== 'object') return false;
+      const o = v as any;
+      return (typeof o.Name === 'string') && (typeof o.Breed === 'string') && (typeof o.Age === 'number');
+    }
+  };
   export function snapshot(proxy: Dog.Proxy): Dog.Snapshot {
     return {
       Name: proxy.Name,
@@ -428,11 +512,5 @@ export namespace PeopleProvider {
 
   }
 
-  export interface Snapshot {
-  }
-  export function snapshot(proxy: PeopleProvider.Proxy): PeopleProvider.Snapshot {
-    return {
-    };
-  }
 }
 
