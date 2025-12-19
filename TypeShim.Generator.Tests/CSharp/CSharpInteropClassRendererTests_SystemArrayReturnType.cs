@@ -39,6 +39,7 @@ internal class CSharpInteropClassRendererTests_SystemArrayReturnType
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -95,6 +96,7 @@ public partial class C1Interop
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -151,6 +153,7 @@ public partial class C1Interop
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -195,6 +198,7 @@ public partial class C1Interop
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;

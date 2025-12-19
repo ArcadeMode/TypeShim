@@ -48,6 +48,7 @@ internal class CSharpInteropClassRendererTests_SystemTaskParameterType
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -106,6 +107,7 @@ public partial class C1Interop
         // the return type is void so we cannot await either, hence the TaskCompletionSource-based conversion.
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -179,6 +181,7 @@ public partial class C1Interop
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -240,6 +243,7 @@ public partial class C1Interop
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;

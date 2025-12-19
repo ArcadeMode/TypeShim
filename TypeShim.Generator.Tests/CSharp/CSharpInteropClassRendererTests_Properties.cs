@@ -34,6 +34,7 @@ internal class CSharpInteropClassRendererTests_Properties
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -102,6 +103,7 @@ public partial class C1Interop
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -177,6 +179,7 @@ public partial class C1Interop
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -239,6 +242,7 @@ public partial class C1Interop
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -305,6 +309,7 @@ public partial class C1Interop
         string[] x = Array.ConvertAll([1,2, 3], e => $"e: {e}");
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;

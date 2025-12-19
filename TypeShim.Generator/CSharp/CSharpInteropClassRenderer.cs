@@ -29,6 +29,7 @@ internal sealed class CSharpInteropClassRenderer
     internal string Render()
     {
         sb.AppendLine("// Auto-generated TypeScript interop definitions");
+        sb.AppendLine("using System;");
         sb.AppendLine("using System.Runtime.InteropServices.JavaScript;");
         sb.AppendLine("using System.Threading.Tasks;");
         sb.AppendLine($"namespace {classInfo.Namespace};");
@@ -247,7 +248,6 @@ internal sealed class CSharpInteropClassRenderer
             // Convert JSObject[] overloads with FromJSObject (part of the snapshot feature).
             InteropTypeInfo targetType = parameterInfo.Type.TypeArgument ?? parameterInfo.Type;
             string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
-            // using Array.ConvertAll requires no imports
             sb.AppendLine($"{indent}{targetType.CLRTypeSyntax}[] {GetTypedParameterName(parameterInfo)} = Array.ConvertAll({parameterInfo.Name}, {targetInteropClass}.FromJSObject);");
         }
         else // Other object arrays enjoy covariance.
