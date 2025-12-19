@@ -34,6 +34,7 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine($"namespace {classInfo.Namespace};");
         sb.AppendLine($"public partial class {GetInteropClassName(classInfo.Name)}");
         sb.AppendLine("{");
+
         foreach (MethodInfo methodInfo in classInfo.Methods)
         {
             RenderMethod(methodInfo);
@@ -42,10 +43,12 @@ internal sealed class CSharpInteropClassRenderer
                 RenderMethod(methodInfo, overloadInfo);
             }
         }
+
         foreach (PropertyInfo propertyInfo in classInfo.Properties)
         {
             RenderPropertyMethods(propertyInfo);
         }
+
         if (classInfo.IsSnapshotCompatible())
         {
             RenderFromJSObjectMapper(depth: 1);
@@ -58,19 +61,22 @@ internal sealed class CSharpInteropClassRenderer
     private void RenderPropertyMethods(PropertyInfo propertyInfo)
     {
         RenderProperty(propertyInfo, getter: true);
-        if (propertyInfo.SetMethod is not null)
+        foreach(MethodOverloadInfo overloadInfo in propertyInfo.GetMethod.Overloads)
         {
-            RenderProperty(propertyInfo, getter: false);
+            RenderProperty(propertyInfo, getter: true, overloadInfo);
         }
 
-        if (propertyInfo.Type.IsSnapshotCompatible)
+        if (propertyInfo.SetMethod is null)
+            return;
+
+        RenderProperty(propertyInfo, getter: false);
+        foreach (MethodOverloadInfo overloadInfo in propertyInfo.SetMethod.Overloads)
         {
-            // adapt property info to make a set method that takes JSObject and maps to the existing set method
-            // TODO BEEPBOOP
+            RenderProperty(propertyInfo, getter: false, overloadInfo);
         }
     }
 
-    private void RenderProperty(PropertyInfo propertyInfo, bool getter)
+    private void RenderProperty(PropertyInfo propertyInfo, bool getter, MethodOverloadInfo? overloadInfo = null)
     {
         MethodInfo methodInfo = getter ? propertyInfo.GetMethod : propertyInfo.SetMethod ?? throw new InvalidOperationException("RenderProperty called for setter with null SetMethod");
 
@@ -81,13 +87,15 @@ internal sealed class CSharpInteropClassRenderer
         sb.Append(indent);
         sb.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
 
-        RenderMethodSignature(depth: 1, methodInfo);
+        RenderMethodSignature(depth: 1, methodInfo, overloadInfo);
 
         sb.Append(indent);
         sb.AppendLine("{");
-        foreach (MethodParameterInfo paramInfo in methodInfo.MethodParameters)
+
+        IEnumerable<MethodParameterInfo?> overloadParams = overloadInfo?.MethodParameters ?? Enumerable.Repeat<MethodParameterInfo?>(null, methodInfo.MethodParameters.Count);
+        foreach ((MethodParameterInfo originalParamInfo, MethodParameterInfo? overloadParamInfo) in methodInfo.MethodParameters.Zip(overloadParams))
         {
-            RenderParameterTypeConversion(depth: 2, paramInfo, overloadParamInfo: null);
+            RenderParameterTypeConversion(depth: 2, originalParamInfo, overloadParamInfo);
         }
 
         string accessorName = methodInfo.IsStatic ? classInfo.Name : GetTypedParameterName(methodInfo.MethodParameters.ElementAt(0));
@@ -143,10 +151,29 @@ internal sealed class CSharpInteropClassRenderer
         sb.Append(' ');
         sb.Append(overloadInfo?.Name ?? methodInfo.Name);
         sb.Append('(');
-        RenderMethodParameters(overloadInfo?.MethodParameters ?? methodInfo.MethodParameters);
+        RenderMethodParameterList(overloadInfo?.MethodParameters ?? methodInfo.MethodParameters);
         sb.Append(')');
         sb.AppendLine();
+        
+        void RenderMethodParameterList(IEnumerable<MethodParameterInfo> parameterInfos)
+        {
+            if (!parameterInfos.Any())
+                return;
+
+            foreach (MethodParameterInfo parameterInfo in parameterInfos)
+            {
+                JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(parameterInfo.Type);
+                sb.Append(marshalAsAttributeRenderer.RenderParameterAttribute().NormalizeWhitespace().ToFullString());
+                sb.Append(' ');
+                sb.Append(parameterInfo.Type.InteropTypeSyntax);
+                sb.Append(' ');
+                sb.Append(parameterInfo.Name);
+                sb.Append(", ");
+            }
+            sb.Length -= 2; // Remove last ", "
+        }
     }
+    
 
     private void RenderUserMethodInvocation(MethodInfo methodInfo, int depth)
     {
@@ -185,65 +212,97 @@ internal sealed class CSharpInteropClassRenderer
 
         if (originalParamInfo.Type.IsTaskType)
         {
-            //task.ContinueWith(t => {
-            //    if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
-            //    else if (t.IsCanceled) taskTcs.SetCanceled();
-            //    else taskTcs.SetResult((MyClass)t.Result);
-            //}, TaskContinuationOptions.ExecuteSynchronously);
-
-            //TODO: fix invalid void ternary
-            InteropTypeInfo userParamTypeInfo = originalParamInfo.Type.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
-            string tcsVarName = $"{originalParamInfo.Name}Tcs";
-            sb.Append(indent);
-            sb.AppendLine($"TaskCompletionSource<{userParamTypeInfo.CLRTypeSyntax}> {tcsVarName} = new();");
-            sb.Append(indent);
-            sb.AppendLine("task.ContinueWith(t =>");
-            string lambdaIndent = new(' ', (depth + 1) * 4);
-            sb.Append(lambdaIndent);
-            sb.AppendLine($"t.IsFaulted ? {tcsVarName}.SetException(t.Exception.InnerExceptions)");
-            sb.Append(lambdaIndent);
-            sb.AppendLine($": t.IsCanceled ? {tcsVarName}.SetCanceled()");
-            sb.Append(lambdaIndent);
-
-            string resultConversionExpression = overloadParamInfo?.Type.TypeArgument?.ManagedType == KnownManagedType.JSObject
-                ? $"{GetInteropClassName(userParamTypeInfo.CLRTypeSyntax.ToString())}.FromJSObject(t.Result)" // only typeshim overloads get JSObject conversion, user can also use jsobject, they'll want to handle it themselves
-                : $"({userParamTypeInfo.CLRTypeSyntax})t.Result";
-            sb.AppendLine($": {tcsVarName}.SetResult({resultConversionExpression}), TaskContinuationOptions.ExecuteSynchronously);");
-            sb.Append(indent);
-            sb.AppendLine($"Task<{userParamTypeInfo.CLRTypeSyntax}> {GetTypedParameterName(originalParamInfo)} = {tcsVarName}.Task;");
+            // TODO: jsobject tasks will end up here.
+            RenderTaskTypeConversion(depth, originalParamInfo, overloadParamInfo, indent);
         }
-        else if (overloadParamInfo?.Type.ManagedType == KnownManagedType.JSObject)
+        else if (originalParamInfo.Type.IsArrayType)
         {
-            InteropTypeInfo targetType = originalParamInfo.Type.TypeArgument ?? originalParamInfo.Type;
+            RenderArrayTypeConversion(originalParamInfo, overloadParamInfo, indent);
+        }
+        else if (overloadParamInfo != null && overloadParamInfo.Type.ContainsTypeOf(KnownManagedType.JSObject))
+        {
+            RenderJSObjectSnapshotTypeConversion(originalParamInfo, indent);
+        }
+        else if (originalParamInfo.Type.ManagedType is KnownManagedType.Object)
+        {
+            RenderCovariantTypeConversion(originalParamInfo, indent);
+        }
+        else // Tests guard against this case. Anyway, here is a state-of-the-art regression detector.
+        {
+            throw new NotImplementedException($"Type conversion not implemented for type: {originalParamInfo.Type.CLRTypeSyntax}. Please file an issue at https://github.com/ArcadeMode/TypeShim");
+        }
+    }
+
+    private void RenderCovariantTypeConversion(MethodParameterInfo parameterInfo, string indent)
+    {
+        Debug.Assert(parameterInfo.Type.ManagedType is KnownManagedType.Object or KnownManagedType.Array, "Unexpected non-object or non-array type with required type conversion");
+        sb.AppendLine($"{indent}{parameterInfo.Type.CLRTypeSyntax} {GetTypedParameterName(parameterInfo)} = ({parameterInfo.Type.CLRTypeSyntax}){parameterInfo.Name};");
+    }
+    
+    private void RenderArrayTypeConversion(MethodParameterInfo parameterInfo, MethodParameterInfo? overloadParamInfo, string indent)
+    {
+        Debug.Assert(parameterInfo.Type.TypeArgument != null, "Array type must have a type argument.");
+        if (overloadParamInfo != null && overloadParamInfo.Type.ContainsTypeOf(KnownManagedType.JSObject))
+        {
+            // Convert JSObject[] overloads with FromJSObject (part of the snapshot feature).
+            InteropTypeInfo targetType = parameterInfo.Type.TypeArgument ?? parameterInfo.Type;
             string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
-            sb.AppendLine($"{indent}{targetType.CLRTypeSyntax} {GetTypedParameterName(originalParamInfo)} = {targetInteropClass}.FromJSObject({originalParamInfo.Name});");
+            // using Array.ConvertAll requires no imports
+            sb.AppendLine($"{indent}{targetType.CLRTypeSyntax}[] {GetTypedParameterName(parameterInfo)} = Array.ConvertAll({parameterInfo.Name}, {targetInteropClass}.FromJSObject);");
+        }
+        else // Other object arrays enjoy covariance.
+        {
+            RenderCovariantTypeConversion(parameterInfo, indent);
+        }
+    }
+
+    private void RenderJSObjectSnapshotTypeConversion(MethodParameterInfo parameterInfo, string indent)
+    {
+        InteropTypeInfo targetType = parameterInfo.Type.TypeArgument ?? parameterInfo.Type;
+        string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
+        sb.Append($"{indent}{targetType.CLRTypeSyntax} {GetTypedParameterName(parameterInfo)} = ");
+
+        if (parameterInfo.Type.IsNullableType)
+        {
+            sb.AppendLine($"{parameterInfo.Name} != null ? {targetInteropClass}.FromJSObject({parameterInfo.Name}) : null;");
         }
         else
         {
-            Debug.Assert(originalParamInfo.Type.ManagedType is KnownManagedType.Object or KnownManagedType.Array, "Unexpected non-object or non-array type with required type conversion");
-            sb.Append(indent);
-            // covariance can be assumed here for objects (and arrays)
-            sb.AppendLine($"{originalParamInfo.Type.CLRTypeSyntax} {GetTypedParameterName(originalParamInfo)} = ({originalParamInfo.Type.CLRTypeSyntax}){originalParamInfo.Name};");
+            sb.AppendLine($"{targetInteropClass}.FromJSObject({parameterInfo.Name});");
         }
     }
 
-    private void RenderMethodParameters(IEnumerable<MethodParameterInfo> parameterInfos)
+
+    private void RenderTaskTypeConversion(int depth, MethodParameterInfo parameterInfo, MethodParameterInfo? overloadParamInfo, string indent)
     {
-        if (!parameterInfos.Any())
-            return;
+        //task.ContinueWith(t => {
+        //    if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
+        //    else if (t.IsCanceled) taskTcs.SetCanceled();
+        //    else taskTcs.SetResult((MyClass)t.Result);
+        //}, TaskContinuationOptions.ExecuteSynchronously);
 
-        foreach (MethodParameterInfo parameterInfo in parameterInfos)
-        {
-            JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(parameterInfo.Type);
-            sb.Append(marshalAsAttributeRenderer.RenderParameterAttribute().NormalizeWhitespace().ToFullString());
-            sb.Append(' ');
-            sb.Append(parameterInfo.Type.InteropTypeSyntax);
-            sb.Append(' ');
-            sb.Append(parameterInfo.Name);
-            sb.Append(", ");
-        }
-        sb.Length -= 2; // Remove last ", "
+        //TODO: fix invalid void ternary
+        InteropTypeInfo userParamTypeInfo = parameterInfo.Type.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
+        string tcsVarName = $"{parameterInfo.Name}Tcs";
+        sb.Append(indent);
+        sb.AppendLine($"TaskCompletionSource<{userParamTypeInfo.CLRTypeSyntax}> {tcsVarName} = new();");
+        sb.Append(indent);
+        sb.AppendLine("task.ContinueWith(t =>");
+        string lambdaIndent = new(' ', (depth + 1) * 4);
+        sb.Append(lambdaIndent);
+        sb.AppendLine($"t.IsFaulted ? {tcsVarName}.SetException(t.Exception.InnerExceptions)");
+        sb.Append(lambdaIndent);
+        sb.AppendLine($": t.IsCanceled ? {tcsVarName}.SetCanceled()");
+        sb.Append(lambdaIndent);
+
+        string resultConversionExpression = overloadParamInfo?.Type.TypeArgument?.ManagedType == KnownManagedType.JSObject
+            ? $"{GetInteropClassName(userParamTypeInfo.CLRTypeSyntax.ToString())}.FromJSObject(t.Result)" // only typeshim overloads get JSObject conversion, user can also use jsobject, they'll want to handle it themselves
+            : $"({userParamTypeInfo.CLRTypeSyntax})t.Result";
+        sb.AppendLine($": {tcsVarName}.SetResult({resultConversionExpression}), TaskContinuationOptions.ExecuteSynchronously);");
+        sb.Append(indent);
+        sb.AppendLine($"Task<{userParamTypeInfo.CLRTypeSyntax}> {GetTypedParameterName(parameterInfo)} = {tcsVarName}.Task;");
     }
+
 
     private void RenderFromJSObjectMapper(int depth)
     {

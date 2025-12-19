@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Newtonsoft.Json.Linq;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
 
@@ -121,6 +122,14 @@ public partial class C1Interop
         MyClass typed_value = (MyClass)value;
         typed_instance.P1 = typed_value;
     }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P1_1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Object>] JSObject value)
+    {
+        C1 typed_instance = (C1)instance;
+        MyClass typed_value = MyClassInterop.FromJSObject(value);
+        typed_instance.P1 = typed_value;
+    }
     public static C1 FromJSObject(JSObject jsObject)
     {
         return new() {
@@ -186,6 +195,14 @@ public partial class C1Interop
     {
         C1 typed_instance = (C1)instance;
         MyClass? typed_value = (MyClass?)value;
+        typed_instance.P1 = typed_value;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P1_1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Object>] JSObject value)
+    {
+        C1 typed_instance = (C1)instance;
+        MyClass typed_value = value != null ? MyClassInterop.FromJSObject(value) : null;
         typed_instance.P1 = typed_value;
     }
     public static C1 FromJSObject(JSObject jsObject)
@@ -285,7 +302,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
-
+        string[] x = Array.ConvertAll([1,2, 3], e => $"e: {e}");
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
 using System.Runtime.InteropServices.JavaScript;
@@ -308,6 +325,14 @@ public partial class C1Interop
         MyClass[] typed_value = (MyClass[])value;
         typed_instance.P1 = typed_value;
     }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P1_1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Array<JSType.Object>>] JSObject[] value)
+    {
+        C1 typed_instance = (C1)instance;
+        MyClass[] typed_value = Array.ConvertAll(value, MyClassInterop.FromJSObject);
+        typed_instance.P1 = typed_value;
+    }
     public static C1 FromJSObject(JSObject jsObject)
     {
         return new() {
@@ -318,4 +343,5 @@ public partial class C1Interop
 
 """));
     }
+
 }

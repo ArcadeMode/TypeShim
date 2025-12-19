@@ -114,7 +114,7 @@ internal sealed class InteropTypeInfo
                     ? SyntaxFactory.ParseTypeName("JSType.Promise<JSType.Object>")
                     : this.IsArrayType
                     ? SyntaxFactory.ParseTypeName("JSType.Array<JSType.Object>")
-                    : SyntaxFactory.ParseTypeName("JSObject"),
+                    : SyntaxFactory.ParseTypeName("JSType.Object"),
                 InteropTypeSyntax = this.IsTaskType 
                     ? SyntaxFactory.ParseTypeName("Task<JSObject>") 
                     : this.IsArrayType
@@ -142,6 +142,6 @@ internal sealed class InteropTypeInfo
         IsNullableType = false,
         RequiresCLRTypeConversion = false,
         TypeArgument = null,
-        IsSnapshotCompatible = true,
+        IsSnapshotCompatible = false, // Transform a jsobject into .. ? ergo not snapshot compatible
     };
 }
