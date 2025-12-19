@@ -295,7 +295,7 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine($": t.IsCanceled ? {tcsVarName}.SetCanceled()");
         sb.Append(lambdaIndent);
 
-        string resultConversionExpression = overloadParamInfo?.Type.TypeArgument?.ManagedType == KnownManagedType.JSObject
+        string resultConversionExpression = overloadParamInfo?.Type.ContainsTypeOf(KnownManagedType.JSObject) == true
             ? $"{GetInteropClassName(userParamTypeInfo.CLRTypeSyntax.ToString())}.FromJSObject(t.Result)" // only typeshim overloads get JSObject conversion, user can also use jsobject, they'll want to handle it themselves
             : $"({userParamTypeInfo.CLRTypeSyntax})t.Result";
         sb.AppendLine($": {tcsVarName}.SetResult({resultConversionExpression}), TaskContinuationOptions.ExecuteSynchronously);");
