@@ -181,4 +181,75 @@ export class C1 {
 
 """.Replace("{{typeScriptType}}", typeScriptType)));
     }
+
+    [Test]
+    public void TypeScriptUserClassProxy_InstanceParameter_WithUserClassParameterType_SupportsJSObjectOverload()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public UserClass P1 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
+
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, symbolNameProvider).Render(0);
+
+        Assert.That(interopClass, Is.EqualTo("""    
+export class Proxy {
+  interop: AssemblyExports;
+  instance: object;
+
+  constructor(instance: object, interop: AssemblyExports) {
+    this.interop = interop;
+    this.instance = instance;
+  }
+
+  public get P1(): UserClass.Proxy {
+    const res = this.interop.N1.C1Interop.get_P1(this.instance);
+    return new UserClass.Proxy(res, this.interop);
+  }
+
+  public set P1(value: UserClass.Proxy | UserClass.Snapshot) {
+    if (value instanceof UserClass.Proxy) {
+      const valueInstance = value.instance;
+      this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
+    } else if (value instanceof UserClass.Snapshot) {
+      this.interop.N1.C1Interop.set_P1_1(this.instance, value);
+    } else {
+      throw new Error("No overload for interop method 'set_P1' matches the provided arguments.");
+    }
+  }
+
+}
+
+"""));
+    }
 }

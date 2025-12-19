@@ -38,7 +38,11 @@ export const PersonCard: React.FC<PersonCardProps> = ({ initPerson }) => {
             color: '#1e3a8a',
             fontSize: '0.75rem',
             border: '1px solid #cfe0ff'
-          }} title={`Pet: ${petSnapshot.Name} (Breed: ${petSnapshot.Breed})`}>
+          }} title={`Pet: ${petSnapshot.Name} (Breed: ${petSnapshot.Breed})`}
+            onClick={() => {
+              personProxy.Pet = {...petSnapshot, Age: petSnapshot.Age + 1}; 
+              setPerson({...wrapper}); 
+            }}>
             Pet: {petSnapshot.Name} {petProxy.GetAge(false)} years/{petProxy.GetAge(true)} years ({petSnapshot.Breed}) - {petProxy.Bark()}
           </span>
         </div>
