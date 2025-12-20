@@ -35,28 +35,10 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypescriptS
         foreach (MethodInfo methodInfo in classInfo.Methods.Where(m => !m.IsStatic))
         {
             methodRenderer.RenderProxyMethod(depth + 1, methodInfo);
-            //sb.AppendLine($"{indent2}public {methodRenderer.RenderProxyMethodSignature(methodInfo.WithoutInstanceParameter())} {{");
-            //RenderMethodBodyContent(depth + 2, methodInfo);
-            //sb.AppendLine($"{indent2}}}");
-            //sb.AppendLine();
         }
         foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => !p.IsStatic))
         {
-            //MethodInfo? getter = propertyInfo.GetMethod;
-            //sb.AppendLine($"{indent2}public {methodRenderer.RenderProxyPropertyGetterSignature(getter.WithoutInstanceParameter())} {{");
-            //RenderMethodBodyContent(depth + 2, getter);
-            //sb.AppendLine($"{indent2}}}");
-            //sb.AppendLine();
-
             methodRenderer.RenderProxyProperty(depth + 1, propertyInfo);
-
-            //if (propertyInfo.SetMethod is MethodInfo setter)
-            //{
-            //    sb.AppendLine($"{indent2}public {methodRenderer.RenderProxyPropertySetterSignature(setter.WithoutInstanceParameter())} {{");
-            //    RenderMethodBodyContent(depth + 2, setter);
-            //    sb.AppendLine($"{indent2}}}");
-            //    sb.AppendLine();
-            //}
         }
         sb.Append(methodRenderer.GetRenderedContent());
         sb.AppendLine($"{indent}}}");

@@ -60,6 +60,14 @@ public partial class C1Interop
     {
         C1.M1(task);
     }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
 }
 
 """.Replace("{{typeExpression}}", interopTypeExpression)));
@@ -118,24 +126,21 @@ public partial class C1Interop
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
     {
         TaskCompletionSource<MyClass> taskTcs = new();
-        task.ContinueWith(t =>
-            t.IsFaulted ? taskTcs.SetException(t.Exception.InnerExceptions)
-            : t.IsCanceled ? taskTcs.SetCanceled()
-            : taskTcs.SetResult((MyClass)t.Result), TaskContinuationOptions.ExecuteSynchronously);
+        task.ContinueWith(t => {
+            if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) taskTcs.SetCanceled();
+            else taskTcs.SetResult(MyClassInterop.FromObject(t.Result));
+        }, TaskContinuationOptions.ExecuteSynchronously);
         Task<MyClass> typed_task = taskTcs.Task;
         C1.M1(typed_task);
     }
-    [JSExport]
-    [return: JSMarshalAs<JSType.Void>]
-    public static void M1_0([JSMarshalAs<JSType.Promise<JSType.Object>>] Task<JSObject> task)
+    public static C1 FromObject(object obj)
     {
-        TaskCompletionSource<MyClass> taskTcs = new();
-        task.ContinueWith(t =>
-            t.IsFaulted ? taskTcs.SetException(t.Exception.InnerExceptions)
-            : t.IsCanceled ? taskTcs.SetCanceled()
-            : taskTcs.SetResult(MyClassInterop.FromJSObject(t.Result)), TaskContinuationOptions.ExecuteSynchronously);
-        Task<MyClass> typed_task = taskTcs.Task;
-        C1.M1(typed_task);
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
 }
 
@@ -192,24 +197,21 @@ public partial class C1Interop
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
     {
         TaskCompletionSource<MyClass> taskTcs = new();
-        task.ContinueWith(t =>
-            t.IsFaulted ? taskTcs.SetException(t.Exception.InnerExceptions)
-            : t.IsCanceled ? taskTcs.SetCanceled()
-            : taskTcs.SetResult((MyClass)t.Result), TaskContinuationOptions.ExecuteSynchronously);
+        task.ContinueWith(t => {
+            if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) taskTcs.SetCanceled();
+            else taskTcs.SetResult(MyClassInterop.FromObject(t.Result));
+        }, TaskContinuationOptions.ExecuteSynchronously);
         Task<MyClass> typed_task = taskTcs.Task;
         C1.M1(typed_task);
     }
-    [JSExport]
-    [return: JSMarshalAs<JSType.Void>]
-    public static void M1_0([JSMarshalAs<JSType.Promise<JSType.Object>>] Task<JSObject> task)
+    public static C1 FromObject(object obj)
     {
-        TaskCompletionSource<MyClass> taskTcs = new();
-        task.ContinueWith(t =>
-            t.IsFaulted ? taskTcs.SetException(t.Exception.InnerExceptions)
-            : t.IsCanceled ? taskTcs.SetCanceled()
-            : taskTcs.SetResult(MyClassInterop.FromJSObject(t.Result)), TaskContinuationOptions.ExecuteSynchronously);
-        Task<MyClass> typed_task = taskTcs.Task;
-        C1.M1(typed_task);
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
 }
 
@@ -254,12 +256,21 @@ public partial class C1Interop
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
     {
         TaskCompletionSource<{{typeName}}> taskTcs = new();
-        task.ContinueWith(t =>
-            t.IsFaulted ? taskTcs.SetException(t.Exception.InnerExceptions)
-            : t.IsCanceled ? taskTcs.SetCanceled()
-            : taskTcs.SetResult(({{typeName}})t.Result), TaskContinuationOptions.ExecuteSynchronously);
+        task.ContinueWith(t => {
+            if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) taskTcs.SetCanceled();
+            else taskTcs.SetResult(({{typeName}})t.Result);
+        }, TaskContinuationOptions.ExecuteSynchronously);
         Task<{{typeName}}> typed_task = taskTcs.Task;
         C1.M1(typed_task);
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
 }
 

@@ -70,71 +70,9 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
     internal void RenderMethodBodyContent(int depth, MethodInfo methodInfo)
     {
         string indent = new(' ', depth * 2);
-        if (!methodInfo.IsSnapshotOverloaded())
-        {
-            RenderManagedObjectConstAssignments(depth, methodInfo, null);
-            RenderInteropInvocation(depth, methodInfo, null);
-            return;
-        }
-
-        sb.Append($"{indent}if (");
-        RenderOverloadTypeCheckBooleanExpression(methodInfo, overloadInfo: null);
-        sb.AppendLine($") {{");
-
-        RenderManagedObjectConstAssignments(depth + 1, methodInfo, null);
-        RenderInteropInvocation(depth + 1, methodInfo, null);
-
-        sb.Append($"{indent}}}");
-        foreach (MethodOverloadInfo overloadInfo in methodInfo.Overloads)
-        {
-            sb.Append($" else if (");
-            RenderOverloadTypeCheckBooleanExpression(methodInfo, overloadInfo);
-            sb.AppendLine($") {{");
-            RenderManagedObjectConstAssignments(depth + 1, methodInfo, overloadInfo);
-            RenderInteropInvocation(depth + 1, methodInfo, overloadInfo);
-            sb.Append($"{indent}}}");
-        }
-        sb.AppendLine($" else {{");
-        sb.AppendLine($"{indent}  throw new Error(\"No overload for interop method '{methodInfo.Name}' matches the provided arguments.\");");
-        sb.AppendLine($"{indent}}}");
-
-        void RenderOverloadTypeCheckBooleanExpression(MethodInfo methodInfo, MethodOverloadInfo? overloadInfo = null)
-        {
-            int i = 0;
-            IEnumerable<MethodParameterInfo?> overloadParams = overloadInfo?.MethodParameters ?? Enumerable.Repeat<MethodParameterInfo?>(null, methodInfo.MethodParameters.Count);
-            foreach ((MethodParameterInfo param, MethodParameterInfo? overloadParam) in methodInfo.MethodParameters.Zip(overloadParams))
-            {
-                if (param.IsInjectedInstanceParameter || !param.Type.RequiresCLRTypeConversion)
-                    continue;
-
-                InteropTypeInfo paramTargetType = param.Type.TypeArgument ?? param.Type; // we are concerned with the element type for arrays/tasks or inner type of nullables
-                string targetClassName = overloadParam != null && overloadParam.Type.ContainsTypeOf(KnownManagedType.JSObject)
-                    ? symbolNameProvider.GetSnapshotReferenceNameIfExists(paramTargetType) ?? throw new ArgumentException("All type conversion-requiring types should be user classes.")
-                    : symbolNameProvider.GetProxyReferenceNameIfExists(paramTargetType) ?? throw new ArgumentException("All type conversion-requiring types should be user classes.");
-
-                sb.Append(i > 0 ? " && " : string.Empty);
-                if (param.Type.IsArrayType)
-                {
-                    sb.Append($"{param.Name}.every(e => e instanceof {targetClassName})");
-                }
-                else if (param.Type.IsTaskType)
-                {
-                    // option A: make TS method async, await + instanceof check on resolved value
-                    // option B: fire and forget, then() + instanceof check inside (wont be able to deal with non-void return types)
-                    
-                    // >> WINNER >> option C: defer to C# to switch between JSObject parsing or object-cast in TCS SetResult (where types reunite as user source class!)
-                    
-                    // for now, we will throw not implemented
-                    throw new NotImplementedException("TODO: make TS method async to await task input and call appropriate interop when applicable?");
-                    //sb.Append($"{param.Name} instanceof Promise");
-                }
-                else // simple or nullable types
-                {
-                    sb.Append($"{param.Name} instanceof {targetClassName}");
-                }
-                i++;
-            }
-        }
+        RenderManagedObjectConstAssignments(depth, methodInfo, null);
+        RenderInteropInvocation(depth, methodInfo, null);
+        return;
 
         void RenderManagedObjectConstAssignments(int depth, MethodInfo methodInfo, MethodOverloadInfo? overloadInfo)
         {
@@ -159,12 +97,12 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
                 {
                     string instancePropertyAccessor = paramTargetType.IsNullableType ? "?.instance" : ".instance";
                     string transformFunction = paramType.IsArrayType ? "map" : "then";
-                    sb.AppendLine($"{indent}const {GetInteropInvocationVariable(originalParam, overloadParam)} = {originalParam.Name}.{transformFunction}(e => e{instancePropertyAccessor});");
+                    sb.AppendLine($"{indent}const {GetInteropInvocationVariable(originalParam, overloadParam)} = {originalParam.Name}.{transformFunction}(e => e instanceof {proxyClassName} ? e{instancePropertyAccessor} : e);");
                 }
                 else // simple or nullable proxy types
                 {
                     string instancePropertyAccessor = paramTargetType.IsNullableType ? "?.instance" : ".instance";
-                    sb.AppendLine($"{indent}const {GetInteropInvocationVariable(originalParam, overloadParam)} = {originalParam.Name}{instancePropertyAccessor};");
+                    sb.AppendLine($"{indent}const {GetInteropInvocationVariable(originalParam, overloadParam)} = {originalParam.Name} instanceof {proxyClassName} ? {originalParam.Name}{instancePropertyAccessor} : {originalParam.Name};");
                 }
             }
         }
@@ -196,21 +134,21 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
             {
                 string optionalReturn = returnType.ManagedType == KnownManagedType.Void ? string.Empty : "return ";
                 sb.AppendLine($"{indent}{optionalReturn}this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo, overloadInfo)}({interopInvoke});");
-            }
-
-            static string GetNewProxyExpression(InteropTypeInfo returnTypeInfo, string proxyClassName, string instanceName)
+            }           
+        }
+        
+        static string GetNewProxyExpression(InteropTypeInfo returnTypeInfo, string proxyClassName, string instanceName)
+        {
+            if (returnTypeInfo.IsNullableType)
             {
-                if (returnTypeInfo.IsNullableType)
-                {
-                    return $"{instanceName} ? new {proxyClassName}({instanceName}, this.interop) : null";
-                }
-                else
-                {
-                    return $"new {proxyClassName}({instanceName}, this.interop)";
-                }
+                return $"{instanceName} ? new {proxyClassName}({instanceName}, this.interop) : null";
+            }
+            else
+            {
+                return $"new {proxyClassName}({instanceName}, this.interop)";
             }
         }
-
+        
         /// <summary>
         /// Renders only the parameter names for method call, with the same names as defined in the method info.
         /// Excludes the injected instance parameter if present.

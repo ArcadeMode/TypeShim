@@ -58,6 +58,14 @@ public partial class C1Interop
     {
         return C1.M1();
     }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
 }
 
 """.Replace("{{typeExpression}}", interopTypeExpression)));
@@ -113,6 +121,14 @@ public partial class C1Interop
     public static {{typeExpression}} M1()
     {
         return C1.M1();
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
 }
 

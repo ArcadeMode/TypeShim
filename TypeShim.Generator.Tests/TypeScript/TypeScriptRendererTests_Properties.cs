@@ -234,14 +234,8 @@ export class Proxy {
   }
 
   public set P1(value: UserClass.Proxy | UserClass.Snapshot) {
-    if (value instanceof UserClass.Proxy) {
-      const valueInstance = value.instance;
-      this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
-    } else if (value instanceof UserClass.Snapshot) {
-      this.interop.N1.C1Interop.set_P1_1(this.instance, value);
-    } else {
-      throw new Error("No overload for interop method 'set_P1' matches the provided arguments.");
-    }
+    const valueInstance = value instanceof UserClass.Proxy ? value.instance : value;
+    this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
 
 }
@@ -303,14 +297,8 @@ export class C1 {
   }
 
   public set P1(value: UserClass.Proxy | UserClass.Snapshot) {
-    if (value instanceof UserClass.Proxy) {
-      const valueInstance = value.instance;
-      this.interop.N1.C1Interop.set_P1(valueInstance);
-    } else if (value instanceof UserClass.Snapshot) {
-      this.interop.N1.C1Interop.set_P1_0(value);
-    } else {
-      throw new Error("No overload for interop method 'set_P1' matches the provided arguments.");
-    }
+    const valueInstance = value instanceof UserClass.Proxy ? value.instance : value;
+    this.interop.N1.C1Interop.set_P1(valueInstance);
   }
 
 }

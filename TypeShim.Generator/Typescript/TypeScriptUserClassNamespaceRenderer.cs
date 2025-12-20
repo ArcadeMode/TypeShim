@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Reflection.Metadata;
-using System.Text;
+﻿using System.Text;
 using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;

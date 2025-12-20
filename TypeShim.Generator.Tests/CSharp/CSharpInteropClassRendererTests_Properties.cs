@@ -11,7 +11,7 @@ internal class CSharpInteropClassRendererTests_Properties
     [TestCase("string", "string", "JSType.String", "GetPropertyAsString")]
     [TestCase("double", "double", "JSType.Number", "GetPropertyAsDouble")]
     [TestCase("bool", "bool", "JSType.Boolean", "GetPropertyAsBoolean")]
-    public void CSharpInteropClass_InstanceProperty_GeneratesGetAndSetFunctions(string typeExpression, string interopTypeExpression, string jsType, string jsObjectMethod)
+    public void CSharpInteropClass_InstanceProperty_GeneratesFromJSObjectMethod(string typeExpression, string interopTypeExpression, string jsType, string jsObjectMethod)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -53,6 +53,15 @@ public partial class C1Interop
     {
         C1 typed_instance = (C1)instance;
         typed_instance.P1 = value;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
@@ -121,16 +130,17 @@ public partial class C1Interop
     public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Any>] object value)
     {
         C1 typed_instance = (C1)instance;
-        MyClass typed_value = (MyClass)value;
+        MyClass typed_value = MyClassInterop.FromObject(value);
         typed_instance.P1 = typed_value;
     }
-    [JSExport]
-    [return: JSMarshalAs<JSType.Void>]
-    public static void set_P1_1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Object>] JSObject value)
+    public static C1 FromObject(object obj)
     {
-        C1 typed_instance = (C1)instance;
-        MyClass typed_value = MyClassInterop.FromJSObject(value);
-        typed_instance.P1 = typed_value;
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
@@ -197,21 +207,78 @@ public partial class C1Interop
     public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Any>] object? value)
     {
         C1 typed_instance = (C1)instance;
-        MyClass? typed_value = (MyClass?)value;
+        MyClass? typed_value = value != null ? MyClassInterop.FromObject(value) : null;
         typed_instance.P1 = typed_value;
     }
-    [JSExport]
-    [return: JSMarshalAs<JSType.Void>]
-    public static void set_P1_1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Object>] JSObject value)
+    public static C1 FromObject(object obj)
     {
-        C1 typed_instance = (C1)instance;
-        MyClass typed_value = value != null ? MyClassInterop.FromJSObject(value) : null;
-        typed_instance.P1 = typed_value;
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
         return new() {
             P1 = MyClassInterop.FromJSObject(jsObject.GetPropertyAsJSObject("P1")),
+        };
+    }
+}
+
+"""));
+    }
+
+    [Test]
+    public void CSharpInteropClass_InstanceProperty_WithSystemObjectType()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public object P1 { get; set; }
+            }
+        """);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+
+        Assert.That(interopClass, Is.EqualTo("""    
+// Auto-generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object get_P1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return typed_instance.P1;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Any>] object value)
+    {
+        C1 typed_instance = (C1)instance;
+        typed_instance.P1 = value;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 }
@@ -261,6 +328,15 @@ public partial class C1Interop
     {
         C1 typed_instance = (C1)instance;
         typed_instance.P1 = value;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
@@ -327,16 +403,17 @@ public partial class C1Interop
     public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Array<JSType.Any>>] object[] value)
     {
         C1 typed_instance = (C1)instance;
-        MyClass[] typed_value = (MyClass[])value;
+        MyClass[] typed_value = Array.ConvertAll(value, MyClassInterop.FromObject);
         typed_instance.P1 = typed_value;
     }
-    [JSExport]
-    [return: JSMarshalAs<JSType.Void>]
-    public static void set_P1_1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Array<JSType.Object>>] JSObject[] value)
+    public static C1 FromObject(object obj)
     {
-        C1 typed_instance = (C1)instance;
-        MyClass[] typed_value = Array.ConvertAll(value, MyClassInterop.FromJSObject);
-        typed_instance.P1 = typed_value;
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
     public static C1 FromJSObject(JSObject jsObject)
     {

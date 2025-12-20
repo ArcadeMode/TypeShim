@@ -59,6 +59,14 @@ public partial class C1Interop
     {
         return await C1.M1();
     }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
 }
 
 """.Replace("{{typeExpression}}", interopTypeExpression)));
@@ -115,6 +123,14 @@ public partial class C1Interop
     public static async Task<object> M1()
     {
         return await C1.M1();
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
 }
 
@@ -174,6 +190,14 @@ public partial class C1Interop
         C1 typed_instance = (C1)instance;
         return await typed_instance.M1();
     }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
 }
 
 """));
@@ -217,6 +241,14 @@ public partial class C1Interop
     public static async Task<object> M1()
     {
         return await C1.M1();
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
 }
 

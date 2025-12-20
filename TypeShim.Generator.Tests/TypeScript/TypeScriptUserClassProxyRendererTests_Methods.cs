@@ -227,14 +227,8 @@ export class Proxy {
   }
 
   public DoStuff(u: UserClass.Proxy | UserClass.Snapshot): void {
-    if (u instanceof UserClass.Proxy) {
-      const uInstance = u.instance;
-      this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
-    } else if (u instanceof UserClass.Snapshot) {
-      this.interop.N1.C1Interop.DoStuff_1(this.instance, u);
-    } else {
-      throw new Error("No overload for interop method 'DoStuff' matches the provided arguments.");
-    }
+    const uInstance = u instanceof UserClass.Proxy ? u.instance : u;
+    this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
 
 }
@@ -292,21 +286,9 @@ export class Proxy {
   }
 
   public DoStuff(u: UserClass.Proxy | UserClass.Snapshot, v: UserClass.Proxy | UserClass.Snapshot): void {
-    if (u instanceof UserClass.Proxy && v instanceof UserClass.Proxy) {
-      const uInstance = u.instance;
-      const vInstance = v.instance;
-      this.interop.N1.C1Interop.DoStuff(this.instance, uInstance, vInstance);
-    } else if (u instanceof UserClass.Snapshot && v instanceof UserClass.Proxy) {
-      const vInstance = v.instance;
-      this.interop.N1.C1Interop.DoStuff_1(this.instance, u, vInstance);
-    } else if (u instanceof UserClass.Proxy && v instanceof UserClass.Snapshot) {
-      const uInstance = u.instance;
-      this.interop.N1.C1Interop.DoStuff_2(this.instance, uInstance, v);
-    } else if (u instanceof UserClass.Snapshot && v instanceof UserClass.Snapshot) {
-      this.interop.N1.C1Interop.DoStuff_12(this.instance, u, v);
-    } else {
-      throw new Error("No overload for interop method 'DoStuff' matches the provided arguments.");
-    }
+    const uInstance = u instanceof UserClass.Proxy ? u.instance : u;
+    const vInstance = v instanceof UserClass.Proxy ? v.instance : v;
+    this.interop.N1.C1Interop.DoStuff(this.instance, uInstance, vInstance);
   }
 
 }
@@ -364,14 +346,8 @@ export class Proxy {
   }
 
   public DoStuff(u: UserClass.Proxy | UserClass.Snapshot | null): void {
-    if (u instanceof UserClass.Proxy) {
-      const uInstance = u.instance;
-      this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
-    } else if (u instanceof UserClass.Snapshot) {
-      this.interop.N1.C1Interop.DoStuff_1(this.instance, u);
-    } else {
-      throw new Error("No overload for interop method 'DoStuff' matches the provided arguments.");
-    }
+    const uInstance = u instanceof UserClass.Proxy ? u.instance : u;
+    this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
 
 }
@@ -429,14 +405,8 @@ export class Proxy {
   }
 
   public DoStuff(u: Array<UserClass.Proxy | UserClass.Snapshot>): void {
-    if (u.every(e => e instanceof UserClass.Proxy)) {
-      const uInstance = u.map(e => e.instance);
-      this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
-    } else if (u.every(e => e instanceof UserClass.Snapshot)) {
-      this.interop.N1.C1Interop.DoStuff_1(this.instance, u);
-    } else {
-      throw new Error("No overload for interop method 'DoStuff' matches the provided arguments.");
-    }
+    const uInstance = u.map(e => e instanceof UserClass.Proxy ? e.instance : e);
+    this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
 
 }
@@ -493,7 +463,7 @@ export class Proxy {
   }
 
   public DoStuff(u: Promise<UserClass.Proxy | UserClass.Snapshot>): void {
-    const uInstance = u.then(e => e instanceof UserClass.Proxy ? item.instance : item);
+    const uInstance = u.then(e => e instanceof UserClass.Proxy ? e.instance : e);
     this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
 

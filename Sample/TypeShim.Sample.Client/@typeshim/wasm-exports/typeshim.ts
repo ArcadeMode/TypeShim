@@ -17,36 +17,6 @@ export interface AssemblyExports {
     };
 }
 
-// Auto-generated TypeShim TSModule class. Source class: TypeShim.Sample.Capabilities.CapabilitiesModule
-export class CapabilitiesModule {
-  private interop: AssemblyExports;
-
-  constructor(interop: AssemblyExports) {
-    this.interop = interop;
-  }
-
-  public GetCapabilitiesProvider(): CapabilitiesProvider.Proxy {
-    const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesModuleInterop.GetCapabilitiesProvider();
-    return new CapabilitiesProvider.Proxy(res, this.interop);
-  }
-
-}
-
-// Auto-generated TypeShim TSModule class. Source class: TypeShim.Sample.TypeShimSampleModule
-export class TypeShimSampleModule {
-  private interop: AssemblyExports;
-
-  constructor(interop: AssemblyExports) {
-    this.interop = interop;
-  }
-
-  public get PeopleProvider(): PeopleProvider.Proxy | null {
-    const res = this.interop.TypeShim.Sample.TypeShimSampleModuleInterop.get_PeopleProvider();
-    return res ? new PeopleProvider.Proxy(res, this.interop) : null;
-  }
-
-}
-
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.CapabilitiesModule
 export interface CapabilitiesModuleInterop {
     GetCapabilitiesProvider(): object;
@@ -125,6 +95,36 @@ export interface PeopleProviderInterop {
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.TypeShimSampleModule
 export interface TypeShimSampleModuleInterop {
     get_PeopleProvider(): object | null;
+}
+
+// Auto-generated TypeShim TSModule class. Source class: TypeShim.Sample.Capabilities.CapabilitiesModule
+export class CapabilitiesModule {
+  private interop: AssemblyExports;
+
+  constructor(interop: AssemblyExports) {
+    this.interop = interop;
+  }
+
+  public GetCapabilitiesProvider(): CapabilitiesProvider.Proxy {
+    const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesModuleInterop.GetCapabilitiesProvider();
+    return new CapabilitiesProvider.Proxy(res, this.interop);
+  }
+
+}
+
+// Auto-generated TypeShim TSModule class. Source class: TypeShim.Sample.TypeShimSampleModule
+export class TypeShimSampleModule {
+  private interop: AssemblyExports;
+
+  constructor(interop: AssemblyExports) {
+    this.interop = interop;
+  }
+
+  public get PeopleProvider(): PeopleProvider.Proxy | null {
+    const res = this.interop.TypeShim.Sample.TypeShimSampleModuleInterop.get_PeopleProvider();
+    return res ? new PeopleProvider.Proxy(res, this.interop) : null;
+  }
+
 }
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.CapabilitiesProvider
@@ -291,14 +291,8 @@ export namespace People {
     }
 
     public set All(value: Array<Person.Proxy | Person.Snapshot>) {
-      if (value.every(e => e instanceof Person.Proxy)) {
-        const valueInstance = value.map(e => e.instance);
-        this.interop.TypeShim.Sample.PeopleInterop.set_All(this.instance, valueInstance);
-      } else if (value.every(e => e instanceof Person.Snapshot)) {
-        this.interop.TypeShim.Sample.PeopleInterop.set_All_1(this.instance, value);
-      } else {
-        throw new Error("No overload for interop method 'set_All' matches the provided arguments.");
-      }
+      const valueInstance = value.map(e => e instanceof Person.Proxy ? e.instance : e);
+      this.interop.TypeShim.Sample.PeopleInterop.set_All(this.instance, valueInstance);
     }
 
   }
@@ -334,14 +328,8 @@ export namespace Person {
     }
 
     public IsOlderThan(other: Person.Proxy | Person.Snapshot): boolean {
-      if (other instanceof Person.Proxy) {
-        const otherInstance = other.instance;
-        return this.interop.TypeShim.Sample.PersonInterop.IsOlderThan(this.instance, otherInstance);
-      } else if (other instanceof Person.Snapshot) {
-        return this.interop.TypeShim.Sample.PersonInterop.IsOlderThan_1(this.instance, other);
-      } else {
-        throw new Error("No overload for interop method 'IsOlderThan' matches the provided arguments.");
-      }
+      const otherInstance = other instanceof Person.Proxy ? other.instance : other;
+      return this.interop.TypeShim.Sample.PersonInterop.IsOlderThan(this.instance, otherInstance);
     }
 
     public AdoptPet(): void {
@@ -349,14 +337,8 @@ export namespace Person {
     }
 
     public Adopt(newPet: Dog.Proxy | Dog.Snapshot): void {
-      if (newPet instanceof Dog.Proxy) {
-        const newPetInstance = newPet.instance;
-        this.interop.TypeShim.Sample.PersonInterop.Adopt(this.instance, newPetInstance);
-      } else if (newPet instanceof Dog.Snapshot) {
-        this.interop.TypeShim.Sample.PersonInterop.Adopt_1(this.instance, newPet);
-      } else {
-        throw new Error("No overload for interop method 'Adopt' matches the provided arguments.");
-      }
+      const newPetInstance = newPet instanceof Dog.Proxy ? newPet.instance : newPet;
+      this.interop.TypeShim.Sample.PersonInterop.Adopt(this.instance, newPetInstance);
     }
 
     public get Id(): number {
@@ -389,14 +371,8 @@ export namespace Person {
     }
 
     public set Pet(value: Dog.Proxy | Dog.Snapshot | null) {
-      if (value instanceof Dog.Proxy) {
-        const valueInstance = value.instance;
-        this.interop.TypeShim.Sample.PersonInterop.set_Pet(this.instance, valueInstance);
-      } else if (value instanceof Dog.Snapshot) {
-        this.interop.TypeShim.Sample.PersonInterop.set_Pet_1(this.instance, value);
-      } else {
-        throw new Error("No overload for interop method 'set_Pet' matches the provided arguments.");
-      }
+      const valueInstance = value instanceof Dog.Proxy ? value.instance : value;
+      this.interop.TypeShim.Sample.PersonInterop.set_Pet(this.instance, valueInstance);
     }
 
   }

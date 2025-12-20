@@ -31,12 +31,24 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
             InteropTypeSyntax = simpleTypeInfo.Syntax,
             CLRTypeSyntax = clrTypeSyntax,
             TypeArgument = null,
-            RequiresCLRTypeConversion = simpleTypeInfo.KnownType == KnownManagedType.Object,
+            RequiresCLRTypeConversion = RequiresTypeConversion(),
             IsTaskType = false,
             IsArrayType = false,
             IsNullableType = clrTypeSyntax is NullableTypeSyntax,
             IsSnapshotCompatible = true
         };
+
+        bool RequiresTypeConversion()
+        {
+            // Check if the type inherits from 'object', if so it will need to be converted to its original type when crossing the interop boundary 
+            if (simpleTypeInfo.KnownType != KnownManagedType.Object)
+            {
+                return false;
+            }
+            // System.Object is excluded from type conversion, the user may handle this as they see fit
+            TypeSyntax unwrapped = clrTypeSyntax is NullableTypeSyntax n ? n.ElementType : clrTypeSyntax;
+            return unwrapped is not PredefinedTypeSyntax p || !p.Keyword.IsKind(SyntaxKind.ObjectKeyword);
+        }
     }
 
     private InteropTypeInfo BuildArrayTypeInfo(JSArrayTypeInfo arrayTypeInfo, TypeSyntax clrTypeSyntax)

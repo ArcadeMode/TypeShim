@@ -45,6 +45,14 @@ public partial class C1Interop
     {
         C1.M1(p1);
     }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
 }
 
 """));
@@ -88,6 +96,14 @@ public partial class C1Interop
     {
         C1 typed_instance = (C1)instance;
         typed_instance.M1(p1);
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
 }
 
