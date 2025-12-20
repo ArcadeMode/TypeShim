@@ -58,6 +58,7 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypescriptS
             //    sb.AppendLine();
             //}
         }
+        sb.Append(methodRenderer.GetRenderedContent());
         sb.AppendLine($"{indent}}}");
     }
 }
