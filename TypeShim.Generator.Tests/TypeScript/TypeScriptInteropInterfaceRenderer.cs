@@ -51,7 +51,6 @@ internal class TypeScriptInteropInterfaceRenderer
 // Auto-generated TypeScript interop interface. Source class: N1.C1
 export interface C1Interop {
     DoStuff(instance: object, u: object | null): void;
-    DoStuff_1(instance: object, u: object | null): void;
 }
 
 """));

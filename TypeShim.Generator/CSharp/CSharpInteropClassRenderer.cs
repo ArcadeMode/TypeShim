@@ -71,7 +71,7 @@ internal sealed class CSharpInteropClassRenderer
         RenderProperty(propertyInfo, getter: false);
     }
 
-    private void RenderProperty(PropertyInfo propertyInfo, bool getter, MethodOverloadInfo? overloadInfo = null)
+    private void RenderProperty(PropertyInfo propertyInfo, bool getter)
     {
         MethodInfo methodInfo = getter ? propertyInfo.GetMethod : propertyInfo.SetMethod ?? throw new InvalidOperationException("RenderProperty called for setter with null SetMethod");
 
@@ -82,15 +82,14 @@ internal sealed class CSharpInteropClassRenderer
         sb.Append(indent);
         sb.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
 
-        RenderMethodSignature(depth: 1, methodInfo, overloadInfo);
+        RenderMethodSignature(depth: 1, methodInfo);
 
         sb.Append(indent);
         sb.AppendLine("{");
 
-        IEnumerable<MethodParameterInfo?> overloadParams = overloadInfo?.MethodParameters ?? Enumerable.Repeat<MethodParameterInfo?>(null, methodInfo.MethodParameters.Count);
-        foreach ((MethodParameterInfo originalParamInfo, MethodParameterInfo? overloadParamInfo) in methodInfo.MethodParameters.Zip(overloadParams))
+        foreach (MethodParameterInfo originalParamInfo in methodInfo.MethodParameters)
         {
-            RenderParameterTypeConversion(depth: 2, originalParamInfo, overloadParamInfo);
+            RenderParameterTypeConversion(depth: 2, originalParamInfo);
         }
 
         string accessorName = methodInfo.IsStatic ? classInfo.Name : GetTypedParameterName(methodInfo.MethodParameters.ElementAt(0));
@@ -108,7 +107,7 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine("}");
     }
 
-    private void RenderMethod(MethodInfo methodInfo, MethodOverloadInfo? overloadInfo = null)
+    private void RenderMethod(MethodInfo methodInfo)
     {
         string indent = new(' ', 4);
         JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(methodInfo.ReturnType);
@@ -117,22 +116,21 @@ internal sealed class CSharpInteropClassRenderer
         sb.Append(indent);
         sb.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
 
-        RenderMethodSignature(depth: 1, methodInfo, overloadInfo);
+        RenderMethodSignature(depth: 1, methodInfo);
 
         sb.Append(indent);
         sb.AppendLine("{");
 
-        IEnumerable<MethodParameterInfo?> overloadParams = overloadInfo?.MethodParameters ?? Enumerable.Repeat<MethodParameterInfo?>(null, methodInfo.MethodParameters.Count);
-        foreach ((MethodParameterInfo originalParamInfo, MethodParameterInfo ? overloadParamInfo) in methodInfo.MethodParameters.Zip(overloadParams))
+        foreach (MethodParameterInfo originalParamInfo in methodInfo.MethodParameters)
         {
-            RenderParameterTypeConversion(depth: 2, originalParamInfo, overloadParamInfo);
+            RenderParameterTypeConversion(depth: 2, originalParamInfo);
         }
-        RenderUserMethodInvocation(methodInfo, depth: 2);
+        RenderUserMethodInvocation(depth: 2, methodInfo);
         sb.Append(indent);
         sb.AppendLine("}");
     }
 
-    private void RenderMethodSignature(int depth, MethodInfo methodInfo, MethodOverloadInfo? overloadInfo = null)
+    private void RenderMethodSignature(int depth, MethodInfo methodInfo)
     {
         string indent = new(' ', depth * 4);
         sb.Append(indent);
@@ -144,9 +142,9 @@ internal sealed class CSharpInteropClassRenderer
 
         sb.Append(methodInfo.ReturnType.InteropTypeSyntax);
         sb.Append(' ');
-        sb.Append(overloadInfo?.Name ?? methodInfo.Name);
+        sb.Append(methodInfo.Name);
         sb.Append('(');
-        RenderMethodParameterList(overloadInfo?.MethodParameters ?? methodInfo.MethodParameters);
+        RenderMethodParameterList(methodInfo.MethodParameters);
         sb.Append(')');
         sb.AppendLine();
         
@@ -169,7 +167,7 @@ internal sealed class CSharpInteropClassRenderer
         }
     }
 
-    private void RenderUserMethodInvocation(MethodInfo methodInfo, int depth)
+    private void RenderUserMethodInvocation(int depth, MethodInfo methodInfo)
     {
         string indent = new(' ', depth * 4);
 
@@ -197,12 +195,10 @@ internal sealed class CSharpInteropClassRenderer
 
     private string GetTypedParameterName(MethodParameterInfo paramInfo) => paramInfo.Type.RequiresCLRTypeConversion ? $"typed_{paramInfo.Name}" : paramInfo.Name;
 
-    private void RenderParameterTypeConversion(int depth, MethodParameterInfo originalParamInfo, MethodParameterInfo? overloadParamInfo = null)
+    private void RenderParameterTypeConversion(int depth, MethodParameterInfo originalParamInfo)
     {
         if (!originalParamInfo.Type.RequiresCLRTypeConversion)
             return;
-
-        string indent = new(' ', depth * 4);
 
         if (originalParamInfo.IsInjectedInstanceParameter)
         {
@@ -210,16 +206,11 @@ internal sealed class CSharpInteropClassRenderer
         }
         else if (originalParamInfo.Type.IsTaskType)
         {
-            // TODO: jsobject tasks will end up here.
-            RenderTaskTypeConversion(depth, originalParamInfo, overloadParamInfo, indent);
+            RenderTaskTypeConversion(depth, originalParamInfo);
         }
         else if (originalParamInfo.Type.IsArrayType)
         {
-            RenderArrayTypeConversion(originalParamInfo, overloadParamInfo, indent);
-        }
-        else if (overloadParamInfo != null && overloadParamInfo.Type.ContainsTypeOf(KnownManagedType.JSObject))
-        {
-            RenderJSObjectSnapshotTypeConversion(originalParamInfo, indent);
+            RenderArrayTypeConversion(depth, originalParamInfo);
         }
         else if (originalParamInfo.Type.ManagedType is KnownManagedType.Object)
         {
@@ -257,32 +248,18 @@ internal sealed class CSharpInteropClassRenderer
         }
     }
 
-    private void RenderArrayTypeConversion(MethodParameterInfo parameterInfo, MethodParameterInfo? overloadParamInfo, string indent)
+    private void RenderArrayTypeConversion(int depth, MethodParameterInfo parameterInfo)
     {
+        string indent = new(' ', depth * 4);
         Debug.Assert(parameterInfo.Type.TypeArgument != null, "Array type must have a type argument.");
         InteropTypeInfo targetType = parameterInfo.Type.TypeArgument ?? parameterInfo.Type;
         string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
         sb.AppendLine($"{indent}{targetType.CLRTypeSyntax}[] {GetTypedParameterName(parameterInfo)} = Array.ConvertAll({parameterInfo.Name}, {targetInteropClass}.{FromObjectMethodName});");
     }
 
-    private void RenderJSObjectSnapshotTypeConversion(MethodParameterInfo parameterInfo, string indent)
+    private void RenderTaskTypeConversion(int depth, MethodParameterInfo parameterInfo)
     {
-        InteropTypeInfo targetType = parameterInfo.Type.TypeArgument ?? parameterInfo.Type;
-        string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
-        sb.Append($"{indent}{targetType.CLRTypeSyntax} {GetTypedParameterName(parameterInfo)} = ");
-
-        if (parameterInfo.Type.IsNullableType)
-        {
-            sb.AppendLine($"{parameterInfo.Name} != null ? {targetInteropClass}.{FromJSObjectMethodName}({parameterInfo.Name}) : null;");
-        }
-        else
-        {
-            sb.AppendLine($"{targetInteropClass}.{FromJSObjectMethodName}({parameterInfo.Name});");
-        }
-    }
-
-    private void RenderTaskTypeConversion(int depth, MethodParameterInfo parameterInfo, MethodParameterInfo? overloadParamInfo, string indent)
-    {
+        string indent = new(' ', depth * 4);
         InteropTypeInfo userParamTypeInfo = parameterInfo.Type.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
         string tcsVarName = $"{parameterInfo.Name}Tcs";
         sb.Append(indent);

@@ -25,7 +25,7 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
             string returnType = symbolNameProvider.GetProxyReferenceNameIfExists(methodInfo.ReturnType) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
 
             string optionalAsync = methodInfo.ReturnType.IsTaskType ? "async " : string.Empty;
-            return $"{optionalAsync}{methodInfo.Name}({RenderProxyMethodParameters(methodInfo)}): {returnType}";
+            return $"{optionalAsync}{methodInfo.Name}({GetProxyMethodParameterList(methodInfo)}): {returnType}";
         }
     }
 
@@ -49,16 +49,16 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         string RenderProxyPropertyGetterSignature(MethodInfo methodInfo)
         {
             string returnType = symbolNameProvider.GetProxyReferenceNameIfExists(methodInfo.ReturnType) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
-            return $"get {propertyInfo.Name}({RenderProxyMethodParameters(methodInfo)}): {returnType}";
+            return $"get {propertyInfo.Name}({GetProxyMethodParameterList(methodInfo)}): {returnType}";
         }
 
         string RenderProxyPropertySetterSignature(MethodInfo methodInfo)
         {
-            return $"set {propertyInfo.Name}({RenderProxyMethodParameters(methodInfo)})";
+            return $"set {propertyInfo.Name}({GetProxyMethodParameterList(methodInfo)})";
         }
     }
 
-    private string RenderProxyMethodParameters(MethodInfo methodInfo)
+    private string GetProxyMethodParameterList(MethodInfo methodInfo)
     {
         return string.Join(", ", methodInfo.MethodParameters.Select(p =>
         {
@@ -70,73 +70,78 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
     internal void RenderMethodBodyContent(int depth, MethodInfo methodInfo)
     {
         string indent = new(' ', depth * 2);
-        RenderManagedObjectConstAssignments(depth, methodInfo, null);
-        RenderInteropInvocation(depth, methodInfo, null);
-        return;
+        RenderManagedObjectConstAssignments(depth, methodInfo);
+        RenderInteropInvocation(depth, methodInfo);
+    }
 
-        void RenderManagedObjectConstAssignments(int depth, MethodInfo methodInfo, MethodOverloadInfo? overloadInfo)
+    private void RenderManagedObjectConstAssignments(int depth, MethodInfo methodInfo)
+    {
+        string indent = new(' ', depth * 2);
+        foreach (MethodParameterInfo originalParam in methodInfo.MethodParameters)
         {
-            string indent = new(' ', depth * 2);
-            IEnumerable<MethodParameterInfo?> overloadParameters = overloadInfo?.MethodParameters ?? Enumerable.Repeat<MethodParameterInfo?>(null, methodInfo.MethodParameters.Count);
-            foreach ((MethodParameterInfo originalParam, MethodParameterInfo? overloadParam) in methodInfo.MethodParameters.Zip(overloadParameters))
+            if (originalParam.IsInjectedInstanceParameter || !originalParam.Type.RequiresCLRTypeConversion)
+                continue;
+
+            InteropTypeInfo paramTargetType = originalParam.Type.TypeArgument ?? originalParam.Type; // we are concerned with the element type for arrays/tasks or inner type of nullables
+            if (symbolNameProvider.GetProxyReferenceNameIfExists(paramTargetType) is not string proxyClassName)
             {
-                if (originalParam.IsInjectedInstanceParameter || !originalParam.Type.RequiresCLRTypeConversion)
-                    continue;
+                throw new ArgumentException("All type conversion-requiring types should be user class proxies.");
+            }
 
-                if (overloadParam != null && overloadParam.Type.ContainsTypeOf(KnownManagedType.JSObject))
-                    continue; // if the original was also JSObject, it wouldnt RequiresCLRTypeConversion
-
-                InteropTypeInfo paramTargetType = originalParam.Type.TypeArgument ?? originalParam.Type; // we are concerned with the element type for arrays/tasks or inner type of nullables
-                if (symbolNameProvider.GetProxyReferenceNameIfExists(paramTargetType) is not string proxyClassName)
-                {
-                    throw new ArgumentException("All type conversion-requiring types should be user class proxies.");
-                }
-
-                InteropTypeInfo paramType = originalParam.Type;
-                if (paramType.IsArrayType || paramType.IsTaskType)
-                {
-                    string instancePropertyAccessor = paramTargetType.IsNullableType ? "?.instance" : ".instance";
-                    string transformFunction = paramType.IsArrayType ? "map" : "then";
-                    sb.AppendLine($"{indent}const {GetInteropInvocationVariable(originalParam, overloadParam)} = {originalParam.Name}.{transformFunction}(e => e instanceof {proxyClassName} ? e{instancePropertyAccessor} : e);");
-                }
-                else // simple or nullable proxy types
-                {
-                    string instancePropertyAccessor = paramTargetType.IsNullableType ? "?.instance" : ".instance";
-                    sb.AppendLine($"{indent}const {GetInteropInvocationVariable(originalParam, overloadParam)} = {originalParam.Name} instanceof {proxyClassName} ? {originalParam.Name}{instancePropertyAccessor} : {originalParam.Name};");
-                }
+            InteropTypeInfo paramType = originalParam.Type;
+            if (paramType.IsArrayType || paramType.IsTaskType)
+            {
+                string instancePropertyAccessor = paramTargetType.IsNullableType ? "?.instance" : ".instance";
+                string transformFunction = paramType.IsArrayType ? "map" : "then";
+                sb.AppendLine($"{indent}const {GetInteropInvocationVariable(originalParam)} = {originalParam.Name}.{transformFunction}(e => e instanceof {proxyClassName} ? e{instancePropertyAccessor} : e);");
+            }
+            else // simple or nullable proxy types
+            {
+                string instancePropertyAccessor = paramTargetType.IsNullableType ? "?.instance" : ".instance";
+                sb.AppendLine($"{indent}const {GetInteropInvocationVariable(originalParam)} = {originalParam.Name} instanceof {proxyClassName} ? {originalParam.Name}{instancePropertyAccessor} : {originalParam.Name};");
             }
         }
+    }
 
-        void RenderInteropInvocation(int depth, MethodInfo methodInfo, MethodOverloadInfo? overloadInfo = null)
+    private void RenderInteropInvocation(int depth, MethodInfo methodInfo)
+    {
+        string indent = new(' ', depth * 2);
+        string interopInvoke = RenderMethodCallParametersWithInstanceParameterExpression(methodInfo, "this.instance"); // note: instance parameter will be unused for static methods
+
+        InteropTypeInfo returnType = methodInfo.ReturnType;
+        InteropTypeInfo returnTargetType = methodInfo.ReturnType.TypeArgument ?? methodInfo.ReturnType; // we are concerned with the element type for arrays/tasks or inner type of nullables
+
+        if (symbolNameProvider.GetProxyReferenceNameIfExists(returnTargetType) is string proxyClassName)
         {
-            string indent = new(' ', depth * 2);
-            string interopInvoke = RenderMethodCallParametersWithInstanceParameterExpression(methodInfo, overloadInfo, "this.instance"); // note: instance parameter will be unused for static methods
+            // user class return type, wrap in proxy
+            string optionalAwait = returnType.IsTaskType ? "await " : string.Empty;
+            sb.AppendLine($"{indent}const res = {optionalAwait}this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({interopInvoke});");
 
-            InteropTypeInfo returnType = methodInfo.ReturnType;
-            InteropTypeInfo returnTargetType = methodInfo.ReturnType.TypeArgument ?? methodInfo.ReturnType; // we are concerned with the element type for arrays/tasks or inner type of nullables
-
-            if (symbolNameProvider.GetProxyReferenceNameIfExists(returnTargetType) is string proxyClassName)
+            if (returnType.IsArrayType)
             {
-                // user class return type, wrap in proxy
-                string optionalAwait = returnType.IsTaskType ? "await " : string.Empty;
-                sb.AppendLine($"{indent}const res = {optionalAwait}this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo, overloadInfo)}({interopInvoke});");
-
-                if (returnType.IsArrayType)
-                {
-                    sb.AppendLine($"{indent}return res.map(e => {GetNewProxyExpression(returnType, proxyClassName, "e")});");
-                }
-                else
-                {
-                    sb.AppendLine($"{indent}return {GetNewProxyExpression(returnType, proxyClassName, "res")};");
-                }
+                sb.AppendLine($"{indent}return res.map(e => {GetNewProxyExpression(returnType, proxyClassName, "e")});");
             }
-            else // primitive return type or void
+            else
             {
-                string optionalReturn = returnType.ManagedType == KnownManagedType.Void ? string.Empty : "return ";
-                sb.AppendLine($"{indent}{optionalReturn}this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo, overloadInfo)}({interopInvoke});");
-            }           
+                sb.AppendLine($"{indent}return {GetNewProxyExpression(returnType, proxyClassName, "res")};");
+            }
         }
-        
+        else // primitive return type or void
+        {
+            string optionalReturn = returnType.ManagedType == KnownManagedType.Void ? string.Empty : "return ";
+            sb.AppendLine($"{indent}{optionalReturn}this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({interopInvoke});");
+        }
+
+        string RenderMethodCallParametersWithInstanceParameterExpression(MethodInfo methodInfo, string instanceParameterExpression)
+        {
+            return string.Join(", ", methodInfo.MethodParameters.Select(p => p.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(p)));
+        }
+
+        string ResolveInteropMethodAccessor(ClassInfo classInfo, MethodInfo methodInfo)
+        {
+            return $"{classInfo.Namespace}.{symbolNameProvider.GetInteropInterfaceName(classInfo)}.{methodInfo.Name}";
+        }
+
         static string GetNewProxyExpression(InteropTypeInfo returnTypeInfo, string proxyClassName, string instanceName)
         {
             if (returnTypeInfo.IsNullableType)
@@ -148,30 +153,10 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
                 return $"new {proxyClassName}({instanceName}, this.interop)";
             }
         }
-        
-        /// <summary>
-        /// Renders only the parameter names for method call, with the same names as defined in the method info.
-        /// Excludes the injected instance parameter if present.
-        /// </summary>
-        /// <param name="methodInfo"></param>
-        /// <returns></returns>
-        string RenderMethodCallParametersWithInstanceParameterExpression(MethodInfo methodInfo, MethodOverloadInfo? overloadInfo, string instanceParameterExpression)
-        {
-            IEnumerable<MethodParameterInfo?> overloadParameters = overloadInfo?.MethodParameters ?? Enumerable.Repeat<MethodParameterInfo?>(null, methodInfo.MethodParameters.Count);
-            IEnumerable<(MethodParameterInfo Param, MethodParameterInfo? Overload)> methodInfoWithOverload = methodInfo.MethodParameters.Zip(overloadParameters);
-            return string.Join(", ", methodInfoWithOverload.Select((p) => p.Param.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(p.Param, p.Overload)));
-        }
+    }
 
-        string GetInteropInvocationVariable(MethodParameterInfo param, MethodParameterInfo? overload)
-        {
-            return param.Type.RequiresCLRTypeConversion && (overload == null || !overload.Type.ContainsTypeOf(KnownManagedType.JSObject))
-                ? $"{param.Name}Instance"
-                : param.Name;
-        }
-
-        string ResolveInteropMethodAccessor(ClassInfo classInfo, MethodInfo methodInfo, MethodOverloadInfo? overloadInfo)
-        {
-            return $"{classInfo.Namespace}.{symbolNameProvider.GetInteropInterfaceName(classInfo)}.{overloadInfo?.Name ?? methodInfo.Name}";
-        }
+    private static string GetInteropInvocationVariable(MethodParameterInfo param)
+    {
+        return param.Type.RequiresCLRTypeConversion ? $"{param.Name}Instance" : param.Name;
     }
 }
