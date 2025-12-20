@@ -5,29 +5,23 @@ using TypeShim.Generator.Typescript;
 internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo moduleInfo, TypescriptSymbolNameProvider symbolNameProvider)
 {
     private readonly StringBuilder sourceBuilder = new();
-    private readonly TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
     internal string Render()
     {
-        RenderInteropModuleInterface();
-        RenderUserModuleClass();
-
         RenderInteropInterfaces();
+        
+        RenderUserModuleClass();
         RenderUserClassNamespaces();
         return sourceBuilder.ToString();
     }
 
-    private void RenderInteropModuleInterface()
+    private void RenderInteropInterfaces()
     {
         TypescriptInteropModuleInterfaceRenderer moduleInterfaceRenderer = new(moduleInfo.HierarchyInfo, symbolNameProvider);
         sourceBuilder.AppendLine(moduleInterfaceRenderer.Render());
-    }
-
-    private void RenderInteropInterfaces()
-    {
         foreach (ClassInfo classInfo in classInfos)
         {
-            TypescriptInteropInterfaceRenderer interopInterfaceRenderer = new(classInfo, methodRenderer, symbolNameProvider);
+            TypescriptInteropInterfaceRenderer interopInterfaceRenderer = new(classInfo, symbolNameProvider);
             sourceBuilder.AppendLine(interopInterfaceRenderer.Render());
         }
     }
@@ -36,7 +30,7 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
     {
         foreach (ClassInfo classInfo in classInfos.Where(c => !c.IsModule))
         {
-            TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(classInfo, methodRenderer, symbolNameProvider);
+            TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(classInfo, symbolNameProvider);
             sourceBuilder.AppendLine(namespaceRenderer.Render());
         }
     }
@@ -45,7 +39,7 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
     {
         foreach (ClassInfo moduleClassInfo in classInfos.Where(c => c.IsModule))
         {
-            TypescriptUserModuleClassRenderer moduleClassRenderer = new(moduleClassInfo, methodRenderer, symbolNameProvider);
+            TypescriptUserModuleClassRenderer moduleClassRenderer = new(moduleClassInfo, symbolNameProvider);
             sourceBuilder.AppendLine(moduleClassRenderer.Render());
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Reflection;
+using System.Text;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
 
@@ -11,7 +12,7 @@ namespace TypeShim.Generator.Typescript;
 /// <param name="classInfo"></param>
 /// <param name="methodRenderer"></param>
 /// <param name="symbolNameProvider"></param>
-internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypeScriptMethodRenderer methodRenderer, TypescriptSymbolNameProvider symbolNameProvider)
+internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypescriptSymbolNameProvider symbolNameProvider)
 {
     private readonly StringBuilder sb = new();
 
@@ -19,14 +20,26 @@ internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypeScrip
     {
         sb.AppendLine($"// Auto-generated TypeScript interop interface. Source class: {classInfo.Namespace}.{classInfo.Name}");
         sb.AppendLine($"export interface {symbolNameProvider.GetInteropInterfaceName(classInfo)} {{");
-        
+        // TODO: add depth param.
+        // TODO: consider merging with module rendering (mode param?)
         foreach ((MethodInfo methodInfo, MethodOverloadInfo? overloadInfo) in GetAllMethods())
         {
-            sb.AppendLine($"    {methodRenderer.RenderInteropMethodSignature(methodInfo, overloadInfo)};");
+            sb.AppendLine($"    {RenderInteropMethodSignature(methodInfo, overloadInfo)};");
         }
 
         sb.AppendLine("}");
         return sb.ToString();
+    }
+
+    private string RenderInteropMethodSignature(MethodInfo methodInfo, MethodOverloadInfo? overloadInfo = null)
+    {
+        string returnType = symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
+        return $"{overloadInfo?.Name ?? methodInfo.Name}({RenderInteropMethodParameters(overloadInfo?.MethodParameters ?? methodInfo.MethodParameters)}): {returnType}";
+
+        string RenderInteropMethodParameters(IEnumerable<MethodParameterInfo> parameterInfos)
+        {
+            return string.Join(", ", parameterInfos.Select(p => $"{p.Name}: {symbolNameProvider.GetNakedSymbolReference(p.Type)}"));
+        }
     }
 
     private IEnumerable<(MethodInfo MethodInfo, MethodOverloadInfo? OverloadInfo)> GetAllMethods()
