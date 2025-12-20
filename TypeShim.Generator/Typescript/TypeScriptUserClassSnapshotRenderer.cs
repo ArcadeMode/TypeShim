@@ -41,8 +41,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
     {
         string indent = new(' ', depth * 2);
         // Emit a runtime value with Symbol.hasInstance so snapshot interfaces can be checked via `instanceof`.
-        // It validates that `v` is an object and that all snapshot-compatible properties exist,
-        // and performs array and nested snapshot checks where applicable.
+        // It validates that `v` is an object matching the snapshot interface's definition, including nested type/structure checks in property types.
 
         string snapshotConstName = symbolNameProvider.GetSnapshotDefinitionName();
         sb.AppendLine($"{indent}export const {snapshotConstName}: {{");
@@ -52,47 +51,45 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
         sb.AppendLine($"{indent}    if (!v || typeof v !== 'object') return false;");
         sb.AppendLine($"{indent}    const o = v as any;");
 
-        List<string> checks = new();
-        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.Type.IsSnapshotCompatible))
-        {
-            InteropTypeInfo typeInfo = propertyInfo.Type;
-            string propertyName = propertyInfo.Name;
-
-            if (typeInfo.IsArrayType)
-            {
-                InteropTypeInfo elementType = typeInfo.TypeArgument ?? throw new ArgumentException("Array element type is not specified");
-                string expectedTypeSymbol = symbolNameProvider.GetSnapshotReferenceNameIfExists(elementType) ?? symbolNameProvider.GetNakedSymbolReference(elementType);
-                checks.Add($"Array.isArray(o.{propertyName}) && o.{propertyName}.every((e: any) => {GetBooleanTypeAssertion(expectedTypeSymbol, "e")})");
-            }
-            else if (typeInfo.IsNullableType)
-            {
-                InteropTypeInfo innerType = typeInfo.TypeArgument ?? throw new ArgumentException("Nullable's type argument is not specified"); ;
-                string expectedTypeSymbol = symbolNameProvider.GetSnapshotReferenceNameIfExists(innerType) ?? symbolNameProvider.GetNakedSymbolReference(innerType);
-                checks.Add($"(o.{propertyName} === null || ({GetBooleanTypeAssertion(expectedTypeSymbol, $"o.{propertyName}")}))");
-            }
-            else if (typeInfo.IsTaskType)
-            {
-                // thenable check over instanceof Promise (cross‑realm safe)
-                checks.Add($"(o.{propertyName} !== null && typeof (o.{propertyName} as any).then === 'function')");
-            }
-            else // Simple type or snapshot
-            {
-                string expectedTypeSymbol = symbolNameProvider.GetSnapshotReferenceNameIfExists(typeInfo) ?? symbolNameProvider.GetNakedSymbolReference(typeInfo);
-                checks.Add($"({GetBooleanTypeAssertion(expectedTypeSymbol, $"o.{propertyName}")})");
-            }
-        }
-
-        if (checks.Count > 0)
-        {
-            sb.AppendLine($"{indent}    return " + string.Join(" && ", checks) + ";");
-        }
-        else
-        {
-            sb.AppendLine($"{indent}    return true;");
-        }
+        PropertyInfo[] propertyInfos = [.. classInfo.Properties.Where(pi => pi.Type.IsSnapshotCompatible)];
+        string structuralMatchExpression = propertyInfos.Length == 0 ? "true" : string.Join(" && ", GetPropertyTypeAssertionExpressions(propertyInfos));
+        sb.AppendLine($"{indent}    return {structuralMatchExpression};");
 
         sb.AppendLine($"{indent}  }}");
         sb.AppendLine($"{indent}}};");
+        return;
+
+        IEnumerable<string> GetPropertyTypeAssertionExpressions(PropertyInfo[] propertyInfos)
+        {
+            foreach (PropertyInfo propertyInfo in propertyInfos)
+            {
+                InteropTypeInfo typeInfo = propertyInfo.Type;
+                string propertyName = propertyInfo.Name;
+
+                if (typeInfo.IsArrayType)
+                {
+                    InteropTypeInfo elementType = typeInfo.TypeArgument ?? throw new ArgumentException("Array element type is not specified");
+                    string expectedTypeSymbol = symbolNameProvider.GetSnapshotReferenceNameIfExists(elementType) ?? symbolNameProvider.GetNakedSymbolReference(elementType);
+                    yield return $"Array.isArray(o.{propertyName}) && o.{propertyName}.every((e: any) => {GetBooleanTypeAssertion(expectedTypeSymbol, "e")})";
+                }
+                else if (typeInfo.IsNullableType)
+                {
+                    InteropTypeInfo innerType = typeInfo.TypeArgument ?? throw new ArgumentException("Nullable's type argument is not specified"); ;
+                    string expectedTypeSymbol = symbolNameProvider.GetSnapshotReferenceNameIfExists(innerType) ?? symbolNameProvider.GetNakedSymbolReference(innerType);
+                    yield return $"(o.{propertyName} === null || ({GetBooleanTypeAssertion(expectedTypeSymbol, $"o.{propertyName}")}))";
+                }
+                else if (typeInfo.IsTaskType)
+                {
+                    // thenable check over instanceof Promise (cross‑realm safe)
+                    yield return $"(o.{propertyName} !== null && typeof (o.{propertyName} as any).then === 'function')";
+                }
+                else // Simple type or snapshot
+                {
+                    string expectedTypeSymbol = symbolNameProvider.GetSnapshotReferenceNameIfExists(typeInfo) ?? symbolNameProvider.GetNakedSymbolReference(typeInfo);
+                    yield return $"({GetBooleanTypeAssertion(expectedTypeSymbol, $"o.{propertyName}")})";
+                }
+            }
+        }
 
         string GetBooleanTypeAssertion(string symbol, string referenceExpression)
         {
