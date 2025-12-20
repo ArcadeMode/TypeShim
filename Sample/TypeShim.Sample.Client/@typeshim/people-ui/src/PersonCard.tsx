@@ -43,7 +43,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({ initPerson }) => {
               personProxy.Pet = {...petSnapshot, Age: petSnapshot.Age + 1}; 
               setPerson({...wrapper}); 
             }}>
-            Pet: {petSnapshot.Name} {petProxy.GetAge(false)} years/{petProxy.GetAge(true)} years ({petSnapshot.Breed}) - {petProxy.Bark()}
+            Pet: {petSnapshot.Name} {petProxy.GetAge(false)}/{petProxy.GetAge(true)} ({petSnapshot.Breed}) - {petProxy.Bark()}
           </span>
         </div>
       )}

@@ -32,9 +32,4 @@ public class PeopleProvider(PeopleApiClient _apiClient)
             throw; // hand over to js
         }
     }
-
-    //public void Ok(JSObject obj)
-    //{
-    //    obj.
-    //}
 }
