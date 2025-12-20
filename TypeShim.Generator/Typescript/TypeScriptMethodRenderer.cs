@@ -121,8 +121,10 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
                 {
                     // option A: make TS method async, await + instanceof check on resolved value
                     // option B: fire and forget, then() + instanceof check inside (wont be able to deal with non-void return types)
-                    // for now, we will throw not implemented, think about it..
-
+                    
+                    // >> WINNER >> option C: defer to C# to switch between JSObject parsing or object-cast in TCS SetResult (where types reunite as user source class!)
+                    
+                    // for now, we will throw not implemented
                     throw new NotImplementedException("TODO: make TS method async to await task input and call appropriate interop when applicable?");
                     //sb.Append($"{param.Name} instanceof Promise");
                 }
