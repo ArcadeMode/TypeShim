@@ -35,7 +35,6 @@ internal class TypeScriptUserClassSnapshotRendererTests
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
         string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
 
@@ -84,7 +83,6 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
         string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
 
@@ -133,7 +131,6 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
         string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
 
@@ -174,7 +171,6 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
         string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
 
@@ -233,7 +229,6 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
         string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
 

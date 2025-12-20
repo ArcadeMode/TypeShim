@@ -33,10 +33,9 @@ internal class TypeScriptRendererTests_Properties
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, symbolNameProvider).Render(0);
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy {
@@ -86,10 +85,9 @@ export class Proxy {
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, symbolNameProvider).Render(0);
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy {
@@ -134,7 +132,6 @@ export class Proxy {
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
         ModuleInfo moduleInfo = new()
         {
@@ -142,7 +139,7 @@ export class Proxy {
             HierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider),
         };
 
-        string interopClass = new TypescriptUserModuleClassRenderer(classInfo, methodRenderer, symbolNameProvider).Render();
+        string interopClass = new TypescriptUserModuleClassRenderer(classInfo, symbolNameProvider).Render();
 
         Assert.That(interopClass, Is.EqualTo("""
 // Auto-generated TypeShim TSModule class. Source class: N1.C1
@@ -218,9 +215,8 @@ export class C1 {
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, symbolNameProvider).Render(0);
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy {
@@ -243,6 +239,75 @@ export class Proxy {
       this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
     } else if (value instanceof UserClass.Snapshot) {
       this.interop.N1.C1Interop.set_P1_1(this.instance, value);
+    } else {
+      throw new Error("No overload for interop method 'set_P1' matches the provided arguments.");
+    }
+  }
+
+}
+
+"""));
+    }
+
+    [Test]
+    public void TypeScriptUserClassModule_InstanceParameter_WithUserClassParameterType_SupportsJSObjectOverload()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSModule]
+            public static class C1
+            {
+                public static UserClass P1 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        string interopClass = new TypescriptUserModuleClassRenderer(classInfo, symbolNameProvider).Render();
+
+        Assert.That(interopClass, Is.EqualTo("""
+// Auto-generated TypeShim TSModule class. Source class: N1.C1
+export class C1 {
+  private interop: AssemblyExports;
+
+  constructor(interop: AssemblyExports) {
+    this.interop = interop;
+  }
+
+  public get P1(): UserClass.Proxy {
+    const res = this.interop.N1.C1Interop.get_P1();
+    return new UserClass.Proxy(res, this.interop);
+  }
+
+  public set P1(value: UserClass.Proxy | UserClass.Snapshot) {
+    if (value instanceof UserClass.Proxy) {
+      const valueInstance = value.instance;
+      this.interop.N1.C1Interop.set_P1(valueInstance);
+    } else if (value instanceof UserClass.Snapshot) {
+      this.interop.N1.C1Interop.set_P1_0(value);
     } else {
       throw new Error("No overload for interop method 'set_P1' matches the provided arguments.");
     }

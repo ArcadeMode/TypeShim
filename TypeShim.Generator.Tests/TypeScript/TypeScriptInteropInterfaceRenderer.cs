@@ -44,9 +44,8 @@ internal class TypeScriptInteropInterfaceRenderer
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
-        string interopClass = new TypescriptInteropInterfaceRenderer(classInfo, methodRenderer, symbolNameProvider).Render();
+        string interopClass = new TypescriptInteropInterfaceRenderer(classInfo, symbolNameProvider).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop interface. Source class: N1.C1
@@ -83,9 +82,8 @@ export interface C1Interop {
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider);
 
-        string interopClass = new TypescriptInteropInterfaceRenderer(classInfo, methodRenderer, symbolNameProvider).Render();
+        string interopClass = new TypescriptInteropInterfaceRenderer(classInfo, symbolNameProvider).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop interface. Source class: N1.C1
