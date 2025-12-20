@@ -8,10 +8,8 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
 
     internal string Render()
     {
-        RenderInteropInterfaces();
-        
-        RenderUserModuleClass();
-        RenderUserClassNamespaces();
+        RenderInteropInterfaces();        
+        RenderUserClasses();
         return sourceBuilder.ToString();
     }
 
@@ -26,18 +24,14 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
         }
     }
 
-    private void RenderUserClassNamespaces()
+    private void RenderUserClasses()
     {
-        foreach (ClassInfo classInfo in classInfos.Where(c => !c.IsModule))
+        foreach (ClassInfo classInfo in classInfos.Where(c => c.Type.IsTSExport))
         {
             TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(classInfo, symbolNameProvider);
             sourceBuilder.AppendLine(namespaceRenderer.Render());
         }
-    }
-
-    private void RenderUserModuleClass()
-    {
-        foreach (ClassInfo moduleClassInfo in classInfos.Where(c => c.IsModule))
+        foreach (ClassInfo moduleClassInfo in classInfos.Where(c => c.Type.IsTSModule))
         {
             TypescriptUserModuleClassRenderer moduleClassRenderer = new(moduleClassInfo, symbolNameProvider);
             sourceBuilder.AppendLine(moduleClassRenderer.Render());

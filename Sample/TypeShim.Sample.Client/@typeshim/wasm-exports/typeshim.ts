@@ -54,16 +54,13 @@ export interface ArraysDemoInterop {
 export interface PeopleInterop {
     get_All(instance: object): Array<object>;
     set_All(instance: object, value: Array<object>): void;
-    set_All_1(instance: object, value: Array<object>): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Person
 export interface PersonInterop {
     IsOlderThan(instance: object, other: object): boolean;
-    IsOlderThan_1(instance: object, other: object): boolean;
     AdoptPet(instance: object): void;
     Adopt(instance: object, newPet: object): void;
-    Adopt_1(instance: object, newPet: object): void;
     get_Id(instance: object): number;
     set_Id(instance: object, value: number): void;
     get_Name(instance: object): string;
@@ -72,7 +69,6 @@ export interface PersonInterop {
     set_Age(instance: object, value: number): void;
     get_Pet(instance: object): object | null;
     set_Pet(instance: object, value: object | null): void;
-    set_Pet_1(instance: object, value: object | null): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Dog
@@ -95,36 +91,6 @@ export interface PeopleProviderInterop {
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.TypeShimSampleModule
 export interface TypeShimSampleModuleInterop {
     get_PeopleProvider(): object | null;
-}
-
-// Auto-generated TypeShim TSModule class. Source class: TypeShim.Sample.Capabilities.CapabilitiesModule
-export class CapabilitiesModule {
-  private interop: AssemblyExports;
-
-  constructor(interop: AssemblyExports) {
-    this.interop = interop;
-  }
-
-  public GetCapabilitiesProvider(): CapabilitiesProvider.Proxy {
-    const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesModuleInterop.GetCapabilitiesProvider();
-    return new CapabilitiesProvider.Proxy(res, this.interop);
-  }
-
-}
-
-// Auto-generated TypeShim TSModule class. Source class: TypeShim.Sample.TypeShimSampleModule
-export class TypeShimSampleModule {
-  private interop: AssemblyExports;
-
-  constructor(interop: AssemblyExports) {
-    this.interop = interop;
-  }
-
-  public get PeopleProvider(): PeopleProvider.Proxy | null {
-    const res = this.interop.TypeShim.Sample.TypeShimSampleModuleInterop.get_PeopleProvider();
-    return res ? new PeopleProvider.Proxy(res, this.interop) : null;
-  }
-
 }
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.CapabilitiesProvider
@@ -486,6 +452,36 @@ export namespace PeopleProvider {
       return new People.Proxy(res, this.interop);
     }
 
+  }
+
+}
+
+// Auto-generated TypeShim TSModule class. Source class: TypeShim.Sample.Capabilities.CapabilitiesModule
+export class CapabilitiesModule {
+  private interop: AssemblyExports;
+
+  constructor(interop: AssemblyExports) {
+    this.interop = interop;
+  }
+
+  public GetCapabilitiesProvider(): CapabilitiesProvider.Proxy {
+    const res = this.interop.TypeShim.Sample.Capabilities.CapabilitiesModuleInterop.GetCapabilitiesProvider();
+    return new CapabilitiesProvider.Proxy(res, this.interop);
+  }
+
+}
+
+// Auto-generated TypeShim TSModule class. Source class: TypeShim.Sample.TypeShimSampleModule
+export class TypeShimSampleModule {
+  private interop: AssemblyExports;
+
+  constructor(interop: AssemblyExports) {
+    this.interop = interop;
+  }
+
+  public get PeopleProvider(): PeopleProvider.Proxy | null {
+    const res = this.interop.TypeShim.Sample.TypeShimSampleModuleInterop.get_PeopleProvider();
+    return res ? new PeopleProvider.Proxy(res, this.interop) : null;
   }
 
 }

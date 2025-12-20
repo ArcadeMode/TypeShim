@@ -6,6 +6,10 @@ namespace TypeShim.Generator.Parsing;
 
 internal sealed class InteropTypeInfo
 {
+    internal required bool IsTSExport { get; init; }
+
+    internal required bool IsTSModule { get; init; }
+
     internal required KnownManagedType ManagedType { get; init; }
 
     /// <summary>
@@ -36,9 +40,10 @@ internal sealed class InteropTypeInfo
     internal required bool IsNullableType { get; init; }
     internal required bool IsSnapshotCompatible { get; init; }
 
+
     internal bool ContainsTypeOf(KnownManagedType managedType)
     {
-        return TypeArgument != null && TypeArgument.ManagedType == managedType 
+        return TypeArgument != null && TypeArgument.ManagedType == managedType
             || ManagedType == managedType;
     }
 
@@ -52,6 +57,8 @@ internal sealed class InteropTypeInfo
         {
             return new InteropTypeInfo
             {
+                IsTSExport = IsTSExport,
+                IsTSModule = IsTSModule,
                 ManagedType = this.ManagedType,
                 JSTypeSyntax = CLRObjectTypeInfo.JSTypeSyntax,
                 InteropTypeSyntax = CLRObjectTypeInfo.InteropTypeSyntax,
@@ -69,6 +76,8 @@ internal sealed class InteropTypeInfo
         {
             return new InteropTypeInfo
             {
+                IsTSExport = IsTSExport,
+                IsTSModule = IsTSModule,
                 ManagedType = this.ManagedType,
                 JSTypeSyntax = this.JSTypeSyntax,
                 InteropTypeSyntax = this.InteropTypeSyntax,
@@ -87,52 +96,10 @@ internal sealed class InteropTypeInfo
         }
     }
 
-    internal InteropTypeInfo AsJSObjectTypeInfo()
-    {
-        if (this.TypeArgument == null)
-        {
-            return new()
-            {
-                ManagedType = KnownManagedType.JSObject,
-                JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Object"),
-                InteropTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
-                CLRTypeSyntax = this.CLRTypeSyntax,
-                IsTaskType = this.IsTaskType,
-                IsArrayType = this.IsArrayType,
-                IsNullableType = this.IsNullableType,
-                RequiresCLRTypeConversion = this.RequiresCLRTypeConversion,
-                TypeArgument = null,
-                IsSnapshotCompatible = this.IsSnapshotCompatible,
-            };
-        }
-        else
-        {
-            return new()
-            {
-                ManagedType = this.ManagedType,
-                JSTypeSyntax = this.IsTaskType
-                    ? SyntaxFactory.ParseTypeName("JSType.Promise<JSType.Object>")
-                    : this.IsArrayType
-                    ? SyntaxFactory.ParseTypeName("JSType.Array<JSType.Object>")
-                    : SyntaxFactory.ParseTypeName("JSType.Object"),
-                InteropTypeSyntax = this.IsTaskType 
-                    ? SyntaxFactory.ParseTypeName("Task<JSObject>") 
-                    : this.IsArrayType
-                    ? SyntaxFactory.ParseTypeName("JSObject[]")
-                    : SyntaxFactory.ParseTypeName("JSObject"),
-                CLRTypeSyntax = this.CLRTypeSyntax,
-                IsTaskType = this.IsTaskType,
-                IsArrayType = this.IsArrayType,
-                IsNullableType = this.IsNullableType,
-                RequiresCLRTypeConversion = this.RequiresCLRTypeConversion,
-                TypeArgument = this.TypeArgument.AsJSObjectTypeInfo(),
-                IsSnapshotCompatible = this.IsSnapshotCompatible,
-            };
-        }
-    }
-
     private static readonly InteropTypeInfo CLRObjectTypeInfo = new()
     {
+        IsTSExport = false,
+        IsTSModule = false,
         ManagedType = KnownManagedType.Object,
         JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Any"),
         InteropTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),

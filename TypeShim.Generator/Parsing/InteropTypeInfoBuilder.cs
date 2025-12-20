@@ -6,6 +6,9 @@ using TypeShim.Generator.Parsing;
 
 internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
 {
+    private readonly bool IsTSExport = typeSymbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSExportAttribute" or "TSExport");
+    private readonly bool IsTSModule = typeSymbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSModuleAttribute" or "TSModule");
+
     internal InteropTypeInfo Build()
     {
         JSTypeInfo parameterMarshallingTypeInfo = JSTypeInfo.CreateJSTypeInfoForTypeSymbol(typeSymbol);
@@ -26,6 +29,8 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
     {
         return new InteropTypeInfo
         {
+            IsTSExport = IsTSExport,
+            IsTSModule = IsTSModule,
             ManagedType = simpleTypeInfo.KnownType,
             JSTypeSyntax = SyntaxFactory.ParseTypeName(GetSimpleJSMarshalAsTypeArgument(simpleTypeInfo.KnownType)),
             InteropTypeSyntax = simpleTypeInfo.Syntax,
@@ -35,12 +40,12 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
             IsTaskType = false,
             IsArrayType = false,
             IsNullableType = clrTypeSyntax is NullableTypeSyntax,
-            IsSnapshotCompatible = true
+            IsSnapshotCompatible = IsSnapshotCompatible(),
         };
 
         bool RequiresTypeConversion()
         {
-            // Check if the type inherits from 'object', if so it will need to be converted to its original type when crossing the interop boundary 
+            // Check if the type inherits from 'object', if so it will need to be converted to its original type after crossing the interop boundary 
             if (simpleTypeInfo.KnownType != KnownManagedType.Object)
             {
                 return false;
@@ -48,6 +53,14 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
             // System.Object is excluded from type conversion, the user may handle this as they see fit
             TypeSyntax unwrapped = clrTypeSyntax is NullableTypeSyntax n ? n.ElementType : clrTypeSyntax;
             return unwrapped is not PredefinedTypeSyntax p || !p.Keyword.IsKind(SyntaxKind.ObjectKeyword);
+        }
+
+        bool IsSnapshotCompatible()
+        {
+            return simpleTypeInfo.KnownType switch { 
+                KnownManagedType.Object => IsTSExport, // Object's only snapshot compatible if user [TSExport]s it
+                _ => true // Note: all other simple types are snapshot compatible, this impl does not consider complex types
+            };
         }
     }
 
@@ -58,6 +71,8 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
 
         return new InteropTypeInfo
         {
+            IsTSExport = IsTSExport,
+            IsTSModule = IsTSModule,
             ManagedType = arrayTypeInfo.KnownType,
             JSTypeSyntax = SyntaxFactory.ParseTypeName(GetArrayJSMarshalAsTypeArgument(arrayTypeInfo.ElementTypeInfo)),
             InteropTypeSyntax = SyntaxFactory.ArrayType(arrayTypeInfo.ElementTypeInfo.Syntax, [SyntaxFactory.ArrayRankSpecifier([])]),
@@ -94,6 +109,8 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
 
         return new InteropTypeInfo
         {
+            IsTSExport = IsTSExport,
+            IsTSModule = IsTSModule,
             ManagedType = taskTypeInfo.KnownType,
             JSTypeSyntax = SyntaxFactory.ParseTypeName(GetPromiseJSMarshalAsTypeArgument(taskTypeInfo.ResultTypeInfo)),
             InteropTypeSyntax = interopTypeSyntax,
@@ -126,6 +143,8 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
 
         return new InteropTypeInfo
         {
+            IsTSExport = IsTSExport,
+            IsTSModule = IsTSModule,
             ManagedType = nullableTypeInfo.KnownType,
             JSTypeSyntax = SyntaxFactory.ParseTypeName(GetNullableJSMarshalAsTypeArgument(nullableTypeInfo.ResultTypeInfo)),
             InteropTypeSyntax = SyntaxFactory.NullableType(nullableTypeInfo.ResultTypeInfo.Syntax),
@@ -153,6 +172,8 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
 
         return new InteropTypeInfo
         {
+            IsTSExport = IsTSExport,
+            IsTSModule = IsTSModule,
             ManagedType = simpleTypeInfo.KnownType,
             JSTypeSyntax = SyntaxFactory.ParseTypeName(GetSimpleJSMarshalAsTypeArgument(simpleTypeInfo.KnownType)),
             InteropTypeSyntax = SyntaxFactory.NullableType(simpleTypeInfo.Syntax),

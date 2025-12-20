@@ -26,7 +26,6 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol)
 
         return new ClassInfo
         {
-            IsModule = classSymbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSModuleAttribute" or "TSModule"),
             Namespace = classSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
             Name = classSymbol.Name,
             Type = new InteropTypeInfoBuilder(classSymbol).Build(),

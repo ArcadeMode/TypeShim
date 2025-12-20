@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using System;
 using System.Data;
 using System.Diagnostics;
 using System.Reflection;
@@ -49,7 +50,7 @@ internal sealed class CSharpInteropClassRenderer
             RenderPropertyMethods(propertyInfo);
         }
 
-        if (!classInfo.IsModule) 
+        if (!classInfo.Type.IsTSModule) 
         {
             RenderFromObjectMapper(depth + 1);
         }
@@ -195,75 +196,92 @@ internal sealed class CSharpInteropClassRenderer
 
     private string GetTypedParameterName(MethodParameterInfo paramInfo) => paramInfo.Type.RequiresCLRTypeConversion ? $"typed_{paramInfo.Name}" : paramInfo.Name;
 
-    private void RenderParameterTypeConversion(int depth, MethodParameterInfo originalParamInfo)
+    private void RenderParameterTypeConversion(int depth, MethodParameterInfo parameterInfo)
     {
-        if (!originalParamInfo.Type.RequiresCLRTypeConversion)
+        if (!parameterInfo.Type.RequiresCLRTypeConversion)
             return;
 
-        if (originalParamInfo.IsInjectedInstanceParameter)
+        if (parameterInfo.Type.IsTaskType)
         {
-            RenderCovariantTypeConversion(depth, originalParamInfo);
+            RenderTaskTypeConversion(depth, parameterInfo);
+            return; // task pattern differs from other conversions, hence its fully separated rendering.
         }
-        else if (originalParamInfo.Type.IsTaskType)
+
+        string indent = new(' ', depth * 4);
+        sb.Append($"{indent}{parameterInfo.Type.CLRTypeSyntax} {GetTypedParameterName(parameterInfo)} = ");
+        if (parameterInfo.IsInjectedInstanceParameter)
         {
-            RenderTaskTypeConversion(depth, originalParamInfo);
+            RenderCovariantTypeConversion(parameterInfo.Type, parameterInfo.Name);
         }
-        else if (originalParamInfo.Type.IsArrayType)
+        else if (parameterInfo.Type.IsArrayType)
         {
-            RenderArrayTypeConversion(depth, originalParamInfo);
+            RenderArrayTypeConversion(parameterInfo.Type, parameterInfo.Name);
         }
-        else if (originalParamInfo.Type.ManagedType is KnownManagedType.Object)
+        else if (parameterInfo.Type.ManagedType is KnownManagedType.Object)
         {
             //TODO: make nullables actually ManagedType.Nullable with inner type Object or T, currently nullable reflects inner type, which is confusing sometimes
-            RenderFromObjectTypeConversion(depth, originalParamInfo);
+            RenderFromObjectTypeConversion(parameterInfo.Type, parameterInfo.Name);
         }
         else // Tests guard against this case. Anyway, here is a state-of-the-art regression detector.
         {
-            throw new NotImplementedException($"Type conversion not implemented for type: {originalParamInfo.Type.CLRTypeSyntax}. Please file an issue at https://github.com/ArcadeMode/TypeShim");
+            throw new NotImplementedException($"Type conversion not implemented for type: {parameterInfo.Type.CLRTypeSyntax}. Please file an issue at https://github.com/ArcadeMode/TypeShim");
         }
+        sb.AppendLine(";");
     }
 
-    private void RenderCovariantTypeConversion(int depth, MethodParameterInfo parameterInfo)
+    private void RenderCovariantTypeConversion(InteropTypeInfo typeInfo, string parameterName)
     {
-        Debug.Assert(parameterInfo.Type.ManagedType is KnownManagedType.Object or KnownManagedType.Array, "Unexpected non-object or non-array type with required type conversion");
-        string indent = new(' ', depth * 4);
-        sb.AppendLine($"{indent}{parameterInfo.Type.CLRTypeSyntax} {GetTypedParameterName(parameterInfo)} = ({parameterInfo.Type.CLRTypeSyntax}){parameterInfo.Name};");
+        Debug.Assert(typeInfo.ManagedType is KnownManagedType.Object or KnownManagedType.Array, "Unexpected non-object or non-array type with required type conversion");
+        sb.Append($"({typeInfo.CLRTypeSyntax}){parameterName}");
     }
 
-    private void RenderFromObjectTypeConversion(int depth, MethodParameterInfo parameterInfo)
+    private void RenderFromObjectTypeConversion(InteropTypeInfo typeInfo, string parameterName)
     {
-        string indent = new(' ', depth * 4);
-
-        InteropTypeInfo targetType = parameterInfo.Type.TypeArgument ?? parameterInfo.Type; // unwrap nullable or use simple type directly
+        InteropTypeInfo targetType = typeInfo.TypeArgument ?? typeInfo; // unwrap nullable or use simple type directly
         string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
 
-        sb.Append($"{indent}{parameterInfo.Type.CLRTypeSyntax} {GetTypedParameterName(parameterInfo)} = ");
-        if (parameterInfo.Type.IsNullableType)
+        if (typeInfo.IsNullableType)
         {
-            sb.AppendLine($"{parameterInfo.Name} != null ? {targetInteropClass}.{FromObjectMethodName}({parameterInfo.Name}) : null;");
+            sb.Append($"{parameterName} != null ? ");
+        }
+        
+        if (typeInfo.IsTSExport)
+        {
+            sb.Append($"{targetInteropClass}.{FromObjectMethodName}({parameterName})");
         }
         else
         {
-            sb.AppendLine($"{targetInteropClass}.{FromObjectMethodName}({parameterInfo.Name});");
+            RenderCovariantTypeConversion(typeInfo, parameterName);
+        }
+
+        if (typeInfo.IsNullableType)
+        {
+            sb.Append(" : null");
         }
     }
 
-    private void RenderArrayTypeConversion(int depth, MethodParameterInfo parameterInfo)
+    private void RenderArrayTypeConversion(InteropTypeInfo typeInfo, string parameterName)
     {
-        string indent = new(' ', depth * 4);
-        Debug.Assert(parameterInfo.Type.TypeArgument != null, "Array type must have a type argument.");
-        InteropTypeInfo targetType = parameterInfo.Type.TypeArgument ?? parameterInfo.Type;
-        string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
-        sb.AppendLine($"{indent}{targetType.CLRTypeSyntax}[] {GetTypedParameterName(parameterInfo)} = Array.ConvertAll({parameterInfo.Name}, {targetInteropClass}.{FromObjectMethodName});");
+        Debug.Assert(typeInfo.TypeArgument != null, "Array type must have a type argument.");
+
+        if (typeInfo.TypeArgument.IsTSExport == false)
+        {
+            RenderCovariantTypeConversion(typeInfo, parameterName);
+            return; // early return for non-exported types, no special conversion possible
+        }
+
+        sb.Append($"Array.ConvertAll({parameterName}, e => ");
+        RenderFromObjectTypeConversion(typeInfo.TypeArgument, "e");
+        sb.Append(')');
     }
 
     private void RenderTaskTypeConversion(int depth, MethodParameterInfo parameterInfo)
     {
         string indent = new(' ', depth * 4);
-        InteropTypeInfo userParamTypeInfo = parameterInfo.Type.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
+        InteropTypeInfo taskTypeParamInfo = parameterInfo.Type.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
         string tcsVarName = $"{parameterInfo.Name}Tcs";
         sb.Append(indent);
-        sb.AppendLine($"TaskCompletionSource<{userParamTypeInfo.CLRTypeSyntax}> {tcsVarName} = new();");
+        sb.AppendLine($"TaskCompletionSource<{taskTypeParamInfo.CLRTypeSyntax}> {tcsVarName} = new();");
         sb.Append(indent);
         sb.AppendLine("task.ContinueWith(t => {");
         string lambdaIndent = new(' ', (depth + 1) * 4);
@@ -271,16 +289,17 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine($"if (t.IsFaulted) {tcsVarName}.SetException(t.Exception.InnerExceptions);");
         sb.Append(lambdaIndent);
         sb.AppendLine($"else if (t.IsCanceled) {tcsVarName}.SetCanceled();");
-        sb.Append(lambdaIndent);
 
-        string resultConversionExpression = true // TODO: detect if TSExport type, then FromObject, else direct cast
-            ? $"{GetInteropClassName(userParamTypeInfo.CLRTypeSyntax.ToString())}.{FromObjectMethodName}(t.Result)"
-            : $"({userParamTypeInfo.CLRTypeSyntax})t.Result";
+        string resultConversionExpression = taskTypeParamInfo.IsTSExport || taskTypeParamInfo.IsTSModule
+            ? $"{GetInteropClassName(taskTypeParamInfo.CLRTypeSyntax.ToString())}.{FromObjectMethodName}(t.Result)"
+            : $"({taskTypeParamInfo.CLRTypeSyntax})t.Result";
+
+        sb.Append(lambdaIndent);
         sb.AppendLine($"else {tcsVarName}.SetResult({resultConversionExpression});");
         sb.Append(indent);
         sb.AppendLine("}, TaskContinuationOptions.ExecuteSynchronously);");
         sb.Append(indent);
-        sb.AppendLine($"Task<{userParamTypeInfo.CLRTypeSyntax}> {GetTypedParameterName(parameterInfo)} = {tcsVarName}.Task;");
+        sb.AppendLine($"Task<{taskTypeParamInfo.CLRTypeSyntax}> {GetTypedParameterName(parameterInfo)} = {tcsVarName}.Task;");
     }
 
     private void RenderFromObjectMapper(int depth)
@@ -329,8 +348,8 @@ internal sealed class CSharpInteropClassRenderer
             }
             else if (propertyInfo.Type.IsTaskType)
             {
-                throw new TypeNotSupportedException("Task types are not supported in FromJSObject conversion."); // TODO: try get promise as jsobject and cycle over interop to let jsexport marshall it?
-                //sb.AppendLine($"{indent3}{propertyInfo.Name} = [],//MarshallAs{propertyInfo.Name}(jsObject.GetPropertyAsJSObject(\"{propertyInfo.Name}\")),");
+                // TODO: try get promise as jsobject and cycle over interop to let jsexport marshall it?
+                throw new TypeNotSupportedException("Task types are not supported in FromJSObject conversion.");
             }
             else
             {
@@ -348,7 +367,8 @@ internal sealed class CSharpInteropClassRenderer
                 KnownManagedType.Double => "GetPropertyAsDouble",
                 KnownManagedType.String => "GetPropertyAsString",
                 KnownManagedType.Int32 => "GetPropertyAsInt32",
-                KnownManagedType.JSObject or KnownManagedType.Object => "GetPropertyAsJSObject",
+                KnownManagedType.JSObject => "GetPropertyAsJSObject",
+                KnownManagedType.Object when typeInfo.IsTSExport => "GetPropertyAsJSObject", // exported object types have a FromJSObject mapper
                 //KnownManagedType.XXX => "GetPropertyAsByteArray",
                 _ => throw new InvalidOperationException($"Type {typeInfo.ManagedType} cannot be marshalled by JSObject"),
             };
