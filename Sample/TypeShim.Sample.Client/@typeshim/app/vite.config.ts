@@ -11,7 +11,7 @@ export default defineConfig({
     outDir: '../../../TypeShim.Sample/wwwroot',
     assetsDir: 'assets',
     rollupOptions: {
-      external: ['webcil'],
+      external: ['webcil', '/_framework/dotnet.js'],
       input: 'index.html',
       output: {
         entryFileNames: 'assets/[name].js',

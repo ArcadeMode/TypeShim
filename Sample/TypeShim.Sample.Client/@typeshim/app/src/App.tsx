@@ -10,11 +10,11 @@ function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
 
   const exportsPromise: Promise<AssemblyExports> = useMemo(() => {
-    const starter = (window as any).wasmModuleStarter;
-    if (!starter || !starter.exports) {
-      throw new Error('wasmModuleStarter.exports not found. Ensure dotnet-start.js ran.');
+    const launchWasmRuntimeFn = (window as any).launchWasmRuntime;
+    if (!launchWasmRuntimeFn) {
+      throw new Error('launchWasmRuntime not found. Ensure dotnet-start.js loaded correctly.');
     }
-    return starter.exports as Promise<AssemblyExports>;
+    return launchWasmRuntimeFn() as Promise<AssemblyExports>;
   }, []);
 
   return (
