@@ -4,17 +4,15 @@ import People from './pages/People';
 import CapabilitiesPage from './pages/Capabilities';
 import type { AssemblyExports } from '@typeshim/wasm-exports';
 
+import { launchWasmRuntime } from '@typeshim/wasm-exports';
+
 type Page = 'home' | 'people' | 'capabilities';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
 
   const exportsPromise: Promise<AssemblyExports> = useMemo(() => {
-    const launchWasmRuntimeFn = (window as any).launchWasmRuntime;
-    if (!launchWasmRuntimeFn) {
-      throw new Error('launchWasmRuntime not found. Ensure dotnet-start.js loaded correctly.');
-    }
-    return launchWasmRuntimeFn() as Promise<AssemblyExports>;
+    return launchWasmRuntime() as Promise<AssemblyExports>;
   }, []);
 
   return (
