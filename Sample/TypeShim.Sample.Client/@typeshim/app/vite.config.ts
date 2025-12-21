@@ -12,7 +12,12 @@ export default defineConfig({
     assetsDir: 'assets',
     rollupOptions: {
       external: ['webcil'],
-      input: 'index.html'
+      input: 'index.html',
+      output: {
+        entryFileNames: 'assets/[name].js',
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name][extname]'
+      }
     }
   }
 });

@@ -63,7 +63,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({ initPerson }) => {
               cursor: 'pointer'
             }}
             onClick={() => {
-              personProxy.Adopt({ Name: "Boi", Breed: "JS", Age: 1 }); 
+              personProxy.AdoptPet(); 
               setPerson({...wrapper}); 
             }}>
             Adopt a pet!
