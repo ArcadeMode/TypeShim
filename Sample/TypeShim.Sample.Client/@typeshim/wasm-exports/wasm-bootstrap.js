@@ -19,6 +19,7 @@ export async function launchWasmRuntime(args) {
 
 // Expose methods JSImport'ed by dotnet wasm module
 window.getBaseURI = () => document.baseURI;
+window.unwrap = (obj) => obj; // TODO: consider how to distribute this method
 
 // TODO: consider if user wants to customize this
 // TODO: consider if user wants to run multiple runtimes

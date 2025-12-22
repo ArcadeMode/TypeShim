@@ -335,21 +335,25 @@ internal sealed class CSharpInteropClassRenderer
         // TODO: support init properties
         foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => p.Type.IsSnapshotCompatible && p.SetMethod != null))
         {
-            if (propertyInfo.Type.IsArrayType)
-            {
-                //TODO: implement arrays
-                sb.AppendLine($"{indent3}{propertyInfo.Name} = [],//MarshallAs{propertyInfo.Name}(jsObject.GetPropertyAsJSObject(\"{propertyInfo.Name}\")),");
-            }
-            else if (propertyInfo.Type.RequiresCLRTypeConversion)
+            if (propertyInfo.Type.RequiresCLRTypeConversion)
             {
                 InteropTypeInfo targetType = propertyInfo.Type.TypeArgument ?? propertyInfo.Type;
                 string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
-                sb.AppendLine($"{indent3}{propertyInfo.Name} = {targetInteropClass}.{FromJSObjectMethodName}(jsObject.GetPropertyAsJSObject(\"{propertyInfo.Name}\")),");
-            }
-            else if (propertyInfo.Type.IsTaskType)
-            {
-                // TODO: try get promise as jsobject and cycle over interop to let jsexport marshall it?
-                throw new TypeNotSupportedException("Task types are not supported in FromJSObject conversion.");
+                sb.Append($"{indent3}{propertyInfo.Name} = ");
+                string propertyRetrievalExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
+                if (propertyInfo.Type.IsArrayType)
+                {
+                    sb.AppendLine($"Array.ConvertAll({propertyRetrievalExpression}, {targetInteropClass}.{FromJSObjectMethodName}),");
+                }
+                else if (propertyInfo.Type.IsTaskType)
+                {
+                    // TODO: IF JSObject inner type, inject the taskcompletion trick.
+                    throw new TypeNotSupportedException("Task types are not supported in FromJSObject conversion.");
+                }
+                else
+                {
+                    sb.AppendLine($"{targetInteropClass}.{FromJSObjectMethodName}({propertyRetrievalExpression}),");
+                }
             }
             else
             {
@@ -369,7 +373,16 @@ internal sealed class CSharpInteropClassRenderer
                 KnownManagedType.Int32 => "GetPropertyAsInt32",
                 KnownManagedType.JSObject => "GetPropertyAsJSObject",
                 KnownManagedType.Object when typeInfo.IsTSExport => "GetPropertyAsJSObject", // exported object types have a FromJSObject mapper
-                //KnownManagedType.XXX => "GetPropertyAsByteArray",
+                KnownManagedType.Array => typeInfo.TypeArgument switch
+                {
+                    { ManagedType: KnownManagedType.Byte } => "GetPropertyAsByteArray",
+                    { ManagedType: KnownManagedType.Int32 } => "GetPropertyAsInt32Array",
+                    { ManagedType: KnownManagedType.Double } => "GetPropertyAsDoubleArray",
+                    { ManagedType: KnownManagedType.String } => "GetPropertyAsStringArray",
+                    { ManagedType: KnownManagedType.JSObject } => "GetPropertyAsJSObjectArray",
+                    { ManagedType: KnownManagedType.Object, IsTSExport: true } => "GetPropertyAsJSObjectArray", // exported object types have a FromJSObject mapper
+                    _ => throw new InvalidOperationException($"Array of type {typeInfo.TypeArgument?.ManagedType} cannot be marshalled by TypeShim JSObject extensions"),
+                },
                 _ => throw new InvalidOperationException($"Type {typeInfo.ManagedType} cannot be marshalled by JSObject"),
             };
         }

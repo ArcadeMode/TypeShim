@@ -341,7 +341,7 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject jsObject)
     {
         return new() {
-            P1 = TODO_MAPPING_ARRAY_FROM_JSOBJECT
+            P1 = jsObject.GetPropertyAsInt32Array("P1"),
         };
     }
 }
@@ -418,7 +418,7 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject jsObject)
     {
         return new() {
-            P1 = TODO_MAPPING_ARRAY_FROM_JSOBJECT
+            P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectArray("P1"), MyClassInterop.FromJSObject),
         };
     }
 }

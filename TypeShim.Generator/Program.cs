@@ -37,6 +37,10 @@ static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInf
         string outFileName = $"{classInfo.Name}.Interop.g.cs";
         File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, outFileName), source.ToString());
     }
+
+    JSObjectArrayExtensionsRenderer jsObjectArrayExtensionsRenderer = new();
+    SourceText jsObjectArrayExtensionsSource = SourceText.From(jsObjectArrayExtensionsRenderer.Render(), Encoding.UTF8);
+    File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, "JSObjectArrayExtensions.g.cs"), jsObjectArrayExtensionsSource.ToString());
 }
 
 static void GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)
