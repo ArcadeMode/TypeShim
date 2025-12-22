@@ -81,6 +81,8 @@ export interface DogInterop {
     set_Breed(instance: object, value: string): void;
     get_Age(instance: object): number;
     set_Age(instance: object, value: number): void;
+    get_Ints(instance: object): Array<number>;
+    set_Ints(instance: object, value: Array<number>): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.PeopleProvider
@@ -411,12 +413,21 @@ export namespace Dog {
       this.interop.TypeShim.Sample.DogInterop.set_Age(this.instance, value);
     }
 
+    public get Ints(): Array<number> {
+      return this.interop.TypeShim.Sample.DogInterop.get_Ints(this.instance);
+    }
+
+    public set Ints(value: Array<number>) {
+      this.interop.TypeShim.Sample.DogInterop.set_Ints(this.instance, value);
+    }
+
   }
 
   export interface Snapshot {
     Name: string;
     Breed: string;
     Age: number;
+    Ints: Array<number>;
   }
   export const Snapshot: {
     [Symbol.hasInstance](v: unknown): boolean;
@@ -424,7 +435,7 @@ export namespace Dog {
     [Symbol.hasInstance](v: unknown) {
       if (!v || typeof v !== 'object') return false;
       const o = v as any;
-      return (typeof o.Name === 'string') && (typeof o.Breed === 'string') && (typeof o.Age === 'number');
+      return (typeof o.Name === 'string') && (typeof o.Breed === 'string') && (typeof o.Age === 'number') && Array.isArray(o.Ints) && o.Ints.every((e: any) => typeof e === 'number');
     }
   };
   export function snapshot(proxy: Dog.Proxy): Dog.Snapshot {
@@ -432,6 +443,7 @@ export namespace Dog {
       Name: proxy.Name,
       Breed: proxy.Breed,
       Age: proxy.Age,
+      Ints: proxy.Ints,
     };
   }
 }

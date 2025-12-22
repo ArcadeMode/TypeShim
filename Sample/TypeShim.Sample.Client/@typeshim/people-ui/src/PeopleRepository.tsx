@@ -1,4 +1,4 @@
-import { People, Person, PeopleProvider, TypeShimSampleModule, AssemblyExports } from '@typeshim/wasm-exports';
+import { People, Person, PeopleProvider, TypeShimSampleModule, AssemblyExports, Dog } from '@typeshim/wasm-exports';
 
 export class PeopleRepository {
 
@@ -15,6 +15,16 @@ export class PeopleRepository {
             throw new Error("PeopleProvider is null");
         }
         const people: People.Proxy = await peopleProvider.FetchPeopleAsync();
+
+        
+        const person: Person.Proxy = people.All.find(person => person.Pet)!;
+        const petObj = Dog.snapshot(person.Pet!);
+        petObj.Ints = [1, 2, 3, 4, 5];
+        
+        person.Pet = petObj;
+        person.Pet!.Ints.forEach(element => {
+            console.log("Ints element:", element);
+        });
         this.PrintAgeMethodUsage(people);
         return people.All;
     }
