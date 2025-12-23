@@ -243,6 +243,8 @@ public partial class C1Interop
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
 
+        // Note: as there is no known mapping for these types, there is no 'FromObject' mapping, instead just try to cast ("taskTcs.SetResult(({{typeName}})t.Result)")
+        // the user shouldnt be able to do much with the object anyway as its untyped on the JS/TS side.
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
 using System;
@@ -274,6 +276,6 @@ public partial class C1Interop
     }
 }
 
-""".Replace("{{typeName}}", typeName))); // TODO: reject unannotated classes from interop
+""".Replace("{{typeName}}", typeName)));
     }
 }
