@@ -19,7 +19,7 @@ public class PersonDto
             Id = person.Id,
             Name = person.Name,
             Age = person.Age,
-            Pet = person.Pet != null ? DogDto.FromDog(person.Pet) : null
+            Pet = person.Pets?.Length > 0 ? DogDto.FromDog(person.Pets[0]) : null
         };
     }
 
@@ -31,7 +31,7 @@ public class PersonDto
             Id = Id,
             Name = Name,
             Age = Age,
-            Pet = dog
+            Pets = dog == null ? [] : [ dog ]
         };
     }
 }

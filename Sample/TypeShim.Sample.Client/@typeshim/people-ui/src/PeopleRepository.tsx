@@ -15,16 +15,7 @@ export class PeopleRepository {
             throw new Error("PeopleProvider is null");
         }
         const people: People.Proxy = await peopleProvider.FetchPeopleAsync();
-
         
-        const person: Person.Proxy = people.All.find(person => person.Pet)!;
-        const petObj = Dog.snapshot(person.Pet!);
-        petObj.Ints = [1, 2, 3, 4, 5];
-        
-        person.Pet = petObj;
-        person.Pet!.Ints.forEach(element => {
-            console.log("Ints element:", element);
-        });
         this.PrintAgeMethodUsage(people);
         return people.All;
     }
@@ -34,7 +25,9 @@ export class PeopleRepository {
         const persons: Person.Proxy[] = people.All;
         const person1 = persons[(Math.random() * persons.length) | 0];
         const person2 = persons[(Math.random() * persons.length) | 0];
+        const jsPerson: Person.Snapshot = { Id: 999, Name: "Snapshot Person", Age: 42, Pets: [] };
         console.log(person1.Name, person1.Age, "isOlderThan", person2.Name, person2.Age, ":", person1.IsOlderThan(person2));
+        console.log(person1.Name, person1.Age, "isOlderThan (snapshot)", jsPerson.Name, jsPerson.Age, ":", person1.IsOlderThan(jsPerson));
     }
 
     private async getInitializedSampleModule(exportsPromise: Promise<AssemblyExports>): Promise<TypeShimSampleModule> {

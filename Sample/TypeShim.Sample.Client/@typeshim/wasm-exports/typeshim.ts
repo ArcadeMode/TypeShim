@@ -67,8 +67,8 @@ export interface PersonInterop {
     set_Name(instance: object, value: string): void;
     get_Age(instance: object): number;
     set_Age(instance: object, value: number): void;
-    get_Pet(instance: object): object | null;
-    set_Pet(instance: object, value: object | null): void;
+    get_Pets(instance: object): Array<object>;
+    set_Pets(instance: object, value: Array<object>): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Dog
@@ -81,8 +81,6 @@ export interface DogInterop {
     set_Breed(instance: object, value: string): void;
     get_Age(instance: object): number;
     set_Age(instance: object, value: number): void;
-    get_Ints(instance: object): Array<number>;
-    set_Ints(instance: object, value: Array<number>): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.PeopleProvider
@@ -333,14 +331,14 @@ export namespace Person {
       this.interop.TypeShim.Sample.PersonInterop.set_Age(this.instance, value);
     }
 
-    public get Pet(): Dog.Proxy | null {
-      const res = this.interop.TypeShim.Sample.PersonInterop.get_Pet(this.instance);
-      return res ? new Dog.Proxy(res, this.interop) : null;
+    public get Pets(): Array<Dog.Proxy> {
+      const res = this.interop.TypeShim.Sample.PersonInterop.get_Pets(this.instance);
+      return res.map(e => new Dog.Proxy(e, this.interop));
     }
 
-    public set Pet(value: Dog.Proxy | Dog.Snapshot | null) {
-      const valueInstance = value instanceof Dog.Proxy ? value.instance : value;
-      this.interop.TypeShim.Sample.PersonInterop.set_Pet(this.instance, valueInstance);
+    public set Pets(value: Array<Dog.Proxy | Dog.Snapshot>) {
+      const valueInstance = value.map(e => e instanceof Dog.Proxy ? e.instance : e);
+      this.interop.TypeShim.Sample.PersonInterop.set_Pets(this.instance, valueInstance);
     }
 
   }
@@ -349,7 +347,7 @@ export namespace Person {
     Id: number;
     Name: string;
     Age: number;
-    Pet: Dog.Snapshot | null;
+    Pets: Array<Dog.Snapshot>;
   }
   export const Snapshot: {
     [Symbol.hasInstance](v: unknown): boolean;
@@ -357,7 +355,7 @@ export namespace Person {
     [Symbol.hasInstance](v: unknown) {
       if (!v || typeof v !== 'object') return false;
       const o = v as any;
-      return (typeof o.Id === 'number') && (typeof o.Name === 'string') && (typeof o.Age === 'number') && (o.Pet === null || (o.Pet instanceof Dog.Snapshot));
+      return (typeof o.Id === 'number') && (typeof o.Name === 'string') && (typeof o.Age === 'number') && Array.isArray(o.Pets) && o.Pets.every((e: any) => e instanceof Dog.Snapshot);
     }
   };
   export function snapshot(proxy: Person.Proxy): Person.Snapshot {
@@ -365,7 +363,7 @@ export namespace Person {
       Id: proxy.Id,
       Name: proxy.Name,
       Age: proxy.Age,
-      Pet: proxy.Pet ? Dog.snapshot(proxy.Pet) : null,
+      Pets: proxy.Pets.map(item => Dog.snapshot(item)),
     };
   }
 }
@@ -413,21 +411,12 @@ export namespace Dog {
       this.interop.TypeShim.Sample.DogInterop.set_Age(this.instance, value);
     }
 
-    public get Ints(): Array<number> {
-      return this.interop.TypeShim.Sample.DogInterop.get_Ints(this.instance);
-    }
-
-    public set Ints(value: Array<number>) {
-      this.interop.TypeShim.Sample.DogInterop.set_Ints(this.instance, value);
-    }
-
   }
 
   export interface Snapshot {
     Name: string;
     Breed: string;
     Age: number;
-    Ints: Array<number>;
   }
   export const Snapshot: {
     [Symbol.hasInstance](v: unknown): boolean;
@@ -435,7 +424,7 @@ export namespace Dog {
     [Symbol.hasInstance](v: unknown) {
       if (!v || typeof v !== 'object') return false;
       const o = v as any;
-      return (typeof o.Name === 'string') && (typeof o.Breed === 'string') && (typeof o.Age === 'number') && Array.isArray(o.Ints) && o.Ints.every((e: any) => typeof e === 'number');
+      return (typeof o.Name === 'string') && (typeof o.Breed === 'string') && (typeof o.Age === 'number');
     }
   };
   export function snapshot(proxy: Dog.Proxy): Dog.Snapshot {
@@ -443,7 +432,6 @@ export namespace Dog {
       Name: proxy.Name,
       Breed: proxy.Breed,
       Age: proxy.Age,
-      Ints: proxy.Ints,
     };
   }
 }

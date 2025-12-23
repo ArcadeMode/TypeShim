@@ -62,7 +62,7 @@ public class RandomEntityGenerator
                 Id = i,
                 Name = fullName,
                 Age = age,
-                Pet = pet
+                Pets = pet == null ? [] : [ pet ]
             });
         }
 
