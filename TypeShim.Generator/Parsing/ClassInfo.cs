@@ -8,5 +8,7 @@ internal sealed class ClassInfo
     internal required IEnumerable<MethodInfo> Methods { get; init; }
     internal required IEnumerable<PropertyInfo> Properties { get; init; }
 
-    internal bool IsSnapshotCompatible() => !Type.IsTSModule && Properties.Any(p => p.Type.IsSnapshotCompatible);
+    internal bool IsSnapshotCompatible() => !Type.IsTSModule // not a module (are static) TODO: add isstatic field to classinfo?
+        && Properties.Any() // has properties at all
+        && !Properties.Any(p => !p.Type.IsSnapshotCompatible); // all properties snapshot compatible
 }

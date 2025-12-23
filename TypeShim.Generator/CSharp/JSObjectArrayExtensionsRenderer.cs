@@ -35,7 +35,7 @@ internal sealed class JSObjectArrayExtensionsRenderer()
         //public static partial int[] GetAsIntArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
         sb.AppendLine(JSObjectArrayExtensionsClass);
-
+        //TODO: reconsider targetting different moniker and provide this class through TypeShim nuget so the user can utilize these directly if they so wish.
         return sb.ToString();
     }
 
