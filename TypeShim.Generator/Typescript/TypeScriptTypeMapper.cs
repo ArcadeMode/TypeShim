@@ -55,15 +55,4 @@ internal sealed class TypeScriptTypeMapper(IEnumerable<ClassInfo> classInfos)
             or _ => TypeScriptSymbolNameTemplate.ForSimpleType("any"),
         };
     }
-
-    public TypeSyntax GetTypeFromNullableSyntax(TypeSyntax typeSyntax, out bool isNullable)
-    {
-        if (typeSyntax is NullableTypeSyntax nullable)
-        {
-            isNullable = true;
-            return nullable.ElementType;
-        }
-        isNullable = false;
-        return typeSyntax;
-    }
 }
