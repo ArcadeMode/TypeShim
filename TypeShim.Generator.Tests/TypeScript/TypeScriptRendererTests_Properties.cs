@@ -24,23 +24,21 @@ internal class TypeScriptRendererTests_Properties
             }
         """.Replace("{{typeExpression}}", typeExpression));
 
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, classNameBuilder).Render();
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript proxy class. Source class: N1.C1
-class C1Proxy implements C1 {
+export class Proxy {
   interop: AssemblyExports;
   instance: object;
 
@@ -78,23 +76,21 @@ class C1Proxy implements C1 {
             }
         """.Replace("{{typeExpression}}", typeExpression));
 
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, methodRenderer, classNameBuilder).Render();
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript proxy class. Source class: N1.C1
-class C1Proxy implements C1 {
+export class Proxy {
   interop: AssemblyExports;
   instance: object;
 
@@ -103,50 +99,6 @@ class C1Proxy implements C1 {
     this.instance = instance;
   }
 
-}
-
-""".Replace("{{typeScriptType}}", typeScriptType)));
-    }
-
-    [TestCase("string", "string")]
-    [TestCase("double", "number")]
-    [TestCase("bool", "boolean")]
-    public void TypeScriptUserClassInterface_InstanceProperty_GeneratesGetAndSetFunctions(string typeExpression, string typeScriptType)
-    {
-        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
-            using System;
-            using System.Threading.Tasks;
-            namespace N1;
-            [TSExport]
-            public class C1
-            {
-                public {{typeExpression}} P1 { get; set; }
-                public {{typeExpression}} P2 { get; init; }
-                public {{typeExpression}} P3 { get; }
-                public {{typeExpression}} P4 => 1
-            }
-        """.Replace("{{typeExpression}}", typeExpression));
-
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
-        Assert.That(exportedClasses, Has.Count.EqualTo(1));
-        INamedTypeSymbol classSymbol = exportedClasses[0];
-
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
-
-        string interopClass = new TypescriptUserClassInterfaceRenderer(classInfo, methodRenderer, typeMapper).Render();
-
-        Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript interface. Source class: N1.C1
-export interface C1 {
-    P1: {{typeScriptType}};
-    readonly P2: {{typeScriptType}};
-    readonly P3: {{typeScriptType}};
-    readonly P4: {{typeScriptType}};
 }
 
 """.Replace("{{typeScriptType}}", typeScriptType)));
@@ -171,24 +123,23 @@ export interface C1 {
             }
         """.Replace("{{typeExpression}}", typeExpression));
 
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
-        TypeScriptMethodRenderer methodRenderer = new(typeMapper);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         ModuleInfo moduleInfo = new()
         {
             ExportedClasses = [classInfo],
-            HierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], classNameBuilder),
+            HierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider),
         };
 
-        string interopClass = new TypescriptUserModuleClassRenderer(classInfo, methodRenderer, classNameBuilder).Render();
+        string interopClass = new TypescriptUserModuleClassRenderer(classInfo, symbolNameProvider).Render();
 
         Assert.That(interopClass, Is.EqualTo("""
 // Auto-generated TypeShim TSModule class. Source class: N1.C1
@@ -226,5 +177,132 @@ export class C1 {
 }
 
 """.Replace("{{typeScriptType}}", typeScriptType)));
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_InstanceParameter_WithUserClassParameterType_SupportsJSObjectOverload()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public UserClass P1 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+
+        Assert.That(interopClass, Is.EqualTo("""    
+export class Proxy {
+  interop: AssemblyExports;
+  instance: object;
+
+  constructor(instance: object, interop: AssemblyExports) {
+    this.interop = interop;
+    this.instance = instance;
+  }
+
+  public get P1(): UserClass.Proxy {
+    const res = this.interop.N1.C1Interop.get_P1(this.instance);
+    return new UserClass.Proxy(res, this.interop);
+  }
+
+  public set P1(value: UserClass.Proxy | UserClass.Snapshot) {
+    const valueInstance = value instanceof UserClass.Proxy ? value.instance : value;
+    this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
+  }
+
+}
+
+"""));
+    }
+
+    [Test]
+    public void TypeScriptUserClassModule_InstanceParameter_WithUserClassParameterType_SupportsJSObjectOverload()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSModule]
+            public static class C1
+            {
+                public static UserClass P1 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        string interopClass = new TypescriptUserModuleClassRenderer(classInfo, symbolNameProvider).Render();
+
+        Assert.That(interopClass, Is.EqualTo("""
+// Auto-generated TypeShim TSModule class. Source class: N1.C1
+export class C1 {
+  private interop: AssemblyExports;
+
+  constructor(interop: AssemblyExports) {
+    this.interop = interop;
+  }
+
+  public get P1(): UserClass.Proxy {
+    const res = this.interop.N1.C1Interop.get_P1();
+    return new UserClass.Proxy(res, this.interop);
+  }
+
+  public set P1(value: UserClass.Proxy | UserClass.Snapshot) {
+    const valueInstance = value instanceof UserClass.Proxy ? value.instance : value;
+    this.interop.N1.C1Interop.set_P1(valueInstance);
+  }
+
+}
+
+"""));
     }
 }

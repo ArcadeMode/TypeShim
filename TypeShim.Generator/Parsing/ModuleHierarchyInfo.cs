@@ -9,12 +9,12 @@ internal class ModuleHierarchyInfo
 
     private readonly Dictionary<string, ModuleHierarchyInfo> _children = [];
 
-    internal static ModuleHierarchyInfo FromClasses(IEnumerable<ClassInfo> classInfos, TypescriptClassNameBuilder classNameBuilder)
+    internal static ModuleHierarchyInfo FromClasses(IEnumerable<ClassInfo> classInfos, TypescriptSymbolNameProvider symbolNameProvider)
     {
         ModuleHierarchyInfo moduleInfo = new() { ExportedClass = null };
         foreach (ClassInfo classInfo in classInfos)
         {
-            string[] propertyAccessorParts = [.. classInfo.Namespace.Split('.'), classNameBuilder.GetInteropInterfaceName(classInfo)];
+            string[] propertyAccessorParts = [.. classInfo.Namespace.Split('.'), symbolNameProvider.GetInteropInterfaceName(classInfo)];
             moduleInfo.Add(propertyAccessorParts, classInfo);
         }
         return moduleInfo;

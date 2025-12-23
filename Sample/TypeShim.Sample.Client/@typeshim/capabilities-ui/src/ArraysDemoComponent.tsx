@@ -8,13 +8,13 @@ export interface ArraysDemoProps {
 }
 
 type ArraysDemoState = {
-  instance: ArraysDemo;
+  instance: ArraysDemo.Proxy;
   appendValue: number;
   setValue: number;
 };
 
 export const ArraysDemoComponent: React.FC<ArraysDemoProps> = ({ exportsPromise }) => {
-  const [cap, setCap] = useState<CapabilitiesProvider | null>(null);
+  const [cap, setCap] = useState<CapabilitiesProvider.Proxy | null>(null);
   const [demos, setDemos] = useState<ArraysDemoState[]>([]);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export const ArraysDemoComponent: React.FC<ArraysDemoProps> = ({ exportsPromise 
 
   const createDemo = () => {
     if (!cap) return;
-    const instance: ArraysDemo = cap.GetArraysDemo();
+    const instance: ArraysDemo.Proxy = cap.GetArraysDemo();
     setDemos(prev => [{ instance, appendValue: 0, setValue: 0 }, ...prev]);
   };
 

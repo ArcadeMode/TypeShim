@@ -6,6 +6,10 @@ namespace TypeShim.Generator.Parsing;
 
 internal sealed class InteropTypeInfo
 {
+    internal required bool IsTSExport { get; init; }
+
+    internal required bool IsTSModule { get; init; }
+
     internal required KnownManagedType ManagedType { get; init; }
 
     /// <summary>
@@ -33,7 +37,15 @@ internal sealed class InteropTypeInfo
 
     internal required bool IsTaskType { get; init; }
     internal required bool IsArrayType { get; init; }
-    internal required bool IsNullableType { get; init; } //TODO: factor out, terrible modelling. include Array<T?>, Array<T>, T? better.
+    internal required bool IsNullableType { get; init; }
+    internal required bool IsSnapshotCompatible { get; init; }
+
+
+    internal bool ContainsTypeOf(KnownManagedType managedType)
+    {
+        return TypeArgument != null && TypeArgument.ManagedType == managedType
+            || ManagedType == managedType;
+    }
 
     /// <summary>
     /// Transforms this <see cref="InteropTypeInfo"/> into one suitable for interop method signatures.
@@ -41,10 +53,12 @@ internal sealed class InteropTypeInfo
     /// <returns></returns>
     internal InteropTypeInfo AsInteropTypeInfo()
     {
-        if (TypeArgument == null && ManagedType == KnownManagedType.Object)
+        if (TypeArgument == null && ManagedType is KnownManagedType.Object or KnownManagedType.JSObject)
         {
             return new InteropTypeInfo
             {
+                IsTSExport = IsTSExport,
+                IsTSModule = IsTSModule,
                 ManagedType = this.ManagedType,
                 JSTypeSyntax = CLRObjectTypeInfo.JSTypeSyntax,
                 InteropTypeSyntax = CLRObjectTypeInfo.InteropTypeSyntax,
@@ -53,14 +67,17 @@ internal sealed class InteropTypeInfo
                 IsArrayType = false,
                 IsNullableType = this.IsNullableType,
                 RequiresCLRTypeConversion = false,
-                TypeArgument = null
+                TypeArgument = null,
+                IsSnapshotCompatible = this.IsSnapshotCompatible,
             };
 
         }
-        else if (TypeArgument?.ManagedType == KnownManagedType.Object)
+        else if (TypeArgument?.ManagedType is KnownManagedType.Object or KnownManagedType.JSObject)
         {
             return new InteropTypeInfo
             {
+                IsTSExport = IsTSExport,
+                IsTSModule = IsTSModule,
                 ManagedType = this.ManagedType,
                 JSTypeSyntax = this.JSTypeSyntax,
                 InteropTypeSyntax = this.InteropTypeSyntax,
@@ -69,7 +86,8 @@ internal sealed class InteropTypeInfo
                 IsArrayType = this.IsArrayType,
                 IsNullableType = this.IsNullableType,
                 RequiresCLRTypeConversion = false,
-                TypeArgument = CLRObjectTypeInfo
+                TypeArgument = CLRObjectTypeInfo,
+                IsSnapshotCompatible = this.IsSnapshotCompatible,
             };
         }
         else
@@ -78,21 +96,10 @@ internal sealed class InteropTypeInfo
         }
     }
 
-    internal static InteropTypeInfo CLRVoidTypeInfo = new()
+    private static readonly InteropTypeInfo CLRObjectTypeInfo = new()
     {
-        ManagedType = KnownManagedType.Void,
-        JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Void"),
-        InteropTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
-        CLRTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
-        IsTaskType = false,
-        IsArrayType = false,
-        IsNullableType = false,
-        RequiresCLRTypeConversion = false,
-        TypeArgument = null,
-    };
-
-    internal static readonly InteropTypeInfo CLRObjectTypeInfo = new()
-    {
+        IsTSExport = false,
+        IsTSModule = false,
         ManagedType = KnownManagedType.Object,
         JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Any"),
         InteropTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),
@@ -102,5 +109,6 @@ internal sealed class InteropTypeInfo
         IsNullableType = false,
         RequiresCLRTypeConversion = false,
         TypeArgument = null,
+        IsSnapshotCompatible = false, // Transform a jsobject into .. ? ergo not snapshot compatible
     };
 }

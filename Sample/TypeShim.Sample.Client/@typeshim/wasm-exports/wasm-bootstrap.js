@@ -1,25 +1,26 @@
-﻿import { dotnet } from './_framework/dotnet.js'
+﻿import { dotnet } from '/_framework/dotnet.js'
 
-async function createWasmRuntime(args) {
+let assemblyExports = null;
+
+export async function launchWasmRuntime(args) {
+    if (assemblyExports) {
+        return assemblyExports;
+    }
+    
     console.info("Creating .NET WebAssembly runtime");
     const { setModuleImports, getAssemblyExports, getConfig, runMain } = await dotnet.withApplicationArguments(args).create();
-
-    const config = getConfig();
-    const exports = await getAssemblyExports(config.mainAssemblyName);
-
     console.info("Invoking .NET WebAssembly Main method");
     runMain(); // this will keep the wasm runtime alive, also what allows debugging
-
     console.info(".NET WebAssembly Module started");
-    return exports;
+    
+    const config = getConfig();
+    return assemblyExports = await getAssemblyExports(config.mainAssemblyName);
 };
-window.getBaseURI = () => document.baseURI;
 
-window.wasmModuleStarter = {
-    exports: (async () =>{
-        return await createWasmRuntime("BeepBoop");
-    })()
-};
+// Expose methods JSImport'ed by dotnet wasm module
+window.getBaseURI = () => document.baseURI;
+window.unwrap = (obj) => obj; // TODO: consider how to distribute this method
+
 // TODO: consider if user wants to customize this
 // TODO: consider if user wants to run multiple runtimes
 // TODO: consider if user wants to delay runtime creation (and accept debugging limitations)

@@ -19,14 +19,20 @@ public class PersonDto
             Id = person.Id,
             Name = person.Name,
             Age = person.Age,
-            Pet = person.Pet != null ? DogDto.FromDog(person.Pet) : null
+            Pet = person.Pets?.Length > 0 ? DogDto.FromDog(person.Pets[0]) : null
         };
     }
 
     public Person ToPerson()
     {
         Dog? dog = Pet != null ? new Dog { Name = Pet.Name, Breed = Pet.Breed, Age = Pet.Age } : null;
-        return new Person(Id, Name, Age, dog);
+        return new Person()
+        {
+            Id = Id,
+            Name = Name,
+            Age = Age,
+            Pets = dog == null ? [] : [ dog ]
+        };
     }
 }
 

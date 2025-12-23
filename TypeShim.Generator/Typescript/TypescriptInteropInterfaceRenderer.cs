@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Reflection;
+using System.Text;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
 
@@ -10,28 +11,53 @@ namespace TypeShim.Generator.Typescript;
 /// </summary>
 /// <param name="classInfo"></param>
 /// <param name="methodRenderer"></param>
-/// <param name="classNameBuilder"></param>
-internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypeScriptMethodRenderer methodRenderer, TypescriptClassNameBuilder classNameBuilder)
+/// <param name="symbolNameProvider"></param>
+internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, TypescriptSymbolNameProvider symbolNameProvider)
 {
     private readonly StringBuilder sb = new();
 
     internal string Render()
     {
         sb.AppendLine($"// Auto-generated TypeScript interop interface. Source class: {classInfo.Namespace}.{classInfo.Name}");
-        sb.AppendLine($"export interface {classNameBuilder.GetInteropInterfaceName(classInfo)} {{");
-        foreach (MethodInfo methodInfo in classInfo.Methods)
+        sb.AppendLine($"export interface {symbolNameProvider.GetInteropInterfaceName(classInfo)} {{");
+        // TODO: add depth param.
+        // TODO: consider merging with module rendering (mode param?)
+        foreach (MethodInfo methodInfo in GetAllMethods())
         {
-            sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(methodInfo.WithInteropTypeInfo())};");
+            sb.AppendLine($"    {RenderInteropMethodSignature(methodInfo)};");
         }
-        foreach (PropertyInfo propertyInfo in classInfo.Properties)
-        {
-            sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(propertyInfo.GetMethod.WithInteropTypeInfo())};");
-            if (propertyInfo.SetMethod is MethodInfo setMethod)
-            {
-                sb.AppendLine($"    {methodRenderer.RenderMethodSignatureForInterface(setMethod.WithInteropTypeInfo())};");
-            }
-        }
+
         sb.AppendLine("}");
         return sb.ToString();
+    }
+
+    private string RenderInteropMethodSignature(MethodInfo methodInfo)
+    {
+        string returnType = symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
+        return $"{methodInfo.Name}({RenderInteropMethodParameters(methodInfo.MethodParameters)}): {returnType}";
+
+        string RenderInteropMethodParameters(IEnumerable<MethodParameterInfo> parameterInfos)
+        {
+            return string.Join(", ", parameterInfos.Select(p => $"{p.Name}: {symbolNameProvider.GetNakedSymbolReference(p.Type)}"));
+        }
+    }
+
+    private IEnumerable<MethodInfo> GetAllMethods()
+    {
+        foreach (MethodInfo methodInfo in classInfo.Methods.Select(m => m.WithInteropTypeInfo()))
+        {
+            yield return methodInfo;
+        }
+        foreach (PropertyInfo propertyInfo in classInfo.Properties.Select(p => p.WithInteropTypeInfo()))
+        {
+            yield return propertyInfo.GetMethod;
+
+            if (propertyInfo.SetMethod is not MethodInfo setMethod)
+            {
+                continue;
+            }
+            yield return setMethod;
+
+        }
     }
 }

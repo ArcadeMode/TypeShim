@@ -1,5 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
+using System.Reflection;
+using System.Security.Cryptography;
 using TypeShim.Generator;
+using TypeShim.Generator.Parsing;
 
 internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSymbol memberMethod)
 {
@@ -14,14 +17,16 @@ internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSym
             throw new UnsupportedMethodException($"Method {classSymbol}.{memberMethod} must be of kind 'Ordinary', 'PropertyGet' or 'PropertySet' and have accessibility 'Public'.");
         }
 
-        return new MethodInfo
+        IReadOnlyCollection<MethodParameterInfo> parameters = [.. parameterInfoBuilder.Build()];
+        InteropTypeInfo returnType = typeInfoBuilder.Build();
+        MethodInfo baseMethod = new()
         {
             IsStatic = memberMethod.IsStatic,
             Name = memberMethod.Name,
-            MethodParameters = [.. parameterInfoBuilder.Build()],
-            ReturnType = typeInfoBuilder.Build()
-            //TODO: exception nicer
-            ?? throw new InvalidOperationException($"Could not create InteropTypeInfo for return type {memberMethod.ReturnType} of method {memberMethod} of {classSymbol}")
+            MethodParameters = parameters,
+            ReturnType = returnType,
         };
+
+        return baseMethod;
     }
 }

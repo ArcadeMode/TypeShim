@@ -1,4 +1,4 @@
-import { People, Person, PeopleProvider, TypeShimSampleModule, AssemblyExports } from '@typeshim/wasm-exports';
+import { People, Person, PeopleProvider, TypeShimSampleModule, AssemblyExports, Dog } from '@typeshim/wasm-exports';
 
 export class PeopleRepository {
 
@@ -8,23 +8,26 @@ export class PeopleRepository {
         this.wasmModulePromise = this.getInitializedSampleModule(exportsPromise);
     }
 
-    public async getAllPeople(): Promise<Person[]> {
+    public async getAllPeople(): Promise<Person.Proxy[]> {
         const sampleModule: TypeShimSampleModule = await this.wasmModulePromise;
-        const peopleProvider: PeopleProvider | null = sampleModule.PeopleProvider;
+        const peopleProvider: PeopleProvider.Proxy | null = sampleModule.PeopleProvider;
         if (!peopleProvider) {
             throw new Error("PeopleProvider is null");
         }
-        const people: People = await peopleProvider.FetchPeopleAsync();
+        const people: People.Proxy = await peopleProvider.FetchPeopleAsync();
+        
         this.PrintAgeMethodUsage(people);
         return people.All;
     }
 
-    private PrintAgeMethodUsage(people: People) {
+    private PrintAgeMethodUsage(people: People.Proxy) {
         console.log("Demonstrating Person.IsOlderThan method:");
-        const persons: Person[] = people.All;
+        const persons: Person.Proxy[] = people.All;
         const person1 = persons[(Math.random() * persons.length) | 0];
         const person2 = persons[(Math.random() * persons.length) | 0];
+        const jsPerson: Person.Snapshot = { Id: 999, Name: "Snapshot Person", Age: 42, Pets: [] };
         console.log(person1.Name, person1.Age, "isOlderThan", person2.Name, person2.Age, ":", person1.IsOlderThan(person2));
+        console.log(person1.Name, person1.Age, "isOlderThan (snapshot)", jsPerson.Name, jsPerson.Age, ":", person1.IsOlderThan(jsPerson));
     }
 
     private async getInitializedSampleModule(exportsPromise: Promise<AssemblyExports>): Promise<TypeShimSampleModule> {

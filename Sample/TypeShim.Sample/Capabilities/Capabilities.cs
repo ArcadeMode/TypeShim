@@ -16,7 +16,11 @@ public class CapabilitiesProvider
 {
     public PrimitivesDemo GetPrimitivesDemo(string baseString)
     {
-        return new(baseString);
+        return new() 
+        { 
+            InitialStringProperty = baseString, 
+            StringProperty = baseString 
+        };
     }
 
     public ArraysDemo GetArraysDemo()
@@ -26,10 +30,10 @@ public class CapabilitiesProvider
 }
 
 [TSExport]
-public class PrimitivesDemo(string baseString)
+public class PrimitivesDemo
 {
-    public string InitialStringProperty { get; } = baseString;
-    public string StringProperty { get; set; } = baseString;
+    public required string InitialStringProperty { get; set; }
+    public required string StringProperty { get; set; }
 
     public int GetStringLength()
     {

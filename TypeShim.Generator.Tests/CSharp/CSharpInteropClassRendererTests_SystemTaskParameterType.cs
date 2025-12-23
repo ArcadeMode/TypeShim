@@ -38,8 +38,8 @@ internal class CSharpInteropClassRendererTests_SystemTaskParameterType
             }
         """.Replace("{{typeExpression}}", typeExpression));
 
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
@@ -48,6 +48,7 @@ internal class CSharpInteropClassRendererTests_SystemTaskParameterType
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -58,6 +59,14 @@ public partial class C1Interop
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Number>>] Task<{{typeExpression}}> task)
     {
         C1.M1(task);
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
 }
 
@@ -94,10 +103,10 @@ public partial class C1Interop
             }
         """);
 
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([userClass, syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
-        Assert.That(exportedClasses, Has.Count.EqualTo(1));
-        INamedTypeSymbol classSymbol = exportedClasses.Last();
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
@@ -106,6 +115,7 @@ public partial class C1Interop
         // the return type is void so we cannot await either, hence the TaskCompletionSource-based conversion.
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -116,12 +126,21 @@ public partial class C1Interop
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
     {
         TaskCompletionSource<MyClass> taskTcs = new();
-        task.ContinueWith(t =>
-            t.IsFaulted ? taskTcs.SetException(t.Exception.InnerExceptions)
-            : t.IsCanceled ? taskTcs.SetCanceled()
-            : taskTcs.SetResult((MyClass)t.Result), TaskContinuationOptions.ExecuteSynchronously);
+        task.ContinueWith(t => {
+            if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) taskTcs.SetCanceled();
+            else taskTcs.SetResult(MyClassInterop.FromObject(t.Result));
+        }, TaskContinuationOptions.ExecuteSynchronously);
         Task<MyClass> typed_task = taskTcs.Task;
         C1.M1(typed_task);
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
 }
 
@@ -129,7 +148,7 @@ public partial class C1Interop
     }
 
     [Test]
-    public void CSharpInteropClass_DynamicMethod_HasJSTypePromiseAny_ForUserClassTaskParameterType()
+    public void CSharpInteropClass_InstanceMethod_HasJSTypePromiseAny_ForUserClassTaskParameterType()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -157,16 +176,17 @@ public partial class C1Interop
                 }
             }
         """);
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([userClass, syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
-        Assert.That(exportedClasses, Has.Count.EqualTo(1));
-        INamedTypeSymbol classSymbol = exportedClasses.Last();
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -177,12 +197,21 @@ public partial class C1Interop
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
     {
         TaskCompletionSource<MyClass> taskTcs = new();
-        task.ContinueWith(t =>
-            t.IsFaulted ? taskTcs.SetException(t.Exception.InnerExceptions)
-            : t.IsCanceled ? taskTcs.SetCanceled()
-            : taskTcs.SetResult((MyClass)t.Result), TaskContinuationOptions.ExecuteSynchronously);
+        task.ContinueWith(t => {
+            if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) taskTcs.SetCanceled();
+            else taskTcs.SetResult(MyClassInterop.FromObject(t.Result));
+        }, TaskContinuationOptions.ExecuteSynchronously);
         Task<MyClass> typed_task = taskTcs.Task;
         C1.M1(typed_task);
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
 }
 
@@ -206,16 +235,19 @@ public partial class C1Interop
                 }
             }
         """.Replace("{{typeName}}", typeName).Replace("{{objectCreation}}", objectCreation));
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation([syntaxTree]);
-        List<INamedTypeSymbol> exportedClasses = [.. TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(syntaxTree), syntaxTree.GetRoot())];
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.Last();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
 
+        // Note: as there is no known mapping for these types, there is no 'FromObject' mapping, instead just try to cast ("taskTcs.SetResult(({{typeName}})t.Result)")
+        // the user shouldnt be able to do much with the object anyway as its untyped on the JS/TS side.
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
+using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -226,12 +258,21 @@ public partial class C1Interop
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
     {
         TaskCompletionSource<{{typeName}}> taskTcs = new();
-        task.ContinueWith(t =>
-            t.IsFaulted ? taskTcs.SetException(t.Exception.InnerExceptions)
-            : t.IsCanceled ? taskTcs.SetCanceled()
-            : taskTcs.SetResult(({{typeName}})t.Result), TaskContinuationOptions.ExecuteSynchronously);
+        task.ContinueWith(t => {
+            if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) taskTcs.SetCanceled();
+            else taskTcs.SetResult(({{typeName}})t.Result);
+        }, TaskContinuationOptions.ExecuteSynchronously);
         Task<{{typeName}}> typed_task = taskTcs.Task;
         C1.M1(typed_task);
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
 }
 

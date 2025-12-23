@@ -6,14 +6,14 @@ namespace TypeShim.Generator.Typescript;
 /// Renders a TypeScript interface matching the JSExport-generated WebAssembly module exports
 /// </summary>
 /// <param name="moduleHierarchyInfo"></param>
-internal class TypescriptInteropModuleInterfaceRenderer(ModuleHierarchyInfo moduleHierarchyInfo, TypescriptClassNameBuilder classNameBuilder)
+internal class TypescriptInteropModuleInterfaceRenderer(ModuleHierarchyInfo moduleHierarchyInfo, TypescriptSymbolNameProvider symbolNameProvider)
 {
     private readonly StringBuilder sb = new();
 
     internal string Render()
     {
         sb.AppendLine("// Auto-generated TypeScript module exports interface");
-        sb.AppendLine($"export interface {classNameBuilder.GetModuleInteropClassName()} {{");
+        sb.AppendLine($"export interface {symbolNameProvider.GetModuleInteropClassName()} {{");
 
         RenderModuleInfo(moduleHierarchyInfo, 1);
 
@@ -28,7 +28,7 @@ internal class TypescriptInteropModuleInterfaceRenderer(ModuleHierarchyInfo modu
         {
             if (child.Value.ExportedClass != null)
             {
-                sb.AppendLine($"{indent}{child.Key}: {classNameBuilder.GetInteropInterfaceName(child.Value.ExportedClass)};");
+                sb.AppendLine($"{indent}{child.Key}: {symbolNameProvider.GetInteropInterfaceName(child.Value.ExportedClass)};");
             }
             else
             {

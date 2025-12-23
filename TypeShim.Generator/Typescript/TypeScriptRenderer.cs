@@ -2,62 +2,39 @@
 using TypeShim.Generator.Parsing;
 using TypeShim.Generator.Typescript;
 
-internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo moduleInfo, TypescriptClassNameBuilder classNameBuilder, TypeScriptTypeMapper typeMapper)
+internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo moduleInfo, TypescriptSymbolNameProvider symbolNameProvider)
 {
     private readonly StringBuilder sourceBuilder = new();
-    private readonly TypeScriptMethodRenderer methodRenderer = new(typeMapper);
 
     internal string Render()
     {
-        RenderInteropModuleInterface();
-        RenderUserModuleClass();
-
-        RenderInteropInterfaces();
-        RenderUserClassInterfaces();
-
-        RenderUserClassProxies();
+        RenderInteropInterfaces();        
+        RenderUserClasses();
         return sourceBuilder.ToString();
-    }
-
-    private void RenderInteropModuleInterface()
-    {
-        TypescriptInteropModuleInterfaceRenderer moduleInterfaceRenderer = new(moduleInfo.HierarchyInfo, classNameBuilder);
-        sourceBuilder.AppendLine(moduleInterfaceRenderer.Render());
     }
 
     private void RenderInteropInterfaces()
     {
+        TypescriptInteropModuleInterfaceRenderer moduleInterfaceRenderer = new(moduleInfo.HierarchyInfo, symbolNameProvider);
+        sourceBuilder.AppendLine(moduleInterfaceRenderer.Render());
         foreach (ClassInfo classInfo in classInfos)
         {
-            TypescriptInteropInterfaceRenderer interopInterfaceRenderer = new(classInfo, methodRenderer, classNameBuilder);
+            TypescriptInteropInterfaceRenderer interopInterfaceRenderer = new(classInfo, symbolNameProvider);
             sourceBuilder.AppendLine(interopInterfaceRenderer.Render());
         }
     }
 
-    private void RenderUserClassInterfaces()
+    private void RenderUserClasses()
     {
-        foreach (ClassInfo classInfo in classInfos.Where(c => !c.IsModule))
+        foreach (ClassInfo classInfo in classInfos.Where(c => c.Type.IsTSExport))
         {
-            TypescriptUserClassInterfaceRenderer classInterfaceRenderer = new(classInfo, methodRenderer, typeMapper);
-            sourceBuilder.AppendLine(classInterfaceRenderer.Render());
+            TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(classInfo, symbolNameProvider);
+            sourceBuilder.AppendLine(namespaceRenderer.Render());
         }
-    }
-
-    private void RenderUserModuleClass()
-    {
-        foreach (ClassInfo moduleClassInfo in classInfos.Where(c => c.IsModule))
+        foreach (ClassInfo moduleClassInfo in classInfos.Where(c => c.Type.IsTSModule))
         {
-            TypescriptUserModuleClassRenderer moduleClassRenderer = new(moduleClassInfo, methodRenderer, classNameBuilder);
+            TypescriptUserModuleClassRenderer moduleClassRenderer = new(moduleClassInfo, symbolNameProvider);
             sourceBuilder.AppendLine(moduleClassRenderer.Render());
-        }
-    }
-
-    private void RenderUserClassProxies()
-    {
-        foreach (ClassInfo classInfo in classInfos.Where(c => !c.IsModule))
-        {
-            TypescriptUserClassProxyRenderer classProxyRenderer = new(classInfo, methodRenderer, classNameBuilder);
-            sourceBuilder.AppendLine(classProxyRenderer.Render());
         }
     }
 }

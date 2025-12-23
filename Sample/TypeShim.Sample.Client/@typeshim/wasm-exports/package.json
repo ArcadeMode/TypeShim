@@ -2,7 +2,7 @@
   "name": "@typeshim/wasm-exports",
   "version": "1.0.0",
   "description": "",
-  "main": "typeshim.ts",
+  "main": "main.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "echo \"exports require no build\""

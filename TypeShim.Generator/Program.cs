@@ -9,17 +9,24 @@ using TypeShim.Generator.Typescript;
 
 ProgramArguments parsedArgs = ProgramArguments.Parse(args);
 
-CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation(parsedArgs.CsFileInfos.Select(csFile => csFile.SyntaxTree));
+try
+{
+    SymbolExtractor symbolExtractor = new(parsedArgs.CsFileInfos);
+    List<ClassInfo> classInfos = [.. symbolExtractor.ExtractAllExportedSymbols()
+        .Select(classSymbol => new ClassInfoBuilder(classSymbol).Build())
+        .Where(ci => ci.Methods.Any() || ci.Properties.Any())]; // dont bother with empty classes
 
-List<ClassInfo> classInfos = [.. parsedArgs.CsFileInfos
-    .SelectMany(fileInfo => TSExportAnnotatedClassFinder.FindLabelledClassSymbols(compilation.GetSemanticModel(fileInfo.SyntaxTree), fileInfo.SyntaxTree.GetRoot()))
-    .Select(classSymbol => new ClassInfoBuilder(classSymbol).Build())
-    .Where(ci => ci.Methods.Any() || ci.Properties.Any())]; // dont bother with empty classes
+    Task generateTS = Task.Run(() => GenerateTypeScriptInteropCode(parsedArgs, classInfos));
+    Task generateCS = Task.Run(() => GenerateCSharpInteropCode(parsedArgs, classInfos));
 
-Task generateTS = Task.Run(() => GenerateTypeScriptInteropCode(parsedArgs, classInfos));
-Task generateCS = Task.Run(() => GenerateCSharpInteropCode(parsedArgs, classInfos));
+    await Task.WhenAll(generateTS, generateCS);
+} 
+catch (TypeShimException ex) // known exceptions warrant only an error message
+{
+    Console.Error.WriteLine($"TypeShim received invalid input. {ex.GetType().Name} {ex.Message}");
+    Environment.Exit(-1);
+}
 
-await Task.WhenAll(generateTS, generateCS);
 // End of main program
 
 static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)
@@ -30,17 +37,21 @@ static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInf
         string outFileName = $"{classInfo.Name}.Interop.g.cs";
         File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, outFileName), source.ToString());
     }
+
+    JSObjectArrayExtensionsRenderer jsObjectArrayExtensionsRenderer = new();
+    SourceText jsObjectArrayExtensionsSource = SourceText.From(jsObjectArrayExtensionsRenderer.Render(), Encoding.UTF8);
+    File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, "JSObjectArrayExtensions.g.cs"), jsObjectArrayExtensionsSource.ToString());
 }
 
 static void GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)
 {
     TypeScriptTypeMapper typeMapper = new(classInfos);
-    TypescriptClassNameBuilder classNameBuilder = new(typeMapper);
+    TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
     ModuleInfo moduleInfo = new()
     {
         ExportedClasses = classInfos,
-        HierarchyInfo = ModuleHierarchyInfo.FromClasses(classInfos, classNameBuilder)
+        HierarchyInfo = ModuleHierarchyInfo.FromClasses(classInfos, symbolNameProvider)
     };
-    TypeScriptRenderer tsRenderer = new(classInfos, moduleInfo, classNameBuilder, typeMapper);
+    TypeScriptRenderer tsRenderer = new(classInfos, moduleInfo, symbolNameProvider);
     File.WriteAllText(parsedArgs.TsOutputFilePath, tsRenderer.Render());
 }

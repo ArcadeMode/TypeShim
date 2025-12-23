@@ -5,7 +5,7 @@
     <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
     <Nullable>enable</Nullable>
 
-    <WasmFingerprintAssets>false</WasmFingerprintAssets>
+    <WasmFingerprintAssets>true</WasmFingerprintAssets>
     <CompressionEnabled>false</CompressionEnabled>
   </PropertyGroup>
 
@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <PropertyGroup>
+    <!--<TypeShim_GeneratedDir>../../../TypeShim</TypeShim_GeneratedDir>-->
     <TypeShim_TypeScriptOutputDirectory>../../../../TypeShim.Sample.Client/@typeshim/wasm-exports</TypeShim_TypeScriptOutputDirectory>
     <TypeShim_MSBuildMessagePriority>High</TypeShim_MSBuildMessagePriority>
   </PropertyGroup>

@@ -1,7 +1,10 @@
 ﻿using Microsoft.CodeAnalysis;
+using System;
 using System.Data;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.CSharp;
@@ -11,6 +14,8 @@ internal sealed class CSharpInteropClassRenderer
     private readonly ClassInfo classInfo;
 
     private readonly StringBuilder sb = new();
+    private const string FromJSObjectMethodName = "FromJSObject";
+    private const string FromObjectMethodName = "FromObject";
 
     public CSharpInteropClassRenderer(ClassInfo classInfo)
     {
@@ -22,33 +27,49 @@ internal sealed class CSharpInteropClassRenderer
         this.classInfo = classInfo;
     }
 
-    internal string Render()
+    private string GetInteropClassName(string className) => $"{className}Interop";
+
+    internal string Render(int depth = 0)
     {
-        sb.AppendLine("// Auto-generated TypeScript interop definitions");
-        sb.AppendLine("using System.Runtime.InteropServices.JavaScript;");
-        sb.AppendLine("using System.Threading.Tasks;");
-        sb.AppendLine($"namespace {classInfo.Namespace};");
-        sb.AppendLine($"public partial class {classInfo.Name}Interop");
-        sb.AppendLine("{");
+        string indent = new(' ', depth * 4);
+        sb.AppendLine($"{indent}// Auto-generated TypeScript interop definitions");
+        sb.AppendLine($"{indent}using System;");
+        sb.AppendLine($"{indent}using System.Runtime.InteropServices.JavaScript;");
+        sb.AppendLine($"{indent}using System.Threading.Tasks;");
+        sb.AppendLine($"{indent}namespace {classInfo.Namespace};");
+        sb.AppendLine($"{indent}public partial class {GetInteropClassName(classInfo.Name)}");
+        sb.AppendLine($"{indent}{{");
+
         foreach (MethodInfo methodInfo in classInfo.Methods)
         {
             RenderMethod(methodInfo);
         }
+
         foreach (PropertyInfo propertyInfo in classInfo.Properties)
         {
             RenderPropertyMethods(propertyInfo);
         }
-        sb.AppendLine("}");
+
+        if (!classInfo.Type.IsTSModule) 
+        {
+            RenderFromObjectMapper(depth + 1);
+        }
+
+        if (classInfo.IsSnapshotCompatible())
+        {
+            RenderFromJSObjectMapper(depth + 1);
+        }
+        
+        sb.AppendLine($"{indent}}}");
         return sb.ToString();
     }
 
     private void RenderPropertyMethods(PropertyInfo propertyInfo)
     {
         RenderProperty(propertyInfo, getter: true);
-        if (propertyInfo.SetMethod is not null)
-        {
-            RenderProperty(propertyInfo, getter: false);
-        }
+        if (propertyInfo.SetMethod is null)
+            return;
+        RenderProperty(propertyInfo, getter: false);
     }
 
     private void RenderProperty(PropertyInfo propertyInfo, bool getter)
@@ -62,13 +83,14 @@ internal sealed class CSharpInteropClassRenderer
         sb.Append(indent);
         sb.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
 
-        RenderMethodSignature(methodInfo, depth: 1);
+        RenderMethodSignature(depth: 1, methodInfo);
 
         sb.Append(indent);
         sb.AppendLine("{");
-        foreach (MethodParameterInfo paramInfo in methodInfo.MethodParameters)
+
+        foreach (MethodParameterInfo originalParamInfo in methodInfo.MethodParameters)
         {
-            RenderParameterTypeConversion(paramInfo, depth: 2);
+            RenderParameterTypeConversion(depth: 2, originalParamInfo);
         }
 
         string accessorName = methodInfo.IsStatic ? classInfo.Name : GetTypedParameterName(methodInfo.MethodParameters.ElementAt(0));
@@ -95,20 +117,21 @@ internal sealed class CSharpInteropClassRenderer
         sb.Append(indent);
         sb.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
 
-        RenderMethodSignature(methodInfo, depth: 1);
+        RenderMethodSignature(depth: 1, methodInfo);
 
         sb.Append(indent);
         sb.AppendLine("{");
-        foreach (MethodParameterInfo paramInfo in methodInfo.MethodParameters)
+
+        foreach (MethodParameterInfo originalParamInfo in methodInfo.MethodParameters)
         {
-            RenderParameterTypeConversion(paramInfo, depth: 2);
+            RenderParameterTypeConversion(depth: 2, originalParamInfo);
         }
-        RenderUserMethodInvocation(methodInfo, depth: 2);
+        RenderUserMethodInvocation(depth: 2, methodInfo);
         sb.Append(indent);
         sb.AppendLine("}");
     }
 
-    private void RenderMethodSignature(MethodInfo methodInfo, int depth)
+    private void RenderMethodSignature(int depth, MethodInfo methodInfo)
     {
         string indent = new(' ', depth * 4);
         sb.Append(indent);
@@ -122,12 +145,30 @@ internal sealed class CSharpInteropClassRenderer
         sb.Append(' ');
         sb.Append(methodInfo.Name);
         sb.Append('(');
-        RenderMethodParameters(methodInfo.MethodParameters);
+        RenderMethodParameterList(methodInfo.MethodParameters);
         sb.Append(')');
         sb.AppendLine();
+        
+        void RenderMethodParameterList(IEnumerable<MethodParameterInfo> parameterInfos)
+        {
+            if (!parameterInfos.Any())
+                return;
+
+            foreach (MethodParameterInfo parameterInfo in parameterInfos)
+            {
+                JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(parameterInfo.Type);
+                sb.Append(marshalAsAttributeRenderer.RenderParameterAttribute().NormalizeWhitespace().ToFullString());
+                sb.Append(' ');
+                sb.Append(parameterInfo.Type.InteropTypeSyntax);
+                sb.Append(' ');
+                sb.Append(parameterInfo.Name);
+                sb.Append(", ");
+            }
+            sb.Length -= 2; // Remove last ", "
+        }
     }
 
-    private void RenderUserMethodInvocation(MethodInfo methodInfo, int depth)
+    private void RenderUserMethodInvocation(int depth, MethodInfo methodInfo)
     {
         string indent = new(' ', depth * 4);
 
@@ -155,55 +196,195 @@ internal sealed class CSharpInteropClassRenderer
 
     private string GetTypedParameterName(MethodParameterInfo paramInfo) => paramInfo.Type.RequiresCLRTypeConversion ? $"typed_{paramInfo.Name}" : paramInfo.Name;
 
-    private void RenderParameterTypeConversion(MethodParameterInfo paramInfo, int depth)
+    private void RenderParameterTypeConversion(int depth, MethodParameterInfo parameterInfo)
     {
-        if (!paramInfo.Type.RequiresCLRTypeConversion)
+        if (!parameterInfo.Type.RequiresCLRTypeConversion)
             return;
 
-        string indent = new(' ', depth * 4);
-
-        if (paramInfo.Type.IsTaskType)
+        if (parameterInfo.Type.IsTaskType)
         {
-            InteropTypeInfo returnTypeInfo = paramInfo.Type.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
-            string tcsVarName = $"{paramInfo.Name}Tcs";
-            sb.Append(indent);
-            sb.AppendLine($"TaskCompletionSource<{returnTypeInfo.CLRTypeSyntax}> {tcsVarName} = new();");
-            sb.Append(indent);
-            sb.AppendLine("task.ContinueWith(t =>");
-            string lambdaIndent = new(' ', (depth + 1) * 4);
-            sb.Append(lambdaIndent);
-            sb.AppendLine($"t.IsFaulted ? {tcsVarName}.SetException(t.Exception.InnerExceptions)");
-            sb.Append(lambdaIndent);
-            sb.AppendLine($": t.IsCanceled ? {tcsVarName}.SetCanceled()");
-            sb.Append(lambdaIndent);
-            sb.AppendLine($": {tcsVarName}.SetResult(({returnTypeInfo.CLRTypeSyntax})t.Result), TaskContinuationOptions.ExecuteSynchronously);");
-            sb.Append(indent);
-            sb.AppendLine($"Task<{returnTypeInfo.CLRTypeSyntax}> {GetTypedParameterName(paramInfo)} = {tcsVarName}.Task;");
+            RenderTaskTypeConversion(depth, parameterInfo);
+            return; // task pattern differs from other conversions, hence its fully separated rendering.
         }
-        //else if (paramInfo.Type.IsArrayType) {} // TODO: write some tests to see array type conversion + run in sample / integrations
+
+        string indent = new(' ', depth * 4);
+        sb.Append($"{indent}{parameterInfo.Type.CLRTypeSyntax} {GetTypedParameterName(parameterInfo)} = ");
+        if (parameterInfo.IsInjectedInstanceParameter)
+        {
+            RenderCovariantTypeConversion(parameterInfo.Type, parameterInfo.Name);
+        }
+        else if (parameterInfo.Type.IsArrayType)
+        {
+            RenderArrayTypeConversion(parameterInfo.Type, parameterInfo.Name);
+        }
+        else if (parameterInfo.Type.ManagedType is KnownManagedType.Object)
+        {
+            //TODO: make nullables actually ManagedType.Nullable with inner type Object or T, currently nullable reflects inner type, which is confusing sometimes
+            RenderFromObjectTypeConversion(parameterInfo.Type, parameterInfo.Name);
+        }
+        else // Tests guard against this case. Anyway, here is a state-of-the-art regression detector.
+        {
+            throw new NotImplementedException($"Type conversion not implemented for type: {parameterInfo.Type.CLRTypeSyntax}. Please file an issue at https://github.com/ArcadeMode/TypeShim");
+        }
+        sb.AppendLine(";");
+    }
+
+    private void RenderCovariantTypeConversion(InteropTypeInfo typeInfo, string parameterName)
+    {
+        Debug.Assert(typeInfo.ManagedType is KnownManagedType.Object or KnownManagedType.Array, "Unexpected non-object or non-array type with required type conversion");
+        sb.Append($"({typeInfo.CLRTypeSyntax}){parameterName}");
+    }
+
+    private void RenderFromObjectTypeConversion(InteropTypeInfo typeInfo, string parameterName)
+    {
+        InteropTypeInfo targetType = typeInfo.TypeArgument ?? typeInfo; // unwrap nullable or use simple type directly
+        string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
+
+        if (typeInfo.IsNullableType)
+        {
+            sb.Append($"{parameterName} != null ? ");
+        }
+        
+        if (typeInfo.IsTSExport)
+        {
+            sb.Append($"{targetInteropClass}.{FromObjectMethodName}({parameterName})");
+        }
         else
         {
-            Debug.Assert(paramInfo.Type.ManagedType == KnownManagedType.Object, "Unexpected non-object type with required type conversion");
-            sb.Append(indent);
-            sb.AppendLine($"{paramInfo.Type.CLRTypeSyntax} {GetTypedParameterName(paramInfo)} = ({paramInfo.Type.CLRTypeSyntax}){paramInfo.Name};");
+            RenderCovariantTypeConversion(typeInfo, parameterName);
+        }
+
+        if (typeInfo.IsNullableType)
+        {
+            sb.Append(" : null");
         }
     }
 
-    private void RenderMethodParameters(IEnumerable<MethodParameterInfo> parameterInfos)
+    private void RenderArrayTypeConversion(InteropTypeInfo typeInfo, string parameterName)
     {
-        if (!parameterInfos.Any())
-            return;
+        Debug.Assert(typeInfo.TypeArgument != null, "Array type must have a type argument.");
 
-        foreach (MethodParameterInfo parameterInfo in parameterInfos)
+        if (typeInfo.TypeArgument.IsTSExport == false)
         {
-            JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(parameterInfo.Type);
-            sb.Append(marshalAsAttributeRenderer.RenderParameterAttribute().NormalizeWhitespace().ToFullString());
-            sb.Append(' ');
-            sb.Append(parameterInfo.Type.InteropTypeSyntax);
-            sb.Append(' ');
-            sb.Append(parameterInfo.Name);
-            sb.Append(", ");
+            RenderCovariantTypeConversion(typeInfo, parameterName);
+            return; // early return for non-exported types, no special conversion possible
         }
-        sb.Length -= 2; // Remove last ", "
+
+        sb.Append($"Array.ConvertAll({parameterName}, e => ");
+        RenderFromObjectTypeConversion(typeInfo.TypeArgument, "e");
+        sb.Append(')');
+    }
+
+    private void RenderTaskTypeConversion(int depth, MethodParameterInfo parameterInfo)
+    {
+        string indent = new(' ', depth * 4);
+        InteropTypeInfo taskTypeParamInfo = parameterInfo.Type.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
+        string tcsVarName = $"{parameterInfo.Name}Tcs";
+        sb.Append(indent);
+        sb.AppendLine($"TaskCompletionSource<{taskTypeParamInfo.CLRTypeSyntax}> {tcsVarName} = new();");
+        sb.Append(indent);
+        sb.AppendLine("task.ContinueWith(t => {");
+        string lambdaIndent = new(' ', (depth + 1) * 4);
+        sb.Append(lambdaIndent);
+        sb.AppendLine($"if (t.IsFaulted) {tcsVarName}.SetException(t.Exception.InnerExceptions);");
+        sb.Append(lambdaIndent);
+        sb.AppendLine($"else if (t.IsCanceled) {tcsVarName}.SetCanceled();");
+
+        string resultConversionExpression = taskTypeParamInfo.IsTSExport || taskTypeParamInfo.IsTSModule
+            ? $"{GetInteropClassName(taskTypeParamInfo.CLRTypeSyntax.ToString())}.{FromObjectMethodName}(t.Result)"
+            : $"({taskTypeParamInfo.CLRTypeSyntax})t.Result";
+
+        sb.Append(lambdaIndent);
+        sb.AppendLine($"else {tcsVarName}.SetResult({resultConversionExpression});");
+        sb.Append(indent);
+        sb.AppendLine("}, TaskContinuationOptions.ExecuteSynchronously);");
+        sb.Append(indent);
+        sb.AppendLine($"Task<{taskTypeParamInfo.CLRTypeSyntax}> {GetTypedParameterName(parameterInfo)} = {tcsVarName}.Task;");
+    }
+
+    private void RenderFromObjectMapper(int depth)
+    {
+        string indent = new(' ', depth * 4);
+        string indent2 = new(' ', (depth + 1) * 4);
+        
+        sb.AppendLine($"{indent}public static {classInfo.Type.CLRTypeSyntax} {FromObjectMethodName}(object obj)");
+        sb.AppendLine($"{indent}{{");
+        sb.AppendLine($"{indent2}return obj switch");
+        sb.AppendLine($"{indent2}{{");
+        sb.AppendLine($"{indent2}    {classInfo.Type.CLRTypeSyntax} instance => instance,");
+        if (classInfo.IsSnapshotCompatible())
+        {
+            sb.AppendLine($"{indent2}    JSObject jsObj => {FromJSObjectMethodName}(jsObj),");
+        }
+        sb.AppendLine($"{indent2}    _ => throw new ArgumentException($\"Invalid object type {{obj?.GetType().ToString() ?? \"null\"}}\", nameof(obj)),");
+        sb.AppendLine($"{indent2}}};");
+        sb.AppendLine($"{indent}}}");
+    }
+
+    private void RenderFromJSObjectMapper(int depth)
+    {
+        //  FromJSObject is not an interop method, but used by interop methods to convert from JSObject to CLR type
+        string indent = new(' ', depth * 4);
+        string indent2 = new(' ', (depth + 1) * 4);
+        string indent3 = new(' ', (depth + 2) * 4);
+
+        sb.AppendLine($"{indent}public static {classInfo.Type.CLRTypeSyntax} {FromJSObjectMethodName}(JSObject jsObject)");
+        sb.AppendLine($"{indent}{{");
+        sb.AppendLine($"{indent2}return new() {{"); // initializer body
+
+        // TODO: support init properties
+        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => p.Type.IsSnapshotCompatible && p.SetMethod != null))
+        {
+            if (propertyInfo.Type.RequiresCLRTypeConversion)
+            {
+                InteropTypeInfo targetType = propertyInfo.Type.TypeArgument ?? propertyInfo.Type;
+                string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
+                sb.Append($"{indent3}{propertyInfo.Name} = ");
+                string propertyRetrievalExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
+                if (propertyInfo.Type.IsArrayType)
+                {
+                    sb.AppendLine($"Array.ConvertAll({propertyRetrievalExpression}, {targetInteropClass}.{FromJSObjectMethodName}),");
+                }
+                else if (propertyInfo.Type.IsTaskType)
+                {
+                    // TODO: IF JSObject inner type, inject the taskcompletion trick.
+                    throw new TypeNotSupportedException("Task types are not supported in FromJSObject conversion.");
+                }
+                else
+                {
+                    sb.AppendLine($"{targetInteropClass}.{FromJSObjectMethodName}({propertyRetrievalExpression}),");
+                }
+            }
+            else
+            {
+                sb.AppendLine($"{indent3}{propertyInfo.Name} = jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\"),"); // TODO: error handling? (null / missing props?)
+            }
+        }
+        sb.AppendLine($"{indent2}}};");
+        sb.AppendLine($"{indent}}}");
+
+        static string ResolveJSObjectMethodName(InteropTypeInfo typeInfo)
+        {
+            return typeInfo.ManagedType switch
+            {
+                KnownManagedType.Boolean => "GetPropertyAsBoolean",
+                KnownManagedType.Double => "GetPropertyAsDouble",
+                KnownManagedType.String => "GetPropertyAsString",
+                KnownManagedType.Int32 => "GetPropertyAsInt32",
+                KnownManagedType.JSObject => "GetPropertyAsJSObject",
+                KnownManagedType.Object when typeInfo.IsTSExport => "GetPropertyAsJSObject", // exported object types have a FromJSObject mapper
+                KnownManagedType.Array => typeInfo.TypeArgument switch
+                {
+                    { ManagedType: KnownManagedType.Byte } => "GetPropertyAsByteArray",
+                    { ManagedType: KnownManagedType.Int32 } => "GetPropertyAsInt32Array",
+                    { ManagedType: KnownManagedType.Double } => "GetPropertyAsDoubleArray",
+                    { ManagedType: KnownManagedType.String } => "GetPropertyAsStringArray",
+                    { ManagedType: KnownManagedType.JSObject } => "GetPropertyAsJSObjectArray",
+                    { ManagedType: KnownManagedType.Object, IsTSExport: true } => "GetPropertyAsJSObjectArray", // exported object types have a FromJSObject mapper
+                    _ => throw new InvalidOperationException($"Array of type {typeInfo.TypeArgument?.ManagedType} cannot be marshalled by TypeShim JSObject extensions"),
+                },
+                _ => throw new InvalidOperationException($"Type {typeInfo.ManagedType} cannot be marshalled by JSObject"),
+            };
+        }
     }
 }
