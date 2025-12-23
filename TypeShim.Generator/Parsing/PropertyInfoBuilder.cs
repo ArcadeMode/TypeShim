@@ -13,7 +13,6 @@ internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropert
             throw new UnsupportedPropertyException($"Property {classSymbol}.{propertySymbol} must have accessibility 'Public'.");
         }
 
-        InteropTypeInfo propertyTypeInfo = typeInfoBuilder.Build();
         if (propertySymbol.GetMethod is not IMethodSymbol methodSymbol)
         {
             throw new UnsupportedPropertyException("Properties without get are not supported");

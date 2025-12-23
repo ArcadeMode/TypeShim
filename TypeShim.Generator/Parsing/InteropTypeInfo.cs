@@ -40,13 +40,6 @@ internal sealed class InteropTypeInfo
     internal required bool IsNullableType { get; init; }
     internal required bool IsSnapshotCompatible { get; init; }
 
-
-    internal bool ContainsTypeOf(KnownManagedType managedType)
-    {
-        return TypeArgument != null && TypeArgument.ManagedType == managedType
-            || ManagedType == managedType;
-    }
-
     /// <summary>
     /// Transforms this <see cref="InteropTypeInfo"/> into one suitable for interop method signatures.
     /// </summary>
