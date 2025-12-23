@@ -50,16 +50,8 @@ internal sealed class CSharpInteropClassRenderer
             RenderPropertyMethods(propertyInfo);
         }
 
-        if (!classInfo.Type.IsTSModule) 
-        {
-            RenderFromObjectMapper(depth + 1);
-        }
+        RenderObjectMappers(depth + 1);
 
-        if (classInfo.IsSnapshotCompatible())
-        {
-            RenderFromJSObjectMapper(depth + 1);
-        }
-        
         sb.AppendLine($"{indent}}}");
         return sb.ToString();
     }
@@ -302,66 +294,88 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine($"Task<{taskTypeParamInfo.CLRTypeSyntax}> {GetTypedParameterName(parameterInfo)} = {tcsVarName}.Task;");
     }
 
-    private void RenderFromObjectMapper(int depth)
+    /// <summary>
+    /// Renders helper methods for mapping from object / JSObject to the target type.
+    /// </summary>
+    /// <param name="depth"></param>
+    /// <exception cref="TypeNotSupportedException"></exception>
+    /// <exception cref="InvalidOperationException"></exception>
+    private void RenderObjectMappers(int depth)
     {
-        string indent = new(' ', depth * 4);
-        string indent2 = new(' ', (depth + 1) * 4);
-        
-        sb.AppendLine($"{indent}public static {classInfo.Type.CLRTypeSyntax} {FromObjectMethodName}(object obj)");
-        sb.AppendLine($"{indent}{{");
-        sb.AppendLine($"{indent2}return obj switch");
-        sb.AppendLine($"{indent2}{{");
-        sb.AppendLine($"{indent2}    {classInfo.Type.CLRTypeSyntax} instance => instance,");
+        if (!classInfo.Type.IsTSModule)
+        {
+            RenderFromObjectMapper(depth);
+        }
+
         if (classInfo.IsSnapshotCompatible())
         {
-            sb.AppendLine($"{indent2}    JSObject jsObj => {FromJSObjectMethodName}(jsObj),");
+            RenderFromJSObjectMapper(depth);
         }
-        sb.AppendLine($"{indent2}    _ => throw new ArgumentException($\"Invalid object type {{obj?.GetType().ToString() ?? \"null\"}}\", nameof(obj)),");
-        sb.AppendLine($"{indent2}}};");
-        sb.AppendLine($"{indent}}}");
-    }
+        return;
 
-    private void RenderFromJSObjectMapper(int depth)
-    {
-        //  FromJSObject is not an interop method, but used by interop methods to convert from JSObject to CLR type
-        string indent = new(' ', depth * 4);
-        string indent2 = new(' ', (depth + 1) * 4);
-        string indent3 = new(' ', (depth + 2) * 4);
-
-        sb.AppendLine($"{indent}public static {classInfo.Type.CLRTypeSyntax} {FromJSObjectMethodName}(JSObject jsObject)");
-        sb.AppendLine($"{indent}{{");
-        sb.AppendLine($"{indent2}return new() {{"); // initializer body
-
-        // TODO: support init properties
-        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => p.Type.IsSnapshotCompatible && p.SetMethod != null))
+        void RenderFromObjectMapper(int depth)
         {
-            if (propertyInfo.Type.RequiresCLRTypeConversion)
+            string indent = new(' ', depth * 4);
+            string indent2 = new(' ', (depth + 1) * 4);
+
+            sb.AppendLine($"{indent}public static {classInfo.Type.CLRTypeSyntax} {FromObjectMethodName}(object obj)");
+            sb.AppendLine($"{indent}{{");
+            sb.AppendLine($"{indent2}return obj switch");
+            sb.AppendLine($"{indent2}{{");
+            sb.AppendLine($"{indent2}    {classInfo.Type.CLRTypeSyntax} instance => instance,");
+            if (classInfo.IsSnapshotCompatible())
             {
-                InteropTypeInfo targetType = propertyInfo.Type.TypeArgument ?? propertyInfo.Type;
-                string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
-                sb.Append($"{indent3}{propertyInfo.Name} = ");
-                string propertyRetrievalExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
-                if (propertyInfo.Type.IsArrayType)
+                sb.AppendLine($"{indent2}    JSObject jsObj => {FromJSObjectMethodName}(jsObj),");
+            }
+            sb.AppendLine($"{indent2}    _ => throw new ArgumentException($\"Invalid object type {{obj?.GetType().ToString() ?? \"null\"}}\", nameof(obj)),");
+            sb.AppendLine($"{indent2}}};");
+            sb.AppendLine($"{indent}}}");
+        }
+
+        void RenderFromJSObjectMapper(int depth)
+        {
+            string indent = new(' ', depth * 4);
+            string indent2 = new(' ', (depth + 1) * 4);
+            string indent3 = new(' ', (depth + 2) * 4);
+
+            sb.AppendLine($"{indent}public static {classInfo.Type.CLRTypeSyntax} {FromJSObjectMethodName}(JSObject jsObject)");
+            sb.AppendLine($"{indent}{{");
+            sb.AppendLine($"{indent2}return new() {{"); // initializer body
+
+            // TODO: support init properties
+            foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => p.Type.IsSnapshotCompatible && p.SetMethod != null))
+            {
+                if (propertyInfo.Type.RequiresCLRTypeConversion)
                 {
-                    sb.AppendLine($"Array.ConvertAll({propertyRetrievalExpression}, {targetInteropClass}.{FromJSObjectMethodName}),");
-                }
-                else if (propertyInfo.Type.IsTaskType)
-                {
-                    // TODO: IF JSObject inner type, inject the taskcompletion trick.
-                    throw new TypeNotSupportedException("Task types are not supported in FromJSObject conversion.");
+                    InteropTypeInfo targetType = propertyInfo.Type.TypeArgument ?? propertyInfo.Type;
+                    string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
+                    sb.Append($"{indent3}{propertyInfo.Name} = ");
+                    string propertyRetrievalExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
+                    if (propertyInfo.Type.IsArrayType)
+                    {
+                        sb.AppendLine($"Array.ConvertAll({propertyRetrievalExpression}, {targetInteropClass}.{FromJSObjectMethodName}),");
+                    }
+                    else if (propertyInfo.Type.IsTaskType)
+                    {
+                        // TODO: retrieve task object through new JSObjectExtensions
+
+                        // TODO: IF JSObject inner type, inject the taskcompletion trick. else preserve readily marshalled task?
+                        //RenderTaskTypeConversion(depth, propertyInfo.SetMethod!.MethodParameters.Single());
+                        throw new TypeNotSupportedException("Task types are not (yet) supported in FromJSObject conversion.");
+                    }
+                    else
+                    {
+                        sb.AppendLine($"{targetInteropClass}.{FromJSObjectMethodName}({propertyRetrievalExpression}),");
+                    }
                 }
                 else
                 {
-                    sb.AppendLine($"{targetInteropClass}.{FromJSObjectMethodName}({propertyRetrievalExpression}),");
+                    sb.AppendLine($"{indent3}{propertyInfo.Name} = jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\"),"); // TODO: error handling? (null / missing props?)
                 }
             }
-            else
-            {
-                sb.AppendLine($"{indent3}{propertyInfo.Name} = jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\"),"); // TODO: error handling? (null / missing props?)
-            }
+            sb.AppendLine($"{indent2}}};");
+            sb.AppendLine($"{indent}}}");
         }
-        sb.AppendLine($"{indent2}}};");
-        sb.AppendLine($"{indent}}}");
 
         static string ResolveJSObjectMethodName(InteropTypeInfo typeInfo)
         {
