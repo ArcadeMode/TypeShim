@@ -79,10 +79,15 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         string indent = new(' ', depth * 2);
         foreach (MethodParameterInfo parameterInfo in methodInfo.MethodParameters)
         {
-            if (parameterInfo.IsInjectedInstanceParameter || !parameterInfo.Type.RequiresCLRTypeConversion || !parameterInfo.Type.IsTSExport)
+            if (parameterInfo.IsInjectedInstanceParameter || !parameterInfo.Type.RequiresCLRTypeConversion)
                 continue;
 
-            InteropTypeInfo paramTargetType = parameterInfo.Type.TypeArgument ?? parameterInfo.Type; // we are concerned with the element type for arrays/tasks or inner type of nullables
+            // The element type for arrays/tasks or inner type of nullables is what matters for conversion purposes
+            InteropTypeInfo paramTargetType = parameterInfo.Type.TypeArgument ?? parameterInfo.Type; 
+
+            if (!paramTargetType.IsTSExport) 
+                continue;
+
             if (symbolNameProvider.GetProxyReferenceNameIfExists(paramTargetType) is not string proxyClassName)
             {
                 throw new ArgumentException($"Invalid conversion-requiring type '{parameterInfo.Type.CLRTypeSyntax}' failed to resolve associated TypeScript proxy name.");
@@ -157,6 +162,6 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
 
     private static string GetInteropInvocationVariable(MethodParameterInfo param)
     {
-        return param.Type.RequiresCLRTypeConversion && param.Type.IsTSExport ? $"{param.Name}Instance" : param.Name;
+        return param.Type.RequiresCLRTypeConversion && (param.Type.TypeArgument ?? param.Type).IsTSExport ? $"{param.Name}Instance" : param.Name;
     }
 }
