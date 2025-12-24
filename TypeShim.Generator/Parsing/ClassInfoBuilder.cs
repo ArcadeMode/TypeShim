@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using TypeShim.Core;
 
 namespace TypeShim.Generator.Parsing;
 

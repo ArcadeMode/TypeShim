@@ -1,4 +1,4 @@
-﻿namespace TypeShim.Generator.Parsing;
+﻿namespace TypeShim.Core;
 
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
@@ -10,7 +10,7 @@ using System;
 using System.Linq;
 
 
-internal abstract record JSTypeInfo(KnownManagedType KnownType)
+public abstract record JSTypeInfo(KnownManagedType KnownType)
 {
     public static JSTypeInfo CreateJSTypeInfoForTypeSymbol(ITypeSymbol type)
     {
@@ -179,27 +179,27 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
     }
 }
 
-internal sealed record JSInvalidTypeInfo() : JSTypeInfo(KnownManagedType.None);
+public sealed record JSInvalidTypeInfo() : JSTypeInfo(KnownManagedType.None);
 
-internal record JSSimpleTypeInfo(KnownManagedType KnownType) : JSTypeInfo(KnownType)
+public record JSSimpleTypeInfo(KnownManagedType KnownType) : JSTypeInfo(KnownType)
 {
     public required TypeSyntax Syntax { get; init; }
 }
 
-internal sealed record JSArrayTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.Array);
+public sealed record JSArrayTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.Array);
 
-internal sealed record JSSpanTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.Span);
+public sealed record JSSpanTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.Span);
 
-internal sealed record JSArraySegmentTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.ArraySegment);
+public sealed record JSArraySegmentTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.ArraySegment);
 
-internal sealed record JSTaskTypeInfo(JSSimpleTypeInfo ResultTypeInfo) : JSTypeInfo(KnownManagedType.Task);
+public sealed record JSTaskTypeInfo(JSSimpleTypeInfo ResultTypeInfo) : JSTypeInfo(KnownManagedType.Task);
 
-internal sealed record JSNullableTypeInfo(JSSimpleTypeInfo ResultTypeInfo) : JSTypeInfo(KnownManagedType.Nullable);
+public sealed record JSNullableTypeInfo(JSSimpleTypeInfo ResultTypeInfo) : JSTypeInfo(KnownManagedType.Nullable);
 
-internal sealed record JSFunctionTypeInfo(bool IsAction, JSSimpleTypeInfo[] ArgsTypeInfo) : JSTypeInfo(IsAction ? KnownManagedType.Action : KnownManagedType.Function);
+public sealed record JSFunctionTypeInfo(bool IsAction, JSSimpleTypeInfo[] ArgsTypeInfo) : JSTypeInfo(IsAction ? KnownManagedType.Action : KnownManagedType.Function);
 
 
-internal enum KnownManagedType : int
+public enum KnownManagedType : int
 {
     None = 0,
     Void = 1,
@@ -230,7 +230,7 @@ internal enum KnownManagedType : int
     Unknown,
 }
 
-internal static class Constants
+public static class Constants
 {
     public const string JSMarshalAsAttribute = "System.Runtime.InteropServices.JavaScript.JSMarshalAsAttribute`1";
     public const string MarshalUsingAttribute = "System.Runtime.InteropServices.Marshalling.MarshalUsingAttribute";

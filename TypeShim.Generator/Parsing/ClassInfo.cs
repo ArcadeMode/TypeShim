@@ -1,4 +1,6 @@
-﻿namespace TypeShim.Generator.Parsing;
+﻿using TypeShim.Core;
+
+namespace TypeShim.Generator.Parsing;
 
 internal sealed class ClassInfo
 {

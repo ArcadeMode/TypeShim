@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CompilerServices.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)\\Exceptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)\\InteropTypeInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)\\InteropTypeInfoBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)\\JSmanagedTypeInfo.cs" />
+  </ItemGroup>
+</Project>

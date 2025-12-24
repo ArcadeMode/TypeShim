@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using TypeShim.Core;
 using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.CSharp;

@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
-using TypeShim.Generator;
-using TypeShim.Generator.Parsing;
+using TypeShim.Core;
 
 internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropertySymbol propertySymbol)
 {

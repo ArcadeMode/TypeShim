@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TypeShim.Core;
 using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;

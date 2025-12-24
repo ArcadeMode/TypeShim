@@ -1,15 +1,18 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using TypeShim.Generator;
-using TypeShim.Generator.Parsing;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
-internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
+namespace TypeShim.Core;
+
+public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
 {
     private readonly bool IsTSExport = typeSymbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSExportAttribute" or "TSExport");
     private readonly bool IsTSModule = typeSymbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSModuleAttribute" or "TSModule");
 
-    internal InteropTypeInfo Build()
+    public InteropTypeInfo Build()
     {
         JSTypeInfo parameterMarshallingTypeInfo = JSTypeInfo.CreateJSTypeInfoForTypeSymbol(typeSymbol);
         TypeSyntax clrTypeSyntax = SyntaxFactory.ParseTypeName(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
@@ -21,6 +24,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
             JSNullableTypeInfo nullableTypeInfo => BuildNullableTypeInfo(nullableTypeInfo, clrTypeSyntax),
             JSSpanTypeInfo => throw new NotImplementedException("Span<T> is not yet supported"),
             JSArraySegmentTypeInfo => throw new NotImplementedException("ArraySegment<T> is not yet supported"),
+            JSFunctionTypeInfo => throw new NotImplementedException("Func & Action are not yet supported"),
             JSInvalidTypeInfo or _ => throw new TypeNotSupportedException(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)),
         };
     }

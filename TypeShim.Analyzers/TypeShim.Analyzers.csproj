@@ -10,4 +10,6 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
   </ItemGroup>
+
+  <Import Project="..\TypeShim.Core\TypeShim.Core.projitems" Label="Shared" />
 </Project>

@@ -1,50 +1,49 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Runtime.InteropServices.JavaScript;
 
-namespace TypeShim.Generator.Parsing;
+namespace TypeShim.Core;
 
-internal sealed class InteropTypeInfo
+public sealed class InteropTypeInfo
 {
-    internal required bool IsTSExport { get; init; }
+    public required bool IsTSExport { get; init; }
 
-    internal required bool IsTSModule { get; init; }
+    public required bool IsTSModule { get; init; }
 
-    internal required KnownManagedType ManagedType { get; init; }
+    public required KnownManagedType ManagedType { get; init; }
 
     /// <summary>
     /// Represents the syntax for writing the associated <see cref="JSType"/>
     /// </summary>
-    internal required TypeSyntax JSTypeSyntax { get; init; }
+    public required TypeSyntax JSTypeSyntax { get; init; }
 
     /// <summary>
     /// Syntax for writing the CLR type on the interop method. This is usually equal to <see cref="CLRTypeSyntax"/>,<br/>
     /// but e.g. YourClass, Task&lt;YourClass&gt; or YourClass[] have to be object, Task&lt;object&gt; or object[] for the interop method.
     /// </summary>
-    internal required TypeSyntax InteropTypeSyntax { get; init; }
+    public required TypeSyntax InteropTypeSyntax { get; init; }
 
     /// <summary>
     /// Syntax for writing the CLR type in C# (i.e. the user's original type)
     /// </summary>
-    internal required TypeSyntax CLRTypeSyntax { get; init; }
+    public required TypeSyntax CLRTypeSyntax { get; init; }
 
     /// <summary>
     /// Tasks and Arrays _may_ have type arguments
     /// </summary>
-    internal required InteropTypeInfo? TypeArgument { get; init; }
+    public required InteropTypeInfo? TypeArgument { get; init; }
 
-    internal required bool RequiresCLRTypeConversion { get; init; }
+    public required bool RequiresCLRTypeConversion { get; init; }
 
-    internal required bool IsTaskType { get; init; }
-    internal required bool IsArrayType { get; init; }
-    internal required bool IsNullableType { get; init; }
-    internal required bool IsSnapshotCompatible { get; init; }
+    public required bool IsTaskType { get; init; }
+    public required bool IsArrayType { get; init; }
+    public required bool IsNullableType { get; init; }
+    public required bool IsSnapshotCompatible { get; init; }
 
     /// <summary>
     /// Transforms this <see cref="InteropTypeInfo"/> into one suitable for interop method signatures.
     /// </summary>
     /// <returns></returns>
-    internal InteropTypeInfo AsInteropTypeInfo()
+    public InteropTypeInfo AsInteropTypeInfo()
     {
         if (TypeArgument == null && ManagedType is KnownManagedType.Object or KnownManagedType.JSObject)
         {

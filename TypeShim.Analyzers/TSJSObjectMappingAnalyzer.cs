@@ -1,35 +1,38 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
+using TypeShim.Core;
 
 namespace TypeShim.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TSJSObjectMappingAnalyzer : DiagnosticAnalyzer
 {
-    public const string RequiredNonPublicSetterRuleId = "TSHIM009";
-    public const string NonRequiredNonPublicSetterRuleId = "TSHIM010";
+    public const string NonPublicSetterRuleId = "TSHIM009";
+    public const string NonCompatiblePropertyRuleId = "TSHIM010";
 
-    private static readonly DiagnosticDescriptor RequiredNonPublicSetterRule = new(
-        id: RequiredNonPublicSetterRuleId,
-        title: "Required property must have a public setter/init to support JSObject mapping",
-        messageFormat: "Required property '{0}' on class '{1}' must have a public setter/init accessor for JSObject mapping",
-        category: "Usage",
-        defaultSeverity: DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        description: "TypeShim generates a JSObject mapper for each TSExport class. Required properties must be assignable via a public setter/init accessor.");
-
-    private static readonly DiagnosticDescriptor NonRequiredNonPublicSetterRule = new(
-        id: NonRequiredNonPublicSetterRuleId,
+    private static readonly DiagnosticDescriptor NonPublicSetterRule = new(
+        id: NonPublicSetterRuleId,
         title: "Non-public setter/init will not be set during JSObject mapping",
-        messageFormat: "Property '{0}' on class '{1}' has a non-public setter/init accessor and will not be set when mapping from a JSObject",
+        messageFormat: "Property '{0}' has a non-public setter/init accessor and will not be set when mapping from a JSObject",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "TypeShim generates a JSObject mapper for each TSExport class. Properties with non-public set/init accessors are excluded from the generated JSObject mapper.");
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [RequiredNonPublicSetterRule, NonRequiredNonPublicSetterRule];
+    private static readonly DiagnosticDescriptor NonCompatiblePropertyRule = new(
+        id: NonCompatiblePropertyRuleId,
+        title: "Property must have a TypeShim/.NET Interop-supported type to opt-in to generated JSObject mapping",
+        messageFormat: "Property '{0}' has unsupported type '{1}' and will not be set when mapping from a JSObject",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "TypeShim generates a JSObject mapper for each TSExport class. Required properties must be of TypeShim/.NET Interop-supported types.");
+
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [NonCompatiblePropertyRule, NonPublicSetterRule];
 
     public override void Initialize(AnalysisContext context)
     {
@@ -40,6 +43,7 @@ public sealed class TSJSObjectMappingAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeClass(SymbolAnalysisContext context)
     {
+
         if (context.Symbol is not INamedTypeSymbol type || type.TypeKind != TypeKind.Class)
             return;
 
@@ -65,19 +69,32 @@ public sealed class TSJSObjectMappingAnalyzer : DiagnosticAnalyzer
             if (setterAccessibility is not Accessibility.Public)
             {
                 Location location = p.Locations.Length > 0 ? p.Locations[0] : Location.None;
-                DiagnosticDescriptor rule = p.IsRequired ? RequiredNonPublicSetterRule : NonRequiredNonPublicSetterRule;
-                context.ReportDiagnostic(Diagnostic.Create(rule, location, p.Name, type.Name));
+                context.ReportDiagnostic(Diagnostic.Create(NonPublicSetterRule, location, p.Name));
             }
-
-            _ = IsSnapshotCompatibleType(p);
+            else if (!IsSnapshotCompatibleProperty(p))
+            {
+                //Debugger.Launch();
+                Location location = p.Locations.Length > 0 ? p.Locations[0] : Location.None;
+                DiagnosticDescriptor rule = NonCompatiblePropertyRule;
+                DiagnosticSeverity severity = p.IsRequired ? DiagnosticSeverity.Error : rule.DefaultSeverity;
+                context.ReportDiagnostic(Diagnostic.Create(rule, location, effectiveSeverity: severity, additionalLocations: null, properties: null, p.Name, p.Type));
+            }
         }
 
         static ImmutableArray<IPropertySymbol> GetInstanceProperties(INamedTypeSymbol t)
             => [.. t.GetMembers().OfType<IPropertySymbol>().Where(p => !p.IsStatic && !p.IsIndexer)];
     }
 
-    // Placeholder for future type checks.
-    // For now: treat required properties as not snapshot compatible.
-    private static bool IsSnapshotCompatibleType(IPropertySymbol property)
-        => !property.IsRequired; // TODO: the rest.
+    private static bool IsSnapshotCompatibleProperty(IPropertySymbol property)
+    {
+        try
+        {
+            InteropTypeInfo typeInfo = new InteropTypeInfoBuilder(property.Type).Build();
+            return typeInfo.IsSnapshotCompatible;
+        } 
+        catch (TypeShimException)
+        {
+            return false; // info builder throws for unsupported types (or not yet supported types)
+        }
+    }
 }
