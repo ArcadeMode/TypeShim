@@ -63,7 +63,8 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
     {
         return string.Join(", ", methodInfo.MethodParameters.Select(p =>
         {
-            string returnType = symbolNameProvider.GetProxySnapshotUnionIfExists(p.Type) ?? symbolNameProvider.GetNakedSymbolReference(p.Type);
+            string? returnType = p.Type.IsSnapshotCompatible ? symbolNameProvider.GetProxySnapshotUnionIfExists(p.Type) : symbolNameProvider.GetProxyReferenceNameIfExists(p.Type);
+            returnType ??= symbolNameProvider.GetNakedSymbolReference(p.Type);
             return $"{p.Name}: {returnType}";
         }));
     }
