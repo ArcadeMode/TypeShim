@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Reflection;
 using System.Security.Cryptography;
-using TypeShim.Core;
+using TypeShim.Shared;
 using TypeShim.Generator;
 using TypeShim.Generator.Parsing;
 

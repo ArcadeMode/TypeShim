@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace TypeShim.Core;
+namespace TypeShim.Shared;
 
 public sealed class InteropTypeInfo
 {

@@ -1,4 +1,4 @@
-﻿using TypeShim.Core;
+﻿using TypeShim.Shared;
 using TypeShim.Generator.Parsing;
 
 internal sealed class PropertyInfo

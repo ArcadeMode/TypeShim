@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Text;
-using TypeShim.Core;
+using TypeShim.Shared;
 using TypeShim.Generator.Parsing;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 

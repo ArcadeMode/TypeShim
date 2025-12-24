@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
-using TypeShim.Core;
+using TypeShim.Shared;
 
 namespace TypeShim.Analyzers;
 

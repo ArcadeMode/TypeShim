@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TypeShim.Core;
+namespace TypeShim.Shared;
 
 public class TypeShimException(string message, Exception? innerException = null) : Exception(message, innerException)
 {

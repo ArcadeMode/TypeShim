@@ -16,5 +16,12 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
   </ItemGroup>
 
-  <Import Project="..\TypeShim.Core\TypeShim.Core.projitems" Label="Shared" />
+  <ItemGroup>
+    <Compile Include="..\TypeShim.Shared\**\*.cs" LinkBase="Shared" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="..\TypeShim.Shared\CompilerServices.cs" />
+  </ItemGroup>
+
 </Project>

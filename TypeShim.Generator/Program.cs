@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using System.Text;
-using TypeShim.Core;
+using TypeShim.Shared;
 using TypeShim.Generator;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;

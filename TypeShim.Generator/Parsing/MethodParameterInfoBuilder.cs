@@ -1,5 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
-using TypeShim.Core;
+using TypeShim.Shared;
 
 internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodSymbol memberMethod, InteropTypeInfoCache typeInfoCache)
 {

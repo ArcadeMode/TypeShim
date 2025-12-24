@@ -1,5 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
-using TypeShim.Core;
+using TypeShim.Shared;
 
 internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropertySymbol propertySymbol, InteropTypeInfoCache typeInfoCache)
 {

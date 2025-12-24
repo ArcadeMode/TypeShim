@@ -1,4 +1,4 @@
-﻿using TypeShim.Core;
+﻿using TypeShim.Shared;
 
 namespace TypeShim.Generator.Parsing;
 
