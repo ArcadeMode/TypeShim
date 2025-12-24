@@ -11,6 +11,7 @@ export interface AssemblyExports {
             PeopleInterop: PeopleInterop;
             PersonInterop: PersonInterop;
             DogInterop: DogInterop;
+            TimeoutUnitInterop: TimeoutUnitInterop;
             PeopleProviderInterop: PeopleProviderInterop;
             TypeShimSampleModuleInterop: TypeShimSampleModuleInterop;
         };
@@ -83,14 +84,22 @@ export interface DogInterop {
     set_Age(instance: object, value: number): void;
 }
 
+// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.TimeoutUnit
+export interface TimeoutUnitInterop {
+    get_Timeout(instance: object): Promise<number>;
+    set_Timeout(instance: object, value: Promise<number>): void;
+}
+
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.PeopleProvider
 export interface PeopleProviderInterop {
     FetchPeopleAsync(instance: object): Promise<object>;
+    get_Unit(instance: object): object;
+    set_Unit(instance: object, value: object): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.TypeShimSampleModule
 export interface TypeShimSampleModuleInterop {
-    get_PeopleProvider(): object | null;
+    get_PeopleProvider(): object;
 }
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.CapabilitiesProvider
@@ -436,6 +445,46 @@ export namespace Dog {
   }
 }
 
+// Auto-generated TypeScript namespace for class: TypeShim.Sample.TimeoutUnit
+export namespace TimeoutUnit {
+  export class Proxy {
+    interop: AssemblyExports;
+    instance: object;
+
+    constructor(instance: object, interop: AssemblyExports) {
+      this.interop = interop;
+      this.instance = instance;
+    }
+
+    public get Timeout(): Promise<number> {
+      return this.interop.TypeShim.Sample.TimeoutUnitInterop.get_Timeout(this.instance);
+    }
+
+    public set Timeout(value: Promise<number>) {
+      this.interop.TypeShim.Sample.TimeoutUnitInterop.set_Timeout(this.instance, value);
+    }
+
+  }
+
+  export interface Snapshot {
+    Timeout: Promise<number>;
+  }
+  export const Snapshot: {
+    [Symbol.hasInstance](v: unknown): boolean;
+  } = {
+    [Symbol.hasInstance](v: unknown) {
+      if (!v || typeof v !== 'object') return false;
+      const o = v as any;
+      return (o.Timeout !== null && typeof (o.Timeout as any).then === 'function');
+    }
+  };
+  export function snapshot(proxy: TimeoutUnit.Proxy): TimeoutUnit.Snapshot {
+    return {
+      Timeout: proxy.Timeout,
+    };
+  }
+}
+
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.PeopleProvider
 export namespace PeopleProvider {
   export class Proxy {
@@ -452,8 +501,35 @@ export namespace PeopleProvider {
       return new People.Proxy(res, this.interop);
     }
 
+    public get Unit(): TimeoutUnit.Proxy {
+      const res = this.interop.TypeShim.Sample.PeopleProviderInterop.get_Unit(this.instance);
+      return new TimeoutUnit.Proxy(res, this.interop);
+    }
+
+    public set Unit(value: TimeoutUnit.Proxy | TimeoutUnit.Snapshot) {
+      const valueInstance = value instanceof TimeoutUnit.Proxy ? value.instance : value;
+      this.interop.TypeShim.Sample.PeopleProviderInterop.set_Unit(this.instance, valueInstance);
+    }
+
   }
 
+  export interface Snapshot {
+    Unit: TimeoutUnit.Snapshot;
+  }
+  export const Snapshot: {
+    [Symbol.hasInstance](v: unknown): boolean;
+  } = {
+    [Symbol.hasInstance](v: unknown) {
+      if (!v || typeof v !== 'object') return false;
+      const o = v as any;
+      return (o.Unit instanceof TimeoutUnit.Snapshot);
+    }
+  };
+  export function snapshot(proxy: PeopleProvider.Proxy): PeopleProvider.Snapshot {
+    return {
+      Unit: TimeoutUnit.snapshot(proxy.Unit),
+    };
+  }
 }
 
 // Auto-generated TypeShim TSModule class. Source class: TypeShim.Sample.Capabilities.CapabilitiesModule
@@ -479,9 +555,9 @@ export class TypeShimSampleModule {
     this.interop = interop;
   }
 
-  public get PeopleProvider(): PeopleProvider.Proxy | null {
+  public get PeopleProvider(): PeopleProvider.Proxy {
     const res = this.interop.TypeShim.Sample.TypeShimSampleModuleInterop.get_PeopleProvider();
-    return res ? new PeopleProvider.Proxy(res, this.interop) : null;
+    return new PeopleProvider.Proxy(res, this.interop);
   }
 
 }

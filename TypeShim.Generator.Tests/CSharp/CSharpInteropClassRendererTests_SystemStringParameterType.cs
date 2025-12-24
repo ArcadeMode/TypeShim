@@ -7,8 +7,11 @@ namespace TypeShim.Generator.Tests.CSharp;
 
 internal class CSharpInteropClassRendererTests_SystemStringParameterType
 {
-    [Test]
-    public void CSharpInteropClass_StaticMethod_HasJSTypeString_ForStringParameterType()
+    [TestCase("string", "string")]
+    [TestCase("String", "string")]
+    [TestCase("char", "char")]
+    [TestCase("Char", "char")]
+    public void CSharpInteropClass_StaticMethod_HasJSTypeString_ForStringParameterType(string typeName, string interopType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -16,12 +19,12 @@ internal class CSharpInteropClassRendererTests_SystemStringParameterType
             [TSExport]
             public class C1
             {
-                public static void M1(string p1)
+                public static void M1({{typeName}} p1)
                 {
                     bool b = string.IsNullOrEmpty(p1);
                 }
             }
-        """);
+        """.Replace("{{typeName}}", typeName));
 
         SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
@@ -41,7 +44,7 @@ public partial class C1Interop
 {
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
-    public static void M1([JSMarshalAs<JSType.String>] string p1)
+    public static void M1([JSMarshalAs<JSType.String>] {{interopType}} p1)
     {
         C1.M1(p1);
     }
@@ -55,7 +58,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""".Replace("{{interopType}}", interopType)));
     }
 
     [Test]

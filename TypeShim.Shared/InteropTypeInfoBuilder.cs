@@ -132,7 +132,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
             IsTaskType = true,
             IsArrayType = false,
             IsNullableType = false,
-            IsSnapshotCompatible = false // task completion cannot be snapshotted
+            IsSnapshotCompatible = taskReturnTypeInfo?.IsSnapshotCompatible ?? false
         };
 
         static ITypeSymbol? GetTypeArgument(ITypeSymbol typeSymbol)
@@ -212,18 +212,18 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
         return knownManagedType switch
         {
             KnownManagedType.Boolean => "JSType.Boolean",
-            KnownManagedType.Byte => "JSType.Number",
-            KnownManagedType.Char => "JSType.Number",
-            KnownManagedType.Int16 => "JSType.Number",
-            KnownManagedType.Int32 => "JSType.Number",
-            KnownManagedType.Int64 => "JSType.Number",
-            KnownManagedType.IntPtr => "JSType.Number",
-            KnownManagedType.Single => "JSType.Number", //i.e. float
-            KnownManagedType.Double => "JSType.Number",
-            KnownManagedType.String => "JSType.String",
+            KnownManagedType.Byte 
+            or KnownManagedType.Int16 
+            or KnownManagedType.Int32
+            or KnownManagedType.Int64
+            or KnownManagedType.IntPtr 
+            or KnownManagedType.Single //i.e. float
+            or KnownManagedType.Double => "JSType.Number",
+            KnownManagedType.Char 
+            or KnownManagedType.String => "JSType.String",
             KnownManagedType.Object => "JSType.Any",
             KnownManagedType.Void => "JSType.Void",
-            KnownManagedType.JSObject => "JSType.Object", // TODO: warning, not fully supported
+            KnownManagedType.JSObject => "JSType.Object",
             KnownManagedType.DateTime => "JSType.Date",
             KnownManagedType.DateTimeOffset => "JSType.Date",
             _ => throw new TypeNotSupportedException($"Unsupported simple type {knownManagedType}")
@@ -236,19 +236,19 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
         string innerJsType = innerTypeInfo.KnownType switch
         {
             KnownManagedType.Boolean => "JSType.Boolean",
-            KnownManagedType.Byte => "JSType.Number",
-            KnownManagedType.Char => "JSType.Number",
-            KnownManagedType.Int16 => "JSType.Number",
-            KnownManagedType.Int32 => "JSType.Number",
-            KnownManagedType.Int64 => "JSType.Number",
-            KnownManagedType.Single => "JSType.Number", //i.e. float
-            KnownManagedType.Double => "JSType.Number",
-            KnownManagedType.IntPtr => "JSType.Number",
-            KnownManagedType.DateTime => "JSType.Date",
-            KnownManagedType.DateTimeOffset => "JSType.Date",
+            KnownManagedType.Byte
+            or KnownManagedType.Int16
+            or KnownManagedType.Int32
+            or KnownManagedType.Int64
+            or KnownManagedType.IntPtr
+            or KnownManagedType.Single
+            or KnownManagedType.Double => "JSType.Number",
+            KnownManagedType.DateTime
+            or KnownManagedType.DateTimeOffset => "JSType.Date",
             KnownManagedType.Exception => "JSType.Error",
-            KnownManagedType.JSObject => "JSType.Object", // TODO: warning, not fully supported
-            KnownManagedType.String => "JSType.String",
+            KnownManagedType.JSObject => "JSType.Object",
+            KnownManagedType.Char
+            or KnownManagedType.String => "JSType.String",
             KnownManagedType.Object => "JSType.Any",
             _ => throw new TypeNotSupportedException($"Unsupported Task<T> type argument {innerTypeInfo.KnownType} ({innerTypeInfo.Syntax})")
         };
@@ -261,9 +261,9 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
         // Only certain types are supported in arrays, this method maps them
         string innerJsType = innerTypeInfo.KnownType switch
         {
-            KnownManagedType.Byte => "JSType.Number",
-            KnownManagedType.Int32 => "JSType.Number",
-            KnownManagedType.Double => "JSType.Number",
+            KnownManagedType.Byte 
+            or KnownManagedType.Int32 
+            or KnownManagedType.Double => "JSType.Number",
             KnownManagedType.JSObject => "JSType.Object",
             KnownManagedType.String => "JSType.String",
             KnownManagedType.Object => "JSType.Any",
@@ -280,14 +280,14 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
         return innerTypeInfo.KnownType switch
         {
             KnownManagedType.Boolean => "JSType.Boolean",
-            KnownManagedType.Byte => "JSType.Number",
-            KnownManagedType.Char => "JSType.Number",
-            KnownManagedType.Int16 => "JSType.Number",
-            KnownManagedType.Int32 => "JSType.Number",
-            KnownManagedType.Int64 => "JSType.Number", // TODO: BigInt marshalling is supported, add option?
-            KnownManagedType.Single => "JSType.Number", //i.e. float
-            KnownManagedType.Double => "JSType.Number",
-            KnownManagedType.IntPtr => "JSType.Number",
+            KnownManagedType.Byte 
+            or KnownManagedType.Int16 
+            or KnownManagedType.Int32
+            or KnownManagedType.Int64
+            or KnownManagedType.IntPtr 
+            or KnownManagedType.Single 
+            or KnownManagedType.Double => "JSType.Number",
+            KnownManagedType.Char => "JSType.String",
             KnownManagedType.DateTime => "JSType.Date",
             KnownManagedType.DateTimeOffset => "JSType.Date",
 

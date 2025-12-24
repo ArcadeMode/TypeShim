@@ -7,17 +7,30 @@ using TypeShim;
 namespace TypeShim.Sample;
 
 [TSExport]
-public class PeopleProvider(PeopleApiClient _apiClient)
+public class TimeoutUnit
+{
+    public Task<int> Timeout { get; set; } = Task.FromResult(1000);
+}
+
+[TSExport]
+public class PeopleProvider(PeopleApiClient? _apiClient = null)
 {
     private static Person[]? AllPeople;
+    
+    public TimeoutUnit? Unit { get; set; }
 
     public async Task<People> FetchPeopleAsync()
     {
         try
         {
+            if (Unit != null)
+            {
+                await Task.Delay(await Unit.Timeout);
+            }
+
             if (AllPeople == null)
             {
-                AllPeople = [.. await _apiClient.GetAllPeopleAsync()];
+                AllPeople = [.. await _apiClient?.GetAllPeopleAsync()];
                 Console.WriteLine("Fetched people data from webapi. Count: " + AllPeople.Length);
             } 
             else
@@ -33,3 +46,5 @@ public class PeopleProvider(PeopleApiClient _apiClient)
         }
     }
 }
+
+
