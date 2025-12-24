@@ -20,8 +20,4 @@
     <Compile Include="..\TypeShim.Shared\**\*.cs" LinkBase="Shared" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="..\TypeShim.Shared\CompilerServices.cs" />
-  </ItemGroup>
-
 </Project>
