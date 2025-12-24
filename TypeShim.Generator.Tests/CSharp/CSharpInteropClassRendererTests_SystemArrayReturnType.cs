@@ -130,7 +130,7 @@ public partial class C1Interop
     }
 
     [Test]
-    public void CSharpInteropClass_DynamicMethod_HasJSTypePromiseAny_ForUserClassReturnType()
+    public void CSharpInteropClass_InstanceMethod_HasJSTypePromiseAny_ForUserClassReturnType()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -177,10 +177,17 @@ public partial class C1Interop
 {
     [JSExport]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
-    public static async Task<object> M1([JSMarshalAs<JSType.Any>] object instance)
+    public static Task<object> M1([JSMarshalAs<JSType.Any>] object instance)
     {
         C1 typed_instance = (C1)instance;
-        return await typed_instance.M1();
+        Task<MyClass> result = typed_instance.M1();
+        TaskCompletionSource<object> resultTcs = new();
+        result.ContinueWith(t => {
+            if (t.IsFaulted) resultTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) resultTcs.SetCanceled();
+            else resultTcs.SetResult((object)t.Result);
+        }, TaskContinuationOptions.ExecuteSynchronously);
+        return resultTcs.Task;
     }
     public static C1 FromObject(object obj)
     {

@@ -129,10 +129,10 @@ internal sealed class CSharpInteropClassRenderer
         string indent = new(' ', depth * 4);
         sb.Append(indent);
         sb.Append("public static ");
-        if (methodInfo.ReturnType.IsTaskType)
-        {
-            sb.Append("async ");
-        }
+
+        // methodInfo.ReturnType.IsTaskType: Never render async! Gets in the way of Task properties, it isnt required anyway.
+        // For returns just return the Task
+        // For parameters Task can be passed or converted in a continuation (see RenderParameterTypeConversion)
 
         sb.Append(methodInfo.ReturnType.InteropTypeSyntax);
         sb.Append(' ');
@@ -165,26 +165,41 @@ internal sealed class CSharpInteropClassRenderer
     {
         string indent = new(' ', depth * 4);
 
-        sb.Append(indent);
-        if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void)
+        // Handle Task<T> return conversion for conversion requiring types
+        if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresCLRTypeConversion: true })
         {
+            sb.Append(indent);
+            sb.AppendLine($"{methodInfo.ReturnType.CLRTypeSyntax} result = {GetInvocationExpression()};");
+            string convertedTaskExpression = RenderTaskTypeConversion(depth, methodInfo.ReturnType.AsInteropTypeInfo(), "result");
+            sb.Append(indent);
             sb.Append("return ");
+            sb.Append(convertedTaskExpression);
+            sb.AppendLine(";");
         }
-        if (methodInfo.ReturnType.IsTaskType)
+        else // direct return handling or void invocations
         {
-            sb.Append("await ");
+            sb.Append(indent);
+            if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void)
+            {
+                sb.Append("return ");
+            }
+            sb.Append(GetInvocationExpression());
+            sb.AppendLine(";");
         }
-        if (!methodInfo.IsStatic)
+
+        string GetInvocationExpression()
         {
-            MethodParameterInfo instanceParam = methodInfo.MethodParameters.ElementAt(0);
-            List<MethodParameterInfo> memberParams = [.. methodInfo.MethodParameters.Skip(1)];
-            sb.Append($"{GetTypedParameterName(instanceParam)}.{methodInfo.Name}({string.Join(", ", memberParams.Select(GetTypedParameterName))})");
+            if (!methodInfo.IsStatic)
+            {
+                MethodParameterInfo instanceParam = methodInfo.MethodParameters.ElementAt(0);
+                List<MethodParameterInfo> memberParams = [.. methodInfo.MethodParameters.Skip(1)];
+                return $"{GetTypedParameterName(instanceParam)}.{methodInfo.Name}({string.Join(", ", memberParams.Select(GetTypedParameterName))})";
+            }
+            else
+            {
+                return $"{classInfo.Name}.{methodInfo.Name}({string.Join(", ", methodInfo.MethodParameters.Select(GetTypedParameterName))})";
+            }
         }
-        else
-        {
-            sb.Append($"{classInfo.Name}.{methodInfo.Name}({string.Join(", ", methodInfo.MethodParameters.Select(GetTypedParameterName))})");
-        }
-        sb.AppendLine(";");
     }
 
     private string GetTypedParameterName(MethodParameterInfo paramInfo) => paramInfo.Type.RequiresCLRTypeConversion ? $"typed_{paramInfo.Name}" : paramInfo.Name;
@@ -194,13 +209,15 @@ internal sealed class CSharpInteropClassRenderer
         if (!parameterInfo.Type.RequiresCLRTypeConversion)
             return;
 
+        string indent = new(' ', depth * 4);
         if (parameterInfo.Type.IsTaskType)
         {
-            RenderTaskTypeConversion(depth, parameterInfo);
+            string convertedTaskExpression = RenderTaskTypeConversion(depth, parameterInfo.Type, parameterInfo.Name);
+            sb.Append(indent);
+            sb.AppendLine($"Task<{parameterInfo.Type.TypeArgument!.CLRTypeSyntax}> {GetTypedParameterName(parameterInfo)} = {convertedTaskExpression};");
             return; // task pattern differs from other conversions, hence its fully separated rendering.
         }
 
-        string indent = new(' ', depth * 4);
         sb.Append($"{indent}{parameterInfo.Type.CLRTypeSyntax} {GetTypedParameterName(parameterInfo)} = ");
         if (parameterInfo.IsInjectedInstanceParameter)
         {
@@ -268,15 +285,24 @@ internal sealed class CSharpInteropClassRenderer
         sb.Append(')');
     }
 
-    private void RenderTaskTypeConversion(int depth, MethodParameterInfo parameterInfo)
+    /// <summary>
+    /// returns an expression to access the converted task with.
+    /// </summary>
+    /// <param name="depth"></param>
+    /// <param name="targetTaskType"></param>
+    /// <param name="sourceVarName"></param>
+    /// <param name="convertedVarName"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    private string RenderTaskTypeConversion(int depth, InteropTypeInfo targetTaskType, string sourceVarName)
     {
         string indent = new(' ', depth * 4);
-        InteropTypeInfo taskTypeParamInfo = parameterInfo.Type.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
-        string tcsVarName = $"{parameterInfo.Name}Tcs";
+        InteropTypeInfo taskTypeParamInfo = targetTaskType.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
+        string tcsVarName = $"{sourceVarName}Tcs";
         sb.Append(indent);
         sb.AppendLine($"TaskCompletionSource<{taskTypeParamInfo.CLRTypeSyntax}> {tcsVarName} = new();");
         sb.Append(indent);
-        sb.AppendLine("task.ContinueWith(t => {");
+        sb.AppendLine($"{sourceVarName}.ContinueWith(t => {{");
         string lambdaIndent = new(' ', (depth + 1) * 4);
         sb.Append(lambdaIndent);
         sb.AppendLine($"if (t.IsFaulted) {tcsVarName}.SetException(t.Exception.InnerExceptions);");
@@ -291,8 +317,7 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine($"else {tcsVarName}.SetResult({resultConversionExpression});");
         sb.Append(indent);
         sb.AppendLine("}, TaskContinuationOptions.ExecuteSynchronously);");
-        sb.Append(indent);
-        sb.AppendLine($"Task<{taskTypeParamInfo.CLRTypeSyntax}> {GetTypedParameterName(parameterInfo)} = {tcsVarName}.Task;");
+        return $"{tcsVarName}.Task";
     }
 
     /// <summary>
