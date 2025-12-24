@@ -34,17 +34,17 @@
     <Message Text="Building $(AnalyzersProjectName)" Importance="high" />
     <MSBuild Projects="..\$(AnalyzersProjectName)\$(AnalyzersProjectName).csproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
     <ItemGroup>
-        <AnalyzerOutput Include="..\$(AnalyzersProjectName)\bin\$(Configuration)\$(TargetFramework)\$(AnalyzersProjectName).dll" />
+        <AnalyzerOutput Include="../$(AnalyzersProjectName)/bin/$(Configuration)/$(TargetFramework)/**/*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(AnalyzerOutput)" DestinationFolder="$(ProjectDir)pack\analyzers\" />
   </Target>
-    
+
   <Target Name="BuildGenerator" BeforeTargets="Build">
     <Message Text="Building $(GeneratorProjectName)" Importance="high" />
     <!-- this enables building the generator without referencing its code, making it easier to pack -->
-    <MSBuild Projects="../$(GeneratorProjectName)/$(GeneratorProjectName).csproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform);OutputPath=pack" />
+    <MSBuild Projects="../$(GeneratorProjectName)/$(GeneratorProjectName).csproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
     <ItemGroup>
-      <GeneratorFiles Include="../$(GeneratorProjectName)/pack/**/*.*" />
+      <GeneratorFiles Include="../$(GeneratorProjectName)/bin/$(Configuration)/$(TargetFramework)/**/*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(GeneratorFiles)" DestinationFolder="$(ProjectDir)/pack/" />
   </Target>
