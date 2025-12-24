@@ -132,9 +132,10 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
-
-        Assert.That(interopClass, Is.EqualTo(string.Empty));
+        Assert.Throws<InvalidOperationException>(() =>
+        {
+            _ = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
+        });
     }
 
     [Test]
