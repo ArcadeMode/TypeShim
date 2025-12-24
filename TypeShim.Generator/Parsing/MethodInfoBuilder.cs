@@ -5,10 +5,10 @@ using TypeShim.Core;
 using TypeShim.Generator;
 using TypeShim.Generator.Parsing;
 
-internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSymbol memberMethod)
+internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSymbol memberMethod, InteropTypeInfoCache typeInfoCache)
 {
-    private readonly MethodParameterInfoBuilder parameterInfoBuilder = new(classSymbol, memberMethod);
-    private readonly InteropTypeInfoBuilder typeInfoBuilder = new(memberMethod.ReturnType);
+    private readonly MethodParameterInfoBuilder parameterInfoBuilder = new(classSymbol, memberMethod, typeInfoCache);
+    private readonly InteropTypeInfoBuilder typeInfoBuilder = new(memberMethod.ReturnType, typeInfoCache);
 
     internal MethodInfo Build()
     {

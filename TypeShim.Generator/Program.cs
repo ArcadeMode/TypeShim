@@ -13,8 +13,9 @@ ProgramArguments parsedArgs = ProgramArguments.Parse(args);
 try
 {
     SymbolExtractor symbolExtractor = new(parsedArgs.CsFileInfos);
+    InteropTypeInfoCache typeInfoCache = new();
     List<ClassInfo> classInfos = [.. symbolExtractor.ExtractAllExportedSymbols()
-        .Select(classSymbol => new ClassInfoBuilder(classSymbol).Build())
+        .Select(classSymbol => new ClassInfoBuilder(classSymbol, typeInfoCache).Build())
         .Where(ci => ci.Methods.Any() || ci.Properties.Any())]; // dont bother with empty classes
 
     Task generateTS = Task.Run(() => GenerateTypeScriptInteropCode(parsedArgs, classInfos));

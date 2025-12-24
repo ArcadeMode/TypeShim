@@ -11,8 +11,8 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
     private readonly StringBuilder sb = new();
     internal string Render(int depth)
     {
-        if (!classInfo.Properties.Any(p => p.Type.IsSnapshotCompatible))
-            return string.Empty;
+        if (!classInfo.IsSnapshotCompatible())
+            throw new InvalidOperationException($"Type '{classInfo.Namespace}.{classInfo.Name}' is not snapshot-compatible.");
 
         string indent = new(' ', depth * 2);
         sb.AppendLine($"{indent}export interface {symbolNameProvider.GetSnapshotDefinitionName()} {{");

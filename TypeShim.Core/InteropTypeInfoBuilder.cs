@@ -2,17 +2,23 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace TypeShim.Core;
 
-public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
+public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeInfoCache cache)
 {
     private readonly bool IsTSExport = typeSymbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSExportAttribute" or "TSExport");
     private readonly bool IsTSModule = typeSymbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSModuleAttribute" or "TSModule");
 
     public InteropTypeInfo Build()
+    {
+        return cache.GetOrAdd(typeSymbol, BuildInternal);
+    }
+
+    private InteropTypeInfo BuildInternal()
     {
         JSTypeInfo parameterMarshallingTypeInfo = JSTypeInfo.CreateJSTypeInfoForTypeSymbol(typeSymbol);
         TypeSyntax clrTypeSyntax = SyntaxFactory.ParseTypeName(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
@@ -61,17 +67,20 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
 
         bool IsSnapshotCompatible()
         {
-            return simpleTypeInfo.KnownType switch { 
-                KnownManagedType.Object => IsTSExport, // Object's only snapshot compatible if user [TSExport]s it
-                _ => true // Note: all other simple types are snapshot compatible, this impl does not consider complex types
-            };
+            if (simpleTypeInfo.KnownType != KnownManagedType.Object)
+            {
+                return true; // note that this is part of the simple type parsing, only 'object' needs further inspection
+            }
+
+            IPropertySymbol[] properties = [.. typeSymbol.GetMembers().OfType<IPropertySymbol>()];
+            return IsTSExport && (properties.Length == 0 || !properties.Any(p => !new InteropTypeInfoBuilder(p.Type, cache).Build().IsSnapshotCompatible));
         }
     }
 
     private InteropTypeInfo BuildArrayTypeInfo(JSArrayTypeInfo arrayTypeInfo, TypeSyntax clrTypeSyntax)
     {
         ITypeSymbol? elementTypeSymbol = GetTypeArgument(typeSymbol) ?? throw new TypeNotSupportedException("Only arrays with one element type are supported");
-        InteropTypeInfo elementTypeInfo = new InteropTypeInfoBuilder(elementTypeSymbol).Build();
+        InteropTypeInfo elementTypeInfo = new InteropTypeInfoBuilder(elementTypeSymbol, cache).Build();
 
         return new InteropTypeInfo
         {
@@ -102,7 +111,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
     private InteropTypeInfo BuildTaskTypeInfo(JSTaskTypeInfo taskTypeInfo, TypeSyntax clrTypeSyntax)
     {
         ITypeSymbol? elementTypeSymbol = GetTypeArgument(typeSymbol);
-        InteropTypeInfo? taskReturnTypeInfo = elementTypeSymbol != null ? new InteropTypeInfoBuilder(elementTypeSymbol).Build() : null;
+        InteropTypeInfo? taskReturnTypeInfo = elementTypeSymbol != null ? new InteropTypeInfoBuilder(elementTypeSymbol, cache).Build() : null;
 
         TypeSyntax interopTypeSyntax = SyntaxFactory.GenericName(nameof(Task))
             .WithTypeArgumentList(
@@ -143,7 +152,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
     private InteropTypeInfo BuildNullableTypeInfo(JSNullableTypeInfo nullableTypeInfo, TypeSyntax clrTypeSyntax)
     {
         ITypeSymbol? innertypeSymbol = GetTypeArgument(typeSymbol) ?? throw new TypeNotSupportedException("Only nullables with one element type are supported");
-        InteropTypeInfo innerTypeInfo = new InteropTypeInfoBuilder(innertypeSymbol).Build();
+        InteropTypeInfo innerTypeInfo = new InteropTypeInfoBuilder(innertypeSymbol, cache).Build();
 
         return new InteropTypeInfo
         {
@@ -172,7 +181,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol)
     private InteropTypeInfo BuildSimpleNullableTypeInfo(JSSimpleTypeInfo simpleTypeInfo, TypeSyntax clrTypeSyntax)
     {
         ITypeSymbol? innertypeSymbol = GetTypeArgument(typeSymbol) ?? throw new TypeNotSupportedException("Only nullables with one element type are supported");
-        InteropTypeInfo innerTypeInfo = new InteropTypeInfoBuilder(innertypeSymbol).Build();
+        InteropTypeInfo innerTypeInfo = new InteropTypeInfoBuilder(innertypeSymbol, cache).Build();
 
         return new InteropTypeInfo
         {

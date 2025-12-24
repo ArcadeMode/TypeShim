@@ -42,9 +42,9 @@
   <Target Name="BuildGenerator" BeforeTargets="Build">
     <Message Text="Building $(GeneratorProjectName)" Importance="high" />
     <!-- this enables building the generator without referencing its code, making it easier to pack -->
-    <MSBuild Projects="../$(GeneratorProjectName)/$(GeneratorProjectName).csproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
+    <MSBuild Projects="../$(GeneratorProjectName)/$(GeneratorProjectName).csproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform);OutDir=bin/build" />
     <ItemGroup>
-      <GeneratorFiles Include="../$(GeneratorProjectName)/bin/$(Configuration)/$(TargetFramework)/**/*.*" />
+      <GeneratorFiles Include="../$(GeneratorProjectName)/bin/build/**/*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(GeneratorFiles)" DestinationFolder="$(ProjectDir)/pack/" />
   </Target>

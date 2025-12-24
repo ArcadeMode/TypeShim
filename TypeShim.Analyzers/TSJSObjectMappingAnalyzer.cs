@@ -1,8 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using TypeShim.Core;
 
@@ -11,28 +9,10 @@ namespace TypeShim.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TSJSObjectMappingAnalyzer : DiagnosticAnalyzer
 {
-    public const string NonPublicSetterRuleId = "TSHIM009";
-    public const string NonCompatiblePropertyRuleId = "TSHIM010";
-
-    private static readonly DiagnosticDescriptor NonPublicSetterRule = new(
-        id: NonPublicSetterRuleId,
-        title: "Non-public setter/init will not be set during JSObject mapping",
-        messageFormat: "Property '{0}' has a non-public setter/init accessor and will not be set when mapping from a JSObject",
-        category: "Usage",
-        defaultSeverity: DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: "TypeShim generates a JSObject mapper for each TSExport class. Properties with non-public set/init accessors are excluded from the generated JSObject mapper.");
-
-    private static readonly DiagnosticDescriptor NonCompatiblePropertyRule = new(
-        id: NonCompatiblePropertyRuleId,
-        title: "Property must have a TypeShim/.NET Interop-supported type to opt-in to generated JSObject mapping",
-        messageFormat: "Property '{0}' has unsupported type '{1}' and will not be set when mapping from a JSObject",
-        category: "Usage",
-        defaultSeverity: DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: "TypeShim generates a JSObject mapper for each TSExport class. Required properties must be of TypeShim/.NET Interop-supported types.");
-
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [NonCompatiblePropertyRule, NonPublicSetterRule];
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
+        [
+            TypeShimDiagnostics.NonPublicSetterRule,
+        ];
 
     public override void Initialize(AnalysisContext context)
     {
@@ -43,7 +23,6 @@ public sealed class TSJSObjectMappingAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeClass(SymbolAnalysisContext context)
     {
-
         if (context.Symbol is not INamedTypeSymbol type || type.TypeKind != TypeKind.Class)
             return;
 
@@ -68,16 +47,7 @@ public sealed class TSJSObjectMappingAnalyzer : DiagnosticAnalyzer
 
             if (setterAccessibility is not Accessibility.Public)
             {
-                Location location = p.Locations.Length > 0 ? p.Locations[0] : Location.None;
-                context.ReportDiagnostic(Diagnostic.Create(NonPublicSetterRule, location, p.Name));
-            }
-            else if (!IsSnapshotCompatibleProperty(p))
-            {
-                //Debugger.Launch();
-                Location location = p.Locations.Length > 0 ? p.Locations[0] : Location.None;
-                DiagnosticDescriptor rule = NonCompatiblePropertyRule;
-                DiagnosticSeverity severity = p.IsRequired ? DiagnosticSeverity.Error : rule.DefaultSeverity;
-                context.ReportDiagnostic(Diagnostic.Create(rule, location, effectiveSeverity: severity, additionalLocations: null, properties: null, p.Name, p.Type));
+                Report(context, TypeShimDiagnostics.NonPublicSetterRule, p, p.Type);
             }
         }
 
@@ -85,16 +55,11 @@ public sealed class TSJSObjectMappingAnalyzer : DiagnosticAnalyzer
             => [.. t.GetMembers().OfType<IPropertySymbol>().Where(p => !p.IsStatic && !p.IsIndexer)];
     }
 
-    private static bool IsSnapshotCompatibleProperty(IPropertySymbol property)
+    private static void Report(SymbolAnalysisContext context, DiagnosticDescriptor descriptor, ISymbol symbol, ITypeSymbol type)
     {
-        try
-        {
-            InteropTypeInfo typeInfo = new InteropTypeInfoBuilder(property.Type).Build();
-            return typeInfo.IsSnapshotCompatible;
-        } 
-        catch (TypeShimException)
-        {
-            return false; // info builder throws for unsupported types (or not yet supported types)
-        }
+        Location location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
+        string propTypeName = type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+
+        context.ReportDiagnostic(Diagnostic.Create(descriptor, location, symbol.Name, propTypeName));
     }
 }

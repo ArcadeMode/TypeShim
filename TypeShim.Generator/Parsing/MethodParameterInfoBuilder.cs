@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using TypeShim.Core;
 
-internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodSymbol memberMethod)
+internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodSymbol memberMethod, InteropTypeInfoCache typeInfoCache)
 {
     internal IEnumerable<MethodParameterInfo> Build()
     {
@@ -11,7 +11,7 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
             {
                 Name = "instance",
                 IsInjectedInstanceParameter = true,
-                Type = new InteropTypeInfoBuilder(classSymbol).Build()
+                Type = new InteropTypeInfoBuilder(classSymbol, typeInfoCache).Build()
             };
         }
 
@@ -21,7 +21,7 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
             {
                 Name = parameterSymbol.Name,
                 IsInjectedInstanceParameter = false,
-                Type = new InteropTypeInfoBuilder(parameterSymbol.Type).Build()
+                Type = new InteropTypeInfoBuilder(parameterSymbol.Type, typeInfoCache).Build()
             };
         }
     }

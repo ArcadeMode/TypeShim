@@ -9,38 +9,13 @@ namespace TypeShim.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
 {
-    public const string UnsupportedTypeId = "TSHIM005";
-    public const string NonExportedTypeId = "TSHIM006";
-    public const string UnderDevelopmentTypeId = "TSHIM007";
-
-    private static readonly DiagnosticDescriptor UnsupportedTypeRule = new(
-        id: UnsupportedTypeId,
-        title: "Unsupported type pattern",
-        messageFormat: "Type '{0}' is not supported by TypeShim nor .NET-JS type marshalling",
-        category: "TypeChecking",
-        defaultSeverity: DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        description: "The provided type is currently unsupported by .NET Type Marshalling and/or TypeShim interop.");
-
-    private static readonly DiagnosticDescriptor NonExportedTypeRule = new(
-        id: NonExportedTypeId,
-        title: "Non-TSExport type on the interop API",
-        messageFormat: "Class '{0}' is not annotated with [TSExport], it will be exported to TypeScript as 'object'",
-        category: "Design",
-        defaultSeverity: DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: "Interop APIs should use TSExport-annotated classes or supported primitives for returns and parameters.");
-
-    private static readonly DiagnosticDescriptor UnderDevelopmentTypeRule = new(
-        id: UnderDevelopmentTypeId,
-        title: "Type under development",
-        messageFormat: "Type '{0}' is not yet implemented by TypeShim",
-        category: "TypeChecking",
-        defaultSeverity: DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        description: "This type is under development and not yet supported by TypeShim interop.");
-
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [UnsupportedTypeRule, NonExportedTypeRule, UnderDevelopmentTypeRule];
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
+        [
+            TypeShimDiagnostics.UnsupportedTypeRule,
+            TypeShimDiagnostics.NonExportedTypeInMethodRule,
+            TypeShimDiagnostics.NonExportedTypeInPropertyRule,   
+            TypeShimDiagnostics.UnderDevelopmentTypeRule,
+        ];
 
     public override void Initialize(AnalysisContext context)
     {
@@ -84,27 +59,27 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static void CheckType(SymbolAnalysisContext context, ISymbol method, ITypeSymbol type)
+    private static void CheckType(SymbolAnalysisContext context, ISymbol symbol, ITypeSymbol type)
     {
         try
         {
-            InteropTypeInfoBuilder builder = new(type);
+            InteropTypeInfoBuilder builder = new(type, new InteropTypeInfoCache());
             InteropTypeInfo info = builder.Build();
             InteropTypeInfo innermostTypeInfo = info.TypeArgument ?? info; // array, task, nullable -> inner type
             if (info.RequiresCLRTypeConversion && !innermostTypeInfo.IsTSExport)
             {
                 // needs to traverse interop boundary as object or JSObject and be converted in CLR
                 // however type is not TSExport, no conversion possible.
-                ReportNonTSExported(context, type, method);
+                ReportNonTSExported(context, type, symbol);
             }
         }
         catch (TypeNotSupportedException)
         {
-            ReportUnsupported(context, type, method);
+            ReportUnsupported(context, type, symbol);
         }
         catch (NotImplementedException)
         {
-            ReportUnderDevelopment(context, type, method);
+            ReportUnderDevelopment(context, type, symbol);
         }
     }
 
@@ -112,20 +87,24 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
     {
         var location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
         var typeText = providedType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        context.ReportDiagnostic(Diagnostic.Create(UnsupportedTypeRule, location, typeText));
+        context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.UnsupportedTypeRule, location, typeText));
     }
 
     private static void ReportUnderDevelopment(SymbolAnalysisContext context, ITypeSymbol providedType, ISymbol symbol)
     {
         var location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
         var typeText = providedType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        context.ReportDiagnostic(Diagnostic.Create(UnderDevelopmentTypeRule, location, typeText));
+        context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.UnderDevelopmentTypeRule, location, typeText));
     }
 
     private static void ReportNonTSExported(SymbolAnalysisContext context, ITypeSymbol type, ISymbol symbol)
     {
+        DiagnosticDescriptor descriptor = symbol is IPropertySymbol
+            ? TypeShimDiagnostics.NonExportedTypeInPropertyRule
+            : TypeShimDiagnostics.NonExportedTypeInMethodRule;
+
         var location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
         var typeText = type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        context.ReportDiagnostic(Diagnostic.Create(NonExportedTypeRule, location, typeText));
+        context.ReportDiagnostic(Diagnostic.Create(descriptor, location, typeText));
     }
 }

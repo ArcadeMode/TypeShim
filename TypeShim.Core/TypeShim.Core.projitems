@@ -5,6 +5,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)\\Exceptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)\\InteropTypeInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)\\InteropTypeInfoBuilder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)\\InteropTypeInfoCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)\\JSmanagedTypeInfo.cs" />
   </ItemGroup>
 </Project>

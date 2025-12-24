@@ -36,7 +36,7 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypescriptS
         {
             methodRenderer.RenderProxyMethod(depth + 1, methodInfo);
         }
-        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => !p.IsStatic))
+        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => !p.IsStatic && p.Type.IsSnapshotCompatible))
         {
             methodRenderer.RenderProxyProperty(depth + 1, propertyInfo);
         }

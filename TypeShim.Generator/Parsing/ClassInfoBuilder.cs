@@ -3,8 +3,12 @@ using TypeShim.Core;
 
 namespace TypeShim.Generator.Parsing;
 
-internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol)
+internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropTypeInfoCache typeInfoCache)
 {
+    internal ClassInfoBuilder(INamedTypeSymbol classSymbol) : this(classSymbol, new InteropTypeInfoCache())
+    {
+    }
+
     internal ClassInfo Build()
     {
         List<MethodInfoBuilder> methodInfoBuilders = new();
@@ -12,7 +16,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol)
             .Where(m => m.MethodKind == MethodKind.Ordinary && m.DeclaredAccessibility == Accessibility.Public);
         foreach (IMethodSymbol methodSymbol in methodSymbols)
         {
-            MethodInfoBuilder methodInfoBuilder = new(classSymbol, methodSymbol);
+            MethodInfoBuilder methodInfoBuilder = new(classSymbol, methodSymbol, typeInfoCache);
             methodInfoBuilders.Add(methodInfoBuilder);
         }
 
@@ -21,7 +25,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol)
             .Where(p => p.DeclaredAccessibility == Accessibility.Public);
         foreach (IPropertySymbol propertySymbol in propertySymbols)
         {
-            PropertyInfoBuilder propertyInfoBuilder = new(classSymbol, propertySymbol);
+            PropertyInfoBuilder propertyInfoBuilder = new(classSymbol, propertySymbol, typeInfoCache);
             propertyInfoBuilders.Add(propertyInfoBuilder);
         }
 
@@ -29,7 +33,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol)
         {
             Namespace = classSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
             Name = classSymbol.Name,
-            Type = new InteropTypeInfoBuilder(classSymbol).Build(),
+            Type = new InteropTypeInfoBuilder(classSymbol, typeInfoCache).Build(),
             Methods = [.. methodInfoBuilders.Select(b => b.Build())],
             Properties = [.. propertyInfoBuilders.Select(b => b.Build())],
         };
