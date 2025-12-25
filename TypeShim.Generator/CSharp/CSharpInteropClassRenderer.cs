@@ -314,7 +314,7 @@ internal sealed class CSharpInteropClassRenderer
         sb.Append(lambdaIndent);
         sb.AppendLine($"else if (t.IsCanceled) {tcsVarName}.SetCanceled();");
 
-        string resultConversionExpression = taskTypeParamInfo.IsTSExport || taskTypeParamInfo.IsTSModule
+        string resultConversionExpression = taskTypeParamInfo.IsTSExport
             ? $"{GetInteropClassName(taskTypeParamInfo.CLRTypeSyntax.ToString())}.{FromObjectMethodName}(t.Result)"
             : $"({taskTypeParamInfo.CLRTypeSyntax})t.Result";
 
