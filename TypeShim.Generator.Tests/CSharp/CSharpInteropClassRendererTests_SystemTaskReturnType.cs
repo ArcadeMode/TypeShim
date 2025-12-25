@@ -122,14 +122,13 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
     public static Task<object> M1()
     {
-        Task<MyClass> result = C1.M1();
-        TaskCompletionSource<object> resultTcs = new();
-        result.ContinueWith(t => {
-            if (t.IsFaulted) resultTcs.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) resultTcs.SetCanceled();
-            else resultTcs.SetResult((object)t.Result);
+        TaskCompletionSource<object> retValTcs = new();
+        C1.M1().ContinueWith(t => {
+            if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) retValTcs.SetCanceled();
+            else retValTcs.SetResult((object)t.Result);
         }, TaskContinuationOptions.ExecuteSynchronously);
-        return resultTcs.Task;
+        return retValTcs.Task;
     }
     public static C1 FromObject(object obj)
     {
@@ -195,14 +194,13 @@ public partial class C1Interop
     public static Task<object> M1([JSMarshalAs<JSType.Any>] object instance)
     {
         C1 typed_instance = (C1)instance;
-        Task<MyClass> result = typed_instance.M1();
-        TaskCompletionSource<object> resultTcs = new();
-        result.ContinueWith(t => {
-            if (t.IsFaulted) resultTcs.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) resultTcs.SetCanceled();
-            else resultTcs.SetResult((object)t.Result);
+        TaskCompletionSource<object> retValTcs = new();
+        typed_instance.M1().ContinueWith(t => {
+            if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) retValTcs.SetCanceled();
+            else retValTcs.SetResult((object)t.Result);
         }, TaskContinuationOptions.ExecuteSynchronously);
-        return resultTcs.Task;
+        return retValTcs.Task;
     }
     public static C1 FromObject(object obj)
     {
@@ -254,14 +252,13 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
     public static Task<object> M1()
     {
-        Task<{{typeName}}> result = C1.M1();
-        TaskCompletionSource<object> resultTcs = new();
-        result.ContinueWith(t => {
-            if (t.IsFaulted) resultTcs.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) resultTcs.SetCanceled();
-            else resultTcs.SetResult((object)t.Result);
+        TaskCompletionSource<object> retValTcs = new();
+        C1.M1().ContinueWith(t => {
+            if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) retValTcs.SetCanceled();
+            else retValTcs.SetResult((object)t.Result);
         }, TaskContinuationOptions.ExecuteSynchronously);
-        return resultTcs.Task;
+        return retValTcs.Task;
     }
     public static C1 FromObject(object obj)
     {

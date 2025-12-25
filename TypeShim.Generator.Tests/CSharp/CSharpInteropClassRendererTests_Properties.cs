@@ -405,14 +405,13 @@ public partial class C1Interop
     public static Task<object> get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
         C1 typed_instance = (C1)instance;
-        Task<MyClass> result = typed_instance.P1;
-        TaskCompletionSource<object> resultTcs = new();
-        result.ContinueWith(t => {
-            if (t.IsFaulted) resultTcs.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) resultTcs.SetCanceled();
-            else resultTcs.SetResult((object)t.Result);
+        TaskCompletionSource<object> retValTcs = new();
+        typed_instance.P1.ContinueWith(t => {
+            if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) retValTcs.SetCanceled();
+            else retValTcs.SetResult((object)t.Result);
         }, TaskContinuationOptions.ExecuteSynchronously);
-        return resultTcs.Task;
+        return retValTcs.Task;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
@@ -439,15 +438,14 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        Task<object> P1Task = jsObject.GetPropertyAsJSObjectTask("P1");
-        TaskCompletionSource<MyClass> P1TaskTcs = new();
-        P1Task.ContinueWith(t => {
-            if (t.IsFaulted) P1TaskTcs.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) P1TaskTcs.SetCanceled();
-            else P1TaskTcs.SetResult(MyClassInterop.FromObject(t.Result));
+        TaskCompletionSource<MyClass> P1Tcs = new();
+        jsObject.GetPropertyAsJSObjectTask("P1").ContinueWith(t => {
+            if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) P1Tcs.SetCanceled();
+            else P1Tcs.SetResult(MyClassInterop.FromObject(t.Result));
         }, TaskContinuationOptions.ExecuteSynchronously);
         return new() {
-            P1 = P1TaskTcs.Task,
+            P1 = P1Tcs.Task,
         };
     }
 }

@@ -90,10 +90,7 @@ internal sealed class CSharpInteropClassRenderer
         if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresCLRTypeConversion: true })
         {
             // Handle Task<T> property conversion to interop type Task<object>
-            sb.Append(indent);
-            sb.Append(indent);
-            sb.AppendLine($"{methodInfo.ReturnType.CLRTypeSyntax} result = {accessorExpression};");
-            string convertedTaskExpression = RenderTaskTypeConversion(2, methodInfo.ReturnType.AsInteropTypeInfo(), "result");
+            string convertedTaskExpression = RenderTaskTypeConversion(2, methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", accessorExpression);
             accessorExpression = convertedTaskExpression; // continue with the converted expression
         }
 
@@ -178,9 +175,7 @@ internal sealed class CSharpInteropClassRenderer
         // Handle Task<T> return conversion for conversion requiring types
         if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresCLRTypeConversion: true })
         {
-            sb.Append(indent);
-            sb.AppendLine($"{methodInfo.ReturnType.CLRTypeSyntax} result = {GetInvocationExpression()};");
-            string convertedTaskExpression = RenderTaskTypeConversion(depth, methodInfo.ReturnType.AsInteropTypeInfo(), "result");
+            string convertedTaskExpression = RenderTaskTypeConversion(depth, methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", GetInvocationExpression());
             sb.Append(indent);
             sb.Append("return ");
             sb.Append(convertedTaskExpression);
@@ -222,7 +217,7 @@ internal sealed class CSharpInteropClassRenderer
         string indent = new(' ', depth * 4);
         if (parameterInfo.Type.IsTaskType)
         {
-            string convertedTaskExpression = RenderTaskTypeConversion(depth, parameterInfo.Type, parameterInfo.Name);
+            string convertedTaskExpression = RenderTaskTypeConversion(depth, parameterInfo.Type, parameterInfo.Name, parameterInfo.Name);
             sb.Append(indent);
             sb.AppendLine($"Task<{parameterInfo.Type.TypeArgument!.CLRTypeSyntax}> {GetTypedParameterName(parameterInfo)} = {convertedTaskExpression};");
             return; // task pattern differs from other conversions, hence its fully separated rendering.
@@ -299,7 +294,7 @@ internal sealed class CSharpInteropClassRenderer
     /// returns an expression to access the converted task with.
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
-    private string RenderTaskTypeConversion(int depth, InteropTypeInfo targetTaskType, string sourceVarName)
+    private string RenderTaskTypeConversion(int depth, InteropTypeInfo targetTaskType, string sourceVarName, string sourceTaskExpression)
     {
         string indent = new(' ', depth * 4);
         InteropTypeInfo taskTypeParamInfo = targetTaskType.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
@@ -307,7 +302,7 @@ internal sealed class CSharpInteropClassRenderer
         sb.Append(indent);
         sb.AppendLine($"TaskCompletionSource<{taskTypeParamInfo.CLRTypeSyntax}> {tcsVarName} = new();");
         sb.Append(indent);
-        sb.AppendLine($"{sourceVarName}.ContinueWith(t => {{");
+        sb.AppendLine($"{sourceTaskExpression}.ContinueWith(t => {{");
         string lambdaIndent = new(' ', (depth + 1) * 4);
         sb.Append(lambdaIndent);
         sb.AppendLine($"if (t.IsFaulted) {tcsVarName}.SetException(t.Exception.InnerExceptions);");
@@ -416,11 +411,8 @@ internal sealed class CSharpInteropClassRenderer
             Dictionary<PropertyInfo, string> convertedTaskExpressionDict = [];
             foreach (PropertyInfo propertyInfo in propertiesInMapper.Where(p => p.Type is { IsTaskType: true, RequiresCLRTypeConversion: true }))
             {
-                string varName = $"{propertyInfo.Name}Task";
-                // TODO: swap to Task<JSObject> instead of Task<object>
-                // TODO: BETTER extend RenderTaskTypeConversion to not require assignment beforehand
-                sb.AppendLine($"{indent}{propertyInfo.Type.InteropTypeSyntax} {varName} = jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\");");
-                string convertedTaskExpression = RenderTaskTypeConversion(depth, propertyInfo.Type, varName);
+                string jsObjectTaskExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
+                string convertedTaskExpression = RenderTaskTypeConversion(depth, propertyInfo.Type, propertyInfo.Name, jsObjectTaskExpression);
                 convertedTaskExpressionDict.Add(propertyInfo, convertedTaskExpression);
             }
 
