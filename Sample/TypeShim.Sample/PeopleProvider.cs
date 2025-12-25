@@ -9,7 +9,7 @@ namespace TypeShim.Sample;
 [TSExport]
 public class TimeoutUnit
 {
-    public Task<int> Timeout { get; set; } = Task.FromResult(1000);
+    public int Timeout { get; set; } = 0;
 }
 
 [TSExport]
@@ -17,16 +17,18 @@ public class PeopleProvider(PeopleApiClient? _apiClient = null)
 {
     private static Person[]? AllPeople;
     
-    public TimeoutUnit? Unit { get; set; }
+    public Task<TimeoutUnit?> Unit { get; set; } = Task.FromResult<TimeoutUnit?>(null);
+
+    public void DoStuff(Task<TimeoutUnit?> task)
+    {
+        Unit = task; 
+    }
 
     public async Task<People> FetchPeopleAsync()
     {
         try
         {
-            if (Unit != null)
-            {
-                await Task.Delay(await Unit.Timeout);
-            }
+            await Task.Delay((await Unit)?.Timeout ?? 0);
 
             if (AllPeople == null)
             {

@@ -86,15 +86,16 @@ export interface DogInterop {
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.TimeoutUnit
 export interface TimeoutUnitInterop {
-    get_Timeout(instance: object): Promise<number>;
-    set_Timeout(instance: object, value: Promise<number>): void;
+    get_Timeout(instance: object): number;
+    set_Timeout(instance: object, value: number): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.PeopleProvider
 export interface PeopleProviderInterop {
+    DoStuff(instance: object, task: Promise<object>): void;
     FetchPeopleAsync(instance: object): Promise<object>;
-    get_Unit(instance: object): object;
-    set_Unit(instance: object, value: object): void;
+    get_Unit(instance: object): Promise<object>;
+    set_Unit(instance: object, value: Promise<object>): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.TypeShimSampleModule
@@ -286,7 +287,7 @@ export namespace People {
   };
   export function snapshot(proxy: People.Proxy): People.Snapshot {
     return {
-      All: proxy.All.map(item => Person.snapshot(item)),
+      All: proxy.All.map(e => Person.snapshot(e)),
     };
   }
 }
@@ -372,7 +373,7 @@ export namespace Person {
       Id: proxy.Id,
       Name: proxy.Name,
       Age: proxy.Age,
-      Pets: proxy.Pets.map(item => Dog.snapshot(item)),
+      Pets: proxy.Pets.map(e => Dog.snapshot(e)),
     };
   }
 }
@@ -456,18 +457,18 @@ export namespace TimeoutUnit {
       this.instance = instance;
     }
 
-    public get Timeout(): Promise<number> {
+    public get Timeout(): number {
       return this.interop.TypeShim.Sample.TimeoutUnitInterop.get_Timeout(this.instance);
     }
 
-    public set Timeout(value: Promise<number>) {
+    public set Timeout(value: number) {
       this.interop.TypeShim.Sample.TimeoutUnitInterop.set_Timeout(this.instance, value);
     }
 
   }
 
   export interface Snapshot {
-    Timeout: Promise<number>;
+    Timeout: number;
   }
   export const Snapshot: {
     [Symbol.hasInstance](v: unknown): boolean;
@@ -475,7 +476,7 @@ export namespace TimeoutUnit {
     [Symbol.hasInstance](v: unknown) {
       if (!v || typeof v !== 'object') return false;
       const o = v as any;
-      return (o.Timeout !== null && typeof (o.Timeout as any).then === 'function');
+      return (typeof o.Timeout === 'number');
     }
   };
   export function snapshot(proxy: TimeoutUnit.Proxy): TimeoutUnit.Snapshot {
@@ -496,25 +497,30 @@ export namespace PeopleProvider {
       this.instance = instance;
     }
 
+    public DoStuff(task: Promise<TimeoutUnit.Proxy | TimeoutUnit.Snapshot>): void {
+      const taskInstance = task.then(e => e instanceof TimeoutUnit.Proxy ? e.instance : e);
+      this.interop.TypeShim.Sample.PeopleProviderInterop.DoStuff(this.instance, taskInstance);
+    }
+
     public async FetchPeopleAsync(): Promise<People.Proxy> {
       const res = await this.interop.TypeShim.Sample.PeopleProviderInterop.FetchPeopleAsync(this.instance);
       return new People.Proxy(res, this.interop);
     }
 
-    public get Unit(): TimeoutUnit.Proxy {
-      const res = this.interop.TypeShim.Sample.PeopleProviderInterop.get_Unit(this.instance);
+    public get Unit(): Promise<TimeoutUnit.Proxy> {
+      const res = await this.interop.TypeShim.Sample.PeopleProviderInterop.get_Unit(this.instance);
       return new TimeoutUnit.Proxy(res, this.interop);
     }
 
-    public set Unit(value: TimeoutUnit.Proxy | TimeoutUnit.Snapshot) {
-      const valueInstance = value instanceof TimeoutUnit.Proxy ? value.instance : value;
+    public set Unit(value: Promise<TimeoutUnit.Proxy | TimeoutUnit.Snapshot>) {
+      const valueInstance = value.then(e => e instanceof TimeoutUnit.Proxy ? e.instance : e);
       this.interop.TypeShim.Sample.PeopleProviderInterop.set_Unit(this.instance, valueInstance);
     }
 
   }
 
   export interface Snapshot {
-    Unit: TimeoutUnit.Snapshot;
+    Unit: Promise<TimeoutUnit.Snapshot>;
   }
   export const Snapshot: {
     [Symbol.hasInstance](v: unknown): boolean;
@@ -522,12 +528,12 @@ export namespace PeopleProvider {
     [Symbol.hasInstance](v: unknown) {
       if (!v || typeof v !== 'object') return false;
       const o = v as any;
-      return (o.Unit instanceof TimeoutUnit.Snapshot);
+      return (o.Unit !== null && typeof (o.Unit as any).then === 'function');
     }
   };
   export function snapshot(proxy: PeopleProvider.Proxy): PeopleProvider.Snapshot {
     return {
-      Unit: TimeoutUnit.snapshot(proxy.Unit),
+      Unit: proxy.Unit.then(e => TimeoutUnit.snapshot(e)),
     };
   }
 }

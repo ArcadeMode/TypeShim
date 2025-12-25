@@ -59,16 +59,14 @@ internal sealed class CSharpInteropClassRenderer
 
     private void RenderPropertyMethods(PropertyInfo propertyInfo)
     {
-        RenderProperty(propertyInfo, getter: true);
+        RenderProperty(propertyInfo, propertyInfo.GetMethod);
         if (propertyInfo.SetMethod is null)
             return;
-        RenderProperty(propertyInfo, getter: false);
+        RenderProperty(propertyInfo, propertyInfo.SetMethod);
     }
 
-    private void RenderProperty(PropertyInfo propertyInfo, bool getter)
+    private void RenderProperty(PropertyInfo propertyInfo, MethodInfo methodInfo)
     {
-        MethodInfo methodInfo = getter ? propertyInfo.GetMethod : propertyInfo.SetMethod ?? throw new InvalidOperationException("RenderProperty called for setter with null SetMethod");
-
         string indent = new(' ', 4);
         JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(methodInfo.ReturnType);
         sb.Append(indent);
@@ -86,15 +84,27 @@ internal sealed class CSharpInteropClassRenderer
             RenderParameterTypeConversion(depth: 2, originalParamInfo);
         }
 
-        string accessorName = methodInfo.IsStatic ? classInfo.Name : GetTypedParameterName(methodInfo.MethodParameters.ElementAt(0));
-        if (getter)
+        string accessedObject = methodInfo.IsStatic ? classInfo.Name : GetTypedParameterName(methodInfo.MethodParameters.ElementAt(0));
+        string accessorExpression = $"{accessedObject}.{propertyInfo.Name}";
+
+        if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresCLRTypeConversion: true })
         {
-            sb.AppendLine($"{indent}{indent}return {accessorName}.{propertyInfo.Name};");
+            // Handle Task<T> property conversion to interop type Task<object>
+            sb.Append(indent);
+            sb.Append(indent);
+            sb.AppendLine($"{methodInfo.ReturnType.CLRTypeSyntax} result = {accessorExpression};");
+            string convertedTaskExpression = RenderTaskTypeConversion(2, methodInfo.ReturnType.AsInteropTypeInfo(), "result");
+            accessorExpression = convertedTaskExpression; // continue with the converted expression
         }
-        else
+
+        if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void) // getter
+        {
+            sb.AppendLine($"{indent}{indent}return {accessorExpression};");
+        }
+        else // setter
         {
             string valueVarName = GetTypedParameterName(methodInfo.MethodParameters.ElementAt(1));
-            sb.AppendLine($"{indent}{indent}{accessorName}.{propertyInfo.Name} = {valueVarName};");
+            sb.AppendLine($"{indent}{indent}{accessorExpression} = {valueVarName};");
         }
 
         sb.Append(indent);
@@ -364,7 +374,7 @@ internal sealed class CSharpInteropClassRenderer
 
             PropertyInfo[] propertiesInMapper = [.. classInfo.Properties.Where(p => p.Type.IsSnapshotCompatible && p.SetMethod != null)];
             // Converting task types requires variable assignments, write those first, keep dict for assignments in initializer
-            Dictionary<PropertyInfo, string> convertedTaskExpressionDict = RenderTaskTypePropertyConversions(depth, propertiesInMapper);
+            Dictionary<PropertyInfo, string> convertedTaskExpressionDict = RenderTaskTypePropertyConversions(depth + 1, propertiesInMapper);
 
             sb.AppendLine($"{indent2}return new() {{"); // initializer body
 
@@ -398,20 +408,23 @@ internal sealed class CSharpInteropClassRenderer
             }
             sb.AppendLine($"{indent2}}};");
             sb.AppendLine($"{indent}}}");
+        }
 
-            Dictionary<PropertyInfo, string> RenderTaskTypePropertyConversions(int depth, PropertyInfo[] propertiesInMapper)
+        Dictionary<PropertyInfo, string> RenderTaskTypePropertyConversions(int depth, PropertyInfo[] propertiesInMapper)
+        {
+            string indent = new(' ', depth * 4);
+            Dictionary<PropertyInfo, string> convertedTaskExpressionDict = [];
+            foreach (PropertyInfo propertyInfo in propertiesInMapper.Where(p => p.Type is { IsTaskType: true, RequiresCLRTypeConversion: true }))
             {
-                Dictionary<PropertyInfo, string> convertedTaskExpressionDict = [];
-                foreach (PropertyInfo propertyInfo in propertiesInMapper.Where(p => p.Type is { IsTaskType: true, RequiresCLRTypeConversion: true }))
-                {
-                    InteropTypeInfo targetType = propertyInfo.Type.TypeArgument ?? propertyInfo.Type;
-                    string propertyRetrievalExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
-                    string convertedTaskExpression = RenderTaskTypeConversion(depth, propertyInfo.Type, propertyRetrievalExpression);
-                    convertedTaskExpressionDict.Add(propertyInfo, convertedTaskExpression);
-                }
-
-                return convertedTaskExpressionDict;
+                string varName = $"{propertyInfo.Name}Task";
+                // TODO: swap to Task<JSObject> instead of Task<object>
+                // TODO: BETTER extend RenderTaskTypeConversion to not require assignment beforehand
+                sb.AppendLine($"{indent}{propertyInfo.Type.InteropTypeSyntax} {varName} = jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\");");
+                string convertedTaskExpression = RenderTaskTypeConversion(depth, propertyInfo.Type, varName);
+                convertedTaskExpressionDict.Add(propertyInfo, convertedTaskExpression);
             }
+
+            return convertedTaskExpressionDict;
         }
 
         static string ResolveJSObjectMethodName(InteropTypeInfo typeInfo)
@@ -432,7 +445,7 @@ internal sealed class CSharpInteropClassRenderer
                     { ManagedType: KnownManagedType.String } => "GetPropertyAsStringArray",
                     { ManagedType: KnownManagedType.JSObject } => "GetPropertyAsJSObjectArray",
                     { ManagedType: KnownManagedType.Object, IsTSExport: true } => "GetPropertyAsJSObjectArray", // exported object types have a FromJSObject mapper
-                    _ => throw new InvalidOperationException($"Array of type {typeInfo.TypeArgument?.ManagedType} cannot be marshalled by TypeShim JSObject extensions"),
+                    _ => throw new InvalidOperationException($"Array of type {typeInfo.TypeArgument?.ManagedType} cannot be marshalled through TypeShim JSObject extensions"),
                 },
                 KnownManagedType.Task => typeInfo.TypeArgument switch
                 {
@@ -451,9 +464,9 @@ internal sealed class CSharpInteropClassRenderer
                     { ManagedType: KnownManagedType.String } => "GetPropertyAsStringTask",
                     { ManagedType: KnownManagedType.JSObject } => "GetPropertyAsJSObjectTask",
                     { ManagedType: KnownManagedType.Object, IsTSExport: true } => "GetPropertyAsJSObjectTask", // TODO: include fromJSObject mapping?
-                    _ => throw new InvalidOperationException($"Task of type {typeInfo.TypeArgument?.ManagedType} cannot be marshalled by JSObject"),
+                    _ => throw new InvalidOperationException($"Task of type {typeInfo.TypeArgument?.ManagedType} cannot be marshalled through TypeShim JSObject extensions"),
                 },
-                _ => throw new InvalidOperationException($"Type {typeInfo.ManagedType} cannot be marshalled by JSObject"),
+                _ => throw new InvalidOperationException($"Type {typeInfo.ManagedType} cannot be marshalled through JSObject nor TypeShim JSObject extensions"),
             };
         }
     }
