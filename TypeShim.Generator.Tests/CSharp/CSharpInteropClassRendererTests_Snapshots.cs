@@ -67,7 +67,8 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        return new() {
+        return new()
+        {
             P1 = jsObject.{{jsObjectMethod}}("P1"),
         };
     }

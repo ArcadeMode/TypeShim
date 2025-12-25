@@ -76,7 +76,8 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        return new() {
+        return new()
+        {
             P1 = MyClassInterop.FromObject(jsObject.GetPropertyAsJSObject("P1")),
         };
     }
@@ -154,7 +155,8 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject jsObject)
     {
         object? P1Tmp = jsObject.GetPropertyAsJSObject("P1");
-        return new() {
+        return new()
+        {
             P1 = P1Tmp != null ? MyClassInterop.FromObject(P1Tmp) : null,
         };
     }
@@ -273,7 +275,8 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        return new() {
+        return new()
+        {
             P1 = jsObject.GetPropertyAsInt32Array("P1"),
         };
     }
@@ -350,7 +353,8 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        return new() {
+        return new()
+        {
             P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectArray("P1"), e => MyClassInterop.FromObject(e)),
         };
     }
@@ -445,7 +449,8 @@ public partial class C1Interop
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(MyClassInterop.FromObject(t.Result));
         }, TaskContinuationOptions.ExecuteSynchronously);
-        return new() {
+        return new()
+        {
             P1 = P1Tcs.Task,
         };
     }
@@ -540,7 +545,8 @@ public partial class C1Interop
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);
         }, TaskContinuationOptions.ExecuteSynchronously);
-        return new() {
+        return new()
+        {
             P1 = P1Tcs.Task,
         };
     }

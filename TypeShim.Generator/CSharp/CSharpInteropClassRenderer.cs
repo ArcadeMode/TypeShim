@@ -375,8 +375,8 @@ internal sealed class CSharpInteropClassRenderer
             // Converting task types requires variable assignments, write those first, keep dict for assignments in initializer
             Dictionary<PropertyInfo, TypeConversionExpressionRenderDelegate> propertyToConvertedVarDict = RenderNonInlinableTypeConversions(depth + 1, propertiesInMapper);
 
-            sb.AppendLine($"{indent2}return new() {{"); // initializer body
-
+            sb.AppendLine($"{indent2}return new()"); // initializer body
+            sb.AppendLine($"{indent2}{{");
             // TODO: support init properties
             foreach (PropertyInfo propertyInfo in propertiesInMapper)
             {
