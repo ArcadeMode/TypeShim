@@ -77,7 +77,7 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject jsObject)
     {
         return new() {
-            P1 = MyClassInterop.FromJSObject(jsObject.GetPropertyAsJSObject("P1")),
+            P1 = MyClassInterop.FromObject(jsObject.GetPropertyAsJSObject("P1")),
         };
     }
 }
@@ -153,8 +153,9 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
+        object? P1Tmp = jsObject.GetPropertyAsJSObject("P1");
         return new() {
-            P1 = MyClassInterop.FromJSObject(jsObject.GetPropertyAsJSObject("P1")),
+            P1 = P1Tmp != null ? MyClassInterop.FromObject(P1Tmp) : null,
         };
     }
 }
@@ -350,7 +351,7 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject jsObject)
     {
         return new() {
-            P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectArray("P1"), MyClassInterop.FromJSObject),
+            P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectArray("P1"), e => MyClassInterop.FromObject(e)),
         };
     }
 }

@@ -373,16 +373,17 @@ internal sealed class CSharpInteropClassRenderer
 
             PropertyInfo[] propertiesInMapper = [.. classInfo.Properties.Where(p => p.Type.IsSnapshotCompatible && p.SetMethod != null)];
             // Converting task types requires variable assignments, write those first, keep dict for assignments in initializer
-            Dictionary<PropertyInfo, string> convertedTaskExpressionDict = RenderTaskTypePropertyConversions(depth + 1, propertiesInMapper);
+            Dictionary<PropertyInfo, TypeConversionExpressionRenderDelegate> propertyToConvertedVarDict = RenderNonInlinableTypeConversions(depth + 1, propertiesInMapper);
 
             sb.AppendLine($"{indent2}return new() {{"); // initializer body
 
             // TODO: support init properties
             foreach (PropertyInfo propertyInfo in propertiesInMapper)
             {
-                if (propertyInfo.Type.RequiresCLRTypeConversion && propertyInfo.Type.IsTaskType)
+                if (propertyToConvertedVarDict.TryGetValue(propertyInfo, out TypeConversionExpressionRenderDelegate? expressionRenderer))
                 {
-                    sb.AppendLine($"{indent3}{propertyInfo.Name} = {convertedTaskExpressionDict[propertyInfo]},");
+                    sb.Append($"{indent3}{propertyInfo.Name} = ");
+                    expressionRenderer.Render();
                 }
                 else if (propertyInfo.Type.RequiresCLRTypeConversion)
                 {
@@ -391,33 +392,38 @@ internal sealed class CSharpInteropClassRenderer
 
                     string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
                     sb.Append($"{indent3}{propertyInfo.Name} = ");
-                    if (propertyInfo.Type.IsArrayType)
-                    {
-                        sb.AppendLine($"Array.ConvertAll({propertyRetrievalExpression}, {targetInteropClass}.{FromJSObjectMethodName}),");
-                    }
-                    else
-                    {
-                        sb.AppendLine($"{targetInteropClass}.{FromJSObjectMethodName}({propertyRetrievalExpression}),");
-                    }
+                    RenderInlineTypeConversion(propertyInfo.Type, propertyRetrievalExpression);
                 }
                 else
                 {
-                    sb.AppendLine($"{indent3}{propertyInfo.Name} = jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\"),"); // TODO: error handling? (null / missing props?)
+                    sb.Append($"{indent3}{propertyInfo.Name} = jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")"); // TODO: error handling? (null / missing props?)
                 }
+                sb.AppendLine(",");
             }
             sb.AppendLine($"{indent2}}};");
             sb.AppendLine($"{indent}}}");
         }
 
-        Dictionary<PropertyInfo, string> RenderTaskTypePropertyConversions(int depth, PropertyInfo[] propertiesInMapper)
+        Dictionary<PropertyInfo, TypeConversionExpressionRenderDelegate> RenderNonInlinableTypeConversions(int depth, PropertyInfo[] propertiesInMapper)
         {
             string indent = new(' ', depth * 4);
-            Dictionary<PropertyInfo, string> convertedTaskExpressionDict = [];
-            foreach (PropertyInfo propertyInfo in propertiesInMapper.Where(p => p.Type is { IsTaskType: true, RequiresCLRTypeConversion: true }))
+            Dictionary<PropertyInfo, TypeConversionExpressionRenderDelegate> convertedTaskExpressionDict = new();
+            foreach (PropertyInfo propertyInfo in propertiesInMapper)
             {
-                string jsObjectTaskExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
-                string convertedTaskExpression = RenderTaskTypeConversion(depth, propertyInfo.Type, propertyInfo.Name, jsObjectTaskExpression);
-                convertedTaskExpressionDict.Add(propertyInfo, convertedTaskExpression);
+                if (propertyInfo.Type is { IsTaskType: true, RequiresCLRTypeConversion: true })
+                {
+                    string jsObjectTaskExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
+                    string convertedTaskExpression = RenderTaskTypeConversion(depth, propertyInfo.Type, propertyInfo.Name, jsObjectTaskExpression);
+                    convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => sb.Append(convertedTaskExpression)));
+                } 
+                else if (propertyInfo.Type is { IsNullableType: true, RequiresCLRTypeConversion: true })
+                {
+                    string tmpVarName = $"{propertyInfo.Name}Tmp";
+                    string jsObjectRetrievalExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
+                    sb.Append(indent);
+                    sb.AppendLine($"{propertyInfo.Type.InteropTypeSyntax} {tmpVarName} = {jsObjectRetrievalExpression};");
+                    convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => RenderInlineTypeConversion(propertyInfo.Type, tmpVarName)));
+                }
             }
 
             return convertedTaskExpressionDict;
@@ -464,6 +470,15 @@ internal sealed class CSharpInteropClassRenderer
                 },
                 _ => throw new InvalidOperationException($"Type {typeInfo.ManagedType} cannot be marshalled through JSObject nor TypeShim JSObject extensions"),
             };
+        }
+    }
+    private class TypeConversionExpressionRenderDelegate(Action renderAction)
+    {
+        internal void Render() => renderAction();
+
+        public static implicit operator TypeConversionExpressionRenderDelegate(Action renderAction)
+        {
+            return new TypeConversionExpressionRenderDelegate(renderAction);
         }
     }
 }
