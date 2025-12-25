@@ -224,33 +224,38 @@ internal sealed class CSharpInteropClassRenderer
         }
 
         sb.Append($"{indent}{parameterInfo.Type.CLRTypeSyntax} {GetTypedParameterName(parameterInfo)} = ");
-        if (parameterInfo.IsInjectedInstanceParameter)
-        {
-            RenderCovariantTypeConversion(parameterInfo.Type, parameterInfo.Name);
-        }
-        else if (parameterInfo.Type.IsArrayType)
-        {
-            RenderArrayTypeConversion(parameterInfo.Type, parameterInfo.Name);
-        }
-        else if (parameterInfo.Type.ManagedType is KnownManagedType.Object)
-        {
-            //TODO: make nullables actually ManagedType.Nullable with inner type Object or T, currently nullable reflects inner type, which is confusing sometimes
-            RenderFromObjectTypeConversion(parameterInfo.Type, parameterInfo.Name);
-        }
-        else // Tests guard against this case. Anyway, here is a state-of-the-art regression detector.
-        {
-            throw new NotImplementedException($"Type conversion not implemented for type: {parameterInfo.Type.CLRTypeSyntax}. Please file an issue at https://github.com/ArcadeMode/TypeShim");
-        }
+        RenderInlineTypeConversion(parameterInfo.Type, parameterInfo.Name, forceCovariantConversion: parameterInfo.IsInjectedInstanceParameter);
         sb.AppendLine(";");
     }
 
-    private void RenderCovariantTypeConversion(InteropTypeInfo typeInfo, string parameterName)
+    private void RenderInlineTypeConversion(InteropTypeInfo typeInfo, string varName, bool forceCovariantConversion = false)
+    {
+        if (forceCovariantConversion)
+        {
+            RenderInlineCovariantTypeConversion(typeInfo, varName);
+        }
+        else if (typeInfo.IsArrayType)
+        {
+            RenderInlineArrayTypeConversion(typeInfo, varName);
+        }
+        else if (typeInfo.ManagedType is KnownManagedType.Object)
+        {
+            //TODO: make nullables actually ManagedType.Nullable with inner type Object or T, currently nullable reflects inner type, which is confusing sometimes
+            RenderInlineObjectTypeConversion(typeInfo, varName);
+        }
+        else // Tests guard against this case. Anyway, here is a state-of-the-art regression detector.
+        {
+            throw new NotImplementedException($"Type conversion not implemented for type: {typeInfo.CLRTypeSyntax}. Please file an issue at https://github.com/ArcadeMode/TypeShim");
+        }
+    }
+
+    private void RenderInlineCovariantTypeConversion(InteropTypeInfo typeInfo, string parameterName)
     {
         Debug.Assert(typeInfo.ManagedType is KnownManagedType.Object or KnownManagedType.Array, "Unexpected non-object or non-array type with required type conversion");
         sb.Append($"({typeInfo.CLRTypeSyntax}){parameterName}");
     }
 
-    private void RenderFromObjectTypeConversion(InteropTypeInfo typeInfo, string parameterName)
+    private void RenderInlineObjectTypeConversion(InteropTypeInfo typeInfo, string parameterName)
     {
         InteropTypeInfo targetType = typeInfo.TypeArgument ?? typeInfo; // unwrap nullable or use simple type directly
         string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
@@ -266,7 +271,7 @@ internal sealed class CSharpInteropClassRenderer
         }
         else
         {
-            RenderCovariantTypeConversion(typeInfo, parameterName);
+            RenderInlineCovariantTypeConversion(typeInfo, parameterName);
         }
 
         if (typeInfo.IsNullableType)
@@ -275,19 +280,21 @@ internal sealed class CSharpInteropClassRenderer
         }
     }
 
-    private void RenderArrayTypeConversion(InteropTypeInfo typeInfo, string parameterName)
+    private void RenderInlineArrayTypeConversion(InteropTypeInfo typeInfo, string parameterName)
     {
         Debug.Assert(typeInfo.TypeArgument != null, "Array type must have a type argument.");
 
         if (typeInfo.TypeArgument.IsTSExport == false)
         {
-            RenderCovariantTypeConversion(typeInfo, parameterName);
-            return; // early return for non-exported types, no special conversion possible
+            RenderInlineCovariantTypeConversion(typeInfo, parameterName);
+            // no special conversion possible for non-exported types
+        } 
+        else
+        {
+            sb.Append($"Array.ConvertAll({parameterName}, e => ");
+            RenderInlineObjectTypeConversion(typeInfo.TypeArgument, "e");
+            sb.Append(')');
         }
-
-        sb.Append($"Array.ConvertAll({parameterName}, e => ");
-        RenderFromObjectTypeConversion(typeInfo.TypeArgument, "e");
-        sb.Append(')');
     }
 
     /// <summary>
@@ -308,13 +315,10 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine($"if (t.IsFaulted) {tcsVarName}.SetException(t.Exception.InnerExceptions);");
         sb.Append(lambdaIndent);
         sb.AppendLine($"else if (t.IsCanceled) {tcsVarName}.SetCanceled();");
-
-        string resultConversionExpression = taskTypeParamInfo.IsTSExport
-            ? $"{GetInteropClassName(taskTypeParamInfo.CLRTypeSyntax.ToString())}.{FromObjectMethodName}(t.Result)"
-            : $"({taskTypeParamInfo.CLRTypeSyntax})t.Result";
-
         sb.Append(lambdaIndent);
-        sb.AppendLine($"else {tcsVarName}.SetResult({resultConversionExpression});");
+        sb.Append($"else {tcsVarName}.SetResult(");
+        RenderInlineTypeConversion(taskTypeParamInfo, "t.Result");
+        sb.AppendLine(");");
         sb.Append(indent);
         sb.AppendLine("}, TaskContinuationOptions.ExecuteSynchronously);");
         return $"{tcsVarName}.Task";

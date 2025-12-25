@@ -25,8 +25,8 @@ try
 } 
 catch (TypeShimException ex) // known exceptions warrant only an error message
 {
-    Console.Error.WriteLine($"TypeShim received invalid input. {ex.GetType().Name} {ex.Message}");
-    Environment.Exit(-1);
+    Console.Error.WriteLine($"TypeShim received invalid input, no code was generated. {ex.GetType().Name} {ex.Message}");
+    Environment.Exit(0);
 }
 
 // End of main program

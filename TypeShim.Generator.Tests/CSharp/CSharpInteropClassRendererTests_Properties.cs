@@ -453,6 +453,101 @@ public partial class C1Interop
 """));
     }
 
+    [Test]
+    public void CSharpInteropClass_InstanceProperty_WithNullableUserClassTaskType()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class MyClass
+            {
+                public void M1()
+                {
+                }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public Task<MyClass?> P1 { get; set; }
+            }
+        """);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+
+        Assert.That(interopClass, Is.EqualTo("""    
+// Auto-generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
+    public static Task<object> get_P1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        TaskCompletionSource<object> retValTcs = new();
+        typed_instance.P1.ContinueWith(t => {
+            if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) retValTcs.SetCanceled();
+            else retValTcs.SetResult((object)t.Result);
+        }, TaskContinuationOptions.ExecuteSynchronously);
+        return retValTcs.Task;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> value)
+    {
+        C1 typed_instance = (C1)instance;
+        TaskCompletionSource<MyClass?> valueTcs = new();
+        value.ContinueWith(t => {
+            if (t.IsFaulted) valueTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) valueTcs.SetCanceled();
+            else valueTcs.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);
+        }, TaskContinuationOptions.ExecuteSynchronously);
+        Task<MyClass?> typed_value = valueTcs.Task;
+        typed_instance.P1 = typed_value;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        TaskCompletionSource<MyClass?> P1Tcs = new();
+        jsObject.GetPropertyAsJSObjectTask("P1").ContinueWith(t => {
+            if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) P1Tcs.SetCanceled();
+            else P1Tcs.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);
+        }, TaskContinuationOptions.ExecuteSynchronously);
+        return new() {
+            P1 = P1Tcs.Task,
+        };
+    }
+}
+
+"""));
+    }
+
     [TestCase("Version")]
     [TestCase("Uri")]
     public void CSharpInteropClass_InstanceProperty_WithNonUserClassArrayType_HasNoFromJSObjectMethod(string typeName) //i.e. is not snapshot compatible

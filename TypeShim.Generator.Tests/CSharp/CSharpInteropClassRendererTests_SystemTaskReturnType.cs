@@ -144,7 +144,7 @@ public partial class C1Interop
     }
 
     [Test]
-    public void CSharpInteropClass_DynamicMethod_HasJSTypePromiseAny_ForUserClassReturnType()
+    public void CSharpInteropClass_InstanceMethod_HasJSTypePromiseAny_ForUserClassReturnType()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;

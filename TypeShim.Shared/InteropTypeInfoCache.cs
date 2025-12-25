@@ -6,7 +6,7 @@ namespace TypeShim.Shared;
 
 public sealed class InteropTypeInfoCache
 {
-    private readonly Dictionary<ITypeSymbol, InteropTypeInfo> cache = new(SymbolEqualityComparer.Default);
+    private readonly Dictionary<ITypeSymbol, InteropTypeInfo> cache = new(SymbolEqualityComparer.IncludeNullability);
     public InteropTypeInfo GetOrAdd(ITypeSymbol typeSymbol, Func<InteropTypeInfo> factory)
     {
         if (!cache.TryGetValue(typeSymbol, out InteropTypeInfo? typeInfo))
