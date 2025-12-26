@@ -9,7 +9,7 @@ using TypeShim.Sample;
 
 namespace TypeShim.Sample;
 
-[TSModule]
+[TSExport]
 public static class TypeShimSampleModule
 {
     public static PeopleProvider? PeopleProvider { get; internal set; }

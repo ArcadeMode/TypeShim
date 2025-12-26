@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TypeShim.Sample.Capabilities;
 
-[TSModule]
+[TSExport]
 public static class CapabilitiesModule
 {
     public static CapabilitiesProvider GetCapabilitiesProvider() => new CapabilitiesProvider();

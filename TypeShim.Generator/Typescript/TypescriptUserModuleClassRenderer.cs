@@ -18,16 +18,9 @@ internal class TypescriptUserModuleClassRenderer(ClassInfo moduleClassInfo, Type
 
     private void RenderModuleClass(string className, string interopInterfaceName)
     {
-        string indent = "  ";
         sb.AppendLine($"// Auto-generated TypeShim TSModule class. Source class: {moduleClassInfo.Namespace}.{moduleClassInfo.Name}");
 
         sb.AppendLine($"export class {className} {{");
-        sb.AppendLine($"{indent}private interop: {interopInterfaceName};");
-        sb.AppendLine();
-        sb.AppendLine($"{indent}constructor(interop: {interopInterfaceName}) {{");
-        sb.AppendLine($"{indent}{indent}this.interop = interop;");
-        sb.AppendLine($"{indent}}}");
-        sb.AppendLine();
         foreach (MethodInfo methodInfo in moduleClassInfo.Methods.Where(m => m.IsStatic))
         {
             methodRenderer.RenderProxyMethod(depth: 1, methodInfo);

@@ -8,6 +8,8 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
 
     internal string Render()
     {
+        TypescriptConfigRenderer configRenderer = new();
+        sourceBuilder.AppendLine(configRenderer.Render());
         RenderInteropInterfaces();        
         RenderUserClasses();
         return sourceBuilder.ToString();
@@ -31,10 +33,10 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
             TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(classInfo, symbolNameProvider);
             sourceBuilder.AppendLine(namespaceRenderer.Render());
         }
-        foreach (ClassInfo moduleClassInfo in classInfos.Where(c => c.Type.IsTSModule))
-        {
-            TypescriptUserModuleClassRenderer moduleClassRenderer = new(moduleClassInfo, symbolNameProvider);
-            sourceBuilder.AppendLine(moduleClassRenderer.Render());
-        }
+        //foreach (ClassInfo moduleClassInfo in classInfos.Where(c => c.Type.IsTSModule))
+        //{
+        //    TypescriptUserModuleClassRenderer moduleClassRenderer = new(moduleClassInfo, symbolNameProvider);
+        //    sourceBuilder.AppendLine(moduleClassRenderer.Render());
+        //}
     }
 }

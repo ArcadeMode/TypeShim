@@ -22,8 +22,7 @@ export const PrimitivesDemoComponent: React.FC<PrimitivesDemoProps> = ({ exports
         if (!starter) throw new Error('wasmModuleStarter not found. Ensure dotnet-start.js is loaded.');
         exports = await (starter.exports as Promise<AssemblyExports>);
       }
-      const module = new CapabilitiesModule(exports);
-      const capabilities = module.GetCapabilitiesProvider();
+      const capabilities = CapabilitiesModule.Proxy.GetCapabilitiesProvider();
       setCap(capabilities);
     })().catch(console.error);
   }, [exportsPromise]);

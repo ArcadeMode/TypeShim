@@ -25,9 +25,9 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         string RenderProxyMethodSignature(MethodInfo methodInfo)
         {
             string returnType = symbolNameProvider.GetUserClassSymbolNameIfExists(methodInfo.ReturnType, SymbolNameFlags.Proxy) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
-
+            string optionalStatic = methodInfo.IsStatic ? "static " : string.Empty;
             string optionalAsync = methodInfo.ReturnType.IsTaskType ? "async " : string.Empty;
-            return $"{optionalAsync}{methodInfo.Name}({GetProxyMethodParameterList(methodInfo)}): {returnType}";
+            return $"{optionalStatic}{optionalAsync}{methodInfo.Name}({GetProxyMethodParameterList(methodInfo)}): {returnType}";
         }
     }
 
@@ -51,12 +51,14 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         string RenderProxyPropertyGetterSignature(MethodInfo methodInfo)
         {
             string returnType = symbolNameProvider.GetUserClassSymbolNameIfExists(methodInfo.ReturnType, SymbolNameFlags.Proxy) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
-            return $"get {propertyInfo.Name}({GetProxyMethodParameterList(methodInfo)}): {returnType}";
+            string optionalStatic = methodInfo.IsStatic ? "static " : string.Empty;
+            return $"{optionalStatic}get {propertyInfo.Name}({GetProxyMethodParameterList(methodInfo)}): {returnType}";
         }
 
         string RenderProxyPropertySetterSignature(MethodInfo methodInfo)
         {
-            return $"set {propertyInfo.Name}({GetProxyMethodParameterList(methodInfo)})";
+            string optionalStatic = methodInfo.IsStatic ? "static " : string.Empty;
+            return $"{optionalStatic}set {propertyInfo.Name}({GetProxyMethodParameterList(methodInfo)})";
         }
     }
 
@@ -114,7 +116,7 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         if (symbolNameProvider.GetUserClassSymbolNameIfExists(returnType, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is string proxyClassName)
         {
             // user class return type, wrap in proxy
-            sb.AppendLine($"{indent}const res = this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({interopInvoke});");
+            sb.AppendLine($"{indent}const res = TypeShimConfig.exports.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({interopInvoke});");
             sb.Append($"{indent}return ");
             RenderInlineToProxyConversion(returnType, proxyClassName, "res");
             sb.AppendLine(";");
@@ -122,7 +124,7 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         else // primitive return type or void
         {
             string optionalReturn = returnType.ManagedType == KnownManagedType.Void ? string.Empty : "return ";
-            sb.AppendLine($"{indent}{optionalReturn}this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({interopInvoke});");
+            sb.AppendLine($"{indent}{optionalReturn}TypeShimConfig.exports.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({interopInvoke});");
         }
 
         string RenderMethodCallParametersWithInstanceParameterExpression(MethodInfo methodInfo, string instanceParameterExpression)
@@ -148,7 +150,7 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         }
         else
         {
-            sb.Append($"new {proxyClassName}({sourceVarName}, this.interop)");
+            sb.Append($"new {proxyClassName}({sourceVarName})");
         }
     }
 
@@ -176,18 +178,6 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
     private string ResolveInteropMethodAccessor(ClassInfo classInfo, MethodInfo methodInfo)
     {
         return $"{classInfo.Namespace}.{symbolNameProvider.GetInteropInterfaceName(classInfo)}.{methodInfo.Name}";
-    }
-
-    private static string GetNewProxyExpression(InteropTypeInfo returnTypeInfo, string proxyClassName, string instanceName)
-    {
-        if (returnTypeInfo.IsNullableType)
-        {
-            return $"{instanceName} ? new {proxyClassName}({instanceName}, this.interop) : null";
-        }
-        else
-        {
-            return $"new {proxyClassName}({instanceName}, this.interop)";
-        }
     }
 
     private static string GetInteropInvocationVariable(MethodParameterInfo param)

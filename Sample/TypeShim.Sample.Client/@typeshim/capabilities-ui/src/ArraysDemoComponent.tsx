@@ -27,8 +27,7 @@ export const ArraysDemoComponent: React.FC<ArraysDemoProps> = ({ exportsPromise 
         if (!starter) throw new Error('wasmModuleStarter not found. Ensure dotnet-start.js is loaded.');
         exports = await (starter.exports as Promise<AssemblyExports>);
       }
-      const module = new CapabilitiesModule(exports);
-      const provider = module.GetCapabilitiesProvider();
+      const provider = CapabilitiesModule.Proxy.GetCapabilitiesProvider();
       setCap(provider);
     })().catch(console.error);
   }, [exportsPromise]);

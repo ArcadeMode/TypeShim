@@ -12,7 +12,7 @@ namespace TypeShim.Sample;
 public class PeopleProvider(PeopleApiClient? _apiClient = null)
 {
     private static Person[]? AllPeople;
-    public Person?[]? PeopleCache => AllPeople ?? [];
+    public static Person?[]? PeopleCache => AllPeople ?? [];
     public Task<TimeoutUnit?>? Unit { get; set; } = Task.FromResult<TimeoutUnit?>(null);
 
     public void DoStuff(Task<TimeoutUnit?> task)

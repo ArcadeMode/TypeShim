@@ -33,6 +33,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
         {
             Namespace = classSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
             Name = classSymbol.Name,
+            IsStatic = classSymbol.IsStatic,
             Type = new InteropTypeInfoBuilder(classSymbol, typeInfoCache).Build(),
             Methods = [.. methodInfoBuilders.Select(b => b.Build())],
             Properties = [.. propertyInfoBuilders.Select(b => b.Build())],

@@ -386,7 +386,7 @@ internal sealed class CSharpInteropClassRenderer
     /// <exception cref="InvalidOperationException"></exception>
     private void RenderObjectMappers(int depth)
     {
-        if (!classInfo.Type.IsTSModule)
+        if (!classInfo.IsStatic)
         {
             RenderFromObjectMapper(depth);
         }
@@ -425,7 +425,7 @@ internal sealed class CSharpInteropClassRenderer
             sb.AppendLine($"{indent}public static {classInfo.Type.CLRTypeSyntax} {FromJSObjectMethodName}(JSObject jsObject)");
             sb.AppendLine($"{indent}{{");
 
-            PropertyInfo[] propertiesInMapper = [.. classInfo.Properties.Where(p => p.Type.IsSnapshotCompatible && p.SetMethod != null)];
+            PropertyInfo[] propertiesInMapper = [.. classInfo.Properties.Where(p => p.IsSnapshotCompatible() && p.SetMethod != null)];
             // Converting task types requires variable assignments, write those first, keep dict for assignments in initializer
             Dictionary<PropertyInfo, TypeConversionExpressionRenderDelegate> propertyToConvertedVarDict = RenderNonInlinableTypeConversions(depth + 1, propertiesInMapper);
 

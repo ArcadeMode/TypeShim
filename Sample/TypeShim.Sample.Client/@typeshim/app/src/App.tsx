@@ -4,7 +4,7 @@ import People from './pages/People';
 import CapabilitiesPage from './pages/Capabilities';
 import type { AssemblyExports } from '@typeshim/wasm-exports';
 
-import { launchWasmRuntime } from '@typeshim/wasm-exports';
+import { launchWasmRuntime, TypeShimInitializer } from '@typeshim/wasm-exports';
 
 type Page = 'home' | 'people' | 'capabilities';
 
@@ -12,7 +12,9 @@ function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
 
   const exportsPromise: Promise<AssemblyExports> = useMemo(() => {
-    return launchWasmRuntime() as Promise<AssemblyExports>;
+    const res = launchWasmRuntime() as Promise<AssemblyExports>;
+    res.then(exports => TypeShimInitializer.initialize({ exports }));
+    return res;
   }, []);
 
   return (

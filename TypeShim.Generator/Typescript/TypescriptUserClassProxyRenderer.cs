@@ -23,24 +23,39 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypescriptS
         string indent3 = new(' ', (depth + 2) * 2);
 
         sb.AppendLine($"{indent}export class {symbolNameProvider.GetUserClassProxySymbolName()} {{");
-        sb.AppendLine($"{indent2}interop: {interopInterfaceName};");
-        sb.AppendLine($"{indent2}instance: object;");
-        sb.AppendLine();
-        sb.AppendLine($"{indent2}constructor(instance: object, interop: {interopInterfaceName}) {{");
-        sb.AppendLine($"{indent3}this.interop = interop;");
-        sb.AppendLine($"{indent3}this.instance = instance;");
-        sb.AppendLine($"{indent2}}}");
-        sb.AppendLine();
+        
+        RenderConstructor(depth + 1);
 
-        foreach (MethodInfo methodInfo in classInfo.Methods.Where(m => !m.IsStatic))
+        foreach (MethodInfo methodInfo in classInfo.Methods)
         {
             methodRenderer.RenderProxyMethod(depth + 1, methodInfo);
         }
-        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => !p.IsStatic && p.Type.IsSnapshotCompatible))
+        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => p.IsSnapshotCompatible() || p.IsStatic))
         {
             methodRenderer.RenderProxyProperty(depth + 1, propertyInfo);
         }
         sb.Append(methodRenderer.GetRenderedContent());
         sb.AppendLine($"{indent}}}");
+    }
+
+    private void RenderConstructor(int depth)
+    {
+        string indent = new(' ', depth * 2);
+        string indent2 = new(' ', (depth + 1) * 2);
+        
+        if (classInfo.IsStatic)
+        {
+            sb.AppendLine($"{indent}private constructor() {{}}");
+        }
+        else
+        {
+            sb.AppendLine($"{indent}instance: object;");
+            sb.AppendLine();
+            sb.AppendLine($"{indent}constructor(instance: object) {{");
+            sb.AppendLine($"{indent2}this.instance = instance;");
+            sb.AppendLine($"{indent}}}");
+            sb.AppendLine();
+        }
+
     }
 }

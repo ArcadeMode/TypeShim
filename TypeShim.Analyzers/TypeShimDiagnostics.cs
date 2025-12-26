@@ -13,24 +13,6 @@ internal static class TypeShimDiagnostics
         isEnabledByDefault: true,
         description: "TSModule classes are entry points; TSExport marks user classes. They cannot be combined.");
 
-    internal static readonly DiagnosticDescriptor TSModuleMustBeStaticRule = new(
-        id: "TSHIM002",
-        title: "TSModule can only be applied to static classes",
-        messageFormat: "Classes with [TSModule] must be static",
-        category: "Usage",
-        defaultSeverity: DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        description: "[TSModule] must be applied to static classes.");
-
-    internal static readonly DiagnosticDescriptor TSExportMustBeNonStaticRule = new(
-        id: "TSHIM003",
-        title: "TSExport can only be applied to non-static classes",
-        messageFormat: "Classes with [TSExport] must be non-static",
-        category: "Usage",
-        defaultSeverity: DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        description: "[TSExport] must be applied to non-static classes.");
-
     internal static readonly DiagnosticDescriptor AttributeOnPublicClassOnlyRule = new(
         id: "TSHIM008",
         title: "TSModule and TSExport can only be applied to classes with public accessibility",
@@ -39,15 +21,6 @@ internal static class TypeShimDiagnostics
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "TSModule and TSExport are only supported on classes with public accessibility.");
-
-    internal static readonly DiagnosticDescriptor TSExportStaticMembersRule = new(
-        id: "TSHIM004",
-        title: "Static members on TSExport classes are not exported",
-        messageFormat: "Public static member '{0}' will not be TSExported, consider making it non-static, decreasing its accessibility or moving it to a [TSModule]",
-        category: "Design",
-        defaultSeverity: DiagnosticSeverity.Warning,
-        isEnabledByDefault: true,
-        description: "TSExport classes expose instance members in TypeScript; static members are not exported.");
 
     internal static readonly DiagnosticDescriptor UnsupportedTypeRule = new(
         id: "TSHIM005",
