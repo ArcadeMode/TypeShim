@@ -154,7 +154,7 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        object? P1Tmp = jsObject.GetPropertyAsJSObject("P1");
+        var P1Tmp = jsObject.GetPropertyAsJSObject("P1");
         return new()
         {
             P1 = P1Tmp != null ? MyClassInterop.FromObject(P1Tmp) : null,
@@ -509,7 +509,7 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        object[]? P1Tmp = jsObject.GetPropertyAsJSObjectArray("P1");
+        var P1Tmp = jsObject.GetPropertyAsJSObjectArray("P1");
         return new()
         {
             P1 = P1Tmp != null ? Array.ConvertAll(P1Tmp, e => MyClassInterop.FromObject(e)) : null,
@@ -588,7 +588,7 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        object?[]? P1Tmp = jsObject.GetPropertyAsJSObjectArray("P1");
+        var P1Tmp = jsObject.GetPropertyAsJSObjectArray("P1");
         return new()
         {
             P1 = P1Tmp != null ? Array.ConvertAll(P1Tmp, e => e != null ? MyClassInterop.FromObject(e) : null) : null,
@@ -679,8 +679,9 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
+        var P1Tmp = jsObject.GetPropertyAsJSObjectTask("P1");
         TaskCompletionSource<MyClass> P1Tcs = new();
-        jsObject.GetPropertyAsJSObjectTask("P1").ContinueWith(t => {
+        P1Tmp.ContinueWith(t => {
             if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(MyClassInterop.FromObject(t.Result));
@@ -775,8 +776,9 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
+        var P1Tmp = jsObject.GetPropertyAsJSObjectTask("P1");
         TaskCompletionSource<MyClass?> P1Tcs = new();
-        jsObject.GetPropertyAsJSObjectTask("P1").ContinueWith(t => {
+        P1Tmp.ContinueWith(t => {
             if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);

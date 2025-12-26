@@ -461,33 +461,24 @@ internal sealed class CSharpInteropClassRenderer
             Dictionary<PropertyInfo, TypeConversionExpressionRenderDelegate> convertedTaskExpressionDict = new();
             foreach (PropertyInfo propertyInfo in propertiesInMapper)
             {
-
-
                 if (propertyInfo.Type is { IsNullableType: true, TypeArgument.IsTaskType: true })
                 {
-                    // Handle Task<T>? property conversion to interop type Task<object>?
                     string tmpVarName = $"{propertyInfo.Name}Tmp";
-                    string jsObjectRetrievalExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type.TypeArgument!)}(\"{propertyInfo.Name}\")";
-                    sb.Append(indent);
-                    sb.AppendLine($"var {tmpVarName} = {jsObjectRetrievalExpression};");
-                    string jsObjectTaskExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
+                    sb.AppendLine($"{indent}var {tmpVarName} = jsObject.{ResolveJSObjectMethodName(propertyInfo.Type.TypeArgument!)}(\"{propertyInfo.Name}\");");
                     string convertedTaskExpression = RenderNullableTaskTypeConversion(depth, propertyInfo.Type, propertyInfo.Name, tmpVarName);
                     convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => sb.Append(convertedTaskExpression)));
                 }
                 else if (propertyInfo.Type is { IsTaskType: true, RequiresCLRTypeConversion: true })
                 {
-                    // Task conversion requires a TaskCompletionSource, cannot be inlined
-                    string jsObjectTaskExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
-                    string convertedTaskExpression = RenderTaskTypeConversion(depth, propertyInfo.Type, propertyInfo.Name, jsObjectTaskExpression);
+                    string tmpVarName = $"{propertyInfo.Name}Tmp";
+                    sb.AppendLine($"{indent}var {tmpVarName} = jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\");");
+                    string convertedTaskExpression = RenderTaskTypeConversion(depth, propertyInfo.Type, propertyInfo.Name, tmpVarName);
                     convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => sb.Append(convertedTaskExpression)));
                 } 
                 else if (propertyInfo.Type is { IsNullableType: true, RequiresCLRTypeConversion: true })
                 {
-                    // Nullable conversion requires a temporary variable to null-check and if not-null convert
                     string tmpVarName = $"{propertyInfo.Name}Tmp";
-                    string jsObjectRetrievalExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type.TypeArgument!)}(\"{propertyInfo.Name}\")";
-                    sb.Append(indent);
-                    sb.AppendLine($"{propertyInfo.Type.InteropTypeSyntax} {tmpVarName} = {jsObjectRetrievalExpression};");
+                    sb.AppendLine($"{indent}var {tmpVarName} = jsObject.{ResolveJSObjectMethodName(propertyInfo.Type.TypeArgument!)}(\"{propertyInfo.Name}\");");
                     convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => RenderInlineTypeConversion(propertyInfo.Type, tmpVarName)));
                 }
             }
