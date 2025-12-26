@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace TypeShim.Shared;
@@ -19,11 +20,12 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
 
     private InteropTypeInfo BuildInternal()
     {
-        JSTypeInfo parameterMarshallingTypeInfo = JSTypeInfo.CreateJSTypeInfoForTypeSymbol(typeSymbol);
+        JSTypeInfo jsTypeInfo = JSTypeInfo.CreateJSTypeInfoForTypeSymbol(typeSymbol);
         TypeSyntax clrTypeSyntax = SyntaxFactory.ParseTypeName(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
-        return parameterMarshallingTypeInfo switch
+
+        return jsTypeInfo switch
         {
-            JSSimpleTypeInfo simpleType => clrTypeSyntax is NullableTypeSyntax ? BuildSimpleNullableTypeInfo(simpleType, clrTypeSyntax) : BuildSimpleTypeInfo(simpleType, clrTypeSyntax),
+            JSSimpleTypeInfo simpleType => BuildSimpleTypeInfo(simpleType, clrTypeSyntax),
             JSArrayTypeInfo arrayTypeInfo => BuildArrayTypeInfo(arrayTypeInfo, clrTypeSyntax),
             JSTaskTypeInfo taskTypeInfo => BuildTaskTypeInfo(taskTypeInfo, clrTypeSyntax),
             JSNullableTypeInfo nullableTypeInfo => BuildNullableTypeInfo(nullableTypeInfo, clrTypeSyntax),
@@ -41,8 +43,8 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
             IsTSExport = IsTSExport,
             IsTSModule = IsTSModule,
             ManagedType = simpleTypeInfo.KnownType,
-            JSTypeSyntax = SyntaxFactory.ParseTypeName(GetSimpleJSMarshalAsTypeArgument(simpleTypeInfo.KnownType)),
-            InteropTypeSyntax = simpleTypeInfo.Syntax,
+            JSTypeSyntax = GetJSTypeSyntax(simpleTypeInfo, clrTypeSyntax),
+            InteropTypeSyntax = GetInteropTypeSyntax(simpleTypeInfo),
             CLRTypeSyntax = clrTypeSyntax,
             TypeArgument = null,
             RequiresCLRTypeConversion = RequiresTypeConversion(),
@@ -54,13 +56,13 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
 
         bool RequiresTypeConversion()
         {
-            // Check if the type inherits from 'object', if so it will need to be converted to its original type after crossing the interop boundary 
+            // If the type inherits from 'object' it requires conversion to its original type after crossing the interop boundary
             if (simpleTypeInfo.KnownType != KnownManagedType.Object)
             {
                 return false;
             }
-            // System.Object is excluded from type conversion, the user may handle this as they see fit
             TypeSyntax unwrapped = clrTypeSyntax is NullableTypeSyntax n ? n.ElementType : clrTypeSyntax;
+            // only 'object' itself requires no conversion, anything else does
             return unwrapped is not PredefinedTypeSyntax p || !p.Keyword.IsKind(SyntaxKind.ObjectKeyword);
         }
 
@@ -86,8 +88,8 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
             IsTSExport = IsTSExport,
             IsTSModule = IsTSModule,
             ManagedType = arrayTypeInfo.KnownType,
-            JSTypeSyntax = SyntaxFactory.ParseTypeName(GetArrayJSMarshalAsTypeArgument(arrayTypeInfo.ElementTypeInfo)),
-            InteropTypeSyntax = SyntaxFactory.ArrayType(arrayTypeInfo.ElementTypeInfo.Syntax, [SyntaxFactory.ArrayRankSpecifier([])]),
+            JSTypeSyntax = GetJSTypeSyntax(arrayTypeInfo, clrTypeSyntax),
+            InteropTypeSyntax = GetInteropTypeSyntax(arrayTypeInfo),
             CLRTypeSyntax = clrTypeSyntax,
             TypeArgument = elementTypeInfo,
             RequiresCLRTypeConversion = elementTypeInfo.RequiresCLRTypeConversion,
@@ -112,20 +114,13 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
         ITypeSymbol? elementTypeSymbol = GetTypeArgument(typeSymbol);
         InteropTypeInfo? taskReturnTypeInfo = elementTypeSymbol != null ? new InteropTypeInfoBuilder(elementTypeSymbol, cache).Build() : null;
 
-        TypeSyntax interopTypeSyntax = SyntaxFactory.GenericName(nameof(Task))
-            .WithTypeArgumentList(
-                SyntaxFactory.TypeArgumentList(
-                    SyntaxFactory.SingletonSeparatedList(taskTypeInfo.ResultTypeInfo.Syntax)
-                )
-            );
-
         return new InteropTypeInfo
         {
             IsTSExport = IsTSExport,
             IsTSModule = IsTSModule,
             ManagedType = taskTypeInfo.KnownType,
-            JSTypeSyntax = SyntaxFactory.ParseTypeName(GetPromiseJSMarshalAsTypeArgument(taskTypeInfo.ResultTypeInfo)),
-            InteropTypeSyntax = interopTypeSyntax,
+            JSTypeSyntax = GetJSTypeSyntax(taskTypeInfo, clrTypeSyntax),
+            InteropTypeSyntax = GetInteropTypeSyntax(taskTypeInfo),
             CLRTypeSyntax = clrTypeSyntax,
             TypeArgument = taskReturnTypeInfo,
             RequiresCLRTypeConversion = taskReturnTypeInfo?.RequiresCLRTypeConversion ?? false,
@@ -158,8 +153,8 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
             IsTSExport = IsTSExport,
             IsTSModule = IsTSModule,
             ManagedType = nullableTypeInfo.KnownType,
-            JSTypeSyntax = SyntaxFactory.ParseTypeName(GetNullableJSMarshalAsTypeArgument(nullableTypeInfo.ResultTypeInfo)),
-            InteropTypeSyntax = SyntaxFactory.NullableType(nullableTypeInfo.ResultTypeInfo.Syntax),
+            JSTypeSyntax = GetJSTypeSyntax(nullableTypeInfo, clrTypeSyntax),
+            InteropTypeSyntax = GetInteropTypeSyntax(nullableTypeInfo),
             CLRTypeSyntax = clrTypeSyntax,
             TypeArgument = innerTypeInfo,
             RequiresCLRTypeConversion = innerTypeInfo.RequiresCLRTypeConversion,
@@ -171,127 +166,151 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
 
         static ITypeSymbol? GetTypeArgument(ITypeSymbol typeSymbol)
         {
-            return typeSymbol is INamedTypeSymbol { ConstructedFrom.SpecialType: SpecialType.System_Nullable_T, TypeArguments.Length: 1 } named
-                ? named.TypeArguments[0]
-                : null;
+            if (typeSymbol.NullableAnnotation == NullableAnnotation.Annotated)
+            {
+                return typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated);
+            } 
+            else if (typeSymbol is INamedTypeSymbol { ConstructedFrom.SpecialType: SpecialType.System_Nullable_T, TypeArguments.Length: 1 } named)
+            {
+                return named.TypeArguments[0];
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 
-    private InteropTypeInfo BuildSimpleNullableTypeInfo(JSSimpleTypeInfo simpleTypeInfo, TypeSyntax clrTypeSyntax)
+    private static TypeSyntax GetInteropTypeSyntax(JSTypeInfo jsTypeInfo)
     {
-        ITypeSymbol? innertypeSymbol = GetTypeArgument(typeSymbol) ?? throw new TypeNotSupportedException("Only nullables with one element type are supported");
-        InteropTypeInfo innerTypeInfo = new InteropTypeInfoBuilder(innertypeSymbol, cache).Build();
-
-        return new InteropTypeInfo
+        return jsTypeInfo switch
         {
-            IsTSExport = IsTSExport,
-            IsTSModule = IsTSModule,
-            ManagedType = simpleTypeInfo.KnownType,
-            JSTypeSyntax = SyntaxFactory.ParseTypeName(GetSimpleJSMarshalAsTypeArgument(simpleTypeInfo.KnownType)),
-            InteropTypeSyntax = SyntaxFactory.NullableType(simpleTypeInfo.Syntax),
-            CLRTypeSyntax = clrTypeSyntax,
-            TypeArgument = innerTypeInfo,
-            RequiresCLRTypeConversion = innerTypeInfo.RequiresCLRTypeConversion,
-            IsTaskType = false,
-            IsArrayType = false,
-            IsNullableType = true,
-            IsSnapshotCompatible = innerTypeInfo.IsSnapshotCompatible
-        };
+            JSSimpleTypeInfo simpleTypeInfo => simpleTypeInfo.Syntax,
+            JSArrayTypeInfo arrayTypeInfo => arrayTypeInfo.GetTypeSyntax(),//SyntaxFactory.ArrayType(arrayTypeInfo.ElementTypeInfo.Syntax, [SyntaxFactory.ArrayRankSpecifier([])]),
+            JSTaskTypeInfo taskTypeInfo => taskTypeInfo.GetTypeSyntax(),
+            //SyntaxFactory.GenericName(nameof(Task))
+            //    .WithTypeArgumentList(
+            //        SyntaxFactory.TypeArgumentList(
+            //            SyntaxFactory.SingletonSeparatedList(taskTypeInfo.ResultTypeInfo.Syntax)
+            //        )
+            //    ),
+            JSNullableTypeInfo nullableTypeInfo => SyntaxFactory.NullableType(GetInteropTypeSyntax(nullableTypeInfo.ResultTypeInfo)),
+            _ => throw new TypeNotSupportedException("Unsupported JSTypeInfo for interop type syntax generation"),
+        } ?? throw new ArgumentException($"Invalid JSTypeInfo of known type '{jsTypeInfo.KnownType}' yielded no syntax");
+    }
 
-        static ITypeSymbol? GetTypeArgument(ITypeSymbol typeSymbol)
+    private static TypeSyntax GetJSTypeSyntax(JSTypeInfo jSTypeInfo, TypeSyntax clrTypeSyntax)
+    {
+        return SyntaxFactory.ParseTypeName(jSTypeInfo switch
         {
-            return typeSymbol.NullableAnnotation == NullableAnnotation.Annotated // mostly indicates a reference type, which is inherently nullable, but is still annotated
-                ? typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated)
-                : null;
+            JSSimpleTypeInfo simpleType => GetSimpleJSMarshalAsTypeArgument(simpleType.KnownType),
+            JSArrayTypeInfo arrayTypeInfo => GetArrayJSMarshalAsTypeArgument(arrayTypeInfo.ElementTypeInfo, clrTypeSyntax),
+            JSTaskTypeInfo taskTypeInfo => GetPromiseJSMarshalAsTypeArgument(taskTypeInfo.ResultTypeInfo, clrTypeSyntax),
+            JSNullableTypeInfo { IsValueType: true } nullableTypeInfo => GetNullableJSMarshalAsTypeArgument(nullableTypeInfo.ResultTypeInfo.KnownType, clrTypeSyntax),
+            JSNullableTypeInfo { IsValueType: false } nullableTypeInfo => GetJSTypeSyntax(nullableTypeInfo.ResultTypeInfo, clrTypeSyntax).ToString(), // todo: needed?
+            JSSpanTypeInfo => throw new NotImplementedException("Span<T> is not yet supported"),
+            JSArraySegmentTypeInfo => throw new NotImplementedException("ArraySegment<T> is not yet supported"),
+            JSFunctionTypeInfo => throw new NotImplementedException("Func & Action are not yet supported"),
+            JSInvalidTypeInfo or _ => throw new TypeNotSupportedException(clrTypeSyntax.ToFullString()),
+        });
+
+        static string GetSimpleJSMarshalAsTypeArgument(KnownManagedType knownManagedType)
+        {
+            // Only certain simple types are supported, this method maps them
+            return knownManagedType switch
+            {
+                KnownManagedType.Boolean => "JSType.Boolean",
+                KnownManagedType.Byte
+                or KnownManagedType.Int16
+                or KnownManagedType.Int32
+                or KnownManagedType.Int64
+                or KnownManagedType.IntPtr
+                or KnownManagedType.Single //i.e. float
+                or KnownManagedType.Double => "JSType.Number",
+                KnownManagedType.Char
+                or KnownManagedType.String => "JSType.String",
+                KnownManagedType.Object => "JSType.Any",
+                KnownManagedType.Void => "JSType.Void",
+                KnownManagedType.JSObject => "JSType.Object",
+                KnownManagedType.DateTime => "JSType.Date",
+                KnownManagedType.DateTimeOffset => "JSType.Date",
+                _ => throw new TypeNotSupportedException($"Unsupported simple type {knownManagedType}")
+            };
         }
-    }
 
-    private static string GetSimpleJSMarshalAsTypeArgument(KnownManagedType knownManagedType)
-    {
-        // Only certain simple types are supported, this method maps them
-        return knownManagedType switch
+        static string GetPromiseJSMarshalAsTypeArgument(JSTypeInfo typeInfo, TypeSyntax syntax)
         {
-            KnownManagedType.Boolean => "JSType.Boolean",
-            KnownManagedType.Byte 
-            or KnownManagedType.Int16 
-            or KnownManagedType.Int32
-            or KnownManagedType.Int64
-            or KnownManagedType.IntPtr 
-            or KnownManagedType.Single //i.e. float
-            or KnownManagedType.Double => "JSType.Number",
-            KnownManagedType.Char 
-            or KnownManagedType.String => "JSType.String",
-            KnownManagedType.Object => "JSType.Any",
-            KnownManagedType.Void => "JSType.Void",
-            KnownManagedType.JSObject => "JSType.Object",
-            KnownManagedType.DateTime => "JSType.Date",
-            KnownManagedType.DateTimeOffset => "JSType.Date",
-            _ => throw new TypeNotSupportedException($"Unsupported simple type {knownManagedType}")
-        };
-    }
+            if (typeInfo is JSNullableTypeInfo { IsValueType: false, ResultTypeInfo: JSTypeInfo resultTypeInfo })
+            {
+                return GetPromiseJSMarshalAsTypeArgument(resultTypeInfo, syntax);
+            }
 
-    private static string GetPromiseJSMarshalAsTypeArgument(JSSimpleTypeInfo innerTypeInfo)
-    {
-        // Only certain types are supported in Task<T>, this method maps them
-        string innerJsType = innerTypeInfo.KnownType switch
+            // Only certain types are supported in Task<T>, this method maps them
+            string innerJsType = typeInfo.KnownType switch
+            {
+                KnownManagedType.Boolean => "JSType.Boolean",
+                KnownManagedType.Byte
+                or KnownManagedType.Int16
+                or KnownManagedType.Int32
+                or KnownManagedType.Int64
+                or KnownManagedType.IntPtr
+                or KnownManagedType.Single
+                or KnownManagedType.Double => "JSType.Number",
+                KnownManagedType.DateTime
+                or KnownManagedType.DateTimeOffset => "JSType.Date",
+                KnownManagedType.Exception => "JSType.Error",
+                KnownManagedType.JSObject => "JSType.Object",
+                KnownManagedType.Char
+                or KnownManagedType.String => "JSType.String",
+                KnownManagedType.Object => "JSType.Any",
+                _ => throw new TypeNotSupportedException($"Unsupported Task<T> type argument {typeInfo.KnownType} ({syntax})")
+            };
+            return $"JSType.Promise<{innerJsType}>";
+
+        }
+
+        static string GetArrayJSMarshalAsTypeArgument(JSTypeInfo typeInfo, TypeSyntax syntax)
         {
-            KnownManagedType.Boolean => "JSType.Boolean",
-            KnownManagedType.Byte
-            or KnownManagedType.Int16
-            or KnownManagedType.Int32
-            or KnownManagedType.Int64
-            or KnownManagedType.IntPtr
-            or KnownManagedType.Single
-            or KnownManagedType.Double => "JSType.Number",
-            KnownManagedType.DateTime
-            or KnownManagedType.DateTimeOffset => "JSType.Date",
-            KnownManagedType.Exception => "JSType.Error",
-            KnownManagedType.JSObject => "JSType.Object",
-            KnownManagedType.Char
-            or KnownManagedType.String => "JSType.String",
-            KnownManagedType.Object => "JSType.Any",
-            _ => throw new TypeNotSupportedException($"Unsupported Task<T> type argument {innerTypeInfo.KnownType} ({innerTypeInfo.Syntax})")
-        };
-        return $"JSType.Promise<{innerJsType}>";
+            if (typeInfo is JSNullableTypeInfo { IsValueType: false, ResultTypeInfo: JSTypeInfo resultTypeInfo })
+            {
+                return GetArrayJSMarshalAsTypeArgument(resultTypeInfo, syntax);
+            }
 
-    }
+            // Only certain types are supported in arrays, this method maps them
+            string innerJsType = typeInfo.KnownType switch
+            {
+                KnownManagedType.Byte
+                or KnownManagedType.Int32
+                or KnownManagedType.Double => "JSType.Number",
+                KnownManagedType.JSObject => "JSType.Object",
+                KnownManagedType.String => "JSType.String",
+                KnownManagedType.Object => "JSType.Any",
 
-    private static string GetArrayJSMarshalAsTypeArgument(JSSimpleTypeInfo innerTypeInfo)
-    {
-        // Only certain types are supported in arrays, this method maps them
-        string innerJsType = innerTypeInfo.KnownType switch
+                _ => throw new TypeNotSupportedException($"Unsupported Array<T> type argument {typeInfo.KnownType} ({syntax})")
+            };
+
+            return $"JSType.Array<{innerJsType}>";
+        }
+
+        static string GetNullableJSMarshalAsTypeArgument(KnownManagedType managedType, TypeSyntax syntax)
         {
-            KnownManagedType.Byte 
-            or KnownManagedType.Int32 
-            or KnownManagedType.Double => "JSType.Number",
-            KnownManagedType.JSObject => "JSType.Object",
-            KnownManagedType.String => "JSType.String",
-            KnownManagedType.Object => "JSType.Any",
+            // Only certain types are supported as nullables, this method maps them
+            return managedType switch
+            {
+                KnownManagedType.Boolean => "JSType.Boolean",
+                KnownManagedType.Byte
+                or KnownManagedType.Int16
+                or KnownManagedType.Int32
+                or KnownManagedType.Int64
+                or KnownManagedType.IntPtr
+                or KnownManagedType.Single
+                or KnownManagedType.Double => "JSType.Number",
+                KnownManagedType.Char => "JSType.String",
+                KnownManagedType.DateTime => "JSType.Date",
+                KnownManagedType.DateTimeOffset => "JSType.Date",
 
-            _ => throw new TypeNotSupportedException($"Unsupported Array<T> type argument {innerTypeInfo.KnownType} ({innerTypeInfo.Syntax})")
-        };
-
-        return $"JSType.Array<{innerJsType}>";
-    }
-
-    private static string GetNullableJSMarshalAsTypeArgument(JSSimpleTypeInfo innerTypeInfo)
-    {
-        // Only certain types are supported as nullables, this method maps them
-        return innerTypeInfo.KnownType switch
-        {
-            KnownManagedType.Boolean => "JSType.Boolean",
-            KnownManagedType.Byte 
-            or KnownManagedType.Int16 
-            or KnownManagedType.Int32
-            or KnownManagedType.Int64
-            or KnownManagedType.IntPtr 
-            or KnownManagedType.Single 
-            or KnownManagedType.Double => "JSType.Number",
-            KnownManagedType.Char => "JSType.String",
-            KnownManagedType.DateTime => "JSType.Date",
-            KnownManagedType.DateTimeOffset => "JSType.Date",
-
-            _ => throw new TypeNotSupportedException($"Unsupported Nullable<T> type argument {innerTypeInfo.KnownType} ({innerTypeInfo.Syntax})")
-        };
+                _ => throw new TypeNotSupportedException($"Unsupported Nullable<T> type argument {managedType} ({syntax})")
+            };
+        }
     }
 }

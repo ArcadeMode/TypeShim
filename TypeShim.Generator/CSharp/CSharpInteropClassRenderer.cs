@@ -238,6 +238,10 @@ internal sealed class CSharpInteropClassRenderer
         {
             RenderInlineArrayTypeConversion(typeInfo, varName);
         }
+        else if (typeInfo.IsNullableType)
+        {
+            RenderInlineNullableTypeConversion(typeInfo, varName);
+        }
         else if (typeInfo.ManagedType is KnownManagedType.Object)
         {
             //TODO: make nullables actually ManagedType.Nullable with inner type Object or T, currently nullable reflects inner type, which is confusing sometimes
@@ -260,11 +264,6 @@ internal sealed class CSharpInteropClassRenderer
         InteropTypeInfo targetType = typeInfo.TypeArgument ?? typeInfo; // unwrap nullable or use simple type directly
         string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
 
-        if (typeInfo.IsNullableType)
-        {
-            sb.Append($"{parameterName} != null ? ");
-        }
-        
         if (typeInfo.IsTSExport)
         {
             sb.Append($"{targetInteropClass}.{FromObjectMethodName}({parameterName})");
@@ -273,17 +272,22 @@ internal sealed class CSharpInteropClassRenderer
         {
             RenderInlineCovariantTypeConversion(targetType, parameterName);
         }
+    }
 
-        if (typeInfo.IsNullableType)
-        {
-            sb.Append(" : null");
-        }
+    private void RenderInlineNullableTypeConversion(InteropTypeInfo typeInfo, string parameterName)
+    {
+        Debug.Assert(typeInfo.IsNullableType, "Type must be nullable for nullable type conversion.");
+        Debug.Assert(typeInfo.TypeArgument != null, "Nullable type must have a type argument.");
+
+        sb.Append($"{parameterName} != null ? ");
+        RenderInlineTypeConversion(typeInfo.TypeArgument, parameterName);
+        sb.Append(" : null");
     }
 
     private void RenderInlineArrayTypeConversion(InteropTypeInfo typeInfo, string parameterName)
     {
         Debug.Assert(typeInfo.TypeArgument != null, "Array type must have a type argument.");
-
+        InteropTypeInfo elementTypeInfo = typeInfo.TypeArgument ?? throw new InvalidOperationException("Array type must have a type argument for conversion.");
         if (typeInfo.TypeArgument.IsTSExport == false)
         {
             RenderInlineCovariantTypeConversion(typeInfo, parameterName);
@@ -292,7 +296,7 @@ internal sealed class CSharpInteropClassRenderer
         else
         {
             sb.Append($"Array.ConvertAll({parameterName}, e => ");
-            RenderInlineObjectTypeConversion(typeInfo.TypeArgument, "e");
+            RenderInlineTypeConversion(typeInfo.TypeArgument, "e");
             sb.Append(')');
         }
     }
@@ -304,7 +308,7 @@ internal sealed class CSharpInteropClassRenderer
     private string RenderTaskTypeConversion(int depth, InteropTypeInfo targetTaskType, string sourceVarName, string sourceTaskExpression)
     {
         string indent = new(' ', depth * 4);
-        InteropTypeInfo taskTypeParamInfo = targetTaskType.TypeArgument ?? throw new InvalidOperationException("Task type parameter must have a type argument for conversion.");
+        InteropTypeInfo taskTypeParamInfo = targetTaskType.TypeArgument ?? throw new InvalidOperationException("Task type must have a type argument for conversion.");
         string tcsVarName = $"{sourceVarName}Tcs";
         sb.Append(indent);
         sb.AppendLine($"TaskCompletionSource<{taskTypeParamInfo.CLRTypeSyntax}> {tcsVarName} = new();");
@@ -387,10 +391,7 @@ internal sealed class CSharpInteropClassRenderer
                 }
                 else if (propertyInfo.Type.RequiresCLRTypeConversion)
                 {
-                    InteropTypeInfo targetType = propertyInfo.Type.TypeArgument ?? propertyInfo.Type;
                     string propertyRetrievalExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
-
-                    string targetInteropClass = GetInteropClassName(targetType.CLRTypeSyntax.ToString());
                     sb.Append($"{indent3}{propertyInfo.Name} = ");
                     RenderInlineTypeConversion(propertyInfo.Type, propertyRetrievalExpression);
                 }
@@ -412,14 +413,16 @@ internal sealed class CSharpInteropClassRenderer
             {
                 if (propertyInfo.Type is { IsTaskType: true, RequiresCLRTypeConversion: true })
                 {
+                    // Task conversion requires a TaskCompletionSource, cannot be inlined
                     string jsObjectTaskExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
                     string convertedTaskExpression = RenderTaskTypeConversion(depth, propertyInfo.Type, propertyInfo.Name, jsObjectTaskExpression);
                     convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => sb.Append(convertedTaskExpression)));
                 } 
                 else if (propertyInfo.Type is { IsNullableType: true, RequiresCLRTypeConversion: true })
                 {
+                    // Nullable conversion requires a temporary variable to null-check and if not-null convert
                     string tmpVarName = $"{propertyInfo.Name}Tmp";
-                    string jsObjectRetrievalExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
+                    string jsObjectRetrievalExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type.TypeArgument!)}(\"{propertyInfo.Name}\")";
                     sb.Append(indent);
                     sb.AppendLine($"{propertyInfo.Type.InteropTypeSyntax} {tmpVarName} = {jsObjectRetrievalExpression};");
                     convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => RenderInlineTypeConversion(propertyInfo.Type, tmpVarName)));
@@ -433,6 +436,7 @@ internal sealed class CSharpInteropClassRenderer
         {
             return typeInfo.ManagedType switch
             {
+                KnownManagedType.Nullable => ResolveJSObjectMethodName(typeInfo.TypeArgument!),
                 KnownManagedType.Boolean => "GetPropertyAsBoolean",
                 KnownManagedType.Double => "GetPropertyAsDouble",
                 KnownManagedType.String => "GetPropertyAsString",
@@ -447,7 +451,13 @@ internal sealed class CSharpInteropClassRenderer
                     { ManagedType: KnownManagedType.String } => "GetPropertyAsStringArray",
                     { ManagedType: KnownManagedType.JSObject } => "GetPropertyAsJSObjectArray",
                     { ManagedType: KnownManagedType.Object, IsTSExport: true } => "GetPropertyAsJSObjectArray", // exported object types have a FromJSObject mapper
-                    _ => throw new InvalidOperationException($"Array of type {typeInfo.TypeArgument?.ManagedType} cannot be marshalled through TypeShim JSObject extensions"),
+                    { ManagedType: KnownManagedType.Nullable } elemTypeInfo => elemTypeInfo.TypeArgument switch
+                    {
+                        { ManagedType: KnownManagedType.JSObject } => "GetPropertyAsJSObjectArray",
+                        { ManagedType: KnownManagedType.Object, IsTSExport: true } => "GetPropertyAsJSObjectArray", // exported object types have a FromJSObject mapper
+                        _ => throw new InvalidOperationException($"Array of nullable type '{elemTypeInfo?.ManagedType}' cannot be marshalled through TypeShim JSObject extensions"),
+                    },
+                    _ => throw new InvalidOperationException($"Array of type '{typeInfo.TypeArgument?.ManagedType}' cannot be marshalled through TypeShim JSObject extensions"),
                 },
                 KnownManagedType.Task => typeInfo.TypeArgument switch
                 {
@@ -466,9 +476,15 @@ internal sealed class CSharpInteropClassRenderer
                     { ManagedType: KnownManagedType.String } => "GetPropertyAsStringTask",
                     { ManagedType: KnownManagedType.JSObject } => "GetPropertyAsJSObjectTask",
                     { ManagedType: KnownManagedType.Object, IsTSExport: true } => "GetPropertyAsJSObjectTask", // TODO: include fromJSObject mapping?
-                    _ => throw new InvalidOperationException($"Task of type {typeInfo.TypeArgument?.ManagedType} cannot be marshalled through TypeShim JSObject extensions"),
+                    { ManagedType: KnownManagedType.Nullable } returnTypeInfo => returnTypeInfo.TypeArgument switch
+                    {
+                        { ManagedType: KnownManagedType.JSObject } => "GetPropertyAsJSObjectTask",
+                        { ManagedType: KnownManagedType.Object, IsTSExport: true } => "GetPropertyAsJSObjectTask", // exported object types have a FromJSObject mapper
+                        _ => throw new InvalidOperationException($"Task of nullable type '{returnTypeInfo?.ManagedType}' cannot be marshalled through TypeShim JSObject extensions"),
+                    },
+                    _ => throw new InvalidOperationException($"Task of type '{typeInfo.TypeArgument?.ManagedType}' cannot be marshalled through TypeShim JSObject extensions"),
                 },
-                _ => throw new InvalidOperationException($"Type {typeInfo.ManagedType} cannot be marshalled through JSObject nor TypeShim JSObject extensions"),
+                _ => throw new InvalidOperationException($"Type '{typeInfo.ManagedType}' cannot be marshalled through JSObject nor TypeShim JSObject extensions"),
             };
         }
     }

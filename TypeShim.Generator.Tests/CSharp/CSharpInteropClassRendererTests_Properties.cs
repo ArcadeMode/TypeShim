@@ -364,6 +364,242 @@ public partial class C1Interop
     }
 
     [Test]
+    public void CSharpInteropClass_InstanceProperty_WithNullableUserClassArrayType()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class MyClass
+            {
+                public void M1()
+                {
+                }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public MyClass?[] P1 { get; set; }
+            }
+        """);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        string[] x = Array.ConvertAll([1, 2, 3], e => $"e: {e}");
+        Assert.That(interopClass, Is.EqualTo("""    
+// Auto-generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Array<JSType.Any>>]
+    public static object?[] get_P1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return typed_instance.P1;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Array<JSType.Any>>] object?[] value)
+    {
+        C1 typed_instance = (C1)instance;
+        MyClass?[] typed_value = Array.ConvertAll(value, e => e != null ? MyClassInterop.FromObject(e) : null);
+        typed_instance.P1 = typed_value;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        return new()
+        {
+            P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectArray("P1"), e => e != null ? MyClassInterop.FromObject(e) : null),
+        };
+    }
+}
+
+"""));
+    }
+
+    [Test]
+    public void CSharpInteropClass_InstanceProperty_WithUserClassNullableArrayType()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class MyClass
+            {
+                public void M1()
+                {
+                }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public MyClass[]? P1 { get; set; }
+            }
+        """);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        string[] x = Array.ConvertAll([1, 2, 3], e => $"e: {e}");
+        Assert.That(interopClass, Is.EqualTo("""    
+// Auto-generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Array<JSType.Any>>]
+    public static object[]? get_P1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return typed_instance.P1;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Array<JSType.Any>>] object[]? value)
+    {
+        C1 typed_instance = (C1)instance;
+        MyClass[]? typed_value = value != null ? Array.ConvertAll(value, e => MyClassInterop.FromObject(e)) : null;
+        typed_instance.P1 = typed_value;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        object[]? P1Tmp = jsObject.GetPropertyAsJSObjectArray("P1");
+        return new()
+        {
+            P1 = P1Tmp != null ? Array.ConvertAll(P1Tmp, e => MyClassInterop.FromObject(e)) : null,
+        };
+    }
+}
+
+"""));
+    }
+
+    [Test]
+    public void CSharpInteropClass_InstanceProperty_WithNullableUserClassNullableArrayType()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class MyClass
+            {
+                public void M1()
+                {
+                }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public MyClass?[]? P1 { get; set; }
+            }
+        """);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        string[] x = Array.ConvertAll([1, 2, 3], e => $"e: {e}");
+        Assert.That(interopClass, Is.EqualTo("""    
+// Auto-generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Array<JSType.Any>>]
+    public static object?[]? get_P1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return typed_instance.P1;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Array<JSType.Any>>] object?[]? value)
+    {
+        C1 typed_instance = (C1)instance;
+        MyClass?[]? typed_value = value != null ? Array.ConvertAll(value, e => e != null ? MyClassInterop.FromObject(e) : null) : null;
+        typed_instance.P1 = typed_value;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        object?[]? P1Tmp = jsObject.GetPropertyAsJSObjectArray("P1");
+        return new()
+        {
+            P1 = P1Tmp != null ? Array.ConvertAll(P1Tmp, e => e != null ? MyClassInterop.FromObject(e) : null) : null,
+        };
+    }
+}
+
+"""));
+    }
+
+    [Test]
     public void CSharpInteropClass_InstanceProperty_WithUserClassTaskType()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
@@ -503,7 +739,7 @@ public partial class C1Interop
 {
     [JSExport]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
-    public static Task<object> get_P1([JSMarshalAs<JSType.Any>] object instance)
+    public static Task<object?> get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
         C1 typed_instance = (C1)instance;
         TaskCompletionSource<object?> retValTcs = new();
@@ -516,7 +752,7 @@ public partial class C1Interop
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
-    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> value)
+    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object?> value)
     {
         C1 typed_instance = (C1)instance;
         TaskCompletionSource<MyClass?> valueTcs = new();

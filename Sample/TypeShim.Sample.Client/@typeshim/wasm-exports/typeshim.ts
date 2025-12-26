@@ -88,9 +88,9 @@ export interface DogInterop {
 export interface PeopleProviderInterop {
     DoStuff(instance: object, task: Promise<object | null>): void;
     FetchPeopleAsync(instance: object): Promise<object>;
-    get_PeopleCache(instance: object): Array<object | null>;
-    get_Unit(instance: object): Promise<object | null>;
-    set_Unit(instance: object, value: Promise<object | null>): void;
+    get_PeopleCache(instance: object): Array<object | null> | null;
+    get_Unit(instance: object): Promise<object | null> | null;
+    set_Unit(instance: object, value: Promise<object | null> | null): void;
 }
 
 // Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.TimeoutUnit
@@ -468,26 +468,25 @@ export namespace PeopleProvider {
       return res.then(e => new People.Proxy(e, this.interop));
     }
 
-    public get PeopleCache(): Array<Person.Proxy | null> {
+    public get PeopleCache(): Array<Person.Proxy | null> | null {
       const res = this.interop.TypeShim.Sample.PeopleProviderInterop.get_PeopleCache(this.instance);
-      return res.map(e => e ? new Person.Proxy(e, this.interop) : null);
+      return res ? new Person.Proxy(res, this.interop) : null;
     }
 
-    public get Unit(): Promise<TimeoutUnit.Proxy | null> {
+    public get Unit(): Promise<TimeoutUnit.Proxy | null> | null {
       const res = this.interop.TypeShim.Sample.PeopleProviderInterop.get_Unit(this.instance);
-      return res.then(e => e ? new TimeoutUnit.Proxy(e, this.interop) : null);
+      return res ? new TimeoutUnit.Proxy(res, this.interop) : null;
     }
 
-    public set Unit(value: Promise<TimeoutUnit.Proxy | TimeoutUnit.Snapshot | null>) {
-      const valueInstance = value.then(e => e instanceof TimeoutUnit.Proxy ? e.instance : e);
-      this.interop.TypeShim.Sample.PeopleProviderInterop.set_Unit(this.instance, valueInstance);
+    public set Unit(value: Promise<TimeoutUnit.Proxy | TimeoutUnit.Snapshot | null> | null) {
+      this.interop.TypeShim.Sample.PeopleProviderInterop.set_Unit(this.instance, value);
     }
 
   }
 
   export interface Snapshot {
-    PeopleCache: Array<Person.Snapshot | null>;
-    Unit: Promise<TimeoutUnit.Snapshot | null>;
+    PeopleCache: Array<Person.Snapshot | null> | null;
+    Unit: Promise<TimeoutUnit.Snapshot | null> | null;
   }
   export const Snapshot: {
     [Symbol.hasInstance](v: unknown): boolean;
@@ -495,13 +494,13 @@ export namespace PeopleProvider {
     [Symbol.hasInstance](v: unknown) {
       if (!v || typeof v !== 'object') return false;
       const o = v as any;
-      return Array.isArray(o.PeopleCache) && o.PeopleCache.every((e: any) => (e === null || e instanceof Person.Snapshot)) && (o.Unit !== null && typeof (o.Unit as any).then === 'function');
+      return (o.PeopleCache === null || Array.isArray(o.PeopleCache) && o.PeopleCache.every((e: any) => (e === null || e instanceof Person.Snapshot))) && (o.Unit === null || (o.Unit !== null && typeof (o.Unit as any).then === 'function'));
     }
   };
   export function snapshot(proxy: PeopleProvider.Proxy): PeopleProvider.Snapshot {
     return {
-      PeopleCache: proxy.PeopleCache.map(e => e ? Person.snapshot(e) : null),
-      Unit: proxy.Unit.then(e => e ? TimeoutUnit.snapshot(e) : null),
+      PeopleCache: proxy.PeopleCache ? proxy.PeopleCache.map(e => e ? Person.snapshot(e) : null) : null,
+      Unit: proxy.Unit ? proxy.Unit.then(e => e ? TimeoutUnit.snapshot(e) : null) : null,
     };
   }
 }
