@@ -3,10 +3,11 @@ using System;
 using System.Data;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using System.Threading.Tasks;
-using TypeShim.Shared;
 using TypeShim.Generator.Parsing;
+using TypeShim.Shared;
 
 namespace TypeShim.Generator.CSharp;
 
@@ -87,7 +88,13 @@ internal sealed class CSharpInteropClassRenderer
         string accessedObject = methodInfo.IsStatic ? classInfo.Name : GetTypedParameterName(methodInfo.MethodParameters.ElementAt(0));
         string accessorExpression = $"{accessedObject}.{propertyInfo.Name}";
 
-        if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresCLRTypeConversion: true })
+        if (methodInfo.ReturnType is { IsNullableType: true, TypeArgument.IsTaskType: true })
+        {
+            // Handle Task<T>? property conversion to interop type Task<object>?
+            string convertedTaskExpression = RenderNullableTaskTypeConversion(2, methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", accessorExpression);
+            accessorExpression = convertedTaskExpression; // continue with the converted expression
+        }
+        else if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresCLRTypeConversion: true })
         {
             // Handle Task<T> property conversion to interop type Task<object>
             string convertedTaskExpression = RenderTaskTypeConversion(2, methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", accessorExpression);
@@ -173,7 +180,15 @@ internal sealed class CSharpInteropClassRenderer
         string indent = new(' ', depth * 4);
 
         // Handle Task<T> return conversion for conversion requiring types
-        if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresCLRTypeConversion: true })
+        if (methodInfo.ReturnType is { IsNullableType: true, TypeArgument.IsTaskType: true })
+        {
+            string convertedTaskExpression = RenderNullableTaskTypeConversion(depth, methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", GetInvocationExpression());
+            sb.Append(indent);
+            sb.Append("return ");
+            sb.Append(convertedTaskExpression);
+            sb.AppendLine(";");
+        }
+        else if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresCLRTypeConversion: true })
         {
             string convertedTaskExpression = RenderTaskTypeConversion(depth, methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", GetInvocationExpression());
             sb.Append(indent);
@@ -215,12 +230,21 @@ internal sealed class CSharpInteropClassRenderer
             return;
 
         string indent = new(' ', depth * 4);
-        if (parameterInfo.Type.IsTaskType)
+
+        // task pattern differs from other conversions, hence their fully separated rendering.
+        if (parameterInfo.Type is { IsNullableType: true, TypeArgument.IsTaskType: true }) // Task<T>?
+        {
+            string convertedTaskExpression = RenderNullableTaskTypeConversion(depth, parameterInfo.Type, parameterInfo.Name, parameterInfo.Name);
+            sb.Append(indent);
+            sb.AppendLine($"{parameterInfo.Type.CLRTypeSyntax} {GetTypedParameterName(parameterInfo)} = {convertedTaskExpression};");
+            return;
+        }
+        if (parameterInfo.Type.IsTaskType) // Task<T>
         {
             string convertedTaskExpression = RenderTaskTypeConversion(depth, parameterInfo.Type, parameterInfo.Name, parameterInfo.Name);
             sb.Append(indent);
-            sb.AppendLine($"Task<{parameterInfo.Type.TypeArgument!.CLRTypeSyntax}> {GetTypedParameterName(parameterInfo)} = {convertedTaskExpression};");
-            return; // task pattern differs from other conversions, hence its fully separated rendering.
+            sb.AppendLine($"{parameterInfo.Type.CLRTypeSyntax} {GetTypedParameterName(parameterInfo)} = {convertedTaskExpression};");
+            return; 
         }
 
         sb.Append($"{indent}{parameterInfo.Type.CLRTypeSyntax} {GetTypedParameterName(parameterInfo)} = ");
@@ -308,6 +332,7 @@ internal sealed class CSharpInteropClassRenderer
     private string RenderTaskTypeConversion(int depth, InteropTypeInfo targetTaskType, string sourceVarName, string sourceTaskExpression)
     {
         string indent = new(' ', depth * 4);
+
         InteropTypeInfo taskTypeParamInfo = targetTaskType.TypeArgument ?? throw new InvalidOperationException("Task type must have a type argument for conversion.");
         string tcsVarName = $"{sourceVarName}Tcs";
         sb.Append(indent);
@@ -326,6 +351,31 @@ internal sealed class CSharpInteropClassRenderer
         sb.Append(indent);
         sb.AppendLine("}, TaskContinuationOptions.ExecuteSynchronously);");
         return $"{tcsVarName}.Task";
+    }
+
+    private string RenderNullableTaskTypeConversion(int depth, InteropTypeInfo targetNullableTaskType, string sourceVarName, string sourceTaskExpression)
+    {
+        string indent = new(' ', depth * 4);
+
+        InteropTypeInfo taskTypeParamInfo = targetNullableTaskType.TypeArgument ?? throw new InvalidOperationException("Nullable type must have a type argument for conversion.");
+        InteropTypeInfo taskReturnTypeParamInfo = taskTypeParamInfo.TypeArgument ?? throw new InvalidOperationException("Task type must have a type argument for conversion.");
+        string tcsVarName = $"{sourceVarName}Tcs";
+        sb.Append(indent);
+        sb.AppendLine($"TaskCompletionSource<{taskReturnTypeParamInfo.CLRTypeSyntax}>? {tcsVarName} = {sourceTaskExpression} != null ? new() : null;");
+        sb.Append(indent);
+        sb.AppendLine($"{sourceTaskExpression}?.ContinueWith(t => {{");
+        string lambdaIndent = new(' ', (depth + 1) * 4);
+        sb.Append(lambdaIndent);
+        sb.AppendLine($"if (t.IsFaulted) {tcsVarName}.SetException(t.Exception.InnerExceptions);");
+        sb.Append(lambdaIndent);
+        sb.AppendLine($"else if (t.IsCanceled) {tcsVarName}.SetCanceled();");
+        sb.Append(lambdaIndent);
+        sb.Append($"else {tcsVarName}.SetResult(");
+        RenderInlineTypeConversion(taskReturnTypeParamInfo, "t.Result");
+        sb.AppendLine(");");
+        sb.Append(indent);
+        sb.AppendLine("}, TaskContinuationOptions.ExecuteSynchronously);");
+        return $"{tcsVarName}?.Task";
     }
 
     /// <summary>
@@ -411,7 +461,20 @@ internal sealed class CSharpInteropClassRenderer
             Dictionary<PropertyInfo, TypeConversionExpressionRenderDelegate> convertedTaskExpressionDict = new();
             foreach (PropertyInfo propertyInfo in propertiesInMapper)
             {
-                if (propertyInfo.Type is { IsTaskType: true, RequiresCLRTypeConversion: true })
+
+
+                if (propertyInfo.Type is { IsNullableType: true, TypeArgument.IsTaskType: true })
+                {
+                    // Handle Task<T>? property conversion to interop type Task<object>?
+                    string tmpVarName = $"{propertyInfo.Name}Tmp";
+                    string jsObjectRetrievalExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type.TypeArgument!)}(\"{propertyInfo.Name}\")";
+                    sb.Append(indent);
+                    sb.AppendLine($"var {tmpVarName} = {jsObjectRetrievalExpression};");
+                    string jsObjectTaskExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
+                    string convertedTaskExpression = RenderNullableTaskTypeConversion(depth, propertyInfo.Type, propertyInfo.Name, tmpVarName);
+                    convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => sb.Append(convertedTaskExpression)));
+                }
+                else if (propertyInfo.Type is { IsTaskType: true, RequiresCLRTypeConversion: true })
                 {
                     // Task conversion requires a TaskCompletionSource, cannot be inlined
                     string jsObjectTaskExpression = $"jsObject.{ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";

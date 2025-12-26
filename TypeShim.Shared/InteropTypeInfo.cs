@@ -39,6 +39,11 @@ public sealed class InteropTypeInfo
     public required bool IsNullableType { get; init; }
     public required bool IsSnapshotCompatible { get; init; }
 
+    public bool ContainsExportedType()
+    {
+        return this.IsTSExport || (TypeArgument?.ContainsExportedType() ?? false);
+    }
+
     /// <summary>
     /// Transforms this <see cref="InteropTypeInfo"/> into one suitable for interop method signatures.
     /// </summary>
