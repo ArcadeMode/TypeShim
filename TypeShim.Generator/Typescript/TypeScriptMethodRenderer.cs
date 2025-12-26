@@ -90,14 +90,11 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         string indent = new(' ', depth * 2);
         foreach (MethodParameterInfo parameterInfo in methodInfo.MethodParameters)
         {
-            if (parameterInfo.IsInjectedInstanceParameter || !parameterInfo.Type.RequiresCLRTypeConversion)
+            if (parameterInfo.IsInjectedInstanceParameter || !parameterInfo.Type.RequiresCLRTypeConversion || !parameterInfo.Type.ContainsExportedType())
                 continue;
 
             // The element type for arrays/tasks or inner type of nullables is what matters for conversion purposes
             InteropTypeInfo paramTargetType = parameterInfo.Type.TypeArgument ?? parameterInfo.Type; 
-
-            if (!paramTargetType.IsTSExport) 
-                continue;
 
             if (symbolNameProvider.GetUserClassSymbolNameIfExists(paramTargetType, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is not string proxyClassName)
             {
@@ -155,27 +152,27 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         {
             return string.Join(", ", methodInfo.MethodParameters.Select(p => p.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(p)));
         }
+    }
 
-        string ResolveInteropMethodAccessor(ClassInfo classInfo, MethodInfo methodInfo)
+    private string ResolveInteropMethodAccessor(ClassInfo classInfo, MethodInfo methodInfo)
+    {
+        return $"{classInfo.Namespace}.{symbolNameProvider.GetInteropInterfaceName(classInfo)}.{methodInfo.Name}";
+    }
+
+    private static string GetNewProxyExpression(InteropTypeInfo returnTypeInfo, string proxyClassName, string instanceName)
+    {
+        if (returnTypeInfo.IsNullableType)
         {
-            return $"{classInfo.Namespace}.{symbolNameProvider.GetInteropInterfaceName(classInfo)}.{methodInfo.Name}";
+            return $"{instanceName} ? new {proxyClassName}({instanceName}, this.interop) : null";
         }
-
-        static string GetNewProxyExpression(InteropTypeInfo returnTypeInfo, string proxyClassName, string instanceName)
+        else
         {
-            if (returnTypeInfo.IsNullableType)
-            {
-                return $"{instanceName} ? new {proxyClassName}({instanceName}, this.interop) : null";
-            }
-            else
-            {
-                return $"new {proxyClassName}({instanceName}, this.interop)";
-            }
+            return $"new {proxyClassName}({instanceName}, this.interop)";
         }
     }
 
     private static string GetInteropInvocationVariable(MethodParameterInfo param)
     {
-        return param.Type.RequiresCLRTypeConversion && (param.Type.TypeArgument ?? param.Type).IsTSExport ? $"{param.Name}Instance" : param.Name;
+        return param.Type.RequiresCLRTypeConversion && param.Type.ContainsExportedType() ? $"{param.Name}Instance" : param.Name;
     }
 }

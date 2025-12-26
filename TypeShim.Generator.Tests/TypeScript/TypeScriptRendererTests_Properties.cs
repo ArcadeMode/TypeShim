@@ -625,4 +625,132 @@ export class Proxy {
 
 """));
     }
+
+    [Test]
+    public void TypeScriptUserClassProxy_InstanceParameter_WithUserClassNullableArrayParameterType_SupportsJSObjectOverload()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public UserClass[]? P1 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+
+        Assert.That(interopClass, Is.EqualTo("""    
+export class Proxy {
+  interop: AssemblyExports;
+  instance: object;
+
+  constructor(instance: object, interop: AssemblyExports) {
+    this.interop = interop;
+    this.instance = instance;
+  }
+
+  public get P1(): Array<UserClass.Proxy> | null {
+    const res = this.interop.N1.C1Interop.get_P1(this.instance);
+    return res ? res.map(e => new UserClass.Proxy(e, this.interop)) : null;
+  }
+
+  public set P1(value: Array<UserClass.Proxy | UserClass.Snapshot> | null) {
+    const valueInstance = value ? value.map(e => e instanceof UserClass.Proxy ? e.instance : e) : null;
+    this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
+  }
+
+}
+
+"""));
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_InstanceParameter_WithNullableUserClassNullableArrayParameterType_SupportsJSObjectOverload()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public UserClass?[]? P1 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+
+        Assert.That(interopClass, Is.EqualTo("""    
+export class Proxy {
+  interop: AssemblyExports;
+  instance: object;
+
+  constructor(instance: object, interop: AssemblyExports) {
+    this.interop = interop;
+    this.instance = instance;
+  }
+
+  public get P1(): Array<UserClass.Proxy | null> | null {
+    const res = this.interop.N1.C1Interop.get_P1(this.instance);
+    return res ? res.map(e => e ? new UserClass.Proxy(e, this.interop) : null) : null;
+  }
+
+  public set P1(value: Array<UserClass.Proxy | UserClass.Snapshot | null> | null) {
+    const valueInstance = value ? value.map(e => e instanceof UserClass.Proxy ? e.instance : e) : null;
+    this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
+  }
+
+}
+
+"""));
+    }
 }
