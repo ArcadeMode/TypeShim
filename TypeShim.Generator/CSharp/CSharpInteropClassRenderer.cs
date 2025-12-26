@@ -271,7 +271,7 @@ internal sealed class CSharpInteropClassRenderer
         }
         else
         {
-            RenderInlineCovariantTypeConversion(typeInfo, parameterName);
+            RenderInlineCovariantTypeConversion(targetType, parameterName);
         }
 
         if (typeInfo.IsNullableType)

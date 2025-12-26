@@ -1,6 +1,7 @@
-﻿using System.Text;
-using TypeShim.Shared;
+﻿using System.Reflection;
+using System.Text;
 using TypeShim.Generator.Parsing;
+using TypeShim.Shared;
 
 namespace TypeShim.Generator.Typescript;
 
@@ -23,7 +24,7 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
 
         string RenderProxyMethodSignature(MethodInfo methodInfo)
         {
-            string returnType = symbolNameProvider.GetProxyReferenceNameIfExists(methodInfo.ReturnType) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
+            string returnType = symbolNameProvider.GetUserClassSymbolNameIfExists(methodInfo.ReturnType, SymbolNameFlags.Proxy) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
 
             string optionalAsync = methodInfo.ReturnType.IsTaskType ? "async " : string.Empty;
             return $"{optionalAsync}{methodInfo.Name}({GetProxyMethodParameterList(methodInfo)}): {returnType}";
@@ -49,7 +50,7 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
 
         string RenderProxyPropertyGetterSignature(MethodInfo methodInfo)
         {
-            string returnType = symbolNameProvider.GetProxyReferenceNameIfExists(methodInfo.ReturnType) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
+            string returnType = symbolNameProvider.GetUserClassSymbolNameIfExists(methodInfo.ReturnType, SymbolNameFlags.Proxy) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
             return $"get {propertyInfo.Name}({GetProxyMethodParameterList(methodInfo)}): {returnType}";
         }
 
@@ -63,10 +64,19 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
     {
         return string.Join(", ", methodInfo.MethodParameters.Select(p =>
         {
-            string? returnType = (p.Type.TypeArgument ?? p.Type).IsSnapshotCompatible ? symbolNameProvider.GetProxySnapshotUnionIfExists(p.Type) : symbolNameProvider.GetProxyReferenceNameIfExists(p.Type);
-            returnType ??= symbolNameProvider.GetNakedSymbolReference(p.Type);
+            SymbolNameFlags flags = ContainsSnapshotCompatibleType(p.Type) ? SymbolNameFlags.ProxySnapshotUnion : SymbolNameFlags.Proxy;
+            string returnType = symbolNameProvider.GetUserClassSymbolNameIfExists(p.Type, flags) ?? symbolNameProvider.GetNakedSymbolReference(p.Type);
             return $"{p.Name}: {returnType}";
         }));
+
+        static bool ContainsSnapshotCompatibleType(InteropTypeInfo typeInfo)
+        {
+            if (typeInfo.IsSnapshotCompatible)
+                return true;
+            if (typeInfo.TypeArgument is InteropTypeInfo innerTypeInfo)
+                return ContainsSnapshotCompatibleType(innerTypeInfo);
+            return false;
+        }
     }
 
     internal void RenderMethodBodyContent(int depth, MethodInfo methodInfo)
@@ -89,23 +99,27 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
             if (!paramTargetType.IsTSExport) 
                 continue;
 
-            if (symbolNameProvider.GetProxyReferenceNameIfExists(paramTargetType) is not string proxyClassName)
+            if (symbolNameProvider.GetUserClassSymbolNameIfExists(paramTargetType, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is not string proxyClassName)
             {
                 throw new ArgumentException($"Invalid conversion-requiring type '{parameterInfo.Type.CLRTypeSyntax}' failed to resolve associated TypeScript proxy name.");
             }
 
-            InteropTypeInfo paramType = parameterInfo.Type;
-            if (paramType.IsArrayType || paramType.IsTaskType)
+            sb.Append($"{indent}const {GetInteropInvocationVariable(parameterInfo)} = ");
+            if (parameterInfo.Type is { IsArrayType: true } or { IsTaskType: true })
             {
-                string instancePropertyAccessor = paramTargetType.IsNullableType ? "?.instance" : ".instance";
-                string transformFunction = paramType.IsArrayType ? "map" : "then";
-                sb.AppendLine($"{indent}const {GetInteropInvocationVariable(parameterInfo)} = {parameterInfo.Name}.{transformFunction}(e => e instanceof {proxyClassName} ? e{instancePropertyAccessor} : e);");
+                string transformFunction = parameterInfo.Type.IsArrayType ? "map" : "then";
+                sb.Append($"{parameterInfo.Name}.{transformFunction}(e => {GetManagedObjectFromProxyExpression(proxyClassName, "e")})");
             }
             else // simple or nullable proxy types
             {
-                string instancePropertyAccessor = paramTargetType.IsNullableType ? "?.instance" : ".instance";
-                sb.AppendLine($"{indent}const {GetInteropInvocationVariable(parameterInfo)} = {parameterInfo.Name} instanceof {proxyClassName} ? {parameterInfo.Name}{instancePropertyAccessor} : {parameterInfo.Name};");
+                sb.Append(GetManagedObjectFromProxyExpression(proxyClassName, parameterInfo.Name));
             }
+            sb.AppendLine(";");
+        }
+
+        static string GetManagedObjectFromProxyExpression(string proxyClassName, string varName)
+        {
+            return $"{varName} instanceof {proxyClassName} ? {varName}.instance : {varName}";
         }
     }
 
@@ -115,17 +129,16 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         string interopInvoke = RenderMethodCallParametersWithInstanceParameterExpression(methodInfo, "this.instance"); // note: instance parameter will be unused for static methods
 
         InteropTypeInfo returnType = methodInfo.ReturnType;
-        InteropTypeInfo returnTargetType = methodInfo.ReturnType.TypeArgument ?? methodInfo.ReturnType; // we are concerned with the element type for arrays/tasks or inner type of nullables
 
-        if (symbolNameProvider.GetProxyReferenceNameIfExists(returnTargetType) is string proxyClassName)
+        if (symbolNameProvider.GetUserClassSymbolNameIfExists(returnType, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is string proxyClassName)
         {
             // user class return type, wrap in proxy
-            string optionalAwait = returnType.IsTaskType ? "await " : string.Empty;
-            sb.AppendLine($"{indent}const res = {optionalAwait}this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({interopInvoke});");
+            sb.AppendLine($"{indent}const res = this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({interopInvoke});");
 
-            if (returnType.IsArrayType)
+            if (returnType.IsArrayType || returnType.IsTaskType)
             {
-                sb.AppendLine($"{indent}return res.map(e => {GetNewProxyExpression(returnType, proxyClassName, "e")});");
+                string transformFunction = returnType.IsArrayType ? "map" : "then";
+                sb.AppendLine($"{indent}return res.{transformFunction}(e => {GetNewProxyExpression(returnType.TypeArgument!, proxyClassName, "e")});");
             }
             else
             {

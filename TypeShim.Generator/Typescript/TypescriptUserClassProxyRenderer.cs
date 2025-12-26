@@ -22,7 +22,7 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypescriptS
         string indent2 = new(' ', (depth + 1) * 2);
         string indent3 = new(' ', (depth + 2) * 2);
 
-        sb.AppendLine($"{indent}export class {symbolNameProvider.GetProxyDefinitionName()} {{");
+        sb.AppendLine($"{indent}export class {symbolNameProvider.GetUserClassProxySymbolName()} {{");
         sb.AppendLine($"{indent2}interop: {interopInterfaceName};");
         sb.AppendLine($"{indent2}instance: object;");
         sb.AppendLine();

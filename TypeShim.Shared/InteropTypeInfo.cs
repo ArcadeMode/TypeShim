@@ -49,8 +49,8 @@ public sealed class InteropTypeInfo
         {
             return new InteropTypeInfo
             {
-                IsTSExport = IsTSExport,
-                IsTSModule = IsTSModule,
+                IsTSExport = false,
+                IsTSModule = false,
                 ManagedType = this.ManagedType,
                 JSTypeSyntax = CLRObjectTypeInfo.JSTypeSyntax,
                 InteropTypeSyntax = CLRObjectTypeInfo.InteropTypeSyntax,
@@ -64,21 +64,21 @@ public sealed class InteropTypeInfo
             };
 
         }
-        else if (TypeArgument?.ManagedType is KnownManagedType.Object or KnownManagedType.JSObject)
+        else if (TypeArgument != null)
         {
             return new InteropTypeInfo
             {
-                IsTSExport = IsTSExport,
-                IsTSModule = IsTSModule,
+                IsTSExport = false,
+                IsTSModule = false,
                 ManagedType = this.ManagedType,
                 JSTypeSyntax = this.JSTypeSyntax,
                 InteropTypeSyntax = this.InteropTypeSyntax,
-                CLRTypeSyntax = this.CLRTypeSyntax,
+                CLRTypeSyntax = this.InteropTypeSyntax,
                 IsTaskType = this.IsTaskType,
                 IsArrayType = this.IsArrayType,
                 IsNullableType = this.IsNullableType,
                 RequiresCLRTypeConversion = false,
-                TypeArgument = CLRObjectTypeInfo,
+                TypeArgument = TypeArgument.AsInteropTypeInfo(),
                 IsSnapshotCompatible = this.IsSnapshotCompatible,
             };
         }

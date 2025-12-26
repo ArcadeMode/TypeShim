@@ -506,11 +506,11 @@ public partial class C1Interop
     public static Task<object> get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
         C1 typed_instance = (C1)instance;
-        TaskCompletionSource<object> retValTcs = new();
+        TaskCompletionSource<object?> retValTcs = new();
         typed_instance.P1.ContinueWith(t => {
             if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) retValTcs.SetCanceled();
-            else retValTcs.SetResult((object)t.Result);
+            else retValTcs.SetResult(t.Result != null ? (object)t.Result : null);
         }, TaskContinuationOptions.ExecuteSynchronously);
         return retValTcs.Task;
     }

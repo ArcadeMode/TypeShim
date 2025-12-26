@@ -48,7 +48,7 @@ export const Snapshot: {
   [Symbol.hasInstance](v: unknown) {
     if (!v || typeof v !== 'object') return false;
     const o = v as any;
-    return (typeof o.P1 === '{{typeScriptType}}');
+    return typeof o.P1 === '{{typeScriptType}}';
   }
 };
 export function snapshot(proxy: C1.Proxy): C1.Snapshot {
@@ -201,7 +201,7 @@ export const Snapshot: {
   [Symbol.hasInstance](v: unknown) {
     if (!v || typeof v !== 'object') return false;
     const o = v as any;
-    return (o.P1 instanceof UserClass.Snapshot);
+    return o.P1 instanceof UserClass.Snapshot;
   }
 };
 export function snapshot(proxy: C1.Proxy): C1.Snapshot {
@@ -259,7 +259,7 @@ export const Snapshot: {
   [Symbol.hasInstance](v: unknown) {
     if (!v || typeof v !== 'object') return false;
     const o = v as any;
-    return (o.P1 === null || (o.P1 instanceof UserClass.Snapshot));
+    return (o.P1 === null || o.P1 instanceof UserClass.Snapshot);
   }
 };
 export function snapshot(proxy: C1.Proxy): C1.Snapshot {
