@@ -459,7 +459,7 @@ export namespace PeopleProvider {
     }
 
     public DoStuff(task: Promise<TimeoutUnit.Proxy | TimeoutUnit.Snapshot | null>): void {
-      const taskInstance = task.then(e => e instanceof TimeoutUnit.Proxy ? e.instance : e);
+      const taskInstance = task.then(e => e ? e instanceof TimeoutUnit.Proxy ? e.instance : e : null);
       this.interop.TypeShim.Sample.PeopleProviderInterop.DoStuff(this.instance, taskInstance);
     }
 
@@ -470,16 +470,17 @@ export namespace PeopleProvider {
 
     public get PeopleCache(): Array<Person.Proxy | null> | null {
       const res = this.interop.TypeShim.Sample.PeopleProviderInterop.get_PeopleCache(this.instance);
-      return res ? new Person.Proxy(res, this.interop) : null;
+      return res ? res.map(e => e ? new Person.Proxy(e, this.interop) : null) : null;
     }
 
     public get Unit(): Promise<TimeoutUnit.Proxy | null> | null {
       const res = this.interop.TypeShim.Sample.PeopleProviderInterop.get_Unit(this.instance);
-      return res ? new TimeoutUnit.Proxy(res, this.interop) : null;
+      return res ? res.then(e => e ? new TimeoutUnit.Proxy(e, this.interop) : null) : null;
     }
 
     public set Unit(value: Promise<TimeoutUnit.Proxy | TimeoutUnit.Snapshot | null> | null) {
-      this.interop.TypeShim.Sample.PeopleProviderInterop.set_Unit(this.instance, value);
+      const valueInstance = value ? value.then(e => e ? e instanceof TimeoutUnit.Proxy ? e.instance : e : null) : null;
+      this.interop.TypeShim.Sample.PeopleProviderInterop.set_Unit(this.instance, valueInstance);
     }
 
   }

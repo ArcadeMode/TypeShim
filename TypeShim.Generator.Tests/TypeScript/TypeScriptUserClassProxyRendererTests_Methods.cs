@@ -346,7 +346,7 @@ export class Proxy {
   }
 
   public DoStuff(u: UserClass.Proxy | UserClass.Snapshot | null): void {
-    const uInstance = u instanceof UserClass.Proxy ? u.instance : u;
+    const uInstance = u ? u instanceof UserClass.Proxy ? u.instance : u : null;
     this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
 

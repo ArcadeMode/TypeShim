@@ -361,7 +361,7 @@ export class Proxy {
   }
 
   public set P1(value: UserClass.Proxy | UserClass.Snapshot | null) {
-    const valueInstance = value instanceof UserClass.Proxy ? value.instance : value;
+    const valueInstance = value ? value instanceof UserClass.Proxy ? value.instance : value : null;
     this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
 
@@ -489,7 +489,7 @@ export class Proxy {
   }
 
   public set P1(value: Promise<UserClass.Proxy | UserClass.Snapshot | null>) {
-    const valueInstance = value.then(e => e instanceof UserClass.Proxy ? e.instance : e);
+    const valueInstance = value.then(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null);
     this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
 
@@ -617,7 +617,7 @@ export class Proxy {
   }
 
   public set P1(value: Array<UserClass.Proxy | UserClass.Snapshot | null>) {
-    const valueInstance = value.map(e => e instanceof UserClass.Proxy ? e.instance : e);
+    const valueInstance = value.map(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null);
     this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
 
@@ -745,7 +745,7 @@ export class Proxy {
   }
 
   public set P1(value: Array<UserClass.Proxy | UserClass.Snapshot | null> | null) {
-    const valueInstance = value ? value.map(e => e instanceof UserClass.Proxy ? e.instance : e) : null;
+    const valueInstance = value ? value.map(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null) : null;
     this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
 

@@ -93,30 +93,14 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
             if (parameterInfo.IsInjectedInstanceParameter || !parameterInfo.Type.RequiresCLRTypeConversion || !parameterInfo.Type.ContainsExportedType())
                 continue;
 
-            // The element type for arrays/tasks or inner type of nullables is what matters for conversion purposes
-            InteropTypeInfo paramTargetType = parameterInfo.Type.TypeArgument ?? parameterInfo.Type; 
-
-            if (symbolNameProvider.GetUserClassSymbolNameIfExists(paramTargetType, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is not string proxyClassName)
+            if (symbolNameProvider.GetUserClassSymbolNameIfExists(parameterInfo.Type, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is not string proxyClassName)
             {
                 throw new ArgumentException($"Invalid conversion-requiring type '{parameterInfo.Type.CLRTypeSyntax}' failed to resolve associated TypeScript proxy name.");
             }
 
             sb.Append($"{indent}const {GetInteropInvocationVariable(parameterInfo)} = ");
-            if (parameterInfo.Type is { IsArrayType: true } or { IsTaskType: true })
-            {
-                string transformFunction = parameterInfo.Type.IsArrayType ? "map" : "then";
-                sb.Append($"{parameterInfo.Name}.{transformFunction}(e => {GetManagedObjectFromProxyExpression(proxyClassName, "e")})");
-            }
-            else // simple or nullable proxy types
-            {
-                sb.Append(GetManagedObjectFromProxyExpression(proxyClassName, parameterInfo.Name));
-            }
+            RenderInlineToManagedObjectConversion(parameterInfo.Type, proxyClassName, parameterInfo.Name);
             sb.AppendLine(";");
-        }
-
-        static string GetManagedObjectFromProxyExpression(string proxyClassName, string varName)
-        {
-            return $"{varName} instanceof {proxyClassName} ? {varName}.instance : {varName}";
         }
     }
 
@@ -131,16 +115,9 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         {
             // user class return type, wrap in proxy
             sb.AppendLine($"{indent}const res = this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({interopInvoke});");
-
-            if (returnType.IsArrayType || returnType.IsTaskType)
-            {
-                string transformFunction = returnType.IsArrayType ? "map" : "then";
-                sb.AppendLine($"{indent}return res.{transformFunction}(e => {GetNewProxyExpression(returnType.TypeArgument!, proxyClassName, "e")});");
-            }
-            else
-            {
-                sb.AppendLine($"{indent}return {GetNewProxyExpression(returnType, proxyClassName, "res")};");
-            }
+            sb.Append($"{indent}return ");
+            RenderInlineToProxyConversion(returnType, proxyClassName, "res");
+            sb.AppendLine(";");
         }
         else // primitive return type or void
         {
@@ -151,6 +128,48 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         string RenderMethodCallParametersWithInstanceParameterExpression(MethodInfo methodInfo, string instanceParameterExpression)
         {
             return string.Join(", ", methodInfo.MethodParameters.Select(p => p.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(p)));
+        }
+    }
+
+    private void RenderInlineToProxyConversion(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
+    {        
+        if (typeInfo is { IsNullableType: true })
+        {
+            sb.Append($"{sourceVarName} ? ");
+            RenderInlineToProxyConversion(typeInfo.TypeArgument!, proxyClassName, sourceVarName);
+            sb.Append(" : null");
+        }
+        else if (typeInfo is { IsArrayType: true } or { IsTaskType: true })
+        {
+            string transformFunction = typeInfo.IsArrayType ? "map" : "then";
+            sb.Append($"{sourceVarName}.{transformFunction}(e => ");
+            RenderInlineToProxyConversion(typeInfo.TypeArgument!, proxyClassName, "e");
+            sb.Append(')');
+        }
+        else
+        {
+            sb.Append($"new {proxyClassName}({sourceVarName}, this.interop)");
+        }
+    }
+
+    private void RenderInlineToManagedObjectConversion(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
+    {
+        if (typeInfo is { IsNullableType: true })
+        {
+            sb.Append($"{sourceVarName} ? ");
+            RenderInlineToManagedObjectConversion(typeInfo.TypeArgument!, proxyClassName, sourceVarName);
+            sb.Append(" : null");
+        }
+        else if (typeInfo is { IsArrayType: true } or { IsTaskType: true })
+        {
+            string transformFunction = typeInfo.IsArrayType ? "map" : "then";
+            sb.Append($"{sourceVarName}.{transformFunction}(e => ");
+            RenderInlineToManagedObjectConversion(typeInfo.TypeArgument!, proxyClassName, "e");
+            sb.Append(')');
+        }
+        else
+        {
+            sb.Append($"{sourceVarName} instanceof {proxyClassName} ? {sourceVarName}.instance : {sourceVarName}");
         }
     }
 
