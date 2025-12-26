@@ -6,17 +6,13 @@ using TypeShim;
 
 namespace TypeShim.Sample;
 
-[TSExport]
-public class TimeoutUnit
-{
-    public int Timeout { get; set; } = 0;
-}
+
 
 [TSExport]
 public class PeopleProvider(PeopleApiClient? _apiClient = null)
 {
     private static Person[]? AllPeople;
-    
+    public Person?[] PeopleCache => AllPeople ?? [];
     public Task<TimeoutUnit?> Unit { get; set; } = Task.FromResult<TimeoutUnit?>(null);
 
     public void DoStuff(Task<TimeoutUnit?> task)
@@ -50,3 +46,8 @@ public class PeopleProvider(PeopleApiClient? _apiClient = null)
 }
 
 
+[TSExport]
+public class TimeoutUnit
+{
+    public int Timeout { get; set; } = 0;
+}

@@ -47,7 +47,6 @@ public partial class Program
             .Build();
 
         TypeShimSampleModule.PeopleProvider = _host.Services.GetRequiredService<PeopleProvider>();
-
         Console.WriteLine("SampleModule initialized.");
     }
 }

@@ -14,8 +14,8 @@ export class PeopleRepository {
         if (!peopleProvider) {
             throw new Error("PeopleProvider is null");
         }
-        const timeoutUnit: TimeoutUnit.Snapshot = { Timeout: new Promise<number>((resolve) => setTimeout(() => resolve(500), 500)) };
-        peopleProvider.Unit = timeoutUnit;
+        const timeoutUnit: TimeoutUnit.Snapshot | null = null;//{ Timeout: 1000 };
+        peopleProvider.Unit = new Promise<TimeoutUnit.Snapshot | null>((resolve) => setTimeout(() => resolve(timeoutUnit), 500));
         const people: People.Proxy = await peopleProvider.FetchPeopleAsync();
         
         this.PrintAgeMethodUsage(people);
