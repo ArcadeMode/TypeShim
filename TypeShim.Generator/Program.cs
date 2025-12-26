@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using System.Text;
+using TypeShim.Shared;
 using TypeShim.Generator;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
@@ -12,8 +13,9 @@ ProgramArguments parsedArgs = ProgramArguments.Parse(args);
 try
 {
     SymbolExtractor symbolExtractor = new(parsedArgs.CsFileInfos);
+    InteropTypeInfoCache typeInfoCache = new();
     List<ClassInfo> classInfos = [.. symbolExtractor.ExtractAllExportedSymbols()
-        .Select(classSymbol => new ClassInfoBuilder(classSymbol).Build())
+        .Select(classSymbol => new ClassInfoBuilder(classSymbol, typeInfoCache).Build())
         .Where(ci => ci.Methods.Any() || ci.Properties.Any())]; // dont bother with empty classes
 
     Task generateTS = Task.Run(() => GenerateTypeScriptInteropCode(parsedArgs, classInfos));
@@ -23,8 +25,8 @@ try
 } 
 catch (TypeShimException ex) // known exceptions warrant only an error message
 {
-    Console.Error.WriteLine($"TypeShim received invalid input. {ex.GetType().Name} {ex.Message}");
-    Environment.Exit(-1);
+    Console.Error.WriteLine($"TypeShim received invalid input, no code was generated. {ex.GetType().Name} {ex.Message}");
+    Environment.Exit(0);
 }
 
 // End of main program
@@ -41,6 +43,10 @@ static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInf
     JSObjectArrayExtensionsRenderer jsObjectArrayExtensionsRenderer = new();
     SourceText jsObjectArrayExtensionsSource = SourceText.From(jsObjectArrayExtensionsRenderer.Render(), Encoding.UTF8);
     File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, "JSObjectArrayExtensions.g.cs"), jsObjectArrayExtensionsSource.ToString());
+
+    JSObjectTaskExtensionsRenderer jsObjectTaskExtensionsRenderer = new();
+    SourceText jsObjectTaskExtensionsSource = SourceText.From(jsObjectTaskExtensionsRenderer.Render(), Encoding.UTF8);
+    File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, "JSObjectTaskExtensions.g.cs"), jsObjectTaskExtensionsSource.ToString());
 }
 
 static void GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)

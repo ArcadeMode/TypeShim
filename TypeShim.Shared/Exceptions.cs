@@ -1,4 +1,6 @@
-﻿namespace TypeShim.Generator;
+﻿using System;
+
+namespace TypeShim.Shared;
 
 public class TypeShimException(string message, Exception? innerException = null) : Exception(message, innerException)
 {

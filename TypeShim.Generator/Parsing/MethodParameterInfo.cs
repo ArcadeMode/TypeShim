@@ -1,4 +1,4 @@
-﻿using TypeShim.Generator.Parsing;
+﻿using TypeShim.Shared;
 
 internal class MethodParameterInfo
 {

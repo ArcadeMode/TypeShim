@@ -1,25 +1,26 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using TypeShim.Shared;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
 
-namespace TypeShim.Generator.Tests;
+namespace TypeShim.Generator.Tests.Parsing;
 
 internal class SyntaxTreeParsingTests_UnsupportedType
 {
-    [TestCase("SByte", "sbyte")]
-    [TestCase("sbyte", "sbyte")]
-    [TestCase("UInt16", "ushort")]
-    [TestCase("ushort", "ushort")]
-    [TestCase("UInt32", "uint")]
-    [TestCase("uint", "uint")]
-    [TestCase("UInt64", "ulong")]
-    [TestCase("ulong", "ulong")]
-    [TestCase("UIntPtr", "nuint")]
-    [TestCase("nuint", "nuint")]
-    [TestCase("Decimal", "decimal")]
-    [TestCase("decimal", "decimal")]
-    public void ClassInfoBuilder_Throws_ForUnsupportedNumericReturnType(string typeExpression, string interopTypeExpression)
+    [TestCase("SByte")]
+    [TestCase("sbyte")]
+    [TestCase("UInt16")]
+    [TestCase("ushort")]
+    [TestCase("UInt32")]
+    [TestCase("uint")]
+    [TestCase("UInt64")]
+    [TestCase("ulong")]
+    [TestCase("UIntPtr")]
+    [TestCase("nuint")]
+    [TestCase("Decimal")]
+    [TestCase("decimal")]
+    public void ClassInfoBuilder_Throws_ForUnsupportedNumericReturnType(string typeExpression)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -31,6 +32,30 @@ internal class SyntaxTreeParsingTests_UnsupportedType
                 {
                     return 1;
                 }
+            }
+        """.Replace("{{typeExpression}}", typeExpression));
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        Assert.Throws<TypeNotSupportedException>(() =>
+        {
+            _ = new ClassInfoBuilder(classSymbol).Build();
+        });
+    }
+
+    [TestCase("MyUnannotatedClass")]
+    [TestCase("ConcurrentDictionary<int, string>")]
+    public void ClassInfoBuilder_Throws_ForUnknownReturnType(string typeExpression)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public {{typeExpression}} P1 { get; set; }
             }
         """.Replace("{{typeExpression}}", typeExpression));
 

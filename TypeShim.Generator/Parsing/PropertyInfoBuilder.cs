@@ -1,10 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
-using TypeShim.Generator;
-using TypeShim.Generator.Parsing;
+using TypeShim.Shared;
 
-internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropertySymbol propertySymbol)
+internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropertySymbol propertySymbol, InteropTypeInfoCache typeInfoCache)
 {
-    private readonly InteropTypeInfoBuilder typeInfoBuilder = new(propertySymbol.Type);
+    private readonly InteropTypeInfoBuilder typeInfoBuilder = new(propertySymbol.Type, typeInfoCache);
 
     internal PropertyInfo Build()
     {
@@ -13,19 +12,18 @@ internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropert
             throw new UnsupportedPropertyException($"Property {classSymbol}.{propertySymbol} must have accessibility 'Public'.");
         }
 
-        InteropTypeInfo propertyTypeInfo = typeInfoBuilder.Build();
         if (propertySymbol.GetMethod is not IMethodSymbol methodSymbol)
         {
             throw new UnsupportedPropertyException("Properties without get are not supported");
         }
 
-        MethodInfoBuilder methodInfoBuilder = new(classSymbol, methodSymbol);
+        MethodInfoBuilder methodInfoBuilder = new(classSymbol, methodSymbol, typeInfoCache);
         MethodInfo getMethod = methodInfoBuilder.Build();
 
         MethodInfo? setMethod = null;
         if (propertySymbol.SetMethod is IMethodSymbol setMethodSymbol && !setMethodSymbol.IsInitOnly && setMethodSymbol.DeclaredAccessibility == Accessibility.Public)
         {
-            MethodInfoBuilder setMethodInfoBuilder = new(classSymbol, setMethodSymbol);
+            MethodInfoBuilder setMethodInfoBuilder = new(classSymbol, setMethodSymbol, typeInfoCache);
             setMethod = setMethodInfoBuilder.Build();
         }
 

@@ -1,4 +1,4 @@
-﻿namespace TypeShim.Generator.Parsing;
+﻿namespace TypeShim.Shared;
 
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
@@ -10,13 +10,61 @@ using System;
 using System.Linq;
 
 
-internal abstract record JSTypeInfo(KnownManagedType KnownType)
+public abstract record JSTypeInfo(KnownManagedType KnownType)
 {
+    public TypeSyntax? GetTypeSyntax()
+    {
+        return this switch
+        {
+            JSSimpleTypeInfo sti => sti.Syntax,
+            JSArrayTypeInfo ati => SyntaxFactory.ArrayType(
+                ati.ElementTypeInfo.GetTypeSyntax() ?? SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),
+                SyntaxFactory.SingletonList(
+                    SyntaxFactory.ArrayRankSpecifier(
+                        SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
+                            SyntaxFactory.OmittedArraySizeExpression())))),
+            JSSpanTypeInfo sti => SyntaxFactory.GenericName(
+                SyntaxFactory.Identifier("Span"),
+                SyntaxFactory.TypeArgumentList(
+                    SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
+                        sti.ElementTypeInfo.Syntax))),
+            JSArraySegmentTypeInfo asti => SyntaxFactory.GenericName(
+                SyntaxFactory.Identifier("ArraySegment"),
+                SyntaxFactory.TypeArgumentList(
+                    SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
+                        asti.ElementTypeInfo.Syntax))),
+            JSTaskTypeInfo tti => SyntaxFactory.GenericName(
+                SyntaxFactory.Identifier("Task"),
+                SyntaxFactory.TypeArgumentList(
+                    SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
+                        tti.ResultTypeInfo.GetTypeSyntax() ?? SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword))))),
+            JSNullableTypeInfo nti => SyntaxFactory.NullableType(
+                nti.ResultTypeInfo.GetTypeSyntax() ?? SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword))),
+            JSFunctionTypeInfo fti => throw new NotImplementedException("Function syntax not implemented"),
+            _ => null,
+        };
+    }
+
     public static JSTypeInfo CreateJSTypeInfoForTypeSymbol(ITypeSymbol type)
     {
         string fullTypeName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         switch (type)
         {
+            //nullable value type
+            case INamedTypeSymbol { ConstructedFrom.SpecialType: SpecialType.System_Nullable_T } nullable:
+                if (CreateJSTypeInfoForTypeSymbol(nullable.TypeArguments[0]) is JSSimpleTypeInfo uti)
+                {
+                    return new JSNullableTypeInfo(uti, IsValueType: true);
+                }
+                return new JSInvalidTypeInfo();
+            // nullable reference type
+            case ITypeSymbol when type.NullableAnnotation == NullableAnnotation.Annotated:
+                if (CreateJSTypeInfoForTypeSymbol(type.WithNullableAnnotation(NullableAnnotation.NotAnnotated)) is JSTypeInfo innerTypeInfo && innerTypeInfo is not JSInvalidTypeInfo)
+                {
+                    return new JSNullableTypeInfo(innerTypeInfo, IsValueType: false);
+                }
+                return new JSInvalidTypeInfo();
+
             case { SpecialType: SpecialType.System_Void }:
                 return new JSSimpleTypeInfo(KnownManagedType.Void)
                 {
@@ -99,19 +147,12 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
                     Syntax = SyntaxFactory.ParseTypeName(fullTypeName.Trim())
                 };
 
-            //nullable
-            case INamedTypeSymbol { ConstructedFrom.SpecialType: SpecialType.System_Nullable_T } nullable:
-                if (CreateJSTypeInfoForTypeSymbol(nullable.TypeArguments[0]) is JSSimpleTypeInfo uti)
-                {
-                    return new JSNullableTypeInfo(uti);
-                }
-                return new JSInvalidTypeInfo();
-
             // array
             case IArrayTypeSymbol { IsSZArray: true, ElementType: ITypeSymbol elementType }:
-                if (CreateJSTypeInfoForTypeSymbol(elementType) is JSSimpleTypeInfo eti)
+                JSTypeInfo elementTypeInfo = CreateJSTypeInfoForTypeSymbol(elementType);
+                if (elementTypeInfo is JSSimpleTypeInfo or JSNullableTypeInfo { IsValueType: false })
                 {
-                    return new JSArrayTypeInfo(eti);
+                    return new JSArrayTypeInfo(elementTypeInfo);
                 }
                 return new JSInvalidTypeInfo();
 
@@ -122,9 +163,10 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
                     Syntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword))
                 });
             case INamedTypeSymbol { TypeArguments.Length: 1 } taskType when fullTypeName.StartsWith(Constants.TaskGlobal, StringComparison.Ordinal):
-                if (CreateJSTypeInfoForTypeSymbol(taskType.TypeArguments[0]) is JSSimpleTypeInfo rti)
+                JSTypeInfo resultTypeInfo = CreateJSTypeInfoForTypeSymbol(taskType.TypeArguments[0]);
+                if (resultTypeInfo is JSSimpleTypeInfo or JSNullableTypeInfo { IsValueType: false })
                 {
-                    return new JSTaskTypeInfo(rti);
+                    return new JSTaskTypeInfo(resultTypeInfo);
                 }
                 return new JSInvalidTypeInfo();
 
@@ -179,27 +221,27 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
     }
 }
 
-internal sealed record JSInvalidTypeInfo() : JSTypeInfo(KnownManagedType.None);
+public sealed record JSInvalidTypeInfo() : JSTypeInfo(KnownManagedType.None);
 
-internal record JSSimpleTypeInfo(KnownManagedType KnownType) : JSTypeInfo(KnownType)
+public record JSSimpleTypeInfo(KnownManagedType KnownType) : JSTypeInfo(KnownType)
 {
     public required TypeSyntax Syntax { get; init; }
 }
 
-internal sealed record JSArrayTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.Array);
+public sealed record JSArrayTypeInfo(JSTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.Array);
 
-internal sealed record JSSpanTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.Span);
+public sealed record JSSpanTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.Span);
 
-internal sealed record JSArraySegmentTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.ArraySegment);
+public sealed record JSArraySegmentTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.ArraySegment);
 
-internal sealed record JSTaskTypeInfo(JSSimpleTypeInfo ResultTypeInfo) : JSTypeInfo(KnownManagedType.Task);
+public sealed record JSTaskTypeInfo(JSTypeInfo ResultTypeInfo) : JSTypeInfo(KnownManagedType.Task);
 
-internal sealed record JSNullableTypeInfo(JSSimpleTypeInfo ResultTypeInfo) : JSTypeInfo(KnownManagedType.Nullable);
+public sealed record JSNullableTypeInfo(JSTypeInfo ResultTypeInfo, bool IsValueType) : JSTypeInfo(KnownManagedType.Nullable);
 
-internal sealed record JSFunctionTypeInfo(bool IsAction, JSSimpleTypeInfo[] ArgsTypeInfo) : JSTypeInfo(IsAction ? KnownManagedType.Action : KnownManagedType.Function);
+public sealed record JSFunctionTypeInfo(bool IsAction, JSSimpleTypeInfo[] ArgsTypeInfo) : JSTypeInfo(IsAction ? KnownManagedType.Action : KnownManagedType.Function);
 
 
-internal enum KnownManagedType : int
+public enum KnownManagedType : int
 {
     None = 0,
     Void = 1,
@@ -230,7 +272,7 @@ internal enum KnownManagedType : int
     Unknown,
 }
 
-internal static class Constants
+public static class Constants
 {
     public const string JSMarshalAsAttribute = "System.Runtime.InteropServices.JavaScript.JSMarshalAsAttribute`1";
     public const string MarshalUsingAttribute = "System.Runtime.InteropServices.Marshalling.MarshalUsingAttribute";

@@ -1,6 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
+using System;
+using System.Reflection;
 using System.Text;
 using TypeShim.Generator.Parsing;
+using TypeShim.Shared;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TypeShim.Generator.Typescript;
@@ -10,20 +13,18 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
     private readonly StringBuilder sb = new();
     internal string Render(int depth)
     {
-        if (!classInfo.Properties.Any(p => p.Type.IsSnapshotCompatible))
-            return string.Empty;
+        if (!classInfo.IsSnapshotCompatible())
+            throw new InvalidOperationException($"Type '{classInfo.Namespace}.{classInfo.Name}' is not snapshot-compatible.");
 
         string indent = new(' ', depth * 2);
-        sb.AppendLine($"{indent}export interface {symbolNameProvider.GetSnapshotDefinitionName()} {{");
+        sb.AppendLine($"{indent}export interface {symbolNameProvider.GetUserClassSnapshotSymbolName()} {{");
         RenderInterfaceProperties(depth + 1);
         sb.AppendLine($"{indent}}}");
 
         RenderInstanceOfRuntimeCheck(depth);
 
         const string proxyParamName = "proxy";
-        sb.AppendLine($"{indent}export function snapshot({proxyParamName}: {symbolNameProvider.GetProxyReferenceName(classInfo)}): {symbolNameProvider.GetSnapshotReferenceName(classInfo)} {{");
-        RenderSnapshotFunction(depth + 1, proxyParamName);
-        sb.Append($"{indent}}}");
+        RenderSnapshotFunction(depth, proxyParamName);
         return sb.ToString();
     }
 
@@ -32,7 +33,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
         string indent = new(' ', depth * 2);
         foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.Type.IsSnapshotCompatible))
         {
-            string propertyType = symbolNameProvider.GetSnapshotReferenceNameIfExists(propertyInfo.Type) ?? symbolNameProvider.GetNakedSymbolReference(propertyInfo.Type);
+            string propertyType = symbolNameProvider.GetUserClassSymbolNameIfExists(propertyInfo.Type, SymbolNameFlags.Snapshot) ?? symbolNameProvider.GetNakedSymbolReference(propertyInfo.Type);
             sb.AppendLine($"{indent}{propertyInfo.Name}: {propertyType};");
         }
     }
@@ -43,7 +44,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
         // Emit a runtime value with Symbol.hasInstance so snapshot interfaces can be checked via `instanceof`.
         // It validates that `v` is an object matching the snapshot interface's definition, including nested type/structure checks in property types.
 
-        string snapshotConstName = symbolNameProvider.GetSnapshotDefinitionName();
+        string snapshotConstName = symbolNameProvider.GetUserClassSnapshotSymbolName();
         sb.AppendLine($"{indent}export const {snapshotConstName}: {{");
         sb.AppendLine($"{indent}  [Symbol.hasInstance](v: unknown): boolean;");
         sb.AppendLine($"{indent}}} = {{");
@@ -65,37 +66,33 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
             {
                 InteropTypeInfo typeInfo = propertyInfo.Type;
                 string propertyName = propertyInfo.Name;
-
-                if (typeInfo.IsArrayType)
-                {
-                    InteropTypeInfo elementType = typeInfo.TypeArgument ?? throw new ArgumentException("Array element type is not specified");
-                    string expectedTypeSymbol = symbolNameProvider.GetSnapshotReferenceNameIfExists(elementType) ?? symbolNameProvider.GetNakedSymbolReference(elementType);
-                    yield return $"Array.isArray(o.{propertyName}) && o.{propertyName}.every((e: any) => {GetBooleanTypeAssertion(expectedTypeSymbol, "e")})";
-                }
-                else if (typeInfo.IsNullableType)
-                {
-                    InteropTypeInfo innerType = typeInfo.TypeArgument ?? throw new ArgumentException("Nullable's type argument is not specified"); ;
-                    string expectedTypeSymbol = symbolNameProvider.GetSnapshotReferenceNameIfExists(innerType) ?? symbolNameProvider.GetNakedSymbolReference(innerType);
-                    yield return $"(o.{propertyName} === null || ({GetBooleanTypeAssertion(expectedTypeSymbol, $"o.{propertyName}")}))";
-                }
-                else if (typeInfo.IsTaskType)
-                {
-                    // thenable check over instanceof Promise (cross‑realm safe)
-                    yield return $"(o.{propertyName} !== null && typeof (o.{propertyName} as any).then === 'function')";
-                }
-                else // Simple type or snapshot
-                {
-                    string expectedTypeSymbol = symbolNameProvider.GetSnapshotReferenceNameIfExists(typeInfo) ?? symbolNameProvider.GetNakedSymbolReference(typeInfo);
-                    yield return $"({GetBooleanTypeAssertion(expectedTypeSymbol, $"o.{propertyName}")})";
-                }
+                yield return GetBooleanTypeAssertion(typeInfo, $"o.{propertyName}");
             }
         }
 
-        string GetBooleanTypeAssertion(string symbol, string referenceExpression)
+        string GetBooleanTypeAssertion(InteropTypeInfo typeInfo, string referenceExpression)
         {
-            return RequiresTypeofExpression(symbol)
-                ? $"typeof {referenceExpression} === '{symbol}'"
-                : $"{referenceExpression} instanceof {symbol}";
+            if (typeInfo.IsArrayType)
+            {
+                InteropTypeInfo elementType = typeInfo.TypeArgument ?? throw new ArgumentException("Array element type is not specified");
+                return $"Array.isArray({referenceExpression}) && {referenceExpression}.every((e: any) => {GetBooleanTypeAssertion(elementType, "e")})";
+            }
+            else if(typeInfo.IsNullableType)
+            {
+                return $"({referenceExpression} === null || {GetBooleanTypeAssertion(typeInfo.TypeArgument!, referenceExpression)})";
+            }
+            else if(typeInfo.IsTaskType)
+            {
+                // thenable check over instanceof Promise (cross‑realm safe)
+                return $"({referenceExpression} !== null && typeof ({referenceExpression} as any).then === 'function')"; // no recurse, would make typechecking async
+            } 
+            else
+            {
+                string symbol = symbolNameProvider.GetUserClassSymbolNameIfExists(typeInfo, SymbolNameFlags.Snapshot | SymbolNameFlags.Isolated) ?? symbolNameProvider.GetNakedSymbolReference(typeInfo);
+                return RequiresTypeofExpression(symbol)
+                        ? $"typeof {referenceExpression} === '{symbol}'"
+                        : $"{referenceExpression} instanceof {symbol}";
+            }
         }
 
         bool RequiresTypeofExpression(string symbol)
@@ -104,37 +101,50 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
         }
     }
 
+
     private void RenderSnapshotFunction(int depth, string proxyParamName)
     {
         string indent = new(' ', depth * 2);
-        string indent2 = new(' ', (depth + 1) * 2);
+        sb.AppendLine($"{indent}export function snapshot({proxyParamName}: {symbolNameProvider.GetUserClassProxySymbolName(classInfo)}): {symbolNameProvider.GetUserClassSnapshotSymbolName(classInfo)} {{");
+        RenderSnapshotFunctionBody(depth + 1, proxyParamName);
+        sb.Append($"{indent}}}");
 
-        sb.AppendLine($"{indent}return {{");
-        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.Type.IsSnapshotCompatible))
+        void RenderSnapshotFunctionBody(int depth, string proxyParamName)
         {
-            string propertyAccessorExpression = $"{proxyParamName}.{propertyInfo.Name}";
-            sb.AppendLine($"{indent2}{propertyInfo.Name}: {GetSnapshotExpression(propertyInfo.Type, propertyAccessorExpression)},");
+            string indent = new(' ', depth * 2);
+            string indent2 = new(' ', (depth + 1) * 2);
+
+            sb.AppendLine($"{indent}return {{");
+            foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.Type.IsSnapshotCompatible))
+            {
+                string propertyAccessorExpression = $"{proxyParamName}.{propertyInfo.Name}";
+                sb.AppendLine($"{indent2}{propertyInfo.Name}: {GetSnapshotExpression(propertyInfo.Type, propertyAccessorExpression)},");
+            }
+            sb.AppendLine($"{indent}}};");
         }
-        sb.AppendLine($"{indent}}};");
 
         string GetSnapshotExpression(InteropTypeInfo typeInfo, string propertyAccessorExpression)
         {
-            if (typeInfo.IsArrayType && typeInfo.RequiresCLRTypeConversion)
-            {
-                InteropTypeInfo elementTypeInfo = typeInfo.TypeArgument ?? throw new InvalidOperationException("Array type must have a type argument.");
-                return $"{propertyAccessorExpression}.map(item => {GetSnapshotExpression(elementTypeInfo, "item")})";
-            }
-            else if (typeInfo.IsNullableType)
+            if (typeInfo.IsNullableType)
             {
                 InteropTypeInfo innerTypeInfo = typeInfo.TypeArgument ?? throw new InvalidOperationException("Nullable type must have a type argument.");
                 return $"{propertyAccessorExpression} ? {GetSnapshotExpression(innerTypeInfo, propertyAccessorExpression)} : null";
             }
             else if (typeInfo.RequiresCLRTypeConversion)
             {
-                string userClassName = symbolNameProvider.GetNakedSymbolReference(typeInfo);
-                return $"{userClassName}.snapshot({propertyAccessorExpression})";
+                if (typeInfo.IsArrayType || typeInfo.IsTaskType)
+                {
+                    InteropTypeInfo elementTypeInfo = typeInfo.TypeArgument ?? throw new InvalidOperationException("Conversion-requiring array/task type must have a type argument.");
+                    string transformFunction = typeInfo.IsArrayType ? "map" : "then";
+                    return $"{propertyAccessorExpression}.{transformFunction}(e => {GetSnapshotExpression(elementTypeInfo, "e")})";
+                }
+                else // simple user type
+                {
+                    string userClassName = symbolNameProvider.GetNakedSymbolReference(typeInfo);
+                    return $"{userClassName}.snapshot({propertyAccessorExpression})";
+                }
             }
-            else // simple type
+            else // simple primitive
             {
                 return propertyAccessorExpression;
             }

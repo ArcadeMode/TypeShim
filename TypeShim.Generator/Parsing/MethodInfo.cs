@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using TypeShim.Shared;
 using TypeShim.Generator.Parsing;
 
 internal sealed class MethodInfo

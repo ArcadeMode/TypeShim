@@ -13,7 +13,7 @@ internal sealed class TypeScriptUserClassNamespaceRenderer(ClassInfo classInfo, 
         TypescriptUserClassProxyRenderer proxyRenderer = new(classInfo, symbolNameProvider);
         sb.AppendLine(proxyRenderer.Render(depth: 1));
         
-        if (classInfo.Properties.Any(p => p.Type.IsSnapshotCompatible))
+        if (classInfo.IsSnapshotCompatible())
         {
             TypeScriptUserClassSnapshotRenderer snapshotRenderer = new(classInfo, symbolNameProvider);
             sb.AppendLine(snapshotRenderer.Render(depth: 1));

@@ -55,9 +55,9 @@ public partial class C1Interop
 {
     [JSExport]
     [return: JSMarshalAs<JSType.Promise<JSType.Number>>]
-    public static async Task<{{typeExpression}}> M1()
+    public static Task<{{typeExpression}}> M1()
     {
-        return await C1.M1();
+        return C1.M1();
     }
     public static C1 FromObject(object obj)
     {
@@ -120,9 +120,15 @@ public partial class C1Interop
 {
     [JSExport]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
-    public static async Task<object> M1()
+    public static Task<object> M1()
     {
-        return await C1.M1();
+        TaskCompletionSource<object> retValTcs = new();
+        C1.M1().ContinueWith(t => {
+            if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) retValTcs.SetCanceled();
+            else retValTcs.SetResult((object)t.Result);
+        }, TaskContinuationOptions.ExecuteSynchronously);
+        return retValTcs.Task;
     }
     public static C1 FromObject(object obj)
     {
@@ -138,7 +144,7 @@ public partial class C1Interop
     }
 
     [Test]
-    public void CSharpInteropClass_DynamicMethod_HasJSTypePromiseAny_ForUserClassReturnType()
+    public void CSharpInteropClass_InstanceMethod_HasJSTypePromiseAny_ForUserClassReturnType()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -185,10 +191,16 @@ public partial class C1Interop
 {
     [JSExport]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
-    public static async Task<object> M1([JSMarshalAs<JSType.Any>] object instance)
+    public static Task<object> M1([JSMarshalAs<JSType.Any>] object instance)
     {
         C1 typed_instance = (C1)instance;
-        return await typed_instance.M1();
+        TaskCompletionSource<object> retValTcs = new();
+        typed_instance.M1().ContinueWith(t => {
+            if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) retValTcs.SetCanceled();
+            else retValTcs.SetResult((object)t.Result);
+        }, TaskContinuationOptions.ExecuteSynchronously);
+        return retValTcs.Task;
     }
     public static C1 FromObject(object obj)
     {
@@ -238,9 +250,15 @@ public partial class C1Interop
 {
     [JSExport]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
-    public static async Task<object> M1()
+    public static Task<object> M1()
     {
-        return await C1.M1();
+        TaskCompletionSource<object> retValTcs = new();
+        C1.M1().ContinueWith(t => {
+            if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) retValTcs.SetCanceled();
+            else retValTcs.SetResult((object)t.Result);
+        }, TaskContinuationOptions.ExecuteSynchronously);
+        return retValTcs.Task;
     }
     public static C1 FromObject(object obj)
     {
@@ -252,6 +270,6 @@ public partial class C1Interop
     }
 }
 
-"""));
+""".Replace("{{typeName}}", typeName)));
     }
 }

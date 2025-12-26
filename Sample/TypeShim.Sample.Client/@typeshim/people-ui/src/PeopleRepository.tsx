@@ -1,4 +1,4 @@
-import { People, Person, PeopleProvider, TypeShimSampleModule, AssemblyExports, Dog } from '@typeshim/wasm-exports';
+import { People, Person, PeopleProvider, TypeShimSampleModule, AssemblyExports, Dog, TimeoutUnit } from '@typeshim/wasm-exports';
 
 export class PeopleRepository {
 
@@ -14,6 +14,8 @@ export class PeopleRepository {
         if (!peopleProvider) {
             throw new Error("PeopleProvider is null");
         }
+        const timeoutUnit: TimeoutUnit.Snapshot | null = null;//{ Timeout: 1000 };
+        peopleProvider.Unit = new Promise<TimeoutUnit.Snapshot | null>((resolve) => setTimeout(() => resolve(timeoutUnit), 500));
         const people: People.Proxy = await peopleProvider.FetchPeopleAsync();
         
         this.PrintAgeMethodUsage(people);

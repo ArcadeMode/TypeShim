@@ -20,26 +20,13 @@ internal sealed class JSObjectArrayExtensionsRenderer()
         // 1. JSObject has no means to retrieve arrays beside ByteArray (automapping user classes with an array property type is therefore not possible by default)
         // 2. Nested types cannot be represented on the interop boundary (i.e. Task<int[]>
 
-        // Workaround: 're-marshalling'. i.e. going back and forth over the interop boundary with altering type annotations so dotnet unwraps array types.
-        // General flow snapshot mapping
-        // 1. C#. Receive JSObject for mapping, from generation context its assumed to match the structure of some class, for example consider 'UserClass' with properties P1: int and P2: int[].
-        // 2. C#. P1 is resolved using JSObject.GetPropertyAsInt32("P1")
-        // 3. C#. P2 cannot be directly resolved. Instead: p2Obj = JSObject.GetPropertyAsJSObject()
-        // 4. C#. call JSImport method GetAsIntArray (see below)
-        // 5. JS. invoked method simply returns object, its still an array, we only need to type it.
-        // 6. C#. GetAsIntArray marshals the JSObject back to int[], then returns
-        // 7. C#. P2 is resolved
-
-        //[JSImport("globalThis.window.unwrap")]
-        //[return: JSMarshalAs<JSType.Array<JSType.Number>>]
-        //public static partial int[] GetAsIntArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
-
         sb.AppendLine(JSObjectArrayExtensionsClass);
-
+        //TODO: reconsider targetting different moniker and provide this class through TypeShim nuget so the user can utilize these directly if they so wish.
         return sb.ToString();
     }
 
     private const string JSObjectArrayExtensionsClass = """
+#nullable enable
 using System.Runtime.InteropServices.JavaScript;
 
 public static partial class JSObjectArrayExtensions
@@ -90,4 +77,5 @@ public static partial class JSObjectArrayExtensions
     public static partial object[] MarshallAsObjectArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
 }
 """;
+
 }

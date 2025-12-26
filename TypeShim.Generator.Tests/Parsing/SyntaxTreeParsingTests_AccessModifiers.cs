@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
 
-namespace TypeShim.Generator.Tests;
+namespace TypeShim.Generator.Tests.Parsing;
 
 internal class SyntaxTreeParsingTests_AccessModifiers
 {

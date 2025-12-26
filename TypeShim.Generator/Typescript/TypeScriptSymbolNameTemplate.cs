@@ -1,4 +1,5 @@
-﻿using TypeShim.Generator.Parsing;
+﻿using TypeShim.Shared;
+using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
 
