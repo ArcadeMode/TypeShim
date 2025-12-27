@@ -1,7 +1,6 @@
 import { PrimitivesDemoComponent, ArraysDemoComponent } from '@typeshim/capabilities-ui';
-import type { AssemblyExports } from '@typeshim/wasm-exports';
 
-export default function Capabilities({ exportsPromise }: { exportsPromise?: Promise<AssemblyExports> }) {
+export default function Capabilities() {
     return (
     <div>
         <p>
@@ -22,9 +21,9 @@ export default function Capabilities({ exportsPromise }: { exportsPromise?: Prom
             This page is doubles as an E2E test of sorts and is very much a work-in-progress. Not all code-patterns are
             implemented yet on this page.
         </p>
-        <PrimitivesDemoComponent exportsPromise={exportsPromise} />
+        <PrimitivesDemoComponent />
         <div style={{ margin: '0.5em'}}></div>
-        <ArraysDemoComponent exportsPromise={exportsPromise} />
+        <ArraysDemoComponent />
     </div>
     );
 }

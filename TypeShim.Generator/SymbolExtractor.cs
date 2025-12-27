@@ -29,7 +29,7 @@ internal class SymbolExtractor(IEnumerable<CSharpFileInfo> fileInfos)
                 continue;
             }
 
-            if (symbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSExportAttribute" or "TSExport" or "TSModuleAttribute" or "TSModule"))
+            if (symbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSExportAttribute" or "TSExport"))
             {
                 //TODO: add verbosity argument and use with ILogger
                 //Console.WriteLine($"TsExport: {symbol.ToDisplayString()}");

@@ -5,4 +5,4 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
-TSHIM008 | Usage | Error | TsAttributesExclusivityAnalyzer
+TSHIM008 | Usage | Error | TSAttributesAnalyzer

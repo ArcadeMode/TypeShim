@@ -318,7 +318,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
-        string[] x = Array.ConvertAll([1,2, 3], e => $"e: {e}");
+
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
 using System;
@@ -396,7 +396,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
-        string[] x = Array.ConvertAll([1, 2, 3], e => $"e: {e}");
+
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
 using System;
@@ -474,7 +474,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
-        string[] x = Array.ConvertAll([1, 2, 3], e => $"e: {e}");
+
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
 using System;
@@ -553,7 +553,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
-        string[] x = Array.ConvertAll([1, 2, 3], e => $"e: {e}");
+
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
 using System;

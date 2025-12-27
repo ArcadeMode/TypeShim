@@ -11,7 +11,6 @@ namespace TypeShim.Shared;
 public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeInfoCache cache)
 {
     private readonly bool IsTSExport = typeSymbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSExportAttribute" or "TSExport");
-    private readonly bool IsTSModule = typeSymbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSModuleAttribute" or "TSModule");
 
     public InteropTypeInfo Build()
     {
@@ -41,7 +40,6 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
         return new InteropTypeInfo
         {
             IsTSExport = IsTSExport,
-            IsTSModule = IsTSModule,
             ManagedType = simpleTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(simpleTypeInfo, clrTypeSyntax),
             InteropTypeSyntax = GetInteropTypeSyntax(simpleTypeInfo),
@@ -86,7 +84,6 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
         return new InteropTypeInfo
         {
             IsTSExport = IsTSExport,
-            IsTSModule = IsTSModule,
             ManagedType = arrayTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(arrayTypeInfo, clrTypeSyntax),
             InteropTypeSyntax = GetInteropTypeSyntax(arrayTypeInfo),
@@ -117,7 +114,6 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
         return new InteropTypeInfo
         {
             IsTSExport = IsTSExport,
-            IsTSModule = IsTSModule,
             ManagedType = taskTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(taskTypeInfo, clrTypeSyntax),
             InteropTypeSyntax = GetInteropTypeSyntax(taskTypeInfo),
@@ -151,7 +147,6 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
         return new InteropTypeInfo
         {
             IsTSExport = IsTSExport,
-            IsTSModule = IsTSModule,
             ManagedType = nullableTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(nullableTypeInfo, clrTypeSyntax),
             InteropTypeSyntax = GetInteropTypeSyntax(nullableTypeInfo),

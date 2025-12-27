@@ -31,7 +31,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
     private void RenderInterfaceProperties(int depth)
     {
         string indent = new(' ', depth * 2);
-        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.Type.IsSnapshotCompatible))
+        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.IsSnapshotCompatible()))
         {
             string propertyType = symbolNameProvider.GetUserClassSymbolNameIfExists(propertyInfo.Type, SymbolNameFlags.Snapshot) ?? symbolNameProvider.GetNakedSymbolReference(propertyInfo.Type);
             sb.AppendLine($"{indent}{propertyInfo.Name}: {propertyType};");
@@ -52,7 +52,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
         sb.AppendLine($"{indent}    if (!v || typeof v !== 'object') return false;");
         sb.AppendLine($"{indent}    const o = v as any;");
 
-        PropertyInfo[] propertyInfos = [.. classInfo.Properties.Where(pi => pi.Type.IsSnapshotCompatible)];
+        PropertyInfo[] propertyInfos = [.. classInfo.Properties.Where(pi => pi.IsSnapshotCompatible())];
         string structuralMatchExpression = propertyInfos.Length == 0 ? "true" : string.Join(" && ", GetPropertyTypeAssertionExpressions(propertyInfos));
         sb.AppendLine($"{indent}    return {structuralMatchExpression};");
 
@@ -115,7 +115,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
             string indent2 = new(' ', (depth + 1) * 2);
 
             sb.AppendLine($"{indent}return {{");
-            foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.Type.IsSnapshotCompatible))
+            foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.IsSnapshotCompatible()))
             {
                 string propertyAccessorExpression = $"{proxyParamName}.{propertyInfo.Name}";
                 sb.AppendLine($"{indent2}{propertyInfo.Name}: {GetSnapshotExpression(propertyInfo.Type, propertyAccessorExpression)},");

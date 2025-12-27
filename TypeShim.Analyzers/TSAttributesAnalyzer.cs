@@ -9,9 +9,6 @@ public sealed class TSAttributesAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         [
-            TypeShimDiagnostics.AttributeMutexRule,
-            TypeShimDiagnostics.TSModuleMustBeStaticRule,
-            TypeShimDiagnostics.TSExportMustBeNonStaticRule,
             TypeShimDiagnostics.AttributeOnPublicClassOnlyRule,
         ];
 
@@ -27,44 +24,20 @@ public sealed class TSAttributesAnalyzer : DiagnosticAnalyzer
         if (context.Symbol is not INamedTypeSymbol type)
             return;
 
-        bool hasTSModule = HasAttribute(type, "TypeShim.TSModuleAttribute");
         bool hasTSExport = HasAttribute(type, "TypeShim.TSExportAttribute");
-        bool isStaticClass = type.IsStatic;
 
-        if ((hasTSExport || hasTSModule) && !IsPublicClass(type))
+        if (hasTSExport && !IsPublicClass(type))
         {
             var location = type.Locations.Length > 0 ? type.Locations[0] : Location.None;
             context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.AttributeOnPublicClassOnlyRule, location, type.Name));
             return;
         }
 
-        if (hasTSModule && hasTSExport)
-        {
-            var location = type.Locations.Length > 0 ? type.Locations[0] : Location.None;
-            context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.AttributeMutexRule, location, type.Name));
-            return;
-        }
-
-        if (hasTSModule && !isStaticClass)
-        {
-            var location = type.Locations.Length > 0 ? type.Locations[0] : Location.None;
-            context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.TSModuleMustBeStaticRule, location, type.Name));
-            return;
-        }
-
-        if (hasTSExport && isStaticClass)
-        {
-            var location = type.Locations.Length > 0 ? type.Locations[0] : Location.None;
-            context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.TSExportMustBeNonStaticRule, location, type.Name));
-            return;
-        }
-
         if (hasTSExport) 
         {
-            // TODO: add parameterless constructor check
+            // TODO: add parameterless constructor check >> BROADER: check if can be constructed (parameters are interopable/properties are etc)
             // TODO: add check for 'no required members that cannot be snapshotted'
         }
-        // Add
     }
 
     private static bool HasAttribute(INamedTypeSymbol type, string fullName)

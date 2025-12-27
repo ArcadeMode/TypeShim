@@ -40,16 +40,14 @@ internal class TypeScriptUserClassProxyRendererTests_Methods
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy {
-  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
+  constructor(instance: object) {
     this.instance = instance;
   }
 
   public DoP1(): {{typeScriptType}} {
-    return this.interop.N1.C1Interop.DoP1(this.instance);
+    return TypeShimConfig.exports.N1.C1Interop.DoP1(this.instance);
   }
 
 }
@@ -99,17 +97,15 @@ export class Proxy {
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy {
-  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
+  constructor(instance: object) {
     this.instance = instance;
   }
 
   public GetAll(): Array<UserClass.Proxy> {
-    const res = this.interop.N1.C1Interop.GetAll(this.instance);
-    return res.map(e => new UserClass.Proxy(e, this.interop));
+    const res = TypeShimConfig.exports.N1.C1Interop.GetAll(this.instance);
+    return res.map(e => new UserClass.Proxy(e));
   }
 
 }
@@ -159,17 +155,15 @@ export class Proxy {
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy {
-  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
+  constructor(instance: object) {
     this.instance = instance;
   }
 
   public GetMaybe(): UserClass.Proxy | null {
-    const res = this.interop.N1.C1Interop.GetMaybe(this.instance);
-    return res ? new UserClass.Proxy(res, this.interop) : null;
+    const res = TypeShimConfig.exports.N1.C1Interop.GetMaybe(this.instance);
+    return res ? new UserClass.Proxy(res) : null;
   }
 
 }
@@ -218,17 +212,15 @@ export class Proxy {
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy {
-  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
+  constructor(instance: object) {
     this.instance = instance;
   }
 
   public DoStuff(u: UserClass.Proxy | UserClass.Snapshot): void {
     const uInstance = u instanceof UserClass.Proxy ? u.instance : u;
-    this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
+    TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
 
 }
@@ -277,18 +269,16 @@ export class Proxy {
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy {
-  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
+  constructor(instance: object) {
     this.instance = instance;
   }
 
   public DoStuff(u: UserClass.Proxy | UserClass.Snapshot, v: UserClass.Proxy | UserClass.Snapshot): void {
     const uInstance = u instanceof UserClass.Proxy ? u.instance : u;
     const vInstance = v instanceof UserClass.Proxy ? v.instance : v;
-    this.interop.N1.C1Interop.DoStuff(this.instance, uInstance, vInstance);
+    TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance, vInstance);
   }
 
 }
@@ -337,17 +327,15 @@ export class Proxy {
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy {
-  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
+  constructor(instance: object) {
     this.instance = instance;
   }
 
   public DoStuff(u: UserClass.Proxy | UserClass.Snapshot | null): void {
     const uInstance = u ? u instanceof UserClass.Proxy ? u.instance : u : null;
-    this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
+    TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
 
 }
@@ -396,17 +384,15 @@ export class Proxy {
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy {
-  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
+  constructor(instance: object) {
     this.instance = instance;
   }
 
   public DoStuff(u: Array<UserClass.Proxy | UserClass.Snapshot>): void {
     const uInstance = u.map(e => e instanceof UserClass.Proxy ? e.instance : e);
-    this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
+    TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
 
 }
@@ -454,17 +440,15 @@ export class Proxy {
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy {
-  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
+  constructor(instance: object) {
     this.instance = instance;
   }
 
   public DoStuff(u: Promise<UserClass.Proxy | UserClass.Snapshot>): void {
     const uInstance = u.then(e => e instanceof UserClass.Proxy ? e.instance : e);
-    this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
+    TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
 
 }
