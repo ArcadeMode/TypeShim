@@ -42,6 +42,11 @@ internal sealed class CSharpInteropClassRenderer
         sb.AppendLine($"{indent}public partial class {GetInteropClassName(classInfo.Name)}");
         sb.AppendLine($"{indent}{{");
 
+        if (classInfo.Constructor is MethodInfo constructorMethod)
+        {
+            RenderMethod(constructorMethod);
+        }
+
         foreach (MethodInfo methodInfo in classInfo.Methods)
         {
             RenderMethod(methodInfo);
@@ -144,10 +149,6 @@ internal sealed class CSharpInteropClassRenderer
         sb.Append(indent);
         sb.Append("public static ");
 
-        // methodInfo.ReturnType.IsTaskType: Never render async! Gets in the way of Task properties, it isnt required anyway.
-        // For returns just return the Task
-        // For parameters Task can be passed or converted in a continuation (see RenderParameterTypeConversion)
-
         sb.Append(methodInfo.ReturnType.InteropTypeSyntax);
         sb.Append(' ');
         sb.Append(methodInfo.Name);
@@ -209,7 +210,11 @@ internal sealed class CSharpInteropClassRenderer
 
         string GetInvocationExpression()
         {
-            if (!methodInfo.IsStatic)
+            if (methodInfo.IsConstructor)
+            {
+                return $"new {classInfo.Name}({string.Join(", ", methodInfo.MethodParameters.Select(GetTypedParameterName))})";
+            }
+            else if (!methodInfo.IsStatic)
             {
                 MethodParameterInfo instanceParam = methodInfo.MethodParameters.ElementAt(0);
                 List<MethodParameterInfo> memberParams = [.. methodInfo.MethodParameters.Skip(1)];

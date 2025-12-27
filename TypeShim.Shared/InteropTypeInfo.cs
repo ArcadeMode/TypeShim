@@ -89,6 +89,21 @@ public sealed class InteropTypeInfo
         }
     }
 
+    public static readonly InteropTypeInfo JSObjectTypeInfo = new()
+    {
+        IsTSExport = false,
+        ManagedType = KnownManagedType.JSObject,
+        JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Object"),
+        InteropTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),
+        CLRTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
+        IsTaskType = false,
+        IsArrayType = false,
+        IsNullableType = false,
+        RequiresCLRTypeConversion = false,
+        TypeArgument = null,
+        IsSnapshotCompatible = false,
+    };
+
     private static readonly InteropTypeInfo CLRObjectTypeInfo = new()
     {
         IsTSExport = false,
@@ -101,6 +116,6 @@ public sealed class InteropTypeInfo
         IsNullableType = false,
         RequiresCLRTypeConversion = false,
         TypeArgument = null,
-        IsSnapshotCompatible = false, // Transform a jsobject into .. ? ergo not snapshot compatible
+        IsSnapshotCompatible = false,
     };
 }

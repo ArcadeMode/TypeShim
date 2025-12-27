@@ -8,7 +8,6 @@ using TypeShim.Generator.Parsing;
 internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSymbol memberMethod, InteropTypeInfoCache typeInfoCache)
 {
     private readonly MethodParameterInfoBuilder parameterInfoBuilder = new(classSymbol, memberMethod, typeInfoCache);
-    private readonly InteropTypeInfoBuilder typeInfoBuilder = new(memberMethod.ReturnType, typeInfoCache);
 
     internal MethodInfo Build()
     {
@@ -19,13 +18,16 @@ internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSym
         }
 
         IReadOnlyCollection<MethodParameterInfo> parameters = [.. parameterInfoBuilder.Build()];
-        InteropTypeInfo returnType = typeInfoBuilder.Build();
+        bool isConstructor = memberMethod.MethodKind == MethodKind.Constructor;
+        ITypeSymbol returnType = isConstructor ? classSymbol : memberMethod.ReturnType;
+        InteropTypeInfoBuilder returnTypeInfoBuilder = new(returnType, typeInfoCache);
         MethodInfo baseMethod = new()
         {
             IsStatic = memberMethod.IsStatic,
+            IsConstructor = isConstructor,
             Name = memberMethod.Name,
             MethodParameters = parameters,
-            ReturnType = returnType,
+            ReturnType = returnTypeInfoBuilder.Build(),
         };
 
         return baseMethod;

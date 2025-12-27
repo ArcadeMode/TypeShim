@@ -5,6 +5,7 @@ using TypeShim.Generator.Parsing;
 internal sealed class MethodInfo
 {
     internal required bool IsStatic { get; init; }
+    internal required bool IsConstructor { get; init; }
     internal required string Name { get; init; }
     internal required IReadOnlyCollection<MethodParameterInfo> MethodParameters { get; init; }
     internal required InteropTypeInfo ReturnType { get; init; }
@@ -14,6 +15,7 @@ internal sealed class MethodInfo
         return new MethodInfo
         {
             IsStatic = this.IsStatic,
+            IsConstructor = this.IsConstructor,
             Name = this.Name,
             MethodParameters = [.. this.MethodParameters.Where(p => !p.IsInjectedInstanceParameter)],
             ReturnType = this.ReturnType,
@@ -25,6 +27,7 @@ internal sealed class MethodInfo
         return new MethodInfo
         {
             IsStatic = this.IsStatic,
+            IsConstructor = this.IsConstructor,
             Name = this.Name,
             MethodParameters = [.. this.MethodParameters.Select(p => p.WithInteropTypeInfo())],
             ReturnType = this.ReturnType.AsInteropTypeInfo(),

@@ -181,14 +181,8 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
         return jsTypeInfo switch
         {
             JSSimpleTypeInfo simpleTypeInfo => simpleTypeInfo.Syntax,
-            JSArrayTypeInfo arrayTypeInfo => arrayTypeInfo.GetTypeSyntax(),//SyntaxFactory.ArrayType(arrayTypeInfo.ElementTypeInfo.Syntax, [SyntaxFactory.ArrayRankSpecifier([])]),
+            JSArrayTypeInfo arrayTypeInfo => arrayTypeInfo.GetTypeSyntax(),
             JSTaskTypeInfo taskTypeInfo => taskTypeInfo.GetTypeSyntax(),
-            //SyntaxFactory.GenericName(nameof(Task))
-            //    .WithTypeArgumentList(
-            //        SyntaxFactory.TypeArgumentList(
-            //            SyntaxFactory.SingletonSeparatedList(taskTypeInfo.ResultTypeInfo.Syntax)
-            //        )
-            //    ),
             JSNullableTypeInfo nullableTypeInfo => SyntaxFactory.NullableType(GetInteropTypeSyntax(nullableTypeInfo.ResultTypeInfo)),
             _ => throw new TypeNotSupportedException("Unsupported JSTypeInfo for interop type syntax generation"),
         } ?? throw new ArgumentException($"Invalid JSTypeInfo of known type '{jsTypeInfo.KnownType}' yielded no syntax");

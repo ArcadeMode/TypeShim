@@ -24,5 +24,15 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
                 Type = new InteropTypeInfoBuilder(parameterSymbol.Type, typeInfoCache).Build()
             };
         }
+
+        if (memberMethod.MethodKind is MethodKind.Constructor) 
+        {
+            yield return new MethodParameterInfo
+            {
+                Name = "jsObject",
+                IsInjectedInstanceParameter = false,
+                Type = InteropTypeInfo.JSObjectTypeInfo //TODO: consider swapping for nullable JSObject
+            };
+        }
     }
 }
