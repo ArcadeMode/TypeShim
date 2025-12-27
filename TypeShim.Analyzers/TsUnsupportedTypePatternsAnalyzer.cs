@@ -30,8 +30,7 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
             return;
 
         bool hasTSExport = SymbolFacts.HasAttribute(type, "TypeShim.TSExportAttribute");
-        bool hasTSModule = SymbolFacts.HasAttribute(type, "TypeShim.TSModuleAttribute");
-        if (!hasTSExport && !hasTSModule)
+        if (!hasTSExport)
             return;
 
         //Debugger.Launch();

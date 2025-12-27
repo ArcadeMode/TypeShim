@@ -7,8 +7,6 @@ public sealed class InteropTypeInfo
 {
     public required bool IsTSExport { get; init; }
 
-    public required bool IsTSModule { get; init; }
-
     public required KnownManagedType ManagedType { get; init; }
 
     /// <summary>
@@ -55,7 +53,6 @@ public sealed class InteropTypeInfo
             return new InteropTypeInfo
             {
                 IsTSExport = false,
-                IsTSModule = false,
                 ManagedType = this.ManagedType,
                 JSTypeSyntax = CLRObjectTypeInfo.JSTypeSyntax,
                 InteropTypeSyntax = CLRObjectTypeInfo.InteropTypeSyntax,
@@ -74,7 +71,6 @@ public sealed class InteropTypeInfo
             return new InteropTypeInfo
             {
                 IsTSExport = false,
-                IsTSModule = false,
                 ManagedType = this.ManagedType,
                 JSTypeSyntax = this.JSTypeSyntax,
                 InteropTypeSyntax = this.InteropTypeSyntax,
@@ -96,7 +92,6 @@ public sealed class InteropTypeInfo
     private static readonly InteropTypeInfo CLRObjectTypeInfo = new()
     {
         IsTSExport = false,
-        IsTSModule = false,
         ManagedType = KnownManagedType.Object,
         JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Any"),
         InteropTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),

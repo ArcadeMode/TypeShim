@@ -107,13 +107,13 @@ export class Proxy {
     [TestCase("string", "string")]
     [TestCase("double", "number")]
     [TestCase("bool", "boolean")]
-    public void TypeScriptUserModuleClass_StaticProperty_GeneratesGetAndSetFunctions(string typeExpression, string typeScriptType)
+    public void TypeScriptUserClassProxy_StaticProperty_GeneratesGetAndSetFunctions(string typeExpression, string typeScriptType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TSModule]
+            [TSExport]
             public static class C1
             {
                 public static {{typeExpression}} P1 { get; set; }
@@ -139,39 +139,34 @@ export class Proxy {
             HierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider),
         };
 
-        string interopClass = new TypescriptUserModuleClassRenderer(classInfo, symbolNameProvider).Render();
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""
-// Auto-generated TypeShim TSModule class. Source class: N1.C1
-export class C1 {
-  private interop: AssemblyExports;
+export class Proxy {
+  private constructor() {}
 
-  constructor(interop: AssemblyExports) {
-    this.interop = interop;
+  public static get P1(): {{typeScriptType}} {
+    return TypeShimConfig.exports.N1.C1Interop.get_P1();
   }
 
-  public get P1(): {{typeScriptType}} {
-    return this.interop.N1.C1Interop.get_P1();
+  public static set P1(value: {{typeScriptType}}) {
+    TypeShimConfig.exports.N1.C1Interop.set_P1(value);
   }
 
-  public set P1(value: {{typeScriptType}}) {
-    this.interop.N1.C1Interop.set_P1(value);
+  public static get P2(): {{typeScriptType}} {
+    return TypeShimConfig.exports.N1.C1Interop.get_P2();
   }
 
-  public get P2(): {{typeScriptType}} {
-    return this.interop.N1.C1Interop.get_P2();
+  public static set P2(value: {{typeScriptType}}) {
+    TypeShimConfig.exports.N1.C1Interop.set_P2(value);
   }
 
-  public set P2(value: {{typeScriptType}}) {
-    this.interop.N1.C1Interop.set_P2(value);
+  public static get P3(): {{typeScriptType}} {
+    return TypeShimConfig.exports.N1.C1Interop.get_P3();
   }
 
-  public get P3(): {{typeScriptType}} {
-    return this.interop.N1.C1Interop.get_P3();
-  }
-
-  public get P4(): {{typeScriptType}} {
-    return this.interop.N1.C1Interop.get_P4();
+  public static get P4(): {{typeScriptType}} {
+    return TypeShimConfig.exports.N1.C1Interop.get_P4();
   }
 
 }
@@ -244,7 +239,7 @@ export class Proxy {
     }
 
     [Test]
-    public void TypeScriptUserClassModule_InstanceParameter_WithUserClassParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_StaticParameter_WithUserClassParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -261,7 +256,7 @@ export class Proxy {
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TSModule]
+            [TSExport]
             public static class C1
             {
                 public static UserClass P1 { get; set; }
@@ -280,25 +275,20 @@ export class Proxy {
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserModuleClassRenderer(classInfo, symbolNameProvider).Render();
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""
-// Auto-generated TypeShim TSModule class. Source class: N1.C1
-export class C1 {
-  private interop: AssemblyExports;
+export class Proxy {
+  private constructor() {}
 
-  constructor(interop: AssemblyExports) {
-    this.interop = interop;
+  public static get P1(): UserClass.Proxy {
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1();
+    return new UserClass.Proxy(res);
   }
 
-  public get P1(): UserClass.Proxy {
-    const res = this.interop.N1.C1Interop.get_P1();
-    return new UserClass.Proxy(res, this.interop);
-  }
-
-  public set P1(value: UserClass.Proxy | UserClass.Snapshot) {
+  public static set P1(value: UserClass.Proxy | UserClass.Snapshot) {
     const valueInstance = value instanceof UserClass.Proxy ? value.instance : value;
-    this.interop.N1.C1Interop.set_P1(valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(valueInstance);
   }
 
 }

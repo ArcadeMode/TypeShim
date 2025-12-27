@@ -46,6 +46,7 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypescriptS
         if (classInfo.IsStatic)
         {
             sb.AppendLine($"{indent}private constructor() {{}}");
+            sb.AppendLine();
         }
         else
         {
@@ -56,6 +57,5 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypescriptS
             sb.AppendLine($"{indent}}}");
             sb.AppendLine();
         }
-
     }
 }

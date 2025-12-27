@@ -4,23 +4,14 @@ namespace TypeShim.Analyzers;
 
 internal static class TypeShimDiagnostics
 {
-    internal static readonly DiagnosticDescriptor AttributeMutexRule = new(
-        id: "TSHIM001",
-        title: "TSModule and TSExport cannot be applied together",
-        messageFormat: "Class '{0}' has both [TSModule] and [TSExport]; these attributes are mutually exclusive",
-        category: "Usage",
-        defaultSeverity: DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        description: "TSModule classes are entry points; TSExport marks user classes. They cannot be combined.");
-
     internal static readonly DiagnosticDescriptor AttributeOnPublicClassOnlyRule = new(
         id: "TSHIM008",
-        title: "TSModule and TSExport can only be applied to classes with public accessibility",
-        messageFormat: "'{0}' has either [TSModule] or [TSExport] and is not a class or has non-public accessibility",
+        title: "TSExport can only be used on public classes",
+        messageFormat: "'{0}' has [TSExport] and is not a class or has non-public accessibility",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "TSModule and TSExport are only supported on classes with public accessibility.");
+        description: "TSExport is only supported on classes with public accessibility.");
 
     internal static readonly DiagnosticDescriptor UnsupportedTypeRule = new(
         id: "TSHIM005",

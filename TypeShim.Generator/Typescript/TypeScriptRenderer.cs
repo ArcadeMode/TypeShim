@@ -28,15 +28,10 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
 
     private void RenderUserClasses()
     {
-        foreach (ClassInfo classInfo in classInfos.Where(c => c.Type.IsTSExport))
+        foreach (ClassInfo classInfo in classInfos)
         {
             TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(classInfo, symbolNameProvider);
             sourceBuilder.AppendLine(namespaceRenderer.Render());
         }
-        //foreach (ClassInfo moduleClassInfo in classInfos.Where(c => c.Type.IsTSModule))
-        //{
-        //    TypescriptUserModuleClassRenderer moduleClassRenderer = new(moduleClassInfo, symbolNameProvider);
-        //    sourceBuilder.AppendLine(moduleClassRenderer.Render());
-        //}
     }
 }

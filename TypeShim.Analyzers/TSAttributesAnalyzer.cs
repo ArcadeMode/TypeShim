@@ -9,7 +9,6 @@ public sealed class TSAttributesAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         [
-            TypeShimDiagnostics.AttributeMutexRule,
             TypeShimDiagnostics.AttributeOnPublicClassOnlyRule,
         ];
 
@@ -25,21 +24,12 @@ public sealed class TSAttributesAnalyzer : DiagnosticAnalyzer
         if (context.Symbol is not INamedTypeSymbol type)
             return;
 
-        bool hasTSModule = HasAttribute(type, "TypeShim.TSModuleAttribute");
         bool hasTSExport = HasAttribute(type, "TypeShim.TSExportAttribute");
-        bool isStaticClass = type.IsStatic;
 
-        if ((hasTSExport || hasTSModule) && !IsPublicClass(type))
+        if (hasTSExport && !IsPublicClass(type))
         {
             var location = type.Locations.Length > 0 ? type.Locations[0] : Location.None;
             context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.AttributeOnPublicClassOnlyRule, location, type.Name));
-            return;
-        }
-
-        if (hasTSModule && hasTSExport)
-        {
-            var location = type.Locations.Length > 0 ? type.Locations[0] : Location.None;
-            context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.AttributeMutexRule, location, type.Name));
             return;
         }
 
