@@ -23,11 +23,12 @@ class TypeShimConfig {
     return TypeShimConfig._exports;
   }
 
-  static initialize(options: { exports: AssemblyExports }) {
+  static initialize(options: { assemblyExports: AssemblyExports, setModuleImports: (scriptName: string, imports: object) => void }) {
     if (TypeShimConfig._exports){
       throw new Error("TypeShim has already been initialized.");
     }
-    TypeShimConfig._exports = options.exports;
+    options.setModuleImports("@typeshim", { unwrap: (obj: any) => obj });
+    TypeShimConfig._exports = options.assemblyExports;
   }
 }
 

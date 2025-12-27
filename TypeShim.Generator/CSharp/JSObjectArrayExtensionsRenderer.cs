@@ -56,23 +56,23 @@ public static partial class JSObjectArrayExtensions
         return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsObjectArray(value) : [];
     }
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Array<JSType.Number>>]
     public static partial int[] MarshallAsIntArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Array<JSType.Number>>]
     public static partial double[] MarshallAsDoubleArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Array<JSType.String>>]
     public static partial string[] MarshallAsStringArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Array<JSType.Object>>]
     public static partial JSObject[] MarshallAsJSObjectArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static partial object[] MarshallAsObjectArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
 }

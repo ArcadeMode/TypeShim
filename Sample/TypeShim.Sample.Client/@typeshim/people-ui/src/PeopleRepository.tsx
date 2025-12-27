@@ -7,12 +7,16 @@ export class PeopleRepository {
         if (!peopleProvider) {
             throw new Error("PeopleProvider is null");
         }
-        const timeoutUnit: TimeoutUnit.Snapshot | null = { Timeout: 1000 };
-        peopleProvider.Unit = new Promise<TimeoutUnit.Snapshot | null>((resolve) => setTimeout(() => resolve(timeoutUnit), 500));
+
         const people: People.Proxy = await peopleProvider.FetchPeopleAsync();
         
         this.PrintAgeMethodUsage(people);
         return people.All;
+    }
+
+    public SetDelays(jsTimeout: number, csDelay: number){
+        const timeoutUnit: TimeoutUnit.Snapshot | null = { Timeout: csDelay };
+        TypeShimSampleModule.Proxy.PeopleProvider!.Unit = new Promise<TimeoutUnit.Snapshot | null>((resolve) => setTimeout(() => resolve(timeoutUnit), jsTimeout));
     }
 
     private PrintAgeMethodUsage(people: People.Proxy) {

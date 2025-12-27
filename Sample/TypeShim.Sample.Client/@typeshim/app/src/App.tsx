@@ -3,7 +3,7 @@ import Home from './pages/Home';
 import People from './pages/People';
 import CapabilitiesPage from './pages/Capabilities';
 
-import { launchWasmRuntime, TypeShimInitializer } from '@typeshim/wasm-exports';
+import { createWasmRuntime, TypeShimInitializer } from '@typeshim/wasm-exports';
 
 type Page = 'home' | 'people' | 'capabilities';
 
@@ -11,8 +11,8 @@ function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
 
   const exportsPromise: Promise<void> = useMemo(async () => {
-    const exports = await launchWasmRuntime();
-    TypeShimInitializer.initialize({ exports });
+    const runtimeInfo = await createWasmRuntime();
+    TypeShimInitializer.initialize(runtimeInfo);
   }, []);
 
   return (

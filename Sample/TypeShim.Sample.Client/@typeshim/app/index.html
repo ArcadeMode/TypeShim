@@ -7,6 +7,11 @@
     <title>@typeshim/app Demo</title>
 
     <script type="importmap"></script>
+
+    <script>
+      // Expose methods JSImport'ed by dotnet wasm module (not needed for TypeShim itself)
+      window.getBaseURI = () => document.baseURI;
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -8,11 +8,12 @@ class TypeShimConfig {
     return TypeShimConfig._exports;
   }
 
-  static initialize(options: { exports: AssemblyExports }) {
+  static initialize(options: { assemblyExports: AssemblyExports, setModuleImports: (scriptName: string, imports: object) => void }) {
     if (TypeShimConfig._exports){
       throw new Error("TypeShim has already been initialized.");
     }
-    TypeShimConfig._exports = options.exports;
+    options.setModuleImports("@typeshim", { unwrap: (obj: any) => obj });
+    TypeShimConfig._exports = options.assemblyExports;
   }
 }
 
@@ -128,6 +129,7 @@ export interface TypeShimSampleModuleInterop {
 export namespace CapabilitiesModule {
   export class Proxy {
     private constructor() {}
+
     public static GetCapabilitiesProvider(): CapabilitiesProvider.Proxy {
       const res = TypeShimConfig.exports.TypeShim.Sample.Capabilities.CapabilitiesModuleInterop.GetCapabilitiesProvider();
       return new CapabilitiesProvider.Proxy(res);
@@ -548,6 +550,7 @@ export namespace TimeoutUnit {
 export namespace TypeShimSampleModule {
   export class Proxy {
     private constructor() {}
+
     public static get PeopleProvider(): PeopleProvider.Proxy | null {
       const res = TypeShimConfig.exports.TypeShim.Sample.TypeShimSampleModuleInterop.get_PeopleProvider();
       return res ? new PeopleProvider.Proxy(res) : null;

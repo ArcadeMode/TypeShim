@@ -101,63 +101,63 @@ public static partial class JSObjectTaskExtensions
         return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsObjectTask(value) : null;
     }
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.Boolean>>]
     public static partial Task<bool> MarshallAsBooleanTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.Number>>]
     public static partial Task<byte> MarshallAsByteTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.String>>]
     public static partial Task<char> MarshallAsCharTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.Number>>]
     public static partial Task<short> MarshallAsInt16Task([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.Number>>]
     public static partial Task<int> MarshallAsInt32Task([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.Number>>]
     public static partial Task<long> MarshallAsInt64Task([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.Number>>]
     public static partial Task<float> MarshallAsSingleTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.Number>>]
     public static partial Task<double> MarshallAsDoubleTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.Number>>]
     public static partial Task<nint> MarshallAsIntPtrTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.Date>>]
     public static partial Task<DateTime> MarshallAsDateTimeTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.Date>>]
     public static partial Task<DateTimeOffset> MarshallAsDateTimeOffsetTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.Error>>]
     public static partial Task<Exception> MarshallAsExceptionTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.Object>>]
     public static partial Task<JSObject> MarshallAsJSObjectTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.String>>]
     public static partial Task<string> MarshallAsStringTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
     public static partial Task<object> MarshallAsObjectTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 }
