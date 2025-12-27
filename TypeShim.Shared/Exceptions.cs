@@ -17,3 +17,11 @@ public class UnsupportedPropertyException(string message, Exception? innerExcept
 public class UnsupportedMethodException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
 {
 }
+
+public class UnsupportedMethodOverloadException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
+{
+}
+
+public class UnsupportedConstructorOverloadException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
+{
+}

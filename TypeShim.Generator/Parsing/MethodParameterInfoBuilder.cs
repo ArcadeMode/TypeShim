@@ -5,7 +5,7 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
 {
     internal IEnumerable<MethodParameterInfo> Build()
     {
-        if (!memberMethod.IsStatic)
+        if (!memberMethod.IsStatic && memberMethod.MethodKind is not MethodKind.Constructor)
         {
             yield return new MethodParameterInfo
             {
