@@ -593,22 +593,20 @@ export class Proxy {
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy {
-  interop: AssemblyExports;
   instance: object;
 
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
+  constructor(instance: object) {
     this.instance = instance;
   }
 
   public get P1(): Array<UserClass.Proxy | null> {
-    const res = this.interop.N1.C1Interop.get_P1(this.instance);
-    return res.map(e => e ? new UserClass.Proxy(e, this.interop) : null);
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+    return res.map(e => e ? new UserClass.Proxy(e) : null);
   }
 
   public set P1(value: Array<UserClass.Proxy | UserClass.Snapshot | null>) {
     const valueInstance = value.map(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null);
-    this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
 
 }
