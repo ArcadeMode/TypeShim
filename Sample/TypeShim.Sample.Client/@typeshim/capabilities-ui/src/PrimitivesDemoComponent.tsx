@@ -1,31 +1,24 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import { AssemblyExports, CapabilitiesProvider, PrimitivesDemo, CapabilitiesModule } from '@typeshim/wasm-exports/typeshim';
+import { CapabilitiesProvider, PrimitivesDemo, CapabilitiesModule } from '@typeshim/wasm-exports/typeshim';
 
 export interface PrimitivesDemoProps {
-  exportsPromise?: Promise<AssemblyExports>;
 }
 
-export const PrimitivesDemoComponent: React.FC<PrimitivesDemoProps> = ({ exportsPromise }) => {
+export const PrimitivesDemoComponent: React.FC<PrimitivesDemoProps> = () => {
   const [cap, setCap] = useState<CapabilitiesProvider.Proxy | null>(null);
   const [newBaseInput, setNewBaseInput] = useState('Hello');
   const [demos, setDemos] = useState<Array<{ instance: PrimitivesDemo.Proxy; concatA: string; concatB: string; multiplyCount: number; multiplyResult?: string }>>([]);
 
   useEffect(() => {
-    (async () => {
-      let exports: AssemblyExports;
-      if (exportsPromise) {
-        exports = await exportsPromise;
-      } else {
-        const starter: any = (window as any).wasmModuleStarter;
-        if (!starter) throw new Error('wasmModuleStarter not found. Ensure dotnet-start.js is loaded.');
-        exports = await (starter.exports as Promise<AssemblyExports>);
-      }
+    try {
       const capabilities = CapabilitiesModule.Proxy.GetCapabilitiesProvider();
       setCap(capabilities);
-    })().catch(console.error);
-  }, [exportsPromise]);
+    } catch (err) {
+      console.error('Error initializing CapabilitiesProvider:', err);
+    }
+  }, []);
 
   const createDemo = () => {
     if (!cap) return;

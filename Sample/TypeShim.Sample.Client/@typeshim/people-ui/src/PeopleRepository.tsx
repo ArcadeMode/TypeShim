@@ -1,10 +1,6 @@
-import { People, Person, PeopleProvider, TypeShimSampleModule, AssemblyExports, Dog, TimeoutUnit } from '@typeshim/wasm-exports';
+import { People, Person, PeopleProvider, TypeShimSampleModule, TimeoutUnit } from '@typeshim/wasm-exports';
 
 export class PeopleRepository {
-
-
-    constructor(exportsPromise: Promise<AssemblyExports>) {
-    }
 
     public async getAllPeople(): Promise<Person.Proxy[]> {
         const peopleProvider: PeopleProvider.Proxy | null = TypeShimSampleModule.Proxy.PeopleProvider;

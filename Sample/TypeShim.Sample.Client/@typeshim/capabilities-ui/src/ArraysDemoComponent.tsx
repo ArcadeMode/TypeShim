@@ -13,25 +13,18 @@ type ArraysDemoState = {
   setValue: number;
 };
 
-export const ArraysDemoComponent: React.FC<ArraysDemoProps> = ({ exportsPromise }) => {
+export const ArraysDemoComponent: React.FC<ArraysDemoProps> = () => {
   const [cap, setCap] = useState<CapabilitiesProvider.Proxy | null>(null);
   const [demos, setDemos] = useState<ArraysDemoState[]>([]);
 
   useEffect(() => {
-    (async () => {
-      let exports: AssemblyExports;
-      if (exportsPromise) {
-        exports = await exportsPromise;
-      } else {
-        const starter: any = (window as any).wasmModuleStarter;
-        if (!starter) throw new Error('wasmModuleStarter not found. Ensure dotnet-start.js is loaded.');
-        exports = await (starter.exports as Promise<AssemblyExports>);
-      }
+    try {
       const provider = CapabilitiesModule.Proxy.GetCapabilitiesProvider();
       setCap(provider);
-    })().catch(console.error);
-  }, [exportsPromise]);
-
+    } catch (err) {
+      console.error('Error initializing CapabilitiesProvider:', err);
+    }
+  }, []);
   const createDemo = () => {
     if (!cap) return;
     const instance: ArraysDemo.Proxy = cap.GetArraysDemo();
