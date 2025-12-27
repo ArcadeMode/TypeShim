@@ -150,7 +150,7 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         }
         else
         {
-            sb.Append($"new {proxyClassName}({sourceVarName})");
+            sb.Append($"ProxyBase.fromHandle({proxyClassName}, {sourceVarName})");
         }
     }
 

@@ -22,8 +22,13 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypescriptS
         string indent2 = new(' ', (depth + 1) * 2);
         string indent3 = new(' ', (depth + 2) * 2);
 
-        sb.AppendLine($"{indent}export class {symbolNameProvider.GetUserClassProxySymbolName()} {{");
-        
+        sb.Append($"{indent}export class {symbolNameProvider.GetUserClassProxySymbolName()}");
+        if (!classInfo.IsStatic)
+        {
+            sb.Append($" extends ProxyBase");
+        }
+        sb.AppendLine(" {");
+
         RenderConstructor(depth + 1);
 
         foreach (MethodInfo methodInfo in classInfo.Methods)
@@ -50,10 +55,8 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypescriptS
         }
         else
         {
-            sb.AppendLine($"{indent}instance: object;");
-            sb.AppendLine();
-            sb.AppendLine($"{indent}constructor(instance: object) {{");
-            sb.AppendLine($"{indent2}this.instance = instance;");
+            sb.AppendLine($"{indent}constructor() {{");
+            sb.AppendLine($"{indent2}super(null!);"); //TODO: render constructor interop call
             sb.AppendLine($"{indent}}}");
             sb.AppendLine();
         }

@@ -19,6 +19,20 @@ class TypeShimConfig {
 
 export const TypeShimInitializer = { initialize: TypeShimConfig.initialize };
 
+abstract class ProxyBase {
+  instance: object;
+  constructor(instance: object) {
+    this.instance = instance;
+  }
+
+  static fromHandle<T extends ProxyBase>(ctor: new (...args: any[]) => T, handle: object): T {
+    const obj = Object.create(ctor.prototype) as T;
+    obj.instance = handle;
+    return obj;
+  }
+}
+
+
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports {
     TypeShim: {
@@ -132,7 +146,7 @@ export namespace CapabilitiesModule {
 
     public static GetCapabilitiesProvider(): CapabilitiesProvider.Proxy {
       const res = TypeShimConfig.exports.TypeShim.Sample.Capabilities.CapabilitiesModuleInterop.GetCapabilitiesProvider();
-      return new CapabilitiesProvider.Proxy(res);
+      return ProxyBase.fromHandle(CapabilitiesProvider.Proxy, res);
     }
 
   }
@@ -141,21 +155,19 @@ export namespace CapabilitiesModule {
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.CapabilitiesProvider
 export namespace CapabilitiesProvider {
-  export class Proxy {
-    instance: object;
-
-    constructor(instance: object) {
-      this.instance = instance;
+  export class Proxy extends ProxyBase {
+    constructor() {
+      super(null!);
     }
 
     public GetPrimitivesDemo(baseString: string): PrimitivesDemo.Proxy {
       const res = TypeShimConfig.exports.TypeShim.Sample.Capabilities.CapabilitiesProviderInterop.GetPrimitivesDemo(this.instance, baseString);
-      return new PrimitivesDemo.Proxy(res);
+      return ProxyBase.fromHandle(PrimitivesDemo.Proxy, res);
     }
 
     public GetArraysDemo(): ArraysDemo.Proxy {
       const res = TypeShimConfig.exports.TypeShim.Sample.Capabilities.CapabilitiesProviderInterop.GetArraysDemo(this.instance);
-      return new ArraysDemo.Proxy(res);
+      return ProxyBase.fromHandle(ArraysDemo.Proxy, res);
     }
 
   }
@@ -164,11 +176,9 @@ export namespace CapabilitiesProvider {
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.PrimitivesDemo
 export namespace PrimitivesDemo {
-  export class Proxy {
-    instance: object;
-
-    constructor(instance: object) {
-      this.instance = instance;
+  export class Proxy extends ProxyBase {
+    constructor() {
+      super(null!);
     }
 
     public GetStringLength(): number {
@@ -236,11 +246,9 @@ export namespace PrimitivesDemo {
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.ArraysDemo
 export namespace ArraysDemo {
-  export class Proxy {
-    instance: object;
-
-    constructor(instance: object) {
-      this.instance = instance;
+  export class Proxy extends ProxyBase {
+    constructor() {
+      super(null!);
     }
 
     public SumIntArray(): number {
@@ -282,16 +290,14 @@ export namespace ArraysDemo {
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.People
 export namespace People {
-  export class Proxy {
-    instance: object;
-
-    constructor(instance: object) {
-      this.instance = instance;
+  export class Proxy extends ProxyBase {
+    constructor() {
+      super(null!);
     }
 
     public get All(): Array<Person.Proxy> {
       const res = TypeShimConfig.exports.TypeShim.Sample.PeopleInterop.get_All(this.instance);
-      return res.map(e => new Person.Proxy(e));
+      return res.map(e => ProxyBase.fromHandle(Person.Proxy, e));
     }
 
     public set All(value: Array<Person.Proxy | Person.Snapshot>) {
@@ -322,11 +328,9 @@ export namespace People {
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Person
 export namespace Person {
-  export class Proxy {
-    instance: object;
-
-    constructor(instance: object) {
-      this.instance = instance;
+  export class Proxy extends ProxyBase {
+    constructor() {
+      super(null!);
     }
 
     public IsOlderThan(other: Person.Proxy | Person.Snapshot): boolean {
@@ -369,7 +373,7 @@ export namespace Person {
 
     public get Pets(): Array<Dog.Proxy> {
       const res = TypeShimConfig.exports.TypeShim.Sample.PersonInterop.get_Pets(this.instance);
-      return res.map(e => new Dog.Proxy(e));
+      return res.map(e => ProxyBase.fromHandle(Dog.Proxy, e));
     }
 
     public set Pets(value: Array<Dog.Proxy | Dog.Snapshot>) {
@@ -406,11 +410,9 @@ export namespace Person {
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Dog
 export namespace Dog {
-  export class Proxy {
-    instance: object;
-
-    constructor(instance: object) {
-      this.instance = instance;
+  export class Proxy extends ProxyBase {
+    constructor() {
+      super(null!);
     }
 
     public Bark(): string {
@@ -472,11 +474,9 @@ export namespace Dog {
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.PeopleProvider
 export namespace PeopleProvider {
-  export class Proxy {
-    instance: object;
-
-    constructor(instance: object) {
-      this.instance = instance;
+  export class Proxy extends ProxyBase {
+    constructor() {
+      super(null!);
     }
 
     public DoStuff(task: Promise<TimeoutUnit.Proxy | TimeoutUnit.Snapshot | null>): void {
@@ -486,17 +486,17 @@ export namespace PeopleProvider {
 
     public async FetchPeopleAsync(): Promise<People.Proxy> {
       const res = TypeShimConfig.exports.TypeShim.Sample.PeopleProviderInterop.FetchPeopleAsync(this.instance);
-      return res.then(e => new People.Proxy(e));
+      return res.then(e => ProxyBase.fromHandle(People.Proxy, e));
     }
 
     public static get PeopleCache(): Array<Person.Proxy | null> | null {
       const res = TypeShimConfig.exports.TypeShim.Sample.PeopleProviderInterop.get_PeopleCache();
-      return res ? res.map(e => e ? new Person.Proxy(e) : null) : null;
+      return res ? res.map(e => e ? ProxyBase.fromHandle(Person.Proxy, e) : null) : null;
     }
 
     public get Unit(): Promise<TimeoutUnit.Proxy | null> | null {
       const res = TypeShimConfig.exports.TypeShim.Sample.PeopleProviderInterop.get_Unit(this.instance);
-      return res ? res.then(e => e ? new TimeoutUnit.Proxy(e) : null) : null;
+      return res ? res.then(e => e ? ProxyBase.fromHandle(TimeoutUnit.Proxy, e) : null) : null;
     }
 
     public set Unit(value: Promise<TimeoutUnit.Proxy | TimeoutUnit.Snapshot | null> | null) {
@@ -510,11 +510,9 @@ export namespace PeopleProvider {
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.TimeoutUnit
 export namespace TimeoutUnit {
-  export class Proxy {
-    instance: object;
-
-    constructor(instance: object) {
-      this.instance = instance;
+  export class Proxy extends ProxyBase {
+    constructor() {
+      super(null!);
     }
 
     public get Timeout(): number {
@@ -553,7 +551,7 @@ export namespace TypeShimSampleModule {
 
     public static get PeopleProvider(): PeopleProvider.Proxy | null {
       const res = TypeShimConfig.exports.TypeShim.Sample.TypeShimSampleModuleInterop.get_PeopleProvider();
-      return res ? new PeopleProvider.Proxy(res) : null;
+      return res ? ProxyBase.fromHandle(PeopleProvider.Proxy, res) : null;
     }
 
   }

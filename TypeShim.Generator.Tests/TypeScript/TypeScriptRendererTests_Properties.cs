@@ -38,11 +38,9 @@ internal class TypeScriptRendererTests_Properties
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public get P1(): {{typeScriptType}} {
@@ -87,11 +85,9 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public static get P1(): {{typeScriptType}} {
@@ -217,16 +213,14 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public get P1(): UserClass.Proxy {
     const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-    return new UserClass.Proxy(res);
+    return ProxyBase.fromHandle(UserClass.Proxy, res);
   }
 
   public set P1(value: UserClass.Proxy | UserClass.Snapshot) {
@@ -284,7 +278,7 @@ export class Proxy {
 
   public static get P1(): UserClass.Proxy {
     const res = TypeShimConfig.exports.N1.C1Interop.get_P1();
-    return new UserClass.Proxy(res);
+    return ProxyBase.fromHandle(UserClass.Proxy, res);
   }
 
   public static set P1(value: UserClass.Proxy | UserClass.Snapshot) {
@@ -337,16 +331,14 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public get P1(): UserClass.Proxy | null {
     const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-    return res ? new UserClass.Proxy(res) : null;
+    return res ? ProxyBase.fromHandle(UserClass.Proxy, res) : null;
   }
 
   public set P1(value: UserClass.Proxy | UserClass.Snapshot | null) {
@@ -399,16 +391,14 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public get P1(): Promise<UserClass.Proxy> {
     const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-    return res.then(e => new UserClass.Proxy(e));
+    return res.then(e => ProxyBase.fromHandle(UserClass.Proxy, e));
   }
 
   public set P1(value: Promise<UserClass.Proxy | UserClass.Snapshot>) {
@@ -461,16 +451,14 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public get P1(): Promise<UserClass.Proxy | null> {
     const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-    return res.then(e => e ? new UserClass.Proxy(e) : null);
+    return res.then(e => e ? ProxyBase.fromHandle(UserClass.Proxy, e) : null);
   }
 
   public set P1(value: Promise<UserClass.Proxy | UserClass.Snapshot | null>) {
@@ -523,16 +511,14 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public get P1(): Array<UserClass.Proxy> {
     const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-    return res.map(e => new UserClass.Proxy(e));
+    return res.map(e => ProxyBase.fromHandle(UserClass.Proxy, e));
   }
 
   public set P1(value: Array<UserClass.Proxy | UserClass.Snapshot>) {
@@ -585,16 +571,14 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public get P1(): Array<UserClass.Proxy | null> {
     const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-    return res.map(e => e ? new UserClass.Proxy(e) : null);
+    return res.map(e => e ? ProxyBase.fromHandle(UserClass.Proxy, e) : null);
   }
 
   public set P1(value: Array<UserClass.Proxy | UserClass.Snapshot | null>) {
@@ -647,16 +631,14 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public get P1(): Array<UserClass.Proxy> | null {
     const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-    return res ? res.map(e => new UserClass.Proxy(e)) : null;
+    return res ? res.map(e => ProxyBase.fromHandle(UserClass.Proxy, e)) : null;
   }
 
   public set P1(value: Array<UserClass.Proxy | UserClass.Snapshot> | null) {
@@ -709,16 +691,14 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public get P1(): Array<UserClass.Proxy | null> | null {
     const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-    return res ? res.map(e => e ? new UserClass.Proxy(e) : null) : null;
+    return res ? res.map(e => e ? ProxyBase.fromHandle(UserClass.Proxy, e) : null) : null;
   }
 
   public set P1(value: Array<UserClass.Proxy | UserClass.Snapshot | null> | null) {
@@ -771,16 +751,14 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public get P1(): Promise<UserClass.Proxy | null> | null {
     const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-    return res ? res.then(e => e ? new UserClass.Proxy(e) : null) : null;
+    return res ? res.then(e => e ? ProxyBase.fromHandle(UserClass.Proxy, e) : null) : null;
   }
 
   public set P1(value: Promise<UserClass.Proxy | UserClass.Snapshot | null> | null) {

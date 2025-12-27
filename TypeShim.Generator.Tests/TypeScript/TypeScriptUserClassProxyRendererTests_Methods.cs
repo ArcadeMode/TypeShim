@@ -39,11 +39,9 @@ internal class TypeScriptUserClassProxyRendererTests_Methods
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public DoP1(): {{typeScriptType}} {
@@ -96,16 +94,14 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public GetAll(): Array<UserClass.Proxy> {
     const res = TypeShimConfig.exports.N1.C1Interop.GetAll(this.instance);
-    return res.map(e => new UserClass.Proxy(e));
+    return res.map(e => ProxyBase.fromHandle(UserClass.Proxy, e));
   }
 
 }
@@ -154,16 +150,14 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public GetMaybe(): UserClass.Proxy | null {
     const res = TypeShimConfig.exports.N1.C1Interop.GetMaybe(this.instance);
-    return res ? new UserClass.Proxy(res) : null;
+    return res ? ProxyBase.fromHandle(UserClass.Proxy, res) : null;
   }
 
 }
@@ -211,11 +205,9 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public DoStuff(u: UserClass.Proxy | UserClass.Snapshot): void {
@@ -268,11 +260,9 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public DoStuff(u: UserClass.Proxy | UserClass.Snapshot, v: UserClass.Proxy | UserClass.Snapshot): void {
@@ -326,11 +316,9 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public DoStuff(u: UserClass.Proxy | UserClass.Snapshot | null): void {
@@ -383,11 +371,9 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public DoStuff(u: Array<UserClass.Proxy | UserClass.Snapshot>): void {
@@ -439,11 +425,9 @@ export class Proxy {
         string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
 
         Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  instance: object;
-
-  constructor(instance: object) {
-    this.instance = instance;
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(null!);
   }
 
   public DoStuff(u: Promise<UserClass.Proxy | UserClass.Snapshot>): void {
