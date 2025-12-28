@@ -35,7 +35,8 @@ static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInf
 {
     foreach (ClassInfo classInfo in classInfos)
     {
-        SourceText source = SourceText.From(new CSharpInteropClassRenderer(classInfo).Render(), Encoding.UTF8);
+        RenderContext renderContext = new(classInfos, indentSpaces: 4);
+        SourceText source = SourceText.From(new CSharpInteropClassRenderer(classInfo, renderContext).Render(), Encoding.UTF8);
         string outFileName = $"{classInfo.Name}.Interop.g.cs";
         File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, outFileName), source.ToString());
     }

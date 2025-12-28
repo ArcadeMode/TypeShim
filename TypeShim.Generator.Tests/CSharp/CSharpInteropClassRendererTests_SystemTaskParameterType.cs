@@ -44,7 +44,8 @@ internal class CSharpInteropClassRendererTests_SystemTaskParameterType
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -109,7 +110,9 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         // Important assertion here, Task<object> required for interop, cannot be simply casted to Task<MyClass>
         // the return type is void so we cannot await either, hence the TaskCompletionSource-based conversion.
@@ -182,7 +185,9 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -241,7 +246,8 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.Last();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         // Note: as there is no known mapping for these types, there is no 'FromObject' mapping, instead just try to cast ("taskTcs.SetResult(({{typeName}})t.Result)")
         // the user shouldnt be able to do much with the object anyway as its untyped on the JS/TS side.

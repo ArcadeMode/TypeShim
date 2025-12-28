@@ -40,7 +40,9 @@ internal class CSharpInteropClassRendererTests_Properties
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -118,7 +120,9 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -184,7 +188,8 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -240,7 +245,8 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -317,7 +323,9 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -395,7 +403,9 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -473,7 +483,9 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -552,7 +564,9 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -631,7 +645,9 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -728,7 +744,9 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -825,7 +843,9 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -910,7 +930,8 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.Last();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions

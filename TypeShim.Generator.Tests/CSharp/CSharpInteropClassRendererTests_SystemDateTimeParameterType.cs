@@ -29,7 +29,8 @@ internal class CSharpInteropClassRendererTests_SystemDateTimeParameterType
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -80,7 +81,8 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
