@@ -278,4 +278,114 @@ public partial class C1Interop
 
 """.Replace("{{typeName}}", typeName)));
     }
+
+    [Test]
+    public void CSharpInteropClass_InstanceMethod_HasJSTypePromiseAny_ForVoidTaskReturnType()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                private C1() {}
+                public Task M1()
+                {
+                    return Task.FromResult(new MyClass());
+                }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+
+        Assert.That(interopClass, Is.EqualTo("""    
+// Auto-generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Promise<JSType.Void>>]
+    public static Task M1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return typed_instance.M1();
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+}
+
+"""));
+    }
+
+    [Test]
+    public void CSharpInteropClass_InstanceMethod_HasJSTypePromiseAny_ForNullableVoidTaskReturnType()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                private C1() {}
+                public Task? M1()
+                {
+                    return null;
+                }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+
+        Assert.That(interopClass, Is.EqualTo("""    
+// Auto-generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Promise<JSType.Void>>]
+    public static Task? M1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return typed_instance.M1();
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+}
+
+"""));
+    }
 }

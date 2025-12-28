@@ -33,7 +33,9 @@ public abstract record JSTypeInfo(KnownManagedType KnownType)
                 SyntaxFactory.TypeArgumentList(
                     SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
                         asti.ElementTypeInfo.Syntax))),
-            JSTaskTypeInfo tti => SyntaxFactory.GenericName(
+            JSTaskTypeInfo { ResultTypeInfo.KnownType: KnownManagedType.Void } => SyntaxFactory.IdentifierName(
+                SyntaxFactory.Identifier("Task")),
+            JSTaskTypeInfo { ResultTypeInfo.KnownType: not KnownManagedType.Void }  tti => SyntaxFactory.GenericName(
                 SyntaxFactory.Identifier("Task"),
                 SyntaxFactory.TypeArgumentList(
                     SyntaxFactory.SingletonSeparatedList<TypeSyntax>(

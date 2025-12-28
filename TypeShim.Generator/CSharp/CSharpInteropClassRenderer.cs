@@ -201,7 +201,7 @@ internal sealed class CSharpInteropClassRenderer
     private void RenderUserMethodInvocation(MethodInfo methodInfo)
     {
         // Handle Task<T> return conversion for conversion requiring types
-        if (methodInfo.ReturnType is { IsNullableType: true, TypeArgument.IsTaskType: true })
+        if (methodInfo.ReturnType is { IsNullableType: true, TypeArgument.IsTaskType: true, TypeArgument.RequiresCLRTypeConversion: true })
         {
             string convertedTaskExpression = _conversionRenderer.RenderNullableTaskTypeConversion(methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", GetInvocationExpression());
             _ctx.Append("return ").Append(convertedTaskExpression).AppendLine(";");

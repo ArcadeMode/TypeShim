@@ -252,6 +252,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
                 KnownManagedType.Char
                 or KnownManagedType.String => "JSType.String",
                 KnownManagedType.Object => "JSType.Any",
+                KnownManagedType.Void => "JSType.Void",
                 _ => throw new TypeNotSupportedException($"Unsupported Task<T> type argument {typeInfo.KnownType} ({syntax})")
             };
             return $"JSType.Promise<{innerJsType}>";
