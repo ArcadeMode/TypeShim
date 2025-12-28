@@ -9,6 +9,9 @@ namespace TypeShim.Generator;
 
 internal sealed class RenderContext(IEnumerable<ClassInfo> classInfos, int indentSpaces)
 {
+    internal const string FromJSObjectMethodName = "FromJSObject";
+    internal const string FromObjectMethodName = "FromObject";
+
     private readonly Dictionary<InteropTypeInfo, ClassInfo> typeToClassDict = classInfos.ToDictionary(c => c.Type);
     private readonly StringBuilder sb = new();
     private int depth = 0;
@@ -19,6 +22,11 @@ internal sealed class RenderContext(IEnumerable<ClassInfo> classInfos, int inden
         typeToClassDict.TryGetValue(type, out ClassInfo? info);
         return info;
     }
+
+    internal string GetInteropClassName(ClassInfo classInfo) => $"{classInfo.Name}Interop";
+
+    internal string GetTypedParameterName(MethodParameterInfo paramInfo) => paramInfo.Type.RequiresCLRTypeConversion ? $"typed_{paramInfo.Name}" : paramInfo.Name;
+
 
     /// <summary>
     /// <code>

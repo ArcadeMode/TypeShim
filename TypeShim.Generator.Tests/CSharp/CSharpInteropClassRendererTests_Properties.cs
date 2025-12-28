@@ -257,6 +257,15 @@ namespace N1;
 public partial class C1Interop
 {
     [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = jsObject.GetPropertyAsInt32Array("P1"),
+        };
+    }
+    [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Number>>]
     public static int[] get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
@@ -281,7 +290,7 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        return new()
+        return new C1()
         {
             P1 = jsObject.GetPropertyAsInt32Array("P1"),
         };
