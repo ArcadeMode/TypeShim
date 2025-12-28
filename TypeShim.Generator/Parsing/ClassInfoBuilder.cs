@@ -11,32 +11,34 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
 
     internal ClassInfo Build()
     {
+        List<PropertyInfo> properties = BuildProperties();
         return new ClassInfo
         {
             Namespace = classSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
             Name = classSymbol.Name,
             IsStatic = classSymbol.IsStatic,
             Type = new InteropTypeInfoBuilder(classSymbol, typeInfoCache).Build(),
-            Constructor = BuildConstructor(),
+            Constructor = BuildConstructor(properties),
             Methods = BuildMethods(),
-            Properties = BuildProperties(),
+            Properties = properties,
         };
     }
 
-    private MethodInfo? BuildConstructor()
+    private ConstructorInfo? BuildConstructor(List<PropertyInfo> properties)
     {
         IMethodSymbol[] constructorMethods = [.. classSymbol.Constructors.Where(m => m.DeclaredAccessibility == Accessibility.Public && !m.IsStatic)];
         return constructorMethods switch
         {
             { Length: 0 } => null,
             { Length: > 1 } => throw new UnsupportedConstructorOverloadException("Overloaded constructors are not supported."),
-            [ IMethodSymbol constructor ] => new MethodInfoBuilder(classSymbol, constructor, typeInfoCache).Build(),
+            [ IMethodSymbol constructor ] => new ConstructorInfoBuilder(classSymbol, constructor, typeInfoCache)
+                .Build(properties),
         };
     }
 
     private List<PropertyInfo> BuildProperties()
     {
-        List<PropertyInfo> propertyInfoBuilders = new();
+        List<PropertyInfo> propertyInfoBuilders = [];
         IEnumerable<IPropertySymbol> propertySymbols = classSymbol.GetMembers().OfType<IPropertySymbol>()
             .Where(p => p.DeclaredAccessibility == Accessibility.Public);
         foreach (IPropertySymbol propertySymbol in propertySymbols)

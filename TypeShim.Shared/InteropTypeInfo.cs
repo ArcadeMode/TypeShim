@@ -94,7 +94,7 @@ public sealed class InteropTypeInfo
         IsTSExport = false,
         ManagedType = KnownManagedType.JSObject,
         JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Object"),
-        InteropTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),
+        InteropTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
         CLRTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
         IsTaskType = false,
         IsArrayType = false,

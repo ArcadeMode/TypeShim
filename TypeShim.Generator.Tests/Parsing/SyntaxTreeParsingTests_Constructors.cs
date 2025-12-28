@@ -28,7 +28,7 @@ internal class SyntaxTreeParsingTests_Constructors
         INamedTypeSymbol classSymbol = exportedClasses[0];
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         Assert.That(classInfo.Constructor, Is.Not.Null);
-        Assert.That(classInfo.Constructor.MethodParameters.ToList(), Has.Count.EqualTo(2));
+        Assert.That(classInfo.Constructor.Parameters, Has.Length.EqualTo(2));
     }
 
     [Test]
@@ -52,7 +52,7 @@ internal class SyntaxTreeParsingTests_Constructors
         INamedTypeSymbol classSymbol = exportedClasses[0];
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         Assert.That(classInfo.Constructor, Is.Not.Null);
-        Assert.That(classInfo.Constructor.MethodParameters.ToList(), Has.Count.EqualTo(2));
+        Assert.That(classInfo.Constructor.Parameters, Has.Length.EqualTo(2));
     }
 
     [Test]
