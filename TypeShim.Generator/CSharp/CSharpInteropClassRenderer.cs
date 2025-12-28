@@ -109,12 +109,12 @@ internal sealed class CSharpInteropClassRenderer
 
         using (_ctx.Indent())
         {
-            foreach (MethodParameterInfo originalParamInfo in methodInfo.MethodParameters)
+            foreach (MethodParameterInfo originalParamInfo in methodInfo.Parameters)
             {
                 _conversionRenderer.RenderParameterTypeConversion(originalParamInfo);
             }
 
-            string accessedObject = methodInfo.IsStatic ? classInfo.Name : _ctx.GetTypedParameterName(methodInfo.MethodParameters.ElementAt(0));
+            string accessedObject = methodInfo.IsStatic ? classInfo.Name : _ctx.GetTypedParameterName(methodInfo.Parameters.ElementAt(0));
             string accessorExpression = $"{accessedObject}.{propertyInfo.Name}";
 
             if (methodInfo.ReturnType is { IsNullableType: true, TypeArgument.IsTaskType: true })
@@ -136,7 +136,7 @@ internal sealed class CSharpInteropClassRenderer
             }
             else // setter
             {
-                string valueVarName = _ctx.GetTypedParameterName(methodInfo.MethodParameters.ElementAt(1));
+                string valueVarName = _ctx.GetTypedParameterName(methodInfo.Parameters.ElementAt(1));
                 _ctx.AppendLine($"{accessorExpression} = {valueVarName};");
             }
         }
@@ -154,7 +154,7 @@ internal sealed class CSharpInteropClassRenderer
         _ctx.AppendLine("{");
         using (_ctx.Indent())
         {
-            foreach (MethodParameterInfo originalParamInfo in methodInfo.MethodParameters)
+            foreach (MethodParameterInfo originalParamInfo in methodInfo.Parameters)
             {
                 _conversionRenderer.RenderParameterTypeConversion(originalParamInfo);
             }
@@ -165,7 +165,7 @@ internal sealed class CSharpInteropClassRenderer
     }
 
     private void RenderMethodSignature(MethodInfo methodInfo) 
-        => RenderMethodSignature(methodInfo.Name, methodInfo.ReturnType, methodInfo.MethodParameters);
+        => RenderMethodSignature(methodInfo.Name, methodInfo.ReturnType, methodInfo.Parameters);
 
     private void RenderMethodSignature(string name, InteropTypeInfo returnType, IEnumerable<MethodParameterInfo> parameterInfos)
     {
@@ -225,13 +225,13 @@ internal sealed class CSharpInteropClassRenderer
         {
             if (!methodInfo.IsStatic)
             {
-                MethodParameterInfo instanceParam = methodInfo.MethodParameters.ElementAt(0);
-                List<MethodParameterInfo> memberParams = [.. methodInfo.MethodParameters.Skip(1)];
+                MethodParameterInfo instanceParam = methodInfo.Parameters.ElementAt(0);
+                List<MethodParameterInfo> memberParams = [.. methodInfo.Parameters.Skip(1)];
                 return $"{_ctx.GetTypedParameterName(instanceParam)}.{methodInfo.Name}({string.Join(", ", memberParams.Select(_ctx.GetTypedParameterName))})";
             }
             else
             {
-                return $"{classInfo.Name}.{methodInfo.Name}({string.Join(", ", methodInfo.MethodParameters.Select(_ctx.GetTypedParameterName))})";
+                return $"{classInfo.Name}.{methodInfo.Name}({string.Join(", ", methodInfo.Parameters.Select(_ctx.GetTypedParameterName))})";
             }
         }
     }

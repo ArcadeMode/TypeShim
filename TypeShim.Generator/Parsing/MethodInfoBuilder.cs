@@ -23,7 +23,7 @@ internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSym
         {
             IsStatic = memberMethod.IsStatic,
             Name = memberMethod.Name,
-            MethodParameters = parameters,
+            Parameters = parameters,
             ReturnType = typeInfoBuilder.Build(),
         };
     }

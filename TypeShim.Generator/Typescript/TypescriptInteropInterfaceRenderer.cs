@@ -34,7 +34,7 @@ internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, Typescrip
     private string RenderInteropMethodSignature(MethodInfo methodInfo)
     {
         string returnType = symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
-        return $"{methodInfo.Name}({RenderInteropMethodParameters(methodInfo.MethodParameters)}): {returnType}";
+        return $"{methodInfo.Name}({RenderInteropMethodParameters(methodInfo.Parameters)}): {returnType}";
 
         string RenderInteropMethodParameters(IEnumerable<MethodParameterInfo> parameterInfos)
         {

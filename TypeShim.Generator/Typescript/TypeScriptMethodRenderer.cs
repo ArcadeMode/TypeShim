@@ -64,7 +64,7 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
 
     private string GetProxyMethodParameterList(MethodInfo methodInfo)
     {
-        return string.Join(", ", methodInfo.MethodParameters.Select(p =>
+        return string.Join(", ", methodInfo.Parameters.Select(p =>
         {
             SymbolNameFlags flags = ContainsSnapshotCompatibleType(p.Type) ? SymbolNameFlags.ProxySnapshotUnion : SymbolNameFlags.Proxy;
             string returnType = symbolNameProvider.GetUserClassSymbolNameIfExists(p.Type, flags) ?? symbolNameProvider.GetNakedSymbolReference(p.Type);
@@ -90,7 +90,7 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
     private void RenderManagedObjectConstAssignments(int depth, MethodInfo methodInfo)
     {
         string indent = new(' ', depth * 2);
-        foreach (MethodParameterInfo parameterInfo in methodInfo.MethodParameters)
+        foreach (MethodParameterInfo parameterInfo in methodInfo.Parameters)
         {
             if (parameterInfo.IsInjectedInstanceParameter || !parameterInfo.Type.RequiresCLRTypeConversion || !parameterInfo.Type.ContainsExportedType())
                 continue;
@@ -129,7 +129,7 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
 
         string RenderMethodCallParametersWithInstanceParameterExpression(MethodInfo methodInfo, string instanceParameterExpression)
         {
-            return string.Join(", ", methodInfo.MethodParameters.Select(p => p.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(p)));
+            return string.Join(", ", methodInfo.Parameters.Select(p => p.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(p)));
         }
     }
 
