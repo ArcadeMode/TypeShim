@@ -56,7 +56,7 @@ internal class SyntaxTreeParsingTests_Constructors
     }
 
     [Test]
-    public void ClassInfoBuilder_RejectsConstructorOverloads()
+    public void ClassInfoBuilder_ConstructorOverload_ThrowsNotSupported()
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -78,7 +78,7 @@ internal class SyntaxTreeParsingTests_Constructors
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        Assert.Throws<UnsupportedConstructorOverloadException>(() => new ClassInfoBuilder(classSymbol).Build());
+        Assert.Throws<NotSupportedConstructorOverloadException>(() => new ClassInfoBuilder(classSymbol).Build());
     }
 
     [Test]
@@ -100,6 +100,6 @@ internal class SyntaxTreeParsingTests_Constructors
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        Assert.Throws<UnsupportedConstructorOverloadException>(() => new ClassInfoBuilder(classSymbol).Build());
+        Assert.Throws<NotSupportedConstructorOverloadException>(() => new ClassInfoBuilder(classSymbol).Build());
     }
 }

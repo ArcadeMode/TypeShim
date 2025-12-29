@@ -33,7 +33,7 @@ internal class SyntaxTreeParsingTests_Methods
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        Assert.Throws<UnsupportedMethodOverloadException>(() => new ClassInfoBuilder(classSymbol).Build());
+        Assert.Throws<NotSupportedMethodOverloadException>(() => new ClassInfoBuilder(classSymbol).Build());
     }
 
     [Test]

@@ -39,7 +39,7 @@ internal class SyntaxTreeParsingTests_UnsupportedType
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        Assert.Throws<TypeNotSupportedException>(() =>
+        Assert.Throws<NotSupportedTypeException>(() =>
         {
             _ = new ClassInfoBuilder(classSymbol).Build();
         });
@@ -63,7 +63,7 @@ internal class SyntaxTreeParsingTests_UnsupportedType
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        Assert.Throws<TypeNotSupportedException>(() =>
+        Assert.Throws<NotSupportedTypeException>(() =>
         {
             _ = new ClassInfoBuilder(classSymbol).Build();
         });
@@ -100,7 +100,7 @@ internal class SyntaxTreeParsingTests_UnsupportedType
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        Assert.Throws<TypeNotSupportedException>(() =>
+        Assert.Throws<NotSupportedTypeException>(() =>
         {
             _ = new ClassInfoBuilder(classSymbol).Build();
         });
@@ -142,7 +142,7 @@ internal class SyntaxTreeParsingTests_UnsupportedType
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        Assert.Throws<TypeNotSupportedException>(() =>
+        Assert.Throws<NotSupportedTypeException>(() =>
         {
             _ = new ClassInfoBuilder(classSymbol).Build();
         });

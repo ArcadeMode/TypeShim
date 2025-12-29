@@ -71,7 +71,7 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
                 ReportNonTSExported(context, type, symbol);
             }
         }
-        catch (TypeNotSupportedException)
+        catch (NotSupportedTypeException)
         {
             ReportUnsupported(context, type, symbol);
         }

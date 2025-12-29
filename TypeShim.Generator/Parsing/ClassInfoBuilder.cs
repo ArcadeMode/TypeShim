@@ -30,7 +30,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
         return constructorMethods switch
         {
             { Length: 0 } => null,
-            { Length: > 1 } => throw new UnsupportedConstructorOverloadException("Overloaded constructors are not supported."),
+            { Length: > 1 } => throw new NotSupportedConstructorOverloadException("Overloaded constructors are not supported."),
             [ IMethodSymbol constructor ] => new ConstructorInfoBuilder(classSymbol, constructor, typeInfoCache)
                 .Build(properties),
         };
@@ -59,7 +59,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
         {
             if (methodInfos.ContainsKey(methodSymbol.Name))
             {
-                throw new UnsupportedMethodOverloadException($"Class {classSymbol.Name} contains overloaded method '{methodSymbol.Name}'. Overloading is not supported.");
+                throw new NotSupportedMethodOverloadException($"Class {classSymbol.Name} contains overloaded method '{methodSymbol.Name}'. Overloading is not supported.");
             }
             MethodInfoBuilder methodInfoBuilder = new(classSymbol, methodSymbol, typeInfoCache);
             methodInfos.Add(methodSymbol.Name, methodInfoBuilder.Build());

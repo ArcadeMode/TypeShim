@@ -9,12 +9,12 @@ internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropert
     {
         if (propertySymbol.DeclaredAccessibility != Accessibility.Public)
         {
-            throw new UnsupportedPropertyException($"Property {classSymbol}.{propertySymbol} must have accessibility 'Public'.");
+            throw new NotSupportedPropertyException($"Property {classSymbol}.{propertySymbol} must have accessibility 'Public'.");
         }
 
         if (propertySymbol.GetMethod is not IMethodSymbol methodSymbol)
         {
-            throw new UnsupportedPropertyException("Properties without get are not supported");
+            throw new NotSupportedPropertyException("Properties without get are not supported");
         }
 
         MethodInfoBuilder methodInfoBuilder = new(classSymbol, methodSymbol, typeInfoCache);

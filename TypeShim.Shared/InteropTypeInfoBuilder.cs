@@ -31,7 +31,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
             JSSpanTypeInfo => throw new NotImplementedException("Span<T> is not yet supported"),
             JSArraySegmentTypeInfo => throw new NotImplementedException("ArraySegment<T> is not yet supported"),
             JSFunctionTypeInfo => throw new NotImplementedException("Func & Action are not yet supported"),
-            JSInvalidTypeInfo or _ => throw new TypeNotSupportedException(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)),
+            JSInvalidTypeInfo or _ => throw new NotSupportedTypeException(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)),
         };
     }
 
@@ -78,7 +78,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
 
     private InteropTypeInfo BuildArrayTypeInfo(JSArrayTypeInfo arrayTypeInfo, TypeSyntax clrTypeSyntax)
     {
-        ITypeSymbol? elementTypeSymbol = GetTypeArgument(typeSymbol) ?? throw new TypeNotSupportedException("Only arrays with one element type are supported");
+        ITypeSymbol? elementTypeSymbol = GetTypeArgument(typeSymbol) ?? throw new NotSupportedTypeException("Only arrays with one element type are supported");
         InteropTypeInfo elementTypeInfo = new InteropTypeInfoBuilder(elementTypeSymbol, cache).Build();
 
         return new InteropTypeInfo
@@ -134,14 +134,14 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
             {
                 ITypeSymbol when fullTypeName == Constants.TaskGlobal => null,
                 INamedTypeSymbol { TypeArguments.Length: 1 } taskType when fullTypeName.StartsWith(Constants.TaskGlobal, StringComparison.Ordinal) => taskType.TypeArguments[0],
-                _ => throw new TypeNotSupportedException("Tasks with more than one type arguments are not supported")
+                _ => throw new NotSupportedTypeException("Tasks with more than one type arguments are not supported")
             };
         }
     }
 
     private InteropTypeInfo BuildNullableTypeInfo(JSNullableTypeInfo nullableTypeInfo, TypeSyntax clrTypeSyntax)
     {
-        ITypeSymbol? innertypeSymbol = GetTypeArgument(typeSymbol) ?? throw new TypeNotSupportedException("Only nullables with one element type are supported");
+        ITypeSymbol? innertypeSymbol = GetTypeArgument(typeSymbol) ?? throw new NotSupportedTypeException("Only nullables with one element type are supported");
         InteropTypeInfo innerTypeInfo = new InteropTypeInfoBuilder(innertypeSymbol, cache).Build();
 
         return new InteropTypeInfo
@@ -184,7 +184,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
             JSArrayTypeInfo arrayTypeInfo => arrayTypeInfo.GetTypeSyntax(),
             JSTaskTypeInfo taskTypeInfo => taskTypeInfo.GetTypeSyntax(),
             JSNullableTypeInfo nullableTypeInfo => SyntaxFactory.NullableType(GetInteropTypeSyntax(nullableTypeInfo.ResultTypeInfo)),
-            _ => throw new TypeNotSupportedException("Unsupported JSTypeInfo for interop type syntax generation"),
+            _ => throw new NotSupportedTypeException("Unsupported JSTypeInfo for interop type syntax generation"),
         } ?? throw new ArgumentException($"Invalid JSTypeInfo of known type '{jsTypeInfo.KnownType}' yielded no syntax");
     }
 
@@ -200,7 +200,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
             JSSpanTypeInfo => throw new NotImplementedException("Span<T> is not yet supported"),
             JSArraySegmentTypeInfo => throw new NotImplementedException("ArraySegment<T> is not yet supported"),
             JSFunctionTypeInfo => throw new NotImplementedException("Func & Action are not yet supported"),
-            JSInvalidTypeInfo or _ => throw new TypeNotSupportedException(clrTypeSyntax.ToFullString()),
+            JSInvalidTypeInfo or _ => throw new NotSupportedTypeException(clrTypeSyntax.ToFullString()),
         });
 
         static string GetSimpleJSMarshalAsTypeArgument(KnownManagedType knownManagedType)
@@ -223,7 +223,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
                 KnownManagedType.JSObject => "JSType.Object",
                 KnownManagedType.DateTime => "JSType.Date",
                 KnownManagedType.DateTimeOffset => "JSType.Date",
-                _ => throw new TypeNotSupportedException($"Unsupported simple type {knownManagedType}")
+                _ => throw new NotSupportedTypeException($"Unsupported simple type {knownManagedType}")
             };
         }
 
@@ -253,7 +253,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
                 or KnownManagedType.String => "JSType.String",
                 KnownManagedType.Object => "JSType.Any",
                 KnownManagedType.Void => "JSType.Void",
-                _ => throw new TypeNotSupportedException($"Unsupported Task<T> type argument {typeInfo.KnownType} ({syntax})")
+                _ => throw new NotSupportedTypeException($"Unsupported Task<T> type argument {typeInfo.KnownType} ({syntax})")
             };
             return $"JSType.Promise<{innerJsType}>";
 
@@ -276,7 +276,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
                 KnownManagedType.String => "JSType.String",
                 KnownManagedType.Object => "JSType.Any",
 
-                _ => throw new TypeNotSupportedException($"Unsupported Array<T> type argument {typeInfo.KnownType} ({syntax})")
+                _ => throw new NotSupportedTypeException($"Unsupported Array<T> type argument {typeInfo.KnownType} ({syntax})")
             };
 
             return $"JSType.Array<{innerJsType}>";
@@ -299,7 +299,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
                 KnownManagedType.DateTime => "JSType.Date",
                 KnownManagedType.DateTimeOffset => "JSType.Date",
 
-                _ => throw new TypeNotSupportedException($"Unsupported Nullable<T> type argument {managedType} ({syntax})")
+                _ => throw new NotSupportedTypeException($"Unsupported Nullable<T> type argument {managedType} ({syntax})")
             };
         }
     }
