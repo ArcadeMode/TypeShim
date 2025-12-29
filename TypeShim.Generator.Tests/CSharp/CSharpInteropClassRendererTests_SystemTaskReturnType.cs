@@ -30,6 +30,7 @@ internal class CSharpInteropClassRendererTests_SystemTaskReturnType
             [TSExport]
             public class C1
             {
+                private C1() {}
                 public static Task<{{typeExpression}}> M1()
                 {
                     return Task.FromResult(1);
@@ -43,7 +44,7 @@ internal class CSharpInteropClassRendererTests_SystemTaskReturnType
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -96,6 +97,7 @@ public partial class C1Interop
             [TSExport]
             public class C1
             {
+                private C1() {}
                 public static Task<MyClass> M1()
                 {
                     return Task.FromResult(new MyClass());
@@ -110,7 +112,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
-        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -169,6 +171,7 @@ public partial class C1Interop
             [TSExport]
             public class C1
             {
+                private C1() {}
                 public Task<MyClass> M1()
                 {
                     return Task.FromResult(new MyClass());
@@ -183,7 +186,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
-        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -231,6 +234,7 @@ public partial class C1Interop
             [TSExport]
             public class C1
             {
+                private C1() {}
                 public static Task<{{typeName}}> M1()
                 {
                     return Task.FromResult({objectCreation});
@@ -243,7 +247,7 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.Last();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -303,7 +307,7 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -358,7 +362,7 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    

@@ -11,23 +11,26 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         if (!parameterInfo.Type.RequiresCLRTypeConversion)
             return;
 
+        string newVarName = $"typed_{_ctx.LocalScope.GetAccessorExpression(parameterInfo)}";
         // task pattern differs from other conversions, hence their fully separated rendering.
         if (parameterInfo.Type is { IsNullableType: true, TypeArgument.IsTaskType: true }) // Task<T>?
         {
             string convertedTaskExpression = RenderNullableTaskTypeConversion(parameterInfo.Type, parameterInfo.Name, parameterInfo.Name);
-            _ctx.AppendLine($"{parameterInfo.Type.CLRTypeSyntax} {_ctx.GetTypedParameterName(parameterInfo)} = {convertedTaskExpression};");
-            return;
+            _ctx.AppendLine($"{parameterInfo.Type.CLRTypeSyntax} {newVarName} = {convertedTaskExpression};");
         }
-        if (parameterInfo.Type.IsTaskType) // Task<T>
+        else if (parameterInfo.Type.IsTaskType) // Task<T>
         {
             string convertedTaskExpression = RenderTaskTypeConversion(parameterInfo.Type, parameterInfo.Name, parameterInfo.Name);
-            _ctx.AppendLine($"{parameterInfo.Type.CLRTypeSyntax} {_ctx.GetTypedParameterName(parameterInfo)} = {convertedTaskExpression};");
-            return;
+            _ctx.AppendLine($"{parameterInfo.Type.CLRTypeSyntax} {newVarName} = {convertedTaskExpression};");
+        }
+        else
+        {
+            _ctx.Append($"{parameterInfo.Type.CLRTypeSyntax} {newVarName} = ");
+            RenderInlineTypeConversion(parameterInfo.Type, parameterInfo.Name, forceCovariantConversion: parameterInfo.IsInjectedInstanceParameter);
+            _ctx.AppendLine(";");
         }
 
-        _ctx.Append($"{parameterInfo.Type.CLRTypeSyntax} {_ctx.GetTypedParameterName(parameterInfo)} = ");
-        RenderInlineTypeConversion(parameterInfo.Type, parameterInfo.Name, forceCovariantConversion: parameterInfo.IsInjectedInstanceParameter);
-        _ctx.AppendLine(";");
+        _ctx.LocalScope.UpdateAccessorExpression(parameterInfo, newVarName); // TODO: let methodctx decide naming
     }
 
     internal void RenderInlineTypeConversion(InteropTypeInfo typeInfo, string varName, bool forceCovariantConversion = false)
@@ -67,7 +70,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         if (_ctx.GetClassInfo(typeInfo) is ClassInfo exportedClass)
         {
             string targetInteropClass = _ctx.GetInteropClassName(exportedClass);
-            _ctx.Append($"{targetInteropClass}.{RenderContext.FromObjectMethodName}({parameterName})");
+            _ctx.Append($"{targetInteropClass}.{RenderConstants.FromObjectMethodName}({parameterName})");
         }
         else
         {

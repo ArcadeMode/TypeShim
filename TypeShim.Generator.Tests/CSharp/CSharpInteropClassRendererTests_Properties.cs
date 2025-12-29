@@ -41,7 +41,7 @@ internal class CSharpInteropClassRendererTests_Properties
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
-        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -121,7 +121,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
-        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -188,7 +188,7 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -245,7 +245,7 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -333,7 +333,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
-        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -413,7 +413,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
-        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -424,6 +424,15 @@ using System.Threading.Tasks;
 namespace N1;
 public partial class C1Interop
 {
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectArray("P1"), e => e != null ? MyClassInterop.FromObject(e) : null),
+        };
+    }
     [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static object?[] get_P1([JSMarshalAs<JSType.Any>] object instance)
@@ -450,7 +459,7 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        return new()
+        return new C1()
         {
             P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectArray("P1"), e => e != null ? MyClassInterop.FromObject(e) : null),
         };
@@ -493,7 +502,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
-        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -574,7 +583,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
-        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -655,7 +664,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
-        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -754,7 +763,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
-        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -853,7 +862,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
-        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -864,6 +873,22 @@ using System.Threading.Tasks;
 namespace N1;
 public partial class C1Interop
 {
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        var P1Tmp = jsObject.GetPropertyAsJSObjectTask("P1");
+        TaskCompletionSource<MyClass?>? P1Tcs = P1Tmp != null ? new() : null;
+        P1Tmp?.ContinueWith(t => {
+            if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) P1Tcs.SetCanceled();
+            else P1Tcs.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);
+        }, TaskContinuationOptions.ExecuteSynchronously);
+        return new C1()
+        {
+            P1 = P1Tcs?.Task,
+        };
+    }
     [JSExport]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
     public static Task<object?>? get_P1([JSMarshalAs<JSType.Any>] object instance)
@@ -909,7 +934,7 @@ public partial class C1Interop
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);
         }, TaskContinuationOptions.ExecuteSynchronously);
-        return new()
+        return new C1()
         {
             P1 = P1Tcs?.Task,
         };
@@ -939,7 +964,7 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.Last();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    

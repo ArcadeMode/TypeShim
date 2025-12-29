@@ -5,15 +5,23 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
 {
     private readonly MethodParameterInfoBuilder parameterInfoBuilder = new(classSymbol, memberMethod, typeInfoCache);
     private readonly InteropTypeInfoBuilder typeInfoBuilder = new(classSymbol, typeInfoCache);
-    internal ConstructorInfo Build(IEnumerable<PropertyInfo> classProperties)
+    internal ConstructorInfo? Build(IEnumerable<PropertyInfo> classProperties)
     {
-        PropertyInfo[] initializerProperties = [..classProperties.Where(p => p is { SetMethod: { }, Type.IsSnapshotCompatible: true })];
-        MethodParameterInfo? initializersObjectParameter = initializerProperties.Length == 0 ? null : new()
+        PropertyInfo[] initializerProperties = [..classProperties.Where(p => p is { SetMethod: { } })];
+
+        if (!initializerProperties.All(p => p.Type.IsSnapshotCompatible))
         {
-            Name = "jsObject",
-            IsInjectedInstanceParameter = false,
-            Type = InteropTypeInfo.JSObjectTypeInfo //TODO: consider swapping for nullable JSObject, for cases where initializer is optional
-        };
+            return null;
+        }
+
+        MethodParameterInfo? initializersObjectParameter = initializerProperties.Length == 0 
+            ? null 
+            : new()
+            {
+                Name = "jsObject",
+                IsInjectedInstanceParameter = false,
+                Type = InteropTypeInfo.JSObjectTypeInfo //TODO: consider swapping for nullable JSObject, for cases where initializer is optional
+            };
 
         return new ConstructorInfo
         {

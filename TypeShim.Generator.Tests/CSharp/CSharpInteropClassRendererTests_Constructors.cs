@@ -29,7 +29,7 @@ internal class CSharpInteropClassRendererTests_Constructors
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -85,7 +85,7 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -141,7 +141,7 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -215,7 +215,7 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    

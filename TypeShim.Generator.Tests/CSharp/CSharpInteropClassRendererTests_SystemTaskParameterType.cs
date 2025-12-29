@@ -31,6 +31,7 @@ internal class CSharpInteropClassRendererTests_SystemTaskParameterType
             [TSExport]
             public class C1
             {
+                private C1() {}
                 public static void M1(Task<{{typeExpression}}> task)
                 {
                     bool b = task.IsCompleted;
@@ -44,7 +45,7 @@ internal class CSharpInteropClassRendererTests_SystemTaskParameterType
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -97,6 +98,7 @@ public partial class C1Interop
             [TSExport]
             public class C1
             {
+                private C1() {}
                 public static void M1(Task<MyClass> task)
                 {
                     bool b = task.IsCompleted;
@@ -111,7 +113,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
-        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         // Important assertion here, Task<object> required for interop, cannot be simply casted to Task<MyClass>
@@ -173,6 +175,7 @@ public partial class C1Interop
             [TSExport]
             public class C1
             {
+                private C1() {}
                 public static void M1(Task<MyClass> task)
                 {
                     var x = new MyClass();
@@ -186,7 +189,7 @@ public partial class C1Interop
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
-        RenderContext renderContext = new([classInfo, userClassInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -234,6 +237,7 @@ public partial class C1Interop
             [TSExport]
             public class C1
             {
+                private C1() {}
                 public static void M1(Task<{{typeName}}> task)
                 {
                     var x = {{objectCreation}};
@@ -246,7 +250,7 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.Last();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         // Note: as there is no known mapping for these types, there is no 'FromObject' mapping, instead just try to cast ("taskTcs.SetResult(({{typeName}})t.Result)")
@@ -308,7 +312,7 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    

@@ -14,7 +14,7 @@ internal class CSharpInteropClassRendererTests_SystemStringReturnType
             using System;
             namespace N1;
             [TSExport]
-            public class C1
+            public static class C1
             {
                 public static string M1()
                 {
@@ -29,7 +29,7 @@ internal class CSharpInteropClassRendererTests_SystemStringReturnType
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -46,27 +46,19 @@ public partial class C1Interop
     {
         return C1.M1();
     }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
-        {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
-    }
 }
 
 """));
     }
 
     [Test]
-    public void CSharpInteropClass_DynamicMethod_HasJSTypeString_ForStringReturnType()
+    public void CSharpInteropClass_InstanceMethod_HasJSTypeString_ForStringReturnType()
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
             [TSExport]
-            public class C1
+            public static class C1
             {
                 public string M1()
                 {
@@ -81,7 +73,7 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -98,14 +90,6 @@ public partial class C1Interop
     {
         C1 typed_instance = (C1)instance;
         return typed_instance.M1();
-    }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
-        {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
     }
 }
 

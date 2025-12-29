@@ -15,7 +15,7 @@ internal class CSharpInteropClassRendererTests_SystemDateTimeReturnType
             using System;
             namespace N1;
             [TSExport]
-            public class C1
+            public static class C1
             {
                 public static {{typeName}} M1()
                 {
@@ -29,7 +29,7 @@ internal class CSharpInteropClassRendererTests_SystemDateTimeReturnType
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
@@ -46,14 +46,6 @@ public partial class C1Interop
     {
         return C1.M1();
     }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
-        {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
-    }
 }
 
 """.Replace("{{typeName}}", typeName)));
@@ -61,7 +53,7 @@ public partial class C1Interop
 
     [TestCase("DateTime")]
     [TestCase("DateTimeOffset")]
-    public void CSharpInteropClass_DynamicMethod_HasJSTypeDate_ForDateTimeReturnType(string typeName)
+    public void CSharpInteropClass_InstanceMethod_HasJSTypeDate_ForDateTimeReturnType(string typeName)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -69,6 +61,7 @@ public partial class C1Interop
             [TSExport]
             public class C1
             {
+                private C1() {}
                 public {{typeName}} M1()
                 {
                 }
@@ -81,7 +74,7 @@ public partial class C1Interop
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        RenderContext renderContext = new([classInfo], indentSpaces: 4);
+        RenderContext renderContext = new(classInfo, [classInfo], indentSpaces: 4);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
