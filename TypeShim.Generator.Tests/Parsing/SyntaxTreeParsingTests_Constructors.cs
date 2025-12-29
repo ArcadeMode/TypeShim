@@ -32,7 +32,7 @@ internal class SyntaxTreeParsingTests_Constructors
     }
 
     [Test]
-    public void ClassInfoBuilder_ParsesRegularConstructor()
+    public void ClassInfoBuilder_RegularConstructor_Parses()
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -53,6 +53,42 @@ internal class SyntaxTreeParsingTests_Constructors
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
         Assert.That(classInfo.Constructor, Is.Not.Null);
         Assert.That(classInfo.Constructor.Parameters, Has.Length.EqualTo(2));
+    }
+
+    [Test]
+    public void ClassInfoBuilder_NonPublicConstructorOverload_Parses()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public C1(string name, int value)
+                {
+                }
+
+                internal C1(string name, int value, bool internalP) : this(name, value)
+                {
+                }
+
+                protected C1(string name, int value, int protectedP) : this(name, value)
+                {
+                }
+
+                private C1(string name, int value, bool privateP) : this(name, value)
+                {
+                }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        Assert.That(classInfo.Constructor, Is.Not.Null);
+        Assert.That(classInfo.Constructor.Parameters, Has.Length.EqualTo(2)); // only public has 2
     }
 
     [Test]
@@ -82,7 +118,7 @@ internal class SyntaxTreeParsingTests_Constructors
     }
 
     [Test]
-    public void ClassInfoBuilder_RejectsPrimaryConstructorOverloads()
+    public void ClassInfoBuilder_PrimaryConstructorOverload_ThrowsNotSupported()
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;

@@ -39,10 +39,13 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
     private List<PropertyInfo> BuildProperties()
     {
         List<PropertyInfo> propertyInfoBuilders = [];
-        IEnumerable<IPropertySymbol> propertySymbols = classSymbol.GetMembers().OfType<IPropertySymbol>()
-            .Where(p => p.DeclaredAccessibility == Accessibility.Public);
-        foreach (IPropertySymbol propertySymbol in propertySymbols)
+        foreach (IPropertySymbol propertySymbol in classSymbol.GetMembers().OfType<IPropertySymbol>())
         {
+            if (propertySymbol.DeclaredAccessibility != Accessibility.Public)
+            {
+                if (propertySymbol.IsRequired) throw new NotSupportedPropertyException($"Required property '{propertySymbol.Name}' is less visible than '{classSymbol.Name}'. This is invalid syntax.");
+                continue;
+            }
             PropertyInfoBuilder propertyInfoBuilder = new(classSymbol, propertySymbol, typeInfoCache);
             propertyInfoBuilders.Add(propertyInfoBuilder.Build());
         }
@@ -59,7 +62,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
         {
             if (methodInfos.ContainsKey(methodSymbol.Name))
             {
-                throw new NotSupportedMethodOverloadException($"Class {classSymbol.Name} contains overloaded method '{methodSymbol.Name}'. Overloading is not supported.");
+                throw new NotSupportedMethodOverloadException($"Method '{classSymbol.Name}.{methodSymbol.Name}' is overloaded, which is not supported.");
             }
             MethodInfoBuilder methodInfoBuilder = new(classSymbol, methodSymbol, typeInfoCache);
             methodInfos.Add(methodSymbol.Name, methodInfoBuilder.Build());
