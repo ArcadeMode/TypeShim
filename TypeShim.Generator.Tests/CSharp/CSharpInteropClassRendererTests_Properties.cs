@@ -54,6 +54,15 @@ public partial class C1Interop
 {
     [JSExport]
     [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = MyClassInterop.FromObject(jsObject.GetPropertyAsJSObject("P1")),
+        };
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
     public static object get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
         C1 typed_instance = (C1)instance;
@@ -78,7 +87,7 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        return new()
+        return new C1()
         {
             P1 = MyClassInterop.FromObject(jsObject.GetPropertyAsJSObject("P1")),
         };
@@ -134,6 +143,16 @@ public partial class C1Interop
 {
     [JSExport]
     [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        var P1Tmp = jsObject.GetPropertyAsJSObject("P1");
+        return new C1()
+        {
+            P1 = P1Tmp != null ? MyClassInterop.FromObject(P1Tmp) : null,
+        };
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
     public static object? get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
         C1 typed_instance = (C1)instance;
@@ -159,7 +178,7 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject jsObject)
     {
         var P1Tmp = jsObject.GetPropertyAsJSObject("P1");
-        return new()
+        return new C1()
         {
             P1 = P1Tmp != null ? MyClassInterop.FromObject(P1Tmp) : null,
         };
@@ -345,6 +364,15 @@ namespace N1;
 public partial class C1Interop
 {
     [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectArray("P1"), e => MyClassInterop.FromObject(e)),
+        };
+    }
+    [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static object[] get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
@@ -370,7 +398,7 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        return new()
+        return new C1()
         {
             P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectArray("P1"), e => MyClassInterop.FromObject(e)),
         };
@@ -514,6 +542,16 @@ namespace N1;
 public partial class C1Interop
 {
     [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        var P1Tmp = jsObject.GetPropertyAsJSObjectArray("P1");
+        return new C1()
+        {
+            P1 = P1Tmp != null ? Array.ConvertAll(P1Tmp, e => MyClassInterop.FromObject(e)) : null,
+        };
+    }
+    [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static object[]? get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
@@ -540,7 +578,7 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject jsObject)
     {
         var P1Tmp = jsObject.GetPropertyAsJSObjectArray("P1");
-        return new()
+        return new C1()
         {
             P1 = P1Tmp != null ? Array.ConvertAll(P1Tmp, e => MyClassInterop.FromObject(e)) : null,
         };
@@ -595,6 +633,16 @@ namespace N1;
 public partial class C1Interop
 {
     [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        var P1Tmp = jsObject.GetPropertyAsJSObjectArray("P1");
+        return new C1()
+        {
+            P1 = P1Tmp != null ? Array.ConvertAll(P1Tmp, e => e != null ? MyClassInterop.FromObject(e) : null) : null,
+        };
+    }
+    [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static object?[]? get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
@@ -621,7 +669,7 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject jsObject)
     {
         var P1Tmp = jsObject.GetPropertyAsJSObjectArray("P1");
-        return new()
+        return new C1()
         {
             P1 = P1Tmp != null ? Array.ConvertAll(P1Tmp, e => e != null ? MyClassInterop.FromObject(e) : null) : null,
         };
@@ -676,6 +724,22 @@ namespace N1;
 public partial class C1Interop
 {
     [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        var P1Tmp = jsObject.GetPropertyAsJSObjectTask("P1");
+        TaskCompletionSource<MyClass> P1Tcs = new();
+        P1Tmp.ContinueWith(t => {
+            if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) P1Tcs.SetCanceled();
+            else P1Tcs.SetResult(MyClassInterop.FromObject(t.Result));
+        }, TaskContinuationOptions.ExecuteSynchronously);
+        return new C1()
+        {
+            P1 = P1Tcs.Task,
+        };
+    }
+    [JSExport]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
     public static Task<object> get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
@@ -720,7 +784,7 @@ public partial class C1Interop
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(MyClassInterop.FromObject(t.Result));
         }, TaskContinuationOptions.ExecuteSynchronously);
-        return new()
+        return new C1()
         {
             P1 = P1Tcs.Task,
         };
@@ -775,6 +839,22 @@ namespace N1;
 public partial class C1Interop
 {
     [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        var P1Tmp = jsObject.GetPropertyAsJSObjectTask("P1");
+        TaskCompletionSource<MyClass?> P1Tcs = new();
+        P1Tmp.ContinueWith(t => {
+            if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) P1Tcs.SetCanceled();
+            else P1Tcs.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);
+        }, TaskContinuationOptions.ExecuteSynchronously);
+        return new C1()
+        {
+            P1 = P1Tcs.Task,
+        };
+    }
+    [JSExport]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
     public static Task<object?> get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
@@ -819,7 +899,7 @@ public partial class C1Interop
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);
         }, TaskContinuationOptions.ExecuteSynchronously);
-        return new()
+        return new C1()
         {
             P1 = P1Tcs.Task,
         };
