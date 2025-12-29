@@ -41,7 +41,7 @@ internal class TypeScriptUserClassSnapshotRendererTests
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export interface Snapshot {
   P1: {{typeScriptType}};
 }
@@ -91,7 +91,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export interface Snapshot {
   P1: {{typeScriptType}};
 }
@@ -140,7 +140,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""
+        Assert.That(renderContext.ToString(), Is.EqualTo("""
 export interface Snapshot {
   P1: {{tsTypeExpression}};
 }
@@ -200,7 +200,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
         new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export interface Snapshot {
   P1: UserClass.Snapshot;
 }
@@ -260,7 +260,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
         new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export interface Snapshot {
   P1: UserClass.Snapshot | null;
 }
@@ -320,7 +320,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
         new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export interface Snapshot {
   P1: Promise<UserClass.Snapshot>;
 }
@@ -380,7 +380,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
         new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export interface Snapshot {
   P1: Array<UserClass.Snapshot>;
 }

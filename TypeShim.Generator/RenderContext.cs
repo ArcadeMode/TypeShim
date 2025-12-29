@@ -115,12 +115,16 @@ internal sealed class RenderContext(ClassInfo? targetClass, IEnumerable<ClassInf
         _isNewLine = false;
     }
 
-    internal string Render() // TODO: consider different api? at least dont let renderer call tostring directly
+    /// <summary>
+    /// Materialize the rendered content as a string.
+    /// </summary>
+    /// <returns></returns>
+    public override string ToString()
     {
         return _sb.ToString();
     }
 
-    internal class ActionOnDisposeDisposable(Action onDisposal) : IDisposable
+    private class ActionOnDisposeDisposable(Action onDisposal) : IDisposable
     {
         public void Dispose()
         {

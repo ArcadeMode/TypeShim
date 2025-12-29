@@ -39,7 +39,7 @@ internal class TypeScriptRendererTests_Properties
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
     super(null!);
@@ -88,7 +88,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
     super(null!);
@@ -146,7 +146,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""
+        Assert.That(renderContext.ToString(), Is.EqualTo("""
 export class Proxy {
   private constructor() {}
 
@@ -220,7 +220,7 @@ export class Proxy {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
     super(null!);
@@ -282,7 +282,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""
+        Assert.That(renderContext.ToString(), Is.EqualTo("""
 export class Proxy {
   private constructor() {}
 
@@ -342,7 +342,7 @@ export class Proxy {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
     super(null!);
@@ -404,7 +404,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
     super(null!);
@@ -466,7 +466,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
     super(null!);
@@ -528,7 +528,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
     super(null!);
@@ -590,7 +590,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
     super(null!);
@@ -652,7 +652,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
     super(null!);
@@ -714,7 +714,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
     super(null!);
@@ -776,7 +776,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.Render(), Is.EqualTo("""    
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
     super(null!);

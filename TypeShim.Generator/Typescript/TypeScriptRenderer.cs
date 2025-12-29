@@ -12,7 +12,7 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
     {
         foreach(RenderContext ctx in (RenderContext[])[RenderTypeShimConfig(), RenderAssemblyExports(), .. RenderUserClasses()])
         {
-            sb.AppendLine(ctx.Render());
+            sb.AppendLine(ctx.ToString());
         }
         return sb.ToString();
     }

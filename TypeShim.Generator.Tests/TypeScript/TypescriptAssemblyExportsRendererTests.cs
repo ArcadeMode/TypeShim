@@ -52,7 +52,7 @@ internal class TypescriptAssemblyExportsRendererTests
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(renderCtx.Render(), Is.EqualTo("""    
+        Assert.That(renderCtx.ToString(), Is.EqualTo("""    
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
@@ -102,7 +102,7 @@ export interface AssemblyExports{
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(renderCtx.Render(), Is.EqualTo("""    
+        Assert.That(renderCtx.ToString(), Is.EqualTo("""    
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
@@ -157,7 +157,7 @@ export interface AssemblyExports{
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(renderCtx.Render(), Is.EqualTo("""    
+        Assert.That(renderCtx.ToString(), Is.EqualTo("""    
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
@@ -212,7 +212,7 @@ export interface AssemblyExports{
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(renderCtx.Render(), Is.EqualTo("""    
+        Assert.That(renderCtx.ToString(), Is.EqualTo("""    
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
@@ -267,7 +267,7 @@ export interface AssemblyExports{
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(renderCtx.Render(), Is.EqualTo("""    
+        Assert.That(renderCtx.ToString(), Is.EqualTo("""    
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {

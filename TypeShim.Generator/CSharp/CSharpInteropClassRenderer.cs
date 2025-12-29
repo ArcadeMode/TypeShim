@@ -71,6 +71,6 @@ internal sealed class CSharpInteropClassRenderer
         }
         
         _ctx.AppendLine("}");
-        return _ctx.Render();
+        return _ctx.ToString();
     }
 }
