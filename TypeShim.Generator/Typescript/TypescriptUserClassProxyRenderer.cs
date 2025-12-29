@@ -10,7 +10,7 @@ internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypescriptS
 
     internal void Render()
     {
-        ctx.Append($"export class ").Append(symbolNameProvider.GetUserClassProxySymbolName());
+        ctx.Append($"export class ").Append(RenderConstants.Proxy);
         if (!classInfo.IsStatic)
         {
             ctx.Append($" extends ProxyBase");

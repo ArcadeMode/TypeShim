@@ -169,7 +169,7 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
 
         void RenderInteropMethodAccessor(ClassInfo classInfo, MethodInfo methodInfo)
         {
-            ctx.Append(classInfo.Namespace).Append('.').Append(symbolNameProvider.GetInteropInterfaceName(classInfo)).Append('.').Append(methodInfo.Name);
+            ctx.Append(classInfo.Namespace).Append('.').Append(RenderConstants.InteropClassName(classInfo)).Append('.').Append(methodInfo.Name);
         }
 
         void RenderInlineProxyConstruction(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)

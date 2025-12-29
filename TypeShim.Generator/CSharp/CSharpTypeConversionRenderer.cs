@@ -69,7 +69,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
 
         if (_ctx.GetClassInfo(typeInfo) is ClassInfo exportedClass)
         {
-            string targetInteropClass = _ctx.GetInteropClassName(exportedClass);
+            string targetInteropClass = RenderConstants.InteropClassName(exportedClass);
             _ctx.Append($"{targetInteropClass}.{RenderConstants.FromObjectMethodName}({parameterName})");
         }
         else

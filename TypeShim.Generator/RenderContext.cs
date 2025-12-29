@@ -7,27 +7,6 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator;
 
-internal static class RenderConstants
-{
-    internal const string FromJSObjectMethodName = "FromJSObject";
-    internal const string FromObjectMethodName = "FromObject";
-}
-
-internal sealed class RenderOptions
-{
-    internal required int IndentSpaces { get; init; }
-
-    internal static RenderOptions CSharp = new()
-    {
-        IndentSpaces = 4
-    };
-
-    internal static RenderOptions TypeScript = new()
-    {
-        IndentSpaces = 2
-    };
-}
-
 internal sealed class RenderContext(ClassInfo? targetClass, IEnumerable<ClassInfo> allClasses, RenderOptions options)
 {
     internal ClassInfo Class => targetClass ?? throw new InvalidOperationException("Not rendering any particular class"); // TODO: improve api to avoid needing this
@@ -60,8 +39,6 @@ internal sealed class RenderContext(ClassInfo? targetClass, IEnumerable<ClassInf
     {
         _localScope = null;
     }
-
-    internal string GetInteropClassName(ClassInfo classInfo) => $"{classInfo.Name}Interop";
 
     /// <summary>
     /// <code>

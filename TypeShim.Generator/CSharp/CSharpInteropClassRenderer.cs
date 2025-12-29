@@ -33,7 +33,7 @@ internal sealed class CSharpInteropClassRenderer
             .AppendLine("using System.Runtime.InteropServices.JavaScript;")
             .AppendLine("using System.Threading.Tasks;")
             .Append("namespace ").Append(_classInfo.Namespace).AppendLine(";")
-            .Append("public partial class ").AppendLine(_ctx.GetInteropClassName(_classInfo))
+            .Append("public partial class ").AppendLine(RenderConstants.InteropClassName(_classInfo))
             .AppendLine("{");
 
         using (_ctx.Indent())

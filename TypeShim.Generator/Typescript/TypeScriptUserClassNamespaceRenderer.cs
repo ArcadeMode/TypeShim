@@ -8,7 +8,7 @@ internal sealed class TypeScriptUserClassNamespaceRenderer(ClassInfo classInfo, 
     internal void Render()
     {
         ctx.AppendLine($"// Auto-generated TypeScript namespace for class: {classInfo.Namespace}.{classInfo.Name}")
-           .AppendLine($"export namespace {symbolNameProvider.GetUserClassNamespace(classInfo)} {{");
+           .AppendLine($"export namespace {classInfo.Name} {{");
         using (ctx.Indent())
         {
             TypescriptUserClassProxyRenderer proxyRenderer = new(classInfo, symbolNameProvider, ctx);

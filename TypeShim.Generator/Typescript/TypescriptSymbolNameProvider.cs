@@ -17,14 +17,6 @@ internal enum SymbolNameFlags
 
 internal class TypescriptSymbolNameProvider(TypeScriptTypeMapper typeMapper)
 {
-    internal string GetModuleInteropClassName() => $"AssemblyExports";
-    internal string GetInteropInterfaceName(ClassInfo classInfo) => $"{classInfo.Name}Interop";
-
-    internal string GetUserClassNamespace(ClassInfo classInfo)
-    {
-        return classInfo.Name;
-    }
-
     internal string? GetUserClassSymbolNameIfExists(InteropTypeInfo typeInfo, SymbolNameFlags flags)
     {
         if (ExtractUserType(typeInfo) is not InteropTypeInfo userTypeInfo)
@@ -35,18 +27,16 @@ internal class TypescriptSymbolNameProvider(TypeScriptTypeMapper typeMapper)
         {
             SymbolNameFlags.Proxy => GetUserClassProxyReferenceName(targetType),
             SymbolNameFlags.Snapshot => GetUserClassSnapshotReferenceName(targetType),
-            SymbolNameFlags.ProxySnapshotUnion => $"{typeMapper.ToTypeScriptType(targetType).Render(suffix: $".{GetUserClassProxySymbolName()} | {GetUserClassSnapshotReferenceName(userTypeInfo)}")}",
+            SymbolNameFlags.ProxySnapshotUnion => $"{typeMapper.ToTypeScriptType(targetType).Render(suffix: $".{RenderConstants.Proxy} | {GetUserClassSnapshotReferenceName(userTypeInfo)}")}",
             _ => null,
         };
     }
 
-    internal string GetUserClassProxySymbolName() => $"Proxy";
     internal string GetUserClassProxySymbolName(ClassInfo classInfo) => GetUserClassProxyReferenceName(classInfo.Type);
-    private string GetUserClassProxyReferenceName(InteropTypeInfo typeInfo) => $"{typeMapper.ToTypeScriptType(typeInfo).Render(suffix: $".{GetUserClassProxySymbolName()}")}";
+    private string GetUserClassProxyReferenceName(InteropTypeInfo typeInfo) => $"{typeMapper.ToTypeScriptType(typeInfo).Render(suffix: $".{RenderConstants.Proxy}")}";
 
-    internal string GetUserClassSnapshotSymbolName() => $"Snapshot";
     internal string GetUserClassSnapshotSymbolName(ClassInfo classInfo) => GetUserClassSnapshotReferenceName(classInfo.Type);
-    private string GetUserClassSnapshotReferenceName(InteropTypeInfo typeInfo) => $"{typeMapper.ToTypeScriptType(typeInfo).Render(suffix: $".{GetUserClassSnapshotSymbolName()}")}";
+    private string GetUserClassSnapshotReferenceName(InteropTypeInfo typeInfo) => $"{typeMapper.ToTypeScriptType(typeInfo).Render(suffix: $".{RenderConstants.Snapshot}")}";
 
     /// <summary>
     /// returns the TypeScript type name without any proxy or snapshot suffixes. Mostly useful for non-user types like string, int with accomodations for Tasks, arrays etc.

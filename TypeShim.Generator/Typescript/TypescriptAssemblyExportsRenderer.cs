@@ -14,15 +14,11 @@ internal sealed class TypescriptAssemblyExportsRenderer(
     internal void Render()
     {
         ctx.AppendLine("// Auto-generated TypeScript module exports interface")
-           .Append("export interface ")
-           .Append(symbolNameProvider.GetModuleInteropClassName())
-           .AppendLine("{");
-
+           .Append("export interface ").Append(RenderConstants.AssemblyExports).AppendLine("{");
         using (ctx.Indent())
         {
             RenderModuleInfoObject(moduleHierarchyInfo);
         }
-
         ctx.AppendLine("}");
     }
 

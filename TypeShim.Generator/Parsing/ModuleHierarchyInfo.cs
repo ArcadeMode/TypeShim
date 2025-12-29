@@ -14,7 +14,7 @@ internal class ModuleHierarchyInfo
         ModuleHierarchyInfo moduleInfo = new() { ExportedClass = null };
         foreach (ClassInfo classInfo in classInfos)
         {
-            string[] propertyAccessorParts = [.. classInfo.Namespace.Split('.'), symbolNameProvider.GetInteropInterfaceName(classInfo)];
+            string[] propertyAccessorParts = [.. classInfo.Namespace.Split('.'), RenderConstants.InteropClassName(classInfo)];
             moduleInfo.Add(propertyAccessorParts, classInfo);
         }
         return moduleInfo;

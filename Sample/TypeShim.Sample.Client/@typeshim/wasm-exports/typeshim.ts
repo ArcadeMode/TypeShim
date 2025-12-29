@@ -39,72 +39,72 @@ export interface AssemblyExports{
     Sample: {
       Capabilities: {
         CapabilitiesModuleInterop: {
-          GetCapabilitiesProvider(): object
-        },
+          GetCapabilitiesProvider(): object;
+        };
         CapabilitiesProviderInterop: {
-          GetPrimitivesDemo(instance: object, baseString: string): object
-          GetArraysDemo(instance: object): object
-        },
+          GetPrimitivesDemo(instance: object, baseString: string): object;
+          GetArraysDemo(instance: object): object;
+        };
         PrimitivesDemoInterop: {
-          GetStringLength(instance: object): number
-          ToUpperCase(instance: object): string
-          Concat(instance: object, str1: string, str2: string): string
-          ContainsUpperCase(instance: object): boolean
-          ResetBaseString(instance: object): void
-          MultiplyString(instance: object, times: number): void
-          get_InitialStringProperty(instance: object): string
-          set_InitialStringProperty(instance: object, value: string): void
-          get_StringProperty(instance: object): string
-          set_StringProperty(instance: object, value: string): void
+          GetStringLength(instance: object): number;
+          ToUpperCase(instance: object): string;
+          Concat(instance: object, str1: string, str2: string): string;
+          ContainsUpperCase(instance: object): boolean;
+          ResetBaseString(instance: object): void;
+          MultiplyString(instance: object, times: number): void;
+          get_InitialStringProperty(instance: object): string;
+          set_InitialStringProperty(instance: object, value: string): void;
+          get_StringProperty(instance: object): string;
+          set_StringProperty(instance: object, value: string): void;
         };
         ArraysDemoInterop: {
-          SumIntArray(instance: object): number
-          AppendToIntArray(instance: object, value: number): void
-          get_IntArrayProperty(instance: object): Array<number>
-          set_IntArrayProperty(instance: object, value: Array<number>): void
-        },
+          SumIntArray(instance: object): number;
+          AppendToIntArray(instance: object, value: number): void;
+          get_IntArrayProperty(instance: object): Array<number>;
+          set_IntArrayProperty(instance: object, value: Array<number>): void;
+        };
       };
       PeopleInterop: {
-        get_All(instance: object): Array<object>
-        set_All(instance: object, value: Array<object>): void
-      },
+        get_All(instance: object): Array<object>;
+        set_All(instance: object, value: Array<object>): void;
+      };
       PersonInterop: {
-        IsOlderThan(instance: object, other: object): boolean
-        AdoptPet(instance: object): void
-        Adopt(instance: object, newPet: object): void
-        get_Id(instance: object): number
-        set_Id(instance: object, value: number): void
-        get_Name(instance: object): string
-        set_Name(instance: object, value: string): void
-        get_Age(instance: object): number
-        set_Age(instance: object, value: number): void
-        get_Pets(instance: object): Array<object>
-        set_Pets(instance: object, value: Array<object>): void
-      },
+        IsOlderThan(instance: object, other: object): boolean;
+        AdoptPet(instance: object): void;
+        Adopt(instance: object, newPet: object): void;
+        get_Id(instance: object): number;
+        set_Id(instance: object, value: number): void;
+        get_Name(instance: object): string;
+        set_Name(instance: object, value: string): void;
+        get_Age(instance: object): number;
+        set_Age(instance: object, value: number): void;
+        get_Pets(instance: object): Array<object>;
+        set_Pets(instance: object, value: Array<object>): void;
+      };
       DogInterop: {
-        Bark(instance: object): string
-        GetAge(instance: object, asHumanYears: boolean): number
-        get_Name(instance: object): string
-        set_Name(instance: object, value: string): void
-        get_Breed(instance: object): string
-        set_Breed(instance: object, value: string): void
-        get_Age(instance: object): number
-        set_Age(instance: object, value: number): void
-      },
+        Bark(instance: object): string;
+        GetAge(instance: object, asHumanYears: boolean): number;
+        get_Name(instance: object): string;
+        set_Name(instance: object, value: string): void;
+        get_Breed(instance: object): string;
+        set_Breed(instance: object, value: string): void;
+        get_Age(instance: object): number;
+        set_Age(instance: object, value: number): void;
+      };
       PeopleProviderInterop: {
-        DoStuff(instance: object, task: Promise<object | null>): void
-        FetchPeopleAsync(instance: object): Promise<object>
-        get_PeopleCache(): Array<object | null> | null
-        get_Unit(instance: object): Promise<object | null> | null
-        set_Unit(instance: object, value: Promise<object | null> | null): void
-      },
+        DoStuff(instance: object, task: Promise<object | null>): void;
+        FetchPeopleAsync(instance: object): Promise<object>;
+        get_PeopleCache(): Array<object | null> | null;
+        get_Unit(instance: object): Promise<object | null> | null;
+        set_Unit(instance: object, value: Promise<object | null> | null): void;
+      };
       TimeoutUnitInterop: {
-        get_Timeout(instance: object): number
-        set_Timeout(instance: object, value: number): void
-      },
+        get_Timeout(instance: object): number;
+        set_Timeout(instance: object, value: number): void;
+      };
       TypeShimSampleModuleInterop: {
-        get_PeopleProvider(): object | null
-      },
+        get_PeopleProvider(): object | null;
+      };
     };
   };
 }
@@ -120,7 +120,6 @@ export namespace CapabilitiesModule {
     }
 
   }
-
 }
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.CapabilitiesProvider
@@ -141,7 +140,6 @@ export namespace CapabilitiesProvider {
     }
 
   }
-
 }
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.PrimitivesDemo
@@ -192,7 +190,6 @@ export namespace PrimitivesDemo {
     }
 
   }
-
   export interface Snapshot {
     InitialStringProperty: string;
     StringProperty: string;
@@ -211,8 +208,7 @@ export namespace PrimitivesDemo {
       InitialStringProperty: proxy.InitialStringProperty,
       StringProperty: proxy.StringProperty,
     };
-  }
-}
+  }}
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.ArraysDemo
 export namespace ArraysDemo {
@@ -238,7 +234,6 @@ export namespace ArraysDemo {
     }
 
   }
-
   export interface Snapshot {
     IntArrayProperty: Array<number>;
   }
@@ -255,8 +250,7 @@ export namespace ArraysDemo {
     return {
       IntArrayProperty: proxy.IntArrayProperty,
     };
-  }
-}
+  }}
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.People
 export namespace People {
@@ -276,7 +270,6 @@ export namespace People {
     }
 
   }
-
   export interface Snapshot {
     All: Array<Person.Snapshot>;
   }
@@ -293,8 +286,7 @@ export namespace People {
     return {
       All: proxy.All.map(e => Person.snapshot(e)),
     };
-  }
-}
+  }}
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Person
 export namespace Person {
@@ -352,7 +344,6 @@ export namespace Person {
     }
 
   }
-
   export interface Snapshot {
     Id: number;
     Name: string;
@@ -375,8 +366,7 @@ export namespace Person {
       Age: proxy.Age,
       Pets: proxy.Pets.map(e => Dog.snapshot(e)),
     };
-  }
-}
+  }}
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Dog
 export namespace Dog {
@@ -418,7 +408,6 @@ export namespace Dog {
     }
 
   }
-
   export interface Snapshot {
     Name: string;
     Breed: string;
@@ -439,8 +428,7 @@ export namespace Dog {
       Breed: proxy.Breed,
       Age: proxy.Age,
     };
-  }
-}
+  }}
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.PeopleProvider
 export namespace PeopleProvider {
@@ -475,7 +463,6 @@ export namespace PeopleProvider {
     }
 
   }
-
 }
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.TimeoutUnit
@@ -494,7 +481,6 @@ export namespace TimeoutUnit {
     }
 
   }
-
   export interface Snapshot {
     Timeout: number;
   }
@@ -511,8 +497,7 @@ export namespace TimeoutUnit {
     return {
       Timeout: proxy.Timeout,
     };
-  }
-}
+  }}
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.TypeShimSampleModule
 export namespace TypeShimSampleModule {
@@ -525,6 +510,5 @@ export namespace TypeShimSampleModule {
     }
 
   }
-
 }
 

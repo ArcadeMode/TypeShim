@@ -15,9 +15,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
         if (!classInfo.IsSnapshotCompatible())
             throw new InvalidOperationException($"Type '{classInfo.Namespace}.{classInfo.Name}' is not snapshot-compatible.");
 
-        ctx.Append($"export interface ");
-        ctx.Append(symbolNameProvider.GetUserClassSnapshotSymbolName());
-        ctx.AppendLine(" {");
+        ctx.Append($"export interface ").Append(RenderConstants.Snapshot).AppendLine(" {");
         using (ctx.Indent())
         {
             RenderInterfaceProperties();
@@ -45,8 +43,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
         // Emit a runtime value with Symbol.hasInstance so snapshot interfaces can be checked via `instanceof`.
         // It validates that `v` is an object matching the snapshot interface's _structure_, including nested typechecks.
 
-        string snapshotConstName = symbolNameProvider.GetUserClassSnapshotSymbolName();
-        ctx.AppendLine($"export const {snapshotConstName}: {{");
+        ctx.Append($"export const ").Append(RenderConstants.Snapshot).AppendLine(": {");
         using (ctx.Indent())
         {
             ctx.AppendLine("[Symbol.hasInstance](v: unknown): boolean;");
@@ -69,7 +66,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
         ctx.AppendLine("};");
         return;
 
-        // TODO: consider omitting or refactor to render instead of interpolation
+        // TODO: refactor to RenderPropertyTypeAssertionExpressions (use ctx)
         IEnumerable<string> GetPropertyTypeAssertionExpressions(PropertyInfo[] propertyInfos)
         {
             foreach (PropertyInfo propertyInfo in propertyInfos)
@@ -80,6 +77,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
             }
         }
 
+        // TODO: refactor to RenderBooleanTypeAssertion (use ctx)
         string GetBooleanTypeAssertion(InteropTypeInfo typeInfo, string referenceExpression)
         {
             if (typeInfo.IsArrayType)
@@ -114,13 +112,9 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
 
     private void RenderSnapshotFunction(string proxyParamName)
     {
-        ctx.Append($"export function snapshot(");
-        ctx.Append(proxyParamName);
-        ctx.Append(": ");
-        ctx.Append(symbolNameProvider.GetUserClassProxySymbolName(classInfo));
-        ctx.Append("): ");
-        ctx.Append(symbolNameProvider.GetUserClassSnapshotSymbolName(classInfo));
-        ctx.AppendLine(" {");
+        string paramType = symbolNameProvider.GetUserClassProxySymbolName(classInfo);
+        string returnType = symbolNameProvider.GetUserClassSnapshotSymbolName(classInfo);
+        ctx.Append($"export function snapshot(").Append(proxyParamName).Append(": ").Append(paramType).Append("): ").Append(returnType).AppendLine(" {");
         using (ctx.Indent())
         {
             RenderSnapshotFunctionBody(proxyParamName);
@@ -134,8 +128,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
             {
                 foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.IsSnapshotCompatible()))
                 {
-                    ctx.Append(propertyInfo.Name)
-                       .Append(": ")
+                    ctx.Append(propertyInfo.Name).Append(": ")
                        .Append(GetSnapshotExpression(propertyInfo.Type, $"{proxyParamName}.{propertyInfo.Name}"))
                        .AppendLine(",");
                 }
@@ -143,7 +136,8 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
             ctx.AppendLine("};");
         }
 
-        string GetSnapshotExpression(InteropTypeInfo typeInfo, string propertyAccessorExpression)
+        // TODO: refactor to RenderSnapshotExpression (use ctx)
+        string GetSnapshotExpression(InteropTypeInfo typeInfo, string propertyAccessorExpression) 
         {
             if (typeInfo.IsNullableType)
             {
