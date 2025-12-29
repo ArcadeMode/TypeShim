@@ -26,7 +26,8 @@ internal class SyntaxTreeParsingTests_Constructors
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         Assert.That(classInfo.Constructor, Is.Not.Null);
         Assert.That(classInfo.Constructor.Parameters, Has.Length.EqualTo(2));
     }
@@ -50,7 +51,8 @@ internal class SyntaxTreeParsingTests_Constructors
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         Assert.That(classInfo.Constructor, Is.Not.Null);
         Assert.That(classInfo.Constructor.Parameters, Has.Length.EqualTo(2));
     }
@@ -86,7 +88,8 @@ internal class SyntaxTreeParsingTests_Constructors
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         Assert.That(classInfo.Constructor, Is.Not.Null);
         Assert.That(classInfo.Constructor.Parameters, Has.Length.EqualTo(2)); // only public has 2
     }
@@ -114,7 +117,8 @@ internal class SyntaxTreeParsingTests_Constructors
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        Assert.Throws<NotSupportedConstructorOverloadException>(() => new ClassInfoBuilder(classSymbol).Build());
+        InteropTypeInfoCache typeCache = new();
+        Assert.Throws<NotSupportedConstructorOverloadException>(() => new ClassInfoBuilder(classSymbol, typeCache).Build());
     }
 
     [Test]
@@ -136,6 +140,7 @@ internal class SyntaxTreeParsingTests_Constructors
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        Assert.Throws<NotSupportedConstructorOverloadException>(() => new ClassInfoBuilder(classSymbol).Build());
+        InteropTypeInfoCache typeCache = new();
+        Assert.Throws<NotSupportedConstructorOverloadException>(() => new ClassInfoBuilder(classSymbol, typeCache).Build());
     }
 }

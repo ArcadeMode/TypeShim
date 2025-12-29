@@ -25,7 +25,8 @@ internal class SyntaxTreeParsingTests_Properties
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         Assert.That(classInfo.Properties.ToList(), Has.Count.EqualTo(1));
         PropertyInfo propertyInfo = classInfo.Properties.First();
         Assert.That(propertyInfo.Name, Is.EqualTo("P1"));
@@ -53,13 +54,15 @@ internal class SyntaxTreeParsingTests_Properties
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         Assert.That(classInfo.Properties.ToList(), Has.Count.EqualTo(0));
     }
 
     [Test]
     public void ClassInfoBuilder_NonPublicRequiredMemberProperty_Throws()
     {
+        // this is not valid C# syntax anyway, but if provided this kind of input, no invalid code should be generated.
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
@@ -74,6 +77,7 @@ internal class SyntaxTreeParsingTests_Properties
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        Assert.Throws<NotSupportedPropertyException>(() => new ClassInfoBuilder(classSymbol).Build());
+        InteropTypeInfoCache typeCache = new();
+        Assert.Throws<NotSupportedPropertyException>(() => new ClassInfoBuilder(classSymbol, typeCache).Build());
     }
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using TypeShim.Generator.Parsing;
 using TypeShim.Generator.Typescript;
+using TypeShim.Shared;
 
 namespace TypeShim.Generator.Tests.TypeScript;
 
@@ -31,7 +32,8 @@ internal class TypeScriptUserClassSnapshotRendererTests
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
@@ -79,7 +81,8 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
@@ -127,7 +130,8 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
@@ -183,8 +187,9 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
-        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First()).Build();
-        ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
+        ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
@@ -241,8 +246,9 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
-        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First()).Build();
-        ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
+        ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
@@ -299,8 +305,9 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
-        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First()).Build();
-        ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
+        ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
@@ -357,8 +364,9 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
-        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First()).Build();
-        ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last()).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
+        ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);

@@ -41,7 +41,8 @@ internal class SyntaxTreeParsingTests_UnsupportedType
         INamedTypeSymbol classSymbol = exportedClasses[0];
         Assert.Throws<NotSupportedTypeException>(() =>
         {
-            _ = new ClassInfoBuilder(classSymbol).Build();
+            InteropTypeInfoCache typeCache = new();
+            _ = new ClassInfoBuilder(classSymbol, typeCache).Build();
         });
     }
 
@@ -65,7 +66,8 @@ internal class SyntaxTreeParsingTests_UnsupportedType
         INamedTypeSymbol classSymbol = exportedClasses[0];
         Assert.Throws<NotSupportedTypeException>(() =>
         {
-            _ = new ClassInfoBuilder(classSymbol).Build();
+            InteropTypeInfoCache typeCache = new();
+            _ = new ClassInfoBuilder(classSymbol, typeCache).Build();
         });
     }
 
@@ -102,7 +104,8 @@ internal class SyntaxTreeParsingTests_UnsupportedType
 
         Assert.Throws<NotSupportedTypeException>(() =>
         {
-            _ = new ClassInfoBuilder(classSymbol).Build();
+            InteropTypeInfoCache typeCache = new();
+            _ = new ClassInfoBuilder(classSymbol, typeCache).Build();
         });
     }
 
@@ -144,7 +147,8 @@ internal class SyntaxTreeParsingTests_UnsupportedType
 
         Assert.Throws<NotSupportedTypeException>(() =>
         {
-            _ = new ClassInfoBuilder(classSymbol).Build();
+            InteropTypeInfoCache typeCache = new();
+            _ = new ClassInfoBuilder(classSymbol, typeCache).Build();
         });
     }
 }

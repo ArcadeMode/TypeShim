@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace TypeShim.Shared;
 
-public sealed class InteropTypeInfo : IEquatable<InteropTypeInfo>
+public sealed class InteropTypeInfo
 {
     public required bool IsTSExport { get; init; }
 
@@ -120,57 +120,4 @@ public sealed class InteropTypeInfo : IEquatable<InteropTypeInfo>
         TypeArgument = null,
         IsSnapshotCompatible = false,
     };
-
-    public override bool Equals(object? obj)
-    {
-        return obj is InteropTypeInfo other && Equals(other);
-    }
-
-    public bool Equals(InteropTypeInfo? other)
-    {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-
-        return IsTSExport == other.IsTSExport
-            && ManagedType == other.ManagedType
-            && string.Equals(JSTypeSyntax.ToString(), other.JSTypeSyntax.ToString(), StringComparison.Ordinal)
-            && string.Equals(InteropTypeSyntax.ToString(), other.InteropTypeSyntax.ToString(), StringComparison.Ordinal)
-            && string.Equals(CLRTypeSyntax.ToString(), other.CLRTypeSyntax.ToString(), StringComparison.Ordinal)
-            && Equals(TypeArgument, other.TypeArgument)
-            && RequiresCLRTypeConversion == other.RequiresCLRTypeConversion
-            && IsTaskType == other.IsTaskType
-            && IsArrayType == other.IsArrayType
-            && IsNullableType == other.IsNullableType
-            && IsSnapshotCompatible == other.IsSnapshotCompatible;
-    }
-
-    public override int GetHashCode()
-    {
-        unchecked
-        {
-            int hash = 17;
-            hash = (hash * 31) + IsTSExport.GetHashCode();
-            hash = (hash * 31) + ManagedType.GetHashCode();
-            hash = (hash * 31) + StringComparer.Ordinal.GetHashCode(JSTypeSyntax.ToString());
-            hash = (hash * 31) + StringComparer.Ordinal.GetHashCode(InteropTypeSyntax.ToString());
-            hash = (hash * 31) + StringComparer.Ordinal.GetHashCode(CLRTypeSyntax.ToString());
-            hash = (hash * 31) + (TypeArgument?.GetHashCode() ?? 0);
-            hash = (hash * 31) + RequiresCLRTypeConversion.GetHashCode();
-            hash = (hash * 31) + IsTaskType.GetHashCode();
-            hash = (hash * 31) + IsArrayType.GetHashCode();
-            hash = (hash * 31) + IsNullableType.GetHashCode();
-            hash = (hash * 31) + IsSnapshotCompatible.GetHashCode();
-            return hash;
-        }
-    }
-
-    public static bool operator ==(InteropTypeInfo? left, InteropTypeInfo? right)
-    {
-        return EqualityComparer<InteropTypeInfo?>.Default.Equals(left, right);
-    }
-
-    public static bool operator !=(InteropTypeInfo? left, InteropTypeInfo? right)
-    {
-        return !(left == right);
-    }
 }

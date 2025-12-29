@@ -33,7 +33,8 @@ internal class SyntaxTreeParsingTests_Methods
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        Assert.Throws<NotSupportedMethodOverloadException>(() => new ClassInfoBuilder(classSymbol).Build());
+        InteropTypeInfoCache typeCache = new();
+        Assert.Throws<NotSupportedMethodOverloadException>(() => new ClassInfoBuilder(classSymbol, typeCache).Build());
     }
 
     [Test]
@@ -59,7 +60,8 @@ internal class SyntaxTreeParsingTests_Methods
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         Assert.That(classInfo.Methods.ToList(), Has.Count.EqualTo(1));
     }
 }

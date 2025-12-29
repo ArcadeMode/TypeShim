@@ -13,25 +13,38 @@ internal static class RenderConstants
     internal const string FromObjectMethodName = "FromObject";
 }
 
-internal sealed class RenderContext(ClassInfo targetClass, IEnumerable<ClassInfo> allClasses, int indentSpaces)
+internal sealed class RenderOptions
 {
-    internal ClassInfo Class => targetClass;
+    internal required int IndentSpaces { get; init; }
+
+    internal static RenderOptions CSharp = new()
+    {
+        IndentSpaces = 4
+    };
+
+    internal static RenderOptions TypeScript = new()
+    {
+        IndentSpaces = 2
+    };
+}
+
+internal sealed class RenderContext(ClassInfo? targetClass, IEnumerable<ClassInfo> allClasses, RenderOptions options)
+{
+    internal ClassInfo Class => targetClass ?? throw new InvalidOperationException("Not rendering any particular class"); // TODO: improve api to avoid needing this
     internal LocalScope LocalScope => _localScope ?? throw new InvalidOperationException("No active method in context");
 
-    private readonly Dictionary<InteropTypeInfo, ClassInfo> typeToClassDict = allClasses.ToDictionary(c => c.Type);
-    private readonly StringBuilder sb = new();
-    private int depth = 0;
-    private bool isNewLine = true;
+    private readonly Dictionary<InteropTypeInfo, ClassInfo> _typeToClassDict = allClasses.ToDictionary(c => c.Type);
+    private readonly StringBuilder _sb = new();
 
+    private int _currentDepth = 0;
+    private bool _isNewLine = true;
     private LocalScope? _localScope;
 
     internal ClassInfo? GetClassInfo(InteropTypeInfo type)
     {
-        typeToClassDict.TryGetValue(type, out ClassInfo? info);
+        _typeToClassDict.TryGetValue(type, out ClassInfo? info);
         return info;
     }
-
-    // TODO: check after interop cache factory if by chance was added during factory call. >> CACHE CLASS
 
     internal void EnterScope(MethodInfo methodInfo)
     {
@@ -60,22 +73,22 @@ internal sealed class RenderContext(ClassInfo targetClass, IEnumerable<ClassInfo
     /// <returns></returns>
     internal IDisposable Indent()
     {
-        depth++;
-        return new ActionOnDisposeDisposable(() => depth--);
+        _currentDepth++;
+        return new ActionOnDisposeDisposable(() => _currentDepth--);
     }
 
     internal RenderContext AppendLine(string line)
     {
         AppendIndentIfNewLine();
-        sb.AppendLine(line);
-        isNewLine = true;
+        _sb.AppendLine(line);
+        _isNewLine = true;
         return this;
     }
 
     internal RenderContext Append(string text)
     {
         AppendIndentIfNewLine();
-        sb.Append(text);
+        _sb.Append(text);
         return this;
     }
 
@@ -88,21 +101,21 @@ internal sealed class RenderContext(ClassInfo targetClass, IEnumerable<ClassInfo
     internal RenderContext Append(char text)
     {
         AppendIndentIfNewLine();
-        sb.Append(text);
+        _sb.Append(text);
         return this;
     }
 
     private void AppendIndentIfNewLine()
     {
-        if (!isNewLine) return;
+        if (!_isNewLine) return;
 
-        sb.Append(' ', indentSpaces * depth);
-        isNewLine = false;
+        _sb.Append(' ', options.IndentSpaces * _currentDepth);
+        _isNewLine = false;
     }
 
     internal string Render() // TODO: consider different api? at least dont let renderer call tostring directly
     {
-        return sb.ToString();
+        return _sb.ToString();
     }
 
     internal class ActionOnDisposeDisposable(Action onDisposal) : IDisposable

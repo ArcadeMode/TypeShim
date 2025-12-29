@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
 using TypeShim.Generator.Typescript;
+using TypeShim.Shared;
 
 namespace TypeShim.Generator.Tests.TypeScript;
 
@@ -39,8 +40,9 @@ internal class TypeScriptInteropInterfaceRenderer
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
@@ -77,7 +79,8 @@ export interface C1Interop {
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
@@ -124,8 +127,9 @@ export interface C1Interop {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
@@ -172,8 +176,9 @@ export interface C1Interop {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
@@ -220,8 +225,9 @@ export interface C1Interop {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);

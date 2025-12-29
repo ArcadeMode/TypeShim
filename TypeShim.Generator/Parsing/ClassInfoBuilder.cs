@@ -5,10 +5,6 @@ namespace TypeShim.Generator.Parsing;
 
 internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropTypeInfoCache typeInfoCache)
 {
-    internal ClassInfoBuilder(INamedTypeSymbol classSymbol) : this(classSymbol, new InteropTypeInfoCache())
-    {
-    }
-
     internal ClassInfo Build()
     {
         List<PropertyInfo> properties = BuildProperties();

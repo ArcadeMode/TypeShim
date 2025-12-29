@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
+using TypeShim.Shared;
 
 namespace TypeShim.Generator.Tests.Parsing;
 
@@ -47,7 +48,8 @@ internal class SyntaxTreeParsingTests_AccessModifiers
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         Assert.That(classInfo.Methods.ToList(), Has.Count.EqualTo(0));
     }
 
@@ -73,7 +75,8 @@ internal class SyntaxTreeParsingTests_AccessModifiers
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         Assert.That(classInfo.Properties.ToList(), Has.Count.EqualTo(0));
     }
 
@@ -95,7 +98,8 @@ internal class SyntaxTreeParsingTests_AccessModifiers
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         Assert.That(classInfo.Properties.ToList(), Has.Count.EqualTo(2));
         Assert.That(classInfo.Properties.All(p => p.SetMethod is null), Is.True);
     }
