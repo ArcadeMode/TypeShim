@@ -10,28 +10,37 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
 
     internal string Render()
     {
-        TypescriptConfigRenderer configRenderer = new();
-        sourceBuilder.AppendLine(configRenderer.Render());
-        RenderAssemblyExports();        
-        RenderUserClasses();
+        foreach(RenderContext ctx in (RenderContext[])[RenderTypeShimConfig(), RenderAssemblyExports(), .. RenderUserClasses()])
+        {
+            sourceBuilder.Append(ctx.Render());
+        }
         return sourceBuilder.ToString();
     }
 
-    private void RenderAssemblyExports()
+    private RenderContext RenderTypeShimConfig()
+    {
+        RenderContext configCtx = new(null, classInfos, RenderOptions.TypeScript);
+        TypescriptConfigRenderer configRenderer = new(configCtx);
+        configRenderer.Render();
+        return configCtx;
+    }
+
+    private RenderContext RenderAssemblyExports()
     {
         RenderContext renderCtx = new(null, classInfos, RenderOptions.TypeScript);
         TypescriptAssemblyExportsRenderer moduleInterfaceRenderer = new(moduleInfo.HierarchyInfo, symbolNameProvider, renderCtx);
-        sourceBuilder.AppendLine(moduleInterfaceRenderer.Render());
+        moduleInterfaceRenderer.Render();
+        return renderCtx;
     }
 
-    private void RenderUserClasses()
+    private IEnumerable<RenderContext> RenderUserClasses()
     {
         foreach (ClassInfo classInfo in classInfos)
         {
             RenderContext renderCtx = new(classInfo, classInfos, RenderOptions.TypeScript);
-
             TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(classInfo, symbolNameProvider, renderCtx);
-            sourceBuilder.AppendLine(namespaceRenderer.Render());
+            namespaceRenderer.Render();
+            yield return renderCtx;
         }
     }
 }

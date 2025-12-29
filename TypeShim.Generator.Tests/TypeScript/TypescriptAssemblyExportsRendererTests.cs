@@ -50,9 +50,9 @@ internal class TypescriptAssemblyExportsRendererTests
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        string interopClass = new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        Assert.That(renderCtx.Render(), Is.EqualTo("""    
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
@@ -100,9 +100,9 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
-        string interopClass = new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        Assert.That(renderCtx.Render(), Is.EqualTo("""    
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
@@ -155,9 +155,9 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
-        string interopClass = new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        Assert.That(renderCtx.Render(), Is.EqualTo("""    
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
@@ -210,9 +210,9 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
-        string interopClass = new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        Assert.That(renderCtx.Render(), Is.EqualTo("""    
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
@@ -265,9 +265,9 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
-        string interopClass = new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        Assert.That(renderCtx.Render(), Is.EqualTo("""    
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {

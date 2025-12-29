@@ -5,7 +5,7 @@ namespace TypeShim.Generator.Typescript;
 
 internal sealed class TypeScriptUserClassNamespaceRenderer(ClassInfo classInfo, TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
 {
-    internal string Render()
+    internal void Render()
     {
         ctx.AppendLine($"// Auto-generated TypeScript namespace for class: {classInfo.Namespace}.{classInfo.Name}")
            .AppendLine($"export namespace {symbolNameProvider.GetUserClassNamespace(classInfo)} {{");
@@ -21,6 +21,5 @@ internal sealed class TypeScriptUserClassNamespaceRenderer(ClassInfo classInfo, 
         }
         
         ctx.AppendLine("}");
-        return ctx.Render();
     }
 }

@@ -10,7 +10,7 @@ namespace TypeShim.Generator.Typescript;
 
 internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
 {
-    internal string Render()
+    internal void Render()
     {
         if (!classInfo.IsSnapshotCompatible())
             throw new InvalidOperationException($"Type '{classInfo.Namespace}.{classInfo.Name}' is not snapshot-compatible.");
@@ -29,7 +29,6 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
 
         const string proxyParamName = "proxy";
         RenderSnapshotFunction(proxyParamName);
-        return ctx.Render();
     }
 
     private void RenderInterfaceProperties()

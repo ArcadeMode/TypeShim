@@ -2,14 +2,11 @@
 
 namespace TypeShim.Generator.Typescript;
 
-internal class TypescriptConfigRenderer()
+internal class TypescriptConfigRenderer(RenderContext ctx)
 {
-    private readonly StringBuilder sb = new();
-
-    internal string Render()
+    internal void Render()
     {
-        sb.AppendLine(TypeShimConfigClass);
-        return sb.ToString();
+        ctx.AppendLine(TypeShimConfigClass);
     }
 
     private const string TypeShimConfigClass = """

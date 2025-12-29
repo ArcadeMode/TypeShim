@@ -11,7 +11,7 @@ internal sealed class TypescriptAssemblyExportsRenderer(
     TypescriptSymbolNameProvider symbolNameProvider,
     RenderContext ctx)
 {
-    internal string Render()
+    internal void Render()
     {
         ctx.AppendLine("// Auto-generated TypeScript module exports interface")
            .Append("export interface ")
@@ -24,7 +24,6 @@ internal sealed class TypescriptAssemblyExportsRenderer(
         }
 
         ctx.AppendLine("}");
-        return ctx.Render();
     }
 
     private void RenderModuleInfoObject(ModuleHierarchyInfo moduleInfo)
