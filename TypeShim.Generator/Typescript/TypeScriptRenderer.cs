@@ -1,6 +1,8 @@
 ﻿using System.Text;
 using TypeShim.Generator.Parsing;
 using TypeShim.Generator.Typescript;
+using TypeShim.Generator.CSharp;
+using TypeShim.Generator;
 
 internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo moduleInfo, TypescriptSymbolNameProvider symbolNameProvider)
 {
@@ -17,13 +19,9 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
 
     private void RenderInteropInterfaces()
     {
-        TypescriptInteropModuleInterfaceRenderer moduleInterfaceRenderer = new(moduleInfo.HierarchyInfo, symbolNameProvider);
+        RenderContext renderCtx = new(null, classInfos, RenderOptions.TypeScript);
+        TypescriptAssemblyExportsRenderer moduleInterfaceRenderer = new(moduleInfo.HierarchyInfo, symbolNameProvider, renderCtx);
         sourceBuilder.AppendLine(moduleInterfaceRenderer.Render());
-        foreach (ClassInfo classInfo in classInfos)
-        {
-            TypescriptInteropInterfaceRenderer interopInterfaceRenderer = new(classInfo, symbolNameProvider);
-            sourceBuilder.AppendLine(interopInterfaceRenderer.Render());
-        }
     }
 
     private void RenderUserClasses()

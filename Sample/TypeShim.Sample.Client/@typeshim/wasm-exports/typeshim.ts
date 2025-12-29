@@ -34,109 +34,79 @@ abstract class ProxyBase {
 
 
 // Auto-generated TypeScript module exports interface
-export interface AssemblyExports {
-    TypeShim: {
-        Sample: {
-            Capabilities: {
-                CapabilitiesModuleInterop: CapabilitiesModuleInterop;
-                CapabilitiesProviderInterop: CapabilitiesProviderInterop;
-                PrimitivesDemoInterop: PrimitivesDemoInterop;
-                ArraysDemoInterop: ArraysDemoInterop;
-            };
-            PeopleInterop: PeopleInterop;
-            PersonInterop: PersonInterop;
-            DogInterop: DogInterop;
-            PeopleProviderInterop: PeopleProviderInterop;
-            TimeoutUnitInterop: TimeoutUnitInterop;
-            TypeShimSampleModuleInterop: TypeShimSampleModuleInterop;
+export interface AssemblyExports{
+  TypeShim: {
+    Sample: {
+      Capabilities: {
+        CapabilitiesModuleInterop: {
+          GetCapabilitiesProvider(): object
+        },
+        CapabilitiesProviderInterop: {
+          GetPrimitivesDemo(instance: object, baseString: string): object
+          GetArraysDemo(instance: object): object
+        },
+        PrimitivesDemoInterop: {
+          GetStringLength(instance: object): number
+          ToUpperCase(instance: object): string
+          Concat(instance: object, str1: string, str2: string): string
+          ContainsUpperCase(instance: object): boolean
+          ResetBaseString(instance: object): void
+          MultiplyString(instance: object, times: number): void
+          get_InitialStringProperty(instance: object): string
+          set_InitialStringProperty(instance: object, value: string): void
+          get_StringProperty(instance: object): string
+          set_StringProperty(instance: object, value: string): void
         };
+        ArraysDemoInterop: {
+          SumIntArray(instance: object): number
+          AppendToIntArray(instance: object, value: number): void
+          get_IntArrayProperty(instance: object): Array<number>
+          set_IntArrayProperty(instance: object, value: Array<number>): void
+        },
+      };
+      PeopleInterop: {
+        get_All(instance: object): Array<object>
+        set_All(instance: object, value: Array<object>): void
+      },
+      PersonInterop: {
+        IsOlderThan(instance: object, other: object): boolean
+        AdoptPet(instance: object): void
+        Adopt(instance: object, newPet: object): void
+        get_Id(instance: object): number
+        set_Id(instance: object, value: number): void
+        get_Name(instance: object): string
+        set_Name(instance: object, value: string): void
+        get_Age(instance: object): number
+        set_Age(instance: object, value: number): void
+        get_Pets(instance: object): Array<object>
+        set_Pets(instance: object, value: Array<object>): void
+      },
+      DogInterop: {
+        Bark(instance: object): string
+        GetAge(instance: object, asHumanYears: boolean): number
+        get_Name(instance: object): string
+        set_Name(instance: object, value: string): void
+        get_Breed(instance: object): string
+        set_Breed(instance: object, value: string): void
+        get_Age(instance: object): number
+        set_Age(instance: object, value: number): void
+      },
+      PeopleProviderInterop: {
+        DoStuff(instance: object, task: Promise<object | null>): void
+        FetchPeopleAsync(instance: object): Promise<object>
+        get_PeopleCache(): Array<object | null> | null
+        get_Unit(instance: object): Promise<object | null> | null
+        set_Unit(instance: object, value: Promise<object | null> | null): void
+      },
+      TimeoutUnitInterop: {
+        get_Timeout(instance: object): number
+        set_Timeout(instance: object, value: number): void
+      },
+      TypeShimSampleModuleInterop: {
+        get_PeopleProvider(): object | null
+      },
     };
-}
-
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.CapabilitiesModule
-export interface CapabilitiesModuleInterop {
-    GetCapabilitiesProvider(): object;
-}
-
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.CapabilitiesProvider
-export interface CapabilitiesProviderInterop {
-    GetPrimitivesDemo(instance: object, baseString: string): object;
-    GetArraysDemo(instance: object): object;
-}
-
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.PrimitivesDemo
-export interface PrimitivesDemoInterop {
-    GetStringLength(instance: object): number;
-    ToUpperCase(instance: object): string;
-    Concat(instance: object, str1: string, str2: string): string;
-    ContainsUpperCase(instance: object): boolean;
-    ResetBaseString(instance: object): void;
-    MultiplyString(instance: object, times: number): void;
-    get_InitialStringProperty(instance: object): string;
-    set_InitialStringProperty(instance: object, value: string): void;
-    get_StringProperty(instance: object): string;
-    set_StringProperty(instance: object, value: string): void;
-}
-
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Capabilities.ArraysDemo
-export interface ArraysDemoInterop {
-    SumIntArray(instance: object): number;
-    AppendToIntArray(instance: object, value: number): void;
-    get_IntArrayProperty(instance: object): Array<number>;
-    set_IntArrayProperty(instance: object, value: Array<number>): void;
-}
-
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.People
-export interface PeopleInterop {
-    get_All(instance: object): Array<object>;
-    set_All(instance: object, value: Array<object>): void;
-}
-
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Person
-export interface PersonInterop {
-    IsOlderThan(instance: object, other: object): boolean;
-    AdoptPet(instance: object): void;
-    Adopt(instance: object, newPet: object): void;
-    get_Id(instance: object): number;
-    set_Id(instance: object, value: number): void;
-    get_Name(instance: object): string;
-    set_Name(instance: object, value: string): void;
-    get_Age(instance: object): number;
-    set_Age(instance: object, value: number): void;
-    get_Pets(instance: object): Array<object>;
-    set_Pets(instance: object, value: Array<object>): void;
-}
-
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.Dog
-export interface DogInterop {
-    Bark(instance: object): string;
-    GetAge(instance: object, asHumanYears: boolean): number;
-    get_Name(instance: object): string;
-    set_Name(instance: object, value: string): void;
-    get_Breed(instance: object): string;
-    set_Breed(instance: object, value: string): void;
-    get_Age(instance: object): number;
-    set_Age(instance: object, value: number): void;
-}
-
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.PeopleProvider
-export interface PeopleProviderInterop {
-    DoStuff(instance: object, task: Promise<object | null>): void;
-    FetchPeopleAsync(instance: object): Promise<object>;
-    get_PeopleCache(): Array<object | null> | null;
-    get_Unit(instance: object): Promise<object | null> | null;
-    set_Unit(instance: object, value: Promise<object | null> | null): void;
-}
-
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.TimeoutUnit
-export interface TimeoutUnitInterop {
-    get_Timeout(instance: object): number;
-    set_Timeout(instance: object, value: number): void;
-}
-
-// Auto-generated TypeScript interop interface. Source class: TypeShim.Sample.TypeShimSampleModule
-export interface TypeShimSampleModuleInterop {
-    get_PeopleProvider(): object | null;
+  };
 }
 
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.CapabilitiesModule

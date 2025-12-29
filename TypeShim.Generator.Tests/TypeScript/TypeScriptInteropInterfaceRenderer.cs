@@ -7,15 +7,15 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator.Tests.TypeScript;
 
-internal class TypeScriptInteropInterfaceRenderer
+internal class TypescriptAssemblyExportsRendererTests
 {
     [Test]
-    public void TypeScriptInteropInterfaceRenderer_InstanceMethod_WithNullableUserClassParameterType_HasObjectOrNullType()
+    public void TypescriptAssemblyExportsRenderer_InstanceMethod_WithNullableUserClassParameterType_HasObjectOrNullType()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
             using System.Threading.Tasks;
-            namespace N1;
+            namespace N1.N2;
             [TSExport]
             public class UserClass
             {
@@ -26,11 +26,12 @@ internal class TypeScriptInteropInterfaceRenderer
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             using System.Threading.Tasks;
+            using N1.N2;
             namespace N1;
             [TSExport]
-            public class C1
+            public static class C1
             {
-                public void DoStuff(UserClass? u) {}
+                public static void DoStuff(UserClass? u) {}
             }
         """);
 
@@ -46,13 +47,25 @@ internal class TypeScriptInteropInterfaceRenderer
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
 
-        string interopClass = new TypescriptInteropInterfaceRenderer(classInfo, symbolNameProvider).Render();
+        RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        string interopClass = new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript interop interface. Source class: N1.C1
-export interface C1Interop {
-    DoStuff(instance: object, u: object | null): void;
+// Auto-generated TypeScript module exports interface
+export interface AssemblyExports{
+  N1: {
+    C1Interop: {
+      DoStuff(u: object | null): void;
+    };
+    N2: {
+      UserClassInterop: {
+        get_Id(instance: object): number;
+        set_Id(instance: object, value: number): void;
+      };
+    };
+  };
 }
 
 """));
@@ -84,13 +97,19 @@ export interface C1Interop {
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
 
-        string interopClass = new TypescriptInteropInterfaceRenderer(classInfo, symbolNameProvider).Render();
+        RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
+        string interopClass = new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript interop interface. Source class: N1.C1
-export interface C1Interop {
-    DoStuff(instance: object, u: {{tsType}}): void;
+// Auto-generated TypeScript module exports interface
+export interface AssemblyExports{
+  N1: {
+    C1Interop: {
+      DoStuff(instance: object, u: {{tsType}}): void;
+    };
+  };
 }
 
 """.Replace("{{tsType}}", tsType)));
@@ -131,15 +150,21 @@ export interface C1Interop {
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
 
-        string interopClass = new TypescriptInteropInterfaceRenderer(classInfo, symbolNameProvider).Render();
+        RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
+        string interopClass = new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript interop interface. Source class: N1.C1
-export interface C1Interop {
-    DoStuff(instance: object, u: Promise<object | null>): void;
+// Auto-generated TypeScript module exports interface
+export interface AssemblyExports{
+  N1: {
+    C1Interop: {
+      DoStuff(instance: object, u: Promise<object | null>): void;
+    };
+  };
 }
 
 """));
@@ -180,15 +205,21 @@ export interface C1Interop {
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
 
-        string interopClass = new TypescriptInteropInterfaceRenderer(classInfo, symbolNameProvider).Render();
+        RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
+        string interopClass = new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript interop interface. Source class: N1.C1
-export interface C1Interop {
-    DoStuff(instance: object, u: Array<object | null>): void;
+// Auto-generated TypeScript module exports interface
+export interface AssemblyExports{
+  N1: {
+    C1Interop: {
+      DoStuff(instance: object, u: Array<object | null>): void;
+    };
+  };
 }
 
 """));
@@ -231,13 +262,19 @@ export interface C1Interop {
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
 
-        string interopClass = new TypescriptInteropInterfaceRenderer(classInfo, symbolNameProvider).Render();
+        RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
+        string interopClass = new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript interop interface. Source class: N1.C1
-export interface C1Interop {
-    DoStuff(instance: object, u: Array<object> | null): void;
+// Auto-generated TypeScript module exports interface
+export interface AssemblyExports{
+  N1: {
+    C1Interop: {
+      DoStuff(instance: object, u: Array<object> | null): void;
+    };
+  };
 }
 
 """));
