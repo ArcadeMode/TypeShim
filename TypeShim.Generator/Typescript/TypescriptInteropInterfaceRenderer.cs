@@ -57,7 +57,7 @@ internal class TypescriptInteropInterfaceRenderer(ClassInfo classInfo, Typescrip
                 continue;
             }
             yield return setMethod;
-
+            // Note: init is not rendered as an interop method.
         }
     }
 }

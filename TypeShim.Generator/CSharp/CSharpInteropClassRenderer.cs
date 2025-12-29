@@ -56,6 +56,7 @@ internal sealed class CSharpInteropClassRenderer
                     continue;
 
                 _methodRenderer.RenderPropertyMethod(propertyInfo, propertyInfo.SetMethod);
+                // Note: init is not rendered as an interop method.
             }
             
             if (!_classInfo.IsStatic)

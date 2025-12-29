@@ -7,7 +7,7 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
     private readonly InteropTypeInfoBuilder typeInfoBuilder = new(classSymbol, typeInfoCache);
     internal ConstructorInfo? Build(IEnumerable<PropertyInfo> classProperties)
     {
-        PropertyInfo[] initializerProperties = [..classProperties.Where(p => p is { SetMethod: { } })];
+        PropertyInfo[] initializerProperties = [..classProperties.Where(p => p is { SetMethod: { } } or { InitMethod: { } })];
 
         if (!initializerProperties.All(p => p.Type.IsSnapshotCompatible))
         {

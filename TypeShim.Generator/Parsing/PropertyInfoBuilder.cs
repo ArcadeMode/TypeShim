@@ -21,10 +21,19 @@ internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropert
         MethodInfo getMethod = methodInfoBuilder.Build();
 
         MethodInfo? setMethod = null;
-        if (propertySymbol.SetMethod is IMethodSymbol setMethodSymbol && !setMethodSymbol.IsInitOnly && setMethodSymbol.DeclaredAccessibility == Accessibility.Public)
+        MethodInfo? initMethod = null;
+        
+        if (propertySymbol.SetMethod is IMethodSymbol setMethodSymbol && setMethodSymbol.DeclaredAccessibility == Accessibility.Public)
         {
             MethodInfoBuilder setMethodInfoBuilder = new(classSymbol, setMethodSymbol, typeInfoCache);
-            setMethod = setMethodInfoBuilder.Build();
+            if (setMethodSymbol.IsInitOnly)
+            {
+                initMethod = setMethodInfoBuilder.Build();
+            }
+            else
+            {
+                setMethod = setMethodInfoBuilder.Build();
+            }
         }
 
         return new PropertyInfo
@@ -34,6 +43,7 @@ internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropert
             Type = typeInfoBuilder.Build(),
             GetMethod = getMethod,
             SetMethod = setMethod,
+            InitMethod = initMethod,
         };
     }
 }
