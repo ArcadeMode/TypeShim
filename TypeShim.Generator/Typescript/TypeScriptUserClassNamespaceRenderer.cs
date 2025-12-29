@@ -19,7 +19,6 @@ internal sealed class TypeScriptUserClassNamespaceRenderer(ClassInfo classInfo, 
                 snapshotRenderer.Render();
             }
         }
-        
         ctx.AppendLine("}");
     }
 }

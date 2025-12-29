@@ -6,15 +6,15 @@ using TypeShim.Generator;
 
 internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo moduleInfo, TypescriptSymbolNameProvider symbolNameProvider)
 {
-    private readonly StringBuilder sourceBuilder = new();
+    private readonly StringBuilder sb = new();
 
     internal string Render()
     {
         foreach(RenderContext ctx in (RenderContext[])[RenderTypeShimConfig(), RenderAssemblyExports(), .. RenderUserClasses()])
         {
-            sourceBuilder.Append(ctx.Render());
+            sb.AppendLine(ctx.Render());
         }
-        return sourceBuilder.ToString();
+        return sb.ToString();
     }
 
     private RenderContext RenderTypeShimConfig()

@@ -6,17 +6,9 @@ namespace TypeShim.Generator.Typescript;
 
 internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
 {
-    private readonly StringBuilder sb = new();
     private readonly TypeScriptMethodRenderer methodRenderer = new(classInfo, symbolNameProvider, ctx);
 
-    internal string Render()
-    {
-        string interopInterfaceName = symbolNameProvider.GetModuleInteropClassName();
-        RenderProxyClass(interopInterfaceName);
-        return ctx.Render();
-    }
-
-    private void RenderProxyClass(string interopInterfaceName)
+    internal void Render()
     {
         ctx.Append($"export class ").Append(symbolNameProvider.GetUserClassProxySymbolName());
         if (!classInfo.IsStatic)
