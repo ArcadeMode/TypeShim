@@ -194,7 +194,7 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         }
     }
 
-    private static string GetInteropInvocationVariable(MethodParameterInfo param) // TODO: get from ctx localscope
+    private static string GetInteropInvocationVariable(MethodParameterInfo param) // TODO: get from ctx localscope (check param.Name call sites!)
     {
         return param.Type.RequiresCLRTypeConversion && param.Type.ContainsExportedType() ? $"{param.Name}Instance" : param.Name;
     }

@@ -247,7 +247,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         foreach (MethodParameterInfo param in constructorInfo.Parameters)
         {
             if (!isFirst) _ctx.Append(", ");
-            _ctx.Append(param.Name);
+            _ctx.Append(_ctx.LocalScope.GetAccessorExpression(param));
             isFirst = false;
         }
 

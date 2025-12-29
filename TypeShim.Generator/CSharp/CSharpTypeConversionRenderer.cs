@@ -11,22 +11,23 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         if (!parameterInfo.Type.RequiresCLRTypeConversion)
             return;
 
+        string varName = _ctx.LocalScope.GetAccessorExpression(parameterInfo);
         string newVarName = $"typed_{_ctx.LocalScope.GetAccessorExpression(parameterInfo)}";
         // task pattern differs from other conversions, hence their fully separated rendering.
         if (parameterInfo.Type is { IsNullableType: true, TypeArgument.IsTaskType: true }) // Task<T>?
         {
-            string convertedTaskExpression = RenderNullableTaskTypeConversion(parameterInfo.Type, parameterInfo.Name, parameterInfo.Name);
+            string convertedTaskExpression = RenderNullableTaskTypeConversion(parameterInfo.Type, varName, varName);
             _ctx.AppendLine($"{parameterInfo.Type.CLRTypeSyntax} {newVarName} = {convertedTaskExpression};");
         }
         else if (parameterInfo.Type.IsTaskType) // Task<T>
         {
-            string convertedTaskExpression = RenderTaskTypeConversion(parameterInfo.Type, parameterInfo.Name, parameterInfo.Name);
+            string convertedTaskExpression = RenderTaskTypeConversion(parameterInfo.Type, varName, varName);
             _ctx.AppendLine($"{parameterInfo.Type.CLRTypeSyntax} {newVarName} = {convertedTaskExpression};");
         }
         else
         {
             _ctx.Append($"{parameterInfo.Type.CLRTypeSyntax} {newVarName} = ");
-            RenderInlineTypeConversion(parameterInfo.Type, parameterInfo.Name, forceCovariantConversion: parameterInfo.IsInjectedInstanceParameter);
+            RenderInlineTypeConversion(parameterInfo.Type, varName, forceCovariantConversion: parameterInfo.IsInjectedInstanceParameter);
             _ctx.AppendLine(";");
         }
 
