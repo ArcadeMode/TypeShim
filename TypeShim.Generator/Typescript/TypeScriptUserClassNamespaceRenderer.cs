@@ -3,22 +3,24 @@ using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
 
-internal sealed class TypeScriptUserClassNamespaceRenderer(ClassInfo classInfo, TypescriptSymbolNameProvider symbolNameProvider)
+internal sealed class TypeScriptUserClassNamespaceRenderer(ClassInfo classInfo, TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
 {
-    private readonly StringBuilder sb = new();
     internal string Render()
     {
-        sb.AppendLine($"// Auto-generated TypeScript namespace for class: {classInfo.Namespace}.{classInfo.Name}");
-        sb.AppendLine($"export namespace {symbolNameProvider.GetUserClassNamespace(classInfo)} {{");
-        TypescriptUserClassProxyRenderer proxyRenderer = new(classInfo, symbolNameProvider);
-        sb.AppendLine(proxyRenderer.Render(depth: 1));
-        
-        if (classInfo.IsSnapshotCompatible())
+        ctx.AppendLine($"// Auto-generated TypeScript namespace for class: {classInfo.Namespace}.{classInfo.Name}")
+           .AppendLine($"export namespace {symbolNameProvider.GetUserClassNamespace(classInfo)} {{");
+        using (ctx.Indent())
         {
-            TypeScriptUserClassSnapshotRenderer snapshotRenderer = new(classInfo, symbolNameProvider);
-            sb.AppendLine(snapshotRenderer.Render(depth: 1));
+            TypescriptUserClassProxyRenderer proxyRenderer = new(classInfo, symbolNameProvider, ctx);
+            proxyRenderer.Render();
+            if (classInfo.IsSnapshotCompatible())
+            {
+                TypeScriptUserClassSnapshotRenderer snapshotRenderer = new(classInfo, symbolNameProvider, ctx);
+                snapshotRenderer.Render();
+            }
         }
-        sb.AppendLine($"}}");
-        return sb.ToString();
+        
+        ctx.AppendLine("}");
+        return ctx.Render();
     }
 }

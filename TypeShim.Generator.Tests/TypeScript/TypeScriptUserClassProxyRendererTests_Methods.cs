@@ -37,8 +37,8 @@ internal class TypeScriptUserClassProxyRendererTests_Methods
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy extends ProxyBase {
@@ -93,8 +93,8 @@ export class Proxy extends ProxyBase {
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy extends ProxyBase {
@@ -150,8 +150,8 @@ export class Proxy extends ProxyBase {
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy extends ProxyBase {
@@ -207,7 +207,8 @@ export class Proxy extends ProxyBase {
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy extends ProxyBase {
@@ -263,7 +264,8 @@ export class Proxy extends ProxyBase {
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy extends ProxyBase {
@@ -320,7 +322,8 @@ export class Proxy extends ProxyBase {
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy extends ProxyBase {
@@ -376,7 +379,8 @@ export class Proxy extends ProxyBase {
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy extends ProxyBase {
@@ -431,7 +435,8 @@ export class Proxy extends ProxyBase {
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 export class Proxy extends ProxyBase {

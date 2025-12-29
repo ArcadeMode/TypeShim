@@ -77,9 +77,11 @@ internal sealed class RenderContext(ClassInfo? targetClass, IEnumerable<ClassInf
         return new ActionOnDisposeDisposable(() => _currentDepth--);
     }
 
+    internal RenderContext AppendLine() => AppendLine(string.Empty);
+
     internal RenderContext AppendLine(string line)
     {
-        AppendIndentIfNewLine();
+        if (!string.IsNullOrEmpty(line))AppendIndentIfNewLine();
         _sb.AppendLine(line);
         _isNewLine = true;
         return this;

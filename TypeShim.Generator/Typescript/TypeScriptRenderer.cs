@@ -12,12 +12,12 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
     {
         TypescriptConfigRenderer configRenderer = new();
         sourceBuilder.AppendLine(configRenderer.Render());
-        RenderInteropInterfaces();        
+        RenderAssemblyExports();        
         RenderUserClasses();
         return sourceBuilder.ToString();
     }
 
-    private void RenderInteropInterfaces()
+    private void RenderAssemblyExports()
     {
         RenderContext renderCtx = new(null, classInfos, RenderOptions.TypeScript);
         TypescriptAssemblyExportsRenderer moduleInterfaceRenderer = new(moduleInfo.HierarchyInfo, symbolNameProvider, renderCtx);
@@ -28,7 +28,9 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
     {
         foreach (ClassInfo classInfo in classInfos)
         {
-            TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(classInfo, symbolNameProvider);
+            RenderContext renderCtx = new(classInfo, classInfos, RenderOptions.TypeScript);
+
+            TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(classInfo, symbolNameProvider, renderCtx);
             sourceBuilder.AppendLine(namespaceRenderer.Render());
         }
     }

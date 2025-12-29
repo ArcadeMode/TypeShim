@@ -8,58 +8,69 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TypeShim.Generator.Typescript;
 
-internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, TypescriptSymbolNameProvider symbolNameProvider)
+internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
 {
-    private readonly StringBuilder sb = new();
-    internal string Render(int depth)
+    internal string Render()
     {
         if (!classInfo.IsSnapshotCompatible())
             throw new InvalidOperationException($"Type '{classInfo.Namespace}.{classInfo.Name}' is not snapshot-compatible.");
 
-        string indent = new(' ', depth * 2);
-        sb.AppendLine($"{indent}export interface {symbolNameProvider.GetUserClassSnapshotSymbolName()} {{");
-        RenderInterfaceProperties(depth + 1);
-        sb.AppendLine($"{indent}}}");
+        ctx.Append($"export interface ");
+        ctx.Append(symbolNameProvider.GetUserClassSnapshotSymbolName());
+        ctx.AppendLine(" {");
+        using (ctx.Indent())
+        {
+            RenderInterfaceProperties();
 
-        RenderInstanceOfRuntimeCheck(depth);
+        }
+        ctx.AppendLine("}");
+
+        RenderInstanceOfRuntimeCheck();
 
         const string proxyParamName = "proxy";
-        RenderSnapshotFunction(depth, proxyParamName);
-        return sb.ToString();
+        RenderSnapshotFunction(proxyParamName);
+        return ctx.Render();
     }
 
-    private void RenderInterfaceProperties(int depth)
+    private void RenderInterfaceProperties()
     {
-        string indent = new(' ', depth * 2);
         foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.IsSnapshotCompatible()))
         {
             string propertyType = symbolNameProvider.GetUserClassSymbolNameIfExists(propertyInfo.Type, SymbolNameFlags.Snapshot) ?? symbolNameProvider.GetNakedSymbolReference(propertyInfo.Type);
-            sb.AppendLine($"{indent}{propertyInfo.Name}: {propertyType};");
+            ctx.Append(propertyInfo.Name).Append(": ").Append(propertyType).AppendLine(";");
         }
     }
 
-    private void RenderInstanceOfRuntimeCheck(int depth)
+    private void RenderInstanceOfRuntimeCheck()
     {
-        string indent = new(' ', depth * 2);
         // Emit a runtime value with Symbol.hasInstance so snapshot interfaces can be checked via `instanceof`.
-        // It validates that `v` is an object matching the snapshot interface's definition, including nested type/structure checks in property types.
+        // It validates that `v` is an object matching the snapshot interface's _structure_, including nested typechecks.
 
         string snapshotConstName = symbolNameProvider.GetUserClassSnapshotSymbolName();
-        sb.AppendLine($"{indent}export const {snapshotConstName}: {{");
-        sb.AppendLine($"{indent}  [Symbol.hasInstance](v: unknown): boolean;");
-        sb.AppendLine($"{indent}}} = {{");
-        sb.AppendLine($"{indent}  [Symbol.hasInstance](v: unknown) {{");
-        sb.AppendLine($"{indent}    if (!v || typeof v !== 'object') return false;");
-        sb.AppendLine($"{indent}    const o = v as any;");
+        ctx.AppendLine($"export const {snapshotConstName}: {{");
+        using (ctx.Indent())
+        {
+            ctx.AppendLine("[Symbol.hasInstance](v: unknown): boolean;");
+        }
+        ctx.AppendLine("} = {");
+        using (ctx.Indent())
+        {
+            ctx.AppendLine("[Symbol.hasInstance](v: unknown) {");
+            using (ctx.Indent())
+            {
+                ctx.AppendLine($"if (!v || typeof v !== 'object') return false;");
+                ctx.AppendLine($"const o = v as any;");
 
-        PropertyInfo[] propertyInfos = [.. classInfo.Properties.Where(pi => pi.IsSnapshotCompatible())];
-        string structuralMatchExpression = propertyInfos.Length == 0 ? "true" : string.Join(" && ", GetPropertyTypeAssertionExpressions(propertyInfos));
-        sb.AppendLine($"{indent}    return {structuralMatchExpression};");
-
-        sb.AppendLine($"{indent}  }}");
-        sb.AppendLine($"{indent}}};");
+                PropertyInfo[] propertyInfos = [.. classInfo.Properties.Where(pi => pi.IsSnapshotCompatible())];
+                string structuralMatchExpression = propertyInfos.Length == 0 ? "true" : string.Join(" && ", GetPropertyTypeAssertionExpressions(propertyInfos));
+                ctx.Append("return ").Append(structuralMatchExpression).AppendLine(";");
+            }
+            ctx.AppendLine("}");
+        }
+        ctx.AppendLine("};");
         return;
 
+        // TODO: consider omitting or refactor to render instead of interpolation
         IEnumerable<string> GetPropertyTypeAssertionExpressions(PropertyInfo[] propertyInfos)
         {
             foreach (PropertyInfo propertyInfo in propertyInfos)
@@ -102,25 +113,35 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
     }
 
 
-    private void RenderSnapshotFunction(int depth, string proxyParamName)
+    private void RenderSnapshotFunction(string proxyParamName)
     {
-        string indent = new(' ', depth * 2);
-        sb.AppendLine($"{indent}export function snapshot({proxyParamName}: {symbolNameProvider.GetUserClassProxySymbolName(classInfo)}): {symbolNameProvider.GetUserClassSnapshotSymbolName(classInfo)} {{");
-        RenderSnapshotFunctionBody(depth + 1, proxyParamName);
-        sb.Append($"{indent}}}");
-
-        void RenderSnapshotFunctionBody(int depth, string proxyParamName)
+        ctx.Append($"export function snapshot(");
+        ctx.Append(proxyParamName);
+        ctx.Append(": ");
+        ctx.Append(symbolNameProvider.GetUserClassProxySymbolName(classInfo));
+        ctx.Append("): ");
+        ctx.Append(symbolNameProvider.GetUserClassSnapshotSymbolName(classInfo));
+        ctx.AppendLine(" {");
+        using (ctx.Indent())
         {
-            string indent = new(' ', depth * 2);
-            string indent2 = new(' ', (depth + 1) * 2);
+            RenderSnapshotFunctionBody(proxyParamName);
+        }
+        ctx.Append("}");
 
-            sb.AppendLine($"{indent}return {{");
-            foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.IsSnapshotCompatible()))
+        void RenderSnapshotFunctionBody(string proxyParamName)
+        {
+            ctx.AppendLine("return {");
+            using (ctx.Indent())
             {
-                string propertyAccessorExpression = $"{proxyParamName}.{propertyInfo.Name}";
-                sb.AppendLine($"{indent2}{propertyInfo.Name}: {GetSnapshotExpression(propertyInfo.Type, propertyAccessorExpression)},");
+                foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.IsSnapshotCompatible()))
+                {
+                    ctx.Append(propertyInfo.Name)
+                       .Append(": ")
+                       .Append(GetSnapshotExpression(propertyInfo.Type, $"{proxyParamName}.{propertyInfo.Name}"))
+                       .AppendLine(",");
+                }
             }
-            sb.AppendLine($"{indent}}};");
+            ctx.AppendLine("};");
         }
 
         string GetSnapshotExpression(InteropTypeInfo typeInfo, string propertyAccessorExpression)

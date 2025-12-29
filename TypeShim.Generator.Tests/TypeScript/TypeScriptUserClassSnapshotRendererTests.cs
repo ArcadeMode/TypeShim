@@ -38,7 +38,8 @@ internal class TypeScriptUserClassSnapshotRendererTests
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 export interface Snapshot {
@@ -87,7 +88,8 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 export interface Snapshot {
@@ -135,7 +137,8 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""
 export interface Snapshot {
@@ -194,7 +197,8 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
+        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 export interface Snapshot {
@@ -253,7 +257,8 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
+        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 export interface Snapshot {
@@ -312,7 +317,8 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
+        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 export interface Snapshot {
@@ -371,7 +377,8 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
+        string interopClass = new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 export interface Snapshot {
