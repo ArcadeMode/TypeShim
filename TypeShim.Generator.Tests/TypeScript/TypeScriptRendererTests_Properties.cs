@@ -1,6 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using TypeShim.Generator.CSharp;
+using System;
+using System.Collections.Generic;
+using System.Text;
 using TypeShim.Generator.Parsing;
 using TypeShim.Generator.Typescript;
 using TypeShim.Shared;
@@ -39,7 +41,7 @@ internal class TypeScriptRendererTests_Properties
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
   constructor() {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
@@ -54,7 +56,7 @@ export class Proxy extends ProxyBase {
   }
 }
 
-""".Replace("{{typeScriptType}}", typeScriptType)));
+""".Replace("{{typeScriptType}}", typeScriptType));
     }
 
     [TestCase("string", "string")]
@@ -87,7 +89,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
   constructor() {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
@@ -102,7 +104,7 @@ export class Proxy extends ProxyBase {
   }
 }
 
-""".Replace("{{typeScriptType}}", typeScriptType)));
+""".Replace("{{typeScriptType}}", typeScriptType));
     }
 
     [TestCase("string", "string")]
@@ -144,7 +146,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.ToString(), Is.EqualTo("""
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class Proxy {
   private constructor() {}
 
@@ -173,7 +175,7 @@ export class Proxy {
   }
 }
 
-""".Replace("{{typeScriptType}}", typeScriptType)));
+""".Replace("{{typeScriptType}}", typeScriptType));
     }
 
     [Test]
@@ -217,7 +219,7 @@ export class Proxy {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
   constructor() {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
@@ -234,7 +236,7 @@ export class Proxy extends ProxyBase {
   }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -278,7 +280,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.ToString(), Is.EqualTo("""
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class Proxy {
   private constructor() {}
 
@@ -293,7 +295,7 @@ export class Proxy {
   }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -337,7 +339,7 @@ export class Proxy {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
   constructor() {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
@@ -354,7 +356,7 @@ export class Proxy extends ProxyBase {
   }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -398,7 +400,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
   constructor() {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
@@ -415,7 +417,7 @@ export class Proxy extends ProxyBase {
   }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -459,24 +461,24 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
   constructor() {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
-  public get P1(): Promise<UserClass.Proxy | null> {
+  public get P1(): Promise<UserClass.Proxy | null> | null {
     const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-    return res.then(e => e ? ProxyBase.fromHandle(UserClass.Proxy, e) : null);
+    return res ? res.then(e => e ? ProxyBase.fromHandle(UserClass.Proxy, e) : null) : null;
   }
 
-  public set P1(value: Promise<UserClass.Proxy | UserClass.Snapshot | null>) {
-    const valueInstance = value.then(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null);
+  public set P1(value: Promise<UserClass.Proxy | UserClass.Snapshot | null> | null) {
+    const valueInstance = value ? value.then(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null) : null;
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -520,7 +522,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
   constructor() {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
@@ -537,7 +539,7 @@ export class Proxy extends ProxyBase {
   }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -581,7 +583,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
   constructor(jsObject: UserClass.Snapshot) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
@@ -598,7 +600,7 @@ export class Proxy extends ProxyBase {
   }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -642,7 +644,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
   constructor() {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
@@ -659,7 +661,7 @@ export class Proxy extends ProxyBase {
   }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -703,7 +705,7 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
   constructor() {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
@@ -720,7 +722,7 @@ export class Proxy extends ProxyBase {
   }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -764,11 +766,9 @@ export class Proxy extends ProxyBase {
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
-  constructor() {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor());
-  }
+  private constructor() {}
 
   public get P1(): Promise<UserClass.Proxy | null> | null {
     const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
@@ -781,6 +781,6 @@ export class Proxy extends ProxyBase {
   }
 }
 
-"""));
+""");
     }
 }

@@ -44,8 +44,7 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
                     throw new InvalidOperationException("Constructor must have a user class return type.");
                 }
             }
-            ctx.AppendLine("}")
-               .AppendLine();
+            ctx.AppendLine("}");
         }
     }
 
@@ -76,6 +75,7 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
 
         if (propertyInfo.SetMethod is MethodInfo setterInfo)
         {
+            ctx.AppendLine();
             RenderProxyPropertySetterSignature(setterInfo.WithoutInstanceParameter());
             RenderMethodBody(setterInfo);
         }

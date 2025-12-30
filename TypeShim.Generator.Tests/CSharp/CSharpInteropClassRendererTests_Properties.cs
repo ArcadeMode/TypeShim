@@ -46,7 +46,7 @@ internal class CSharpInteropClassRendererTests_Properties
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -96,7 +96,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -136,7 +136,7 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -188,7 +188,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -214,7 +214,7 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -246,7 +246,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -272,7 +272,7 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -321,7 +321,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -361,7 +361,7 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -411,7 +411,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -451,7 +451,7 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -501,7 +501,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -540,7 +540,7 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -592,7 +592,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -632,7 +632,7 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -684,7 +684,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -724,7 +724,7 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -800,7 +800,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -840,7 +840,7 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -916,7 +916,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -956,7 +956,7 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -1032,7 +1032,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 
     [TestCase("Version")]
@@ -1059,7 +1059,7 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -1092,6 +1092,6 @@ public partial class C1Interop
     }
 }
 
-""".Replace("{{typeName}}", typeName)));
+""".Replace("{{typeName}}", typeName));
     }
 }

@@ -37,7 +37,7 @@ internal class CSharpInteropClassRendererTests_SystemStringParameterType
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -53,7 +53,7 @@ public partial class C1Interop
     }
 }
 
-""".Replace("{{interopType}}", interopType)));
+""".Replace("{{interopType}}", interopType));
     }
 
     [Test]
@@ -83,7 +83,7 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -108,6 +108,6 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 }

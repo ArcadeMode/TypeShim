@@ -20,7 +20,7 @@ internal class TypescriptUserClassProxyRenderer(TypescriptSymbolNameProvider sym
         using (ctx.Indent())
         {
             methodRenderer.RenderProxyConstructor(ctx.Class.Constructor);
-            //ctx.AppendLine();
+            ctx.AppendLine();
             bool isFirst = true;
             foreach (MethodInfo methodInfo in ctx.Class.Methods)
             {
