@@ -11,9 +11,4 @@ internal sealed class ClassInfo
     internal required ConstructorInfo? Constructor { get; init; }
     internal required IEnumerable<MethodInfo> Methods { get; init; }
     internal required IEnumerable<PropertyInfo> Properties { get; init; }
-
-    internal bool IsSnapshotCompatible() => !IsStatic
-        && Constructor is { AcceptsInitializer: true, IsParameterless: true }
-        && Properties.Any() // has properties at all
-        && !Properties.Any(p => !p.IsSnapshotCompatible()); // all properties snapshot compatible
 }

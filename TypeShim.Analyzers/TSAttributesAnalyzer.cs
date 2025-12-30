@@ -36,7 +36,7 @@ public sealed class TSAttributesAnalyzer : DiagnosticAnalyzer
         if (hasTSExport) 
         {
             // TODO: add parameterless constructor check >> BROADER: check if can be constructed (parameters are interopable/properties are etc)
-            // TODO: add check for 'no required members that cannot be snapshotted'
+            // TODO: add check for 'no required members that cannot be type converted'
         }
     }
 

@@ -36,7 +36,7 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
             {
                 if (constructorInfo.Parameters.Length != 0) ctx.Append(", ");
                 
-                string returnType = symbolNameProvider.GetUserClassSnapshotSymbolName(ctx.Class);
+                string returnType = symbolNameProvider.GetUserClassSymbolName(ctx.Class, RenderConstants.Initializer);
                 ctx.Append(constructorInfo.InitializerObject.Name).Append(": ").Append(returnType);
             }
             ctx.Append(")");
@@ -118,22 +118,25 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
         bool isFirst = true;
         foreach (MethodParameterInfo parameterInfo in parameterInfos)
         {
-            SymbolNameFlags flags = ContainsSnapshotCompatibleType(parameterInfo.Type) ? SymbolNameFlags.ProxySnapshotUnion : SymbolNameFlags.Proxy;
-            string returnType = symbolNameProvider.GetUserClassSymbolNameIfExists(parameterInfo.Type, flags) ?? symbolNameProvider.GetNakedSymbolReference(parameterInfo.Type);
-            
             if (!isFirst) ctx.Append(", ");
 
-            ctx.Append(parameterInfo.Name).Append(": ").Append(returnType);
+            ctx.Append(parameterInfo.Name).Append(": ").Append(ResolveReturnType(parameterInfo.Type));
             isFirst = false;
         }
 
-        static bool ContainsSnapshotCompatibleType(InteropTypeInfo typeInfo) // TODO: rename snapshot to 'initializer constructable' or similar
+        string ResolveReturnType(InteropTypeInfo typeInfo)
         {
-            if (typeInfo.IsSnapshotCompatible)
-                return true;
-            if (typeInfo.TypeArgument is InteropTypeInfo innerTypeInfo)
-                return ContainsSnapshotCompatibleType(innerTypeInfo);
-            return false;
+            if (ctx.GetClassInfo(typeInfo.GetInnermostType()) is not ClassInfo classInfo)
+            {
+                return symbolNameProvider.GetNakedSymbolReference(typeInfo);
+            }
+
+            if (classInfo is { Constructor: { IsParameterless: true, AcceptsInitializer: true } })
+            {
+                return symbolNameProvider.GetUserClassSymbolName(typeInfo, classInfo, SymbolNameFlags.ProxyInitializerUnion);
+            }
+
+            return symbolNameProvider.GetUserClassSymbolName(typeInfo, classInfo, SymbolNameFlags.Proxy);
         }
     }
 
@@ -188,7 +191,7 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
     {
         foreach (MethodParameterInfo parameterInfo in parameterInfos)
         {
-            if (parameterInfo.IsInjectedInstanceParameter || !parameterInfo.Type.RequiresCLRTypeConversion || !parameterInfo.Type.ContainsExportedType())
+            if (parameterInfo.IsInjectedInstanceParameter || !parameterInfo.Type.RequiresTypeConversion || !parameterInfo.Type.ContainsExportedType())
                 continue;
 
             if (symbolNameProvider.GetUserClassSymbolNameIfExists(parameterInfo.Type, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is not string proxyClassName)
@@ -255,6 +258,6 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
 
     private static string GetInteropInvocationVariable(MethodParameterInfo param) // TODO: get from ctx localscope (check param.Name call sites!)
     {
-        return param.Type.RequiresCLRTypeConversion && param.Type.ContainsExportedType() ? $"{param.Name}Instance" : param.Name;
+        return param.Type.RequiresTypeConversion && param.Type.ContainsExportedType() ? $"{param.Name}Instance" : param.Name;
     }
 }

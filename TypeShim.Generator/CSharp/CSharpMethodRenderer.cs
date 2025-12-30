@@ -113,7 +113,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                 string convertedTaskExpression = _conversionRenderer.RenderNullableTaskTypeConversion(methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", accessorExpression);
                 accessorExpression = convertedTaskExpression; // continue with the converted expression
             }
-            else if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresCLRTypeConversion: true })
+            else if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresTypeConversion: true })
             {
                 // Handle Task<T> property conversion to interop type Task<object>
                 string convertedTaskExpression = _conversionRenderer.RenderTaskTypeConversion(methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", accessorExpression);
@@ -168,12 +168,12 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
     private void RenderUserMethodInvocation(MethodInfo methodInfo)
     {
         // Handle Task<T> return conversion for conversion requiring types
-        if (methodInfo.ReturnType is { IsNullableType: true, TypeArgument.IsTaskType: true, TypeArgument.RequiresCLRTypeConversion: true })
+        if (methodInfo.ReturnType is { IsNullableType: true, TypeArgument.IsTaskType: true, TypeArgument.RequiresTypeConversion: true })
         {
             string convertedTaskExpression = _conversionRenderer.RenderNullableTaskTypeConversion(methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", GetInvocationExpression());
             _ctx.Append("return ").Append(convertedTaskExpression).AppendLine(";");
         }
-        else if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresCLRTypeConversion: true })
+        else if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresTypeConversion: true })
         {
             string convertedTaskExpression = _conversionRenderer.RenderTaskTypeConversion(methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", GetInvocationExpression());
             _ctx.Append("return ").Append(convertedTaskExpression).AppendLine(";");
@@ -214,7 +214,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             using (_ctx.Indent())
             {
                 _ctx.AppendLine($"{_ctx.Class.Type.CLRTypeSyntax} instance => instance,");
-                if (_ctx.Class.IsSnapshotCompatible())
+                if (_ctx.Class is { IsStatic: false, Constructor: { AcceptsInitializer: true, IsParameterless: true } })
                 {
                     _ctx.AppendLine($"JSObject jsObj => {RenderConstants.FromJSObjectMethodName}(jsObj),");
                 }
@@ -269,7 +269,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                     _ctx.Append($"{propertyInfo.Name} = ");
                     expressionRenderer.Render();
                 }
-                else if (propertyInfo.Type.RequiresCLRTypeConversion)
+                else if (propertyInfo.Type.RequiresTypeConversion)
                 {
                     string propertyRetrievalExpression = $"jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
                     _ctx.Append($"{propertyInfo.Name} = ");
@@ -296,14 +296,14 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                     string convertedTaskExpression = _conversionRenderer.RenderNullableTaskTypeConversion(propertyInfo.Type, propertyInfo.Name, tmpVarName);
                     convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => _ctx.Append(convertedTaskExpression)));
                 }
-                else if (propertyInfo.Type is { IsTaskType: true, RequiresCLRTypeConversion: true })
+                else if (propertyInfo.Type is { IsTaskType: true, RequiresTypeConversion: true })
                 {
                     string tmpVarName = $"{propertyInfo.Name}Tmp";
                     _ctx.AppendLine($"var {tmpVarName} = jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\");");
                     string convertedTaskExpression = _conversionRenderer.RenderTaskTypeConversion(propertyInfo.Type, propertyInfo.Name, tmpVarName);
                     convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => _ctx.Append(convertedTaskExpression)));
                 }
-                else if (propertyInfo.Type is { IsNullableType: true, RequiresCLRTypeConversion: true })
+                else if (propertyInfo.Type is { IsNullableType: true, RequiresTypeConversion: true })
                 {
                     string tmpVarName = $"{propertyInfo.Name}Tmp";
                     _ctx.AppendLine($"var {tmpVarName} = jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type.TypeArgument!)}(\"{propertyInfo.Name}\");");

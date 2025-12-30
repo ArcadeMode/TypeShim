@@ -13,11 +13,9 @@ internal sealed class TypeScriptUserClassNamespaceRenderer(TypescriptSymbolNameP
         {
             TypescriptUserClassProxyRenderer proxyRenderer = new(symbolNameProvider, ctx);
             proxyRenderer.Render();
-            if (ctx.Class.IsSnapshotCompatible())
-            {
-                TypeScriptUserClassSnapshotRenderer snapshotRenderer = new(symbolNameProvider, ctx);
-                snapshotRenderer.Render();
-            }
+
+            TypeScriptUserClassShapesRenderer propertiesRenderer = new(symbolNameProvider, ctx);
+            propertiesRenderer.Render();
         }
         ctx.AppendLine("}");
     }

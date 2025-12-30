@@ -12,8 +12,6 @@ internal sealed class PropertyInfo
     internal required MethodInfo? SetMethod { get; init; }
     internal required MethodInfo? InitMethod { get; init; }
 
-    public bool IsSnapshotCompatible() => !IsStatic && Type.IsSnapshotCompatible;
-
     public PropertyInfo WithInteropTypeInfo()
     {
         return new PropertyInfo

@@ -29,10 +29,10 @@ public sealed class TSJSObjectMappingAnalyzer : DiagnosticAnalyzer
         if (!hasTSExport)
             return;
 
-        AnalyzeClassPropertiesForSnapshotCompatibility(context, type);
+        AnalyzeClassPropertiesForConstructionCompatibility(context, type);
     }
 
-    private static void AnalyzeClassPropertiesForSnapshotCompatibility(SymbolAnalysisContext context, INamedTypeSymbol type)
+    private static void AnalyzeClassPropertiesForConstructionCompatibility(SymbolAnalysisContext context, INamedTypeSymbol type)
     {
         foreach (IPropertySymbol p in GetInstanceProperties(type))
         {

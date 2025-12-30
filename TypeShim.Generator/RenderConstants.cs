@@ -9,7 +9,8 @@ internal static class RenderConstants
 
     internal const string AssemblyExports = "AssemblyExports";
     internal const string Proxy = "Proxy";
-    internal const string Snapshot = "Snapshot";
+    internal const string Properties = "Properties";
+    internal const string Initializer = "Initializer";
 
     internal static string InteropClassName(ClassInfo classInfo) => $"{classInfo.Name}Interop";
 

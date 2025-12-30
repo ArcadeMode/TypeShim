@@ -9,7 +9,7 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
     {
         PropertyInfo[] initializerProperties = [..classProperties.Where(p => p is { SetMethod: { } } or { InitMethod: { } })];
         MethodParameterInfo[] parameterInfos = [.. parameterInfoBuilder.Build()];
-        if (!initializerProperties.All(p => p.Type.IsSnapshotCompatible) || !parameterInfos.All(p => p.Type.IsSnapshotCompatible))
+        if (!initializerProperties.All(p => p.Type.SupportsTypeConversion) || !parameterInfos.All(p => p.Type.SupportsTypeConversion))
         {
             return null;
         }

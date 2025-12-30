@@ -29,7 +29,7 @@ internal class TypescriptUserClassProxyRenderer(TypescriptSymbolNameProvider sym
                 isFirst = false;
             }
             isFirst = true;
-            foreach (PropertyInfo propertyInfo in ctx.Class.Properties.Where(p => p.IsSnapshotCompatible() || p.IsStatic))
+            foreach (PropertyInfo propertyInfo in ctx.Class.Properties)
             {
                 if (!isFirst) ctx.AppendLine();
                 methodRenderer.RenderProxyProperty(propertyInfo);

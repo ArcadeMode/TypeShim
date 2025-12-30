@@ -257,7 +257,7 @@ export class Proxy extends ProxyBase {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
-  public DoStuff(u: UserClass.Proxy | UserClass.Snapshot): void {
+  public DoStuff(u: UserClass.Proxy | UserClass.Initializer): void {
     const uInstance = u instanceof UserClass.Proxy ? u.instance : u;
     TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
@@ -313,7 +313,7 @@ export class Proxy extends ProxyBase {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
-  public DoStuff(u: UserClass.Proxy | UserClass.Snapshot, v: UserClass.Proxy | UserClass.Snapshot): void {
+  public DoStuff(u: UserClass.Proxy | UserClass.Initializer, v: UserClass.Proxy | UserClass.Initializer): void {
     const uInstance = u instanceof UserClass.Proxy ? u.instance : u;
     const vInstance = v instanceof UserClass.Proxy ? v.instance : v;
     TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance, vInstance);
@@ -370,7 +370,7 @@ export class Proxy extends ProxyBase {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
-  public DoStuff(u: UserClass.Proxy | UserClass.Snapshot | null): void {
+  public DoStuff(u: UserClass.Proxy | UserClass.Initializer | null): void {
     const uInstance = u ? u instanceof UserClass.Proxy ? u.instance : u : null;
     TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
@@ -426,7 +426,7 @@ export class Proxy extends ProxyBase {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
-  public DoStuff(u: Array<UserClass.Proxy | UserClass.Snapshot>): void {
+  public DoStuff(u: Array<UserClass.Proxy | UserClass.Initializer>): void {
     const uInstance = u.map(e => e instanceof UserClass.Proxy ? e.instance : e);
     TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
@@ -481,7 +481,7 @@ export class Proxy extends ProxyBase {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
-  public DoStuff(u: Promise<UserClass.Proxy | UserClass.Snapshot>): void {
+  public DoStuff(u: Promise<UserClass.Proxy | UserClass.Initializer>): void {
     const uInstance = u.then(e => e instanceof UserClass.Proxy ? e.instance : e);
     TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }

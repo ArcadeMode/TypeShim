@@ -8,7 +8,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
 {
     internal void RenderParameterTypeConversion(MethodParameterInfo parameterInfo)
     {
-        if (!parameterInfo.Type.RequiresCLRTypeConversion)
+        if (!parameterInfo.Type.RequiresTypeConversion)
             return;
 
         string varName = _ctx.LocalScope.GetAccessorExpression(parameterInfo);

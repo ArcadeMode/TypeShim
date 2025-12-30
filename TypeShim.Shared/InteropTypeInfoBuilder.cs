@@ -45,11 +45,11 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
             InteropTypeSyntax = GetInteropTypeSyntax(simpleTypeInfo),
             CLRTypeSyntax = clrTypeSyntax,
             TypeArgument = null,
-            RequiresCLRTypeConversion = RequiresTypeConversion(),
             IsTaskType = false,
             IsArrayType = false,
             IsNullableType = clrTypeSyntax is NullableTypeSyntax,
-            IsSnapshotCompatible = IsSnapshotCompatible(),
+            RequiresTypeConversion = RequiresTypeConversion(),
+            SupportsTypeConversion = SupportsTypeConversion(),
         };
 
         bool RequiresTypeConversion()
@@ -64,7 +64,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
             return unwrapped is not PredefinedTypeSyntax p || !p.Keyword.IsKind(SyntaxKind.ObjectKeyword);
         }
 
-        bool IsSnapshotCompatible()
+        bool SupportsTypeConversion()
         {
             if (simpleTypeInfo.KnownType != KnownManagedType.Object)
             {
@@ -72,7 +72,7 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
             }
 
             IPropertySymbol[] properties = [.. typeSymbol.GetMembers().OfType<IPropertySymbol>()];
-            return IsTSExport && (properties.Length == 0 || !properties.Any(p => !new InteropTypeInfoBuilder(p.Type, cache).Build().IsSnapshotCompatible));
+            return IsTSExport && (properties.Length == 0 || !properties.Any(p => !new InteropTypeInfoBuilder(p.Type, cache).Build().SupportsTypeConversion));
         }
     }
 
@@ -89,11 +89,11 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
             InteropTypeSyntax = GetInteropTypeSyntax(arrayTypeInfo),
             CLRTypeSyntax = clrTypeSyntax,
             TypeArgument = elementTypeInfo,
-            RequiresCLRTypeConversion = elementTypeInfo.RequiresCLRTypeConversion,
+            RequiresTypeConversion = elementTypeInfo.RequiresTypeConversion,
             IsTaskType = false,
             IsArrayType = true,
             IsNullableType = false,
-            IsSnapshotCompatible = elementTypeInfo.IsSnapshotCompatible
+            SupportsTypeConversion = elementTypeInfo.SupportsTypeConversion
         };
 
         static ITypeSymbol? GetTypeArgument(ITypeSymbol typeSymbol)
@@ -119,11 +119,11 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
             InteropTypeSyntax = GetInteropTypeSyntax(taskTypeInfo),
             CLRTypeSyntax = clrTypeSyntax,
             TypeArgument = taskReturnTypeInfo,
-            RequiresCLRTypeConversion = taskReturnTypeInfo?.RequiresCLRTypeConversion ?? false,
+            RequiresTypeConversion = taskReturnTypeInfo?.RequiresTypeConversion ?? false,
             IsTaskType = true,
             IsArrayType = false,
             IsNullableType = false,
-            IsSnapshotCompatible = taskReturnTypeInfo?.IsSnapshotCompatible ?? false
+            SupportsTypeConversion = taskReturnTypeInfo?.SupportsTypeConversion ?? false
         };
 
         static ITypeSymbol? GetTypeArgument(ITypeSymbol typeSymbol)
@@ -152,11 +152,11 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
             InteropTypeSyntax = GetInteropTypeSyntax(nullableTypeInfo),
             CLRTypeSyntax = clrTypeSyntax,
             TypeArgument = innerTypeInfo,
-            RequiresCLRTypeConversion = innerTypeInfo.RequiresCLRTypeConversion,
+            RequiresTypeConversion = innerTypeInfo.RequiresTypeConversion,
             IsTaskType = false,
             IsArrayType = false,
             IsNullableType = true,
-            IsSnapshotCompatible = innerTypeInfo.IsSnapshotCompatible
+            SupportsTypeConversion = innerTypeInfo.SupportsTypeConversion
         };
 
         static ITypeSymbol? GetTypeArgument(ITypeSymbol typeSymbol)

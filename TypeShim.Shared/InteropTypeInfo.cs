@@ -7,8 +7,6 @@ namespace TypeShim.Shared;
 
 public sealed class InteropTypeInfo
 {
-    public required bool IsTSExport { get; init; }
-
     public required KnownManagedType ManagedType { get; init; }
 
     /// <summary>
@@ -32,16 +30,30 @@ public sealed class InteropTypeInfo
     /// </summary>
     public required InteropTypeInfo? TypeArgument { get; init; }
 
-    public required bool RequiresCLRTypeConversion { get; init; }
-
     public required bool IsTaskType { get; init; }
     public required bool IsArrayType { get; init; }
     public required bool IsNullableType { get; init; }
-    public required bool IsSnapshotCompatible { get; init; }
 
+    public required bool IsTSExport { get; init; }
+    public required bool RequiresTypeConversion { get; init; }
+    public required bool SupportsTypeConversion { get; init; }
+
+    [Obsolete("Use Requires/SupportsTypeConversion")]
     public bool ContainsExportedType()
     {
         return this.IsTSExport || (TypeArgument?.ContainsExportedType() ?? false);
+    }
+
+    public InteropTypeInfo GetInnermostType()
+    {
+        if (TypeArgument != null)
+        {
+            return TypeArgument.GetInnermostType();
+        }
+        else
+        {
+            return this;
+        }
     }
 
     /// <summary>
@@ -56,15 +68,15 @@ public sealed class InteropTypeInfo
             {
                 IsTSExport = false,
                 ManagedType = this.ManagedType,
-                JSTypeSyntax = CLRObjectTypeInfo.JSTypeSyntax,
-                InteropTypeSyntax = CLRObjectTypeInfo.InteropTypeSyntax,
-                CLRTypeSyntax = CLRObjectTypeInfo.CLRTypeSyntax,
+                JSTypeSyntax = this.JSTypeSyntax,
+                InteropTypeSyntax = this.InteropTypeSyntax,
+                CLRTypeSyntax = this.InteropTypeSyntax,
                 IsTaskType = false,
                 IsArrayType = false,
                 IsNullableType = this.IsNullableType,
-                RequiresCLRTypeConversion = false,
+                RequiresTypeConversion = false,
                 TypeArgument = null,
-                IsSnapshotCompatible = this.IsSnapshotCompatible,
+                SupportsTypeConversion = this.SupportsTypeConversion,
             };
 
         }
@@ -80,9 +92,9 @@ public sealed class InteropTypeInfo
                 IsTaskType = this.IsTaskType,
                 IsArrayType = this.IsArrayType,
                 IsNullableType = this.IsNullableType,
-                RequiresCLRTypeConversion = false,
+                RequiresTypeConversion = false,
                 TypeArgument = TypeArgument.AsInteropTypeInfo(),
-                IsSnapshotCompatible = this.IsSnapshotCompatible,
+                SupportsTypeConversion = this.SupportsTypeConversion,
             };
         }
         else
@@ -101,9 +113,9 @@ public sealed class InteropTypeInfo
         IsTaskType = false,
         IsArrayType = false,
         IsNullableType = false,
-        RequiresCLRTypeConversion = false,
+        RequiresTypeConversion = false,
         TypeArgument = null,
-        IsSnapshotCompatible = false,
+        SupportsTypeConversion = false,
     };
 
     private static readonly InteropTypeInfo CLRObjectTypeInfo = new()
@@ -116,8 +128,8 @@ public sealed class InteropTypeInfo
         IsTaskType = false,
         IsArrayType = false,
         IsNullableType = false,
-        RequiresCLRTypeConversion = false,
+        RequiresTypeConversion = false,
         TypeArgument = null,
-        IsSnapshotCompatible = false,
+        SupportsTypeConversion = false,
     };
 }
