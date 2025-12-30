@@ -40,6 +40,7 @@ internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropert
         {
             Name = propertySymbol.Name,
             IsStatic = propertySymbol.IsStatic,
+            IsRequired = propertySymbol.IsRequired,
             Type = typeInfoBuilder.Build(),
             GetMethod = getMethod,
             SetMethod = setMethod,
