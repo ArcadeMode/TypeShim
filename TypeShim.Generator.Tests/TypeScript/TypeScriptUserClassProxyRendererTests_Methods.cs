@@ -13,7 +13,7 @@ internal class TypeScriptUserClassProxyRendererTests_Methods
     [TestCase("string", "string")]
     [TestCase("double", "number")]
     [TestCase("bool", "boolean")]
-    public void TypeScriptUserClassProxy_InstanceMethod_GeneratesSimpleFunction(string typeExpression, string typeScriptType)
+    public void TypeScriptUserClassProxy_InstanceMethod_WithPrimitiveReturnType(string typeExpression, string typeScriptType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -49,7 +49,50 @@ export class Proxy extends ProxyBase {
   public DoP1(): {{typeScriptType}} {
     return TypeShimConfig.exports.N1.C1Interop.DoP1(this.instance);
   }
+}
 
+""".Replace("{{typeScriptType}}", typeScriptType)));
+    }
+
+    [TestCase("string?", "string | null")]
+    [TestCase("double?", "number | null")]
+    [TestCase("bool?", "boolean | null")]
+    public void TypeScriptUserClassProxy_InstanceMethod_WithNullablePrimitiveReturnType(string typeExpression, string typeScriptType)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public {{typeExpression}} DoP1() {}
+            }
+        """.Replace("{{typeExpression}}", typeExpression));
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public DoP1(): {{typeScriptType}} {
+    return TypeShimConfig.exports.N1.C1Interop.DoP1(this.instance);
+  }
 }
 
 """.Replace("{{typeScriptType}}", typeScriptType)));
@@ -106,7 +149,6 @@ export class Proxy extends ProxyBase {
     const res = TypeShimConfig.exports.N1.C1Interop.GetAll(this.instance);
     return res.map(e => ProxyBase.fromHandle(UserClass.Proxy, e));
   }
-
 }
 
 """));
@@ -163,7 +205,6 @@ export class Proxy extends ProxyBase {
     const res = TypeShimConfig.exports.N1.C1Interop.GetMaybe(this.instance);
     return res ? ProxyBase.fromHandle(UserClass.Proxy, res) : null;
   }
-
 }
 
 """));
@@ -220,7 +261,6 @@ export class Proxy extends ProxyBase {
     const uInstance = u instanceof UserClass.Proxy ? u.instance : u;
     TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
-
 }
 
 """));
@@ -278,7 +318,6 @@ export class Proxy extends ProxyBase {
     const vInstance = v instanceof UserClass.Proxy ? v.instance : v;
     TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance, vInstance);
   }
-
 }
 
 """));
@@ -335,7 +374,6 @@ export class Proxy extends ProxyBase {
     const uInstance = u ? u instanceof UserClass.Proxy ? u.instance : u : null;
     TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
-
 }
 
 """));
@@ -392,7 +430,6 @@ export class Proxy extends ProxyBase {
     const uInstance = u.map(e => e instanceof UserClass.Proxy ? e.instance : e);
     TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
-
 }
 
 """));
@@ -448,7 +485,6 @@ export class Proxy extends ProxyBase {
     const uInstance = u.then(e => e instanceof UserClass.Proxy ? e.instance : e);
     TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
-
 }
 
 """));

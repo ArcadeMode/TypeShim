@@ -161,14 +161,14 @@ public sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeIn
 
         static ITypeSymbol? GetTypeArgument(ITypeSymbol typeSymbol)
         {
-            if (typeSymbol.NullableAnnotation == NullableAnnotation.Annotated)
-            {
-                return typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated);
-            } 
-            else if (typeSymbol is INamedTypeSymbol { ConstructedFrom.SpecialType: SpecialType.System_Nullable_T, TypeArguments.Length: 1 } named)
+            if (typeSymbol is INamedTypeSymbol { ConstructedFrom.SpecialType: SpecialType.System_Nullable_T, TypeArguments.Length: 1 } named)
             {
                 return named.TypeArguments[0];
             }
+            else if (typeSymbol.NullableAnnotation == NullableAnnotation.Annotated)
+            {
+                return typeSymbol.WithNullableAnnotation(NullableAnnotation.NotAnnotated);
+            } 
             else
             {
                 return null;
