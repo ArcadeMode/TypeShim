@@ -8,8 +8,8 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
     internal ConstructorInfo? Build(IEnumerable<PropertyInfo> classProperties)
     {
         PropertyInfo[] initializerProperties = [..classProperties.Where(p => p is { SetMethod: { } } or { InitMethod: { } })];
-
-        if (!initializerProperties.All(p => p.Type.IsSnapshotCompatible))
+        MethodParameterInfo[] parameterInfos = [.. parameterInfoBuilder.Build()];
+        if (!initializerProperties.All(p => p.Type.IsSnapshotCompatible) || !parameterInfos.All(p => p.Type.IsSnapshotCompatible))
         {
             return null;
         }
@@ -26,7 +26,7 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
         return new ConstructorInfo
         {
             Name = "ctor",
-            Parameters = [.. parameterInfoBuilder.Build()],
+            Parameters = parameterInfos,
             InitializerObject = initializersObjectParameter,
             Type = typeInfoBuilder.Build(),
             MemberInitializers = [.. initializerProperties],
