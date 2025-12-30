@@ -38,12 +38,12 @@ internal class TypeScriptUserClassProxyRendererTests_Methods
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
-    super(null!);
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
   public DoP1(): {{typeScriptType}} {
@@ -94,12 +94,12 @@ export class Proxy extends ProxyBase {
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
-    super(null!);
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
   public GetAll(): Array<UserClass.Proxy> {
@@ -151,12 +151,12 @@ export class Proxy extends ProxyBase {
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
-    super(null!);
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
   public GetMaybe(): UserClass.Proxy | null {
@@ -208,12 +208,12 @@ export class Proxy extends ProxyBase {
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
-    super(null!);
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
   public DoStuff(u: UserClass.Proxy | UserClass.Snapshot): void {
@@ -265,12 +265,12 @@ export class Proxy extends ProxyBase {
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
-    super(null!);
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
   public DoStuff(u: UserClass.Proxy | UserClass.Snapshot, v: UserClass.Proxy | UserClass.Snapshot): void {
@@ -323,12 +323,12 @@ export class Proxy extends ProxyBase {
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
-    super(null!);
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
   public DoStuff(u: UserClass.Proxy | UserClass.Snapshot | null): void {
@@ -380,12 +380,12 @@ export class Proxy extends ProxyBase {
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
-    super(null!);
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
   public DoStuff(u: Array<UserClass.Proxy | UserClass.Snapshot>): void {
@@ -436,12 +436,12 @@ export class Proxy extends ProxyBase {
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
   constructor() {
-    super(null!);
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
   public DoStuff(u: Promise<UserClass.Proxy | UserClass.Snapshot>): void {

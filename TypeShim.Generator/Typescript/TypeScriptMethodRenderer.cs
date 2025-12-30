@@ -5,8 +5,43 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator.Typescript;
 
-internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
+internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
 {
+    internal void RenderProxyConstructor(ConstructorInfo? constructorInfo)
+    {
+        if (constructorInfo == null)
+        {
+            ctx.AppendLine("private constructor() {}")
+               .AppendLine();
+        }
+        else
+        {
+            ctx.Append("constructor()");
+            RenderConstructorBody();
+        }
+
+        void RenderConstructorBody()
+        {
+            ctx.AppendLine(" {");
+            using (ctx.Indent())
+            {
+                //RenderHandleExtractionToConsts(methodInfo);
+                if (symbolNameProvider.GetUserClassSymbolNameIfExists(constructorInfo.Type, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is string proxyClassName)
+                {
+                    ctx.Append("super(");
+                    RenderInteropInvocation(constructorInfo.Name, constructorInfo.Parameters);
+                    ctx.AppendLine(");");
+                }
+                else
+                {
+                    throw new InvalidOperationException("Constructor must have a user class return type.");
+                }
+            }
+            ctx.AppendLine("}")
+               .AppendLine();
+        }
+    }
+
     internal void RenderProxyMethod(MethodInfo methodInfo)
     {
         RenderProxyMethodSignature(methodInfo.WithoutInstanceParameter());
@@ -86,10 +121,46 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         using (ctx.Indent())
         {
             RenderHandleExtractionToConsts(methodInfo);
-            RenderInteropInvocation(methodInfo);
+            if (symbolNameProvider.GetUserClassSymbolNameIfExists(methodInfo.ReturnType, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is string proxyClassName)
+            {
+                // user class return type, wrap in proxy
+                ctx.Append("const res = ");
+                RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
+                ctx.AppendLine(";");
+                ctx.Append($"return ");
+                RenderInlineProxyConstruction(methodInfo.ReturnType, proxyClassName, "res");
+                ctx.AppendLine(";");
+            }
+            else // primitive return type or void
+            {
+                ctx.Append(methodInfo.ReturnType.ManagedType == KnownManagedType.Void ? string.Empty : "return ");
+                RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
+                ctx.AppendLine(";");
+            }
         }
         ctx.AppendLine("}")
            .AppendLine();
+
+        void RenderInlineProxyConstruction(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
+        {
+            if (typeInfo is { IsNullableType: true })
+            {
+                ctx.Append(sourceVarName).Append(" ? ");
+                RenderInlineProxyConstruction(typeInfo.TypeArgument!, proxyClassName, sourceVarName);
+                ctx.Append(" : null");
+            }
+            else if (typeInfo is { IsArrayType: true } or { IsTaskType: true })
+            {
+                string transformFunction = typeInfo.IsArrayType ? "map" : "then";
+                ctx.Append(sourceVarName).Append('.').Append(transformFunction).Append("(e => ");
+                RenderInlineProxyConstruction(typeInfo.TypeArgument!, proxyClassName, "e");
+                ctx.Append(')');
+            }
+            else
+            {
+                ctx.Append($"ProxyBase.fromHandle({proxyClassName}, {sourceVarName})");
+            }
+        }
     }
 
     private void RenderHandleExtractionToConsts(MethodInfo methodInfo)
@@ -131,34 +202,18 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
         }
     }
 
-    private void RenderInteropInvocation(MethodInfo methodInfo)
+    private void RenderInteropInvocation(string methodName, IEnumerable<MethodParameterInfo> methodParameters)
     {
-        if (symbolNameProvider.GetUserClassSymbolNameIfExists(methodInfo.ReturnType, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is string proxyClassName)
-        {
-            // user class return type, wrap in proxy
-            ctx.Append($"const res = TypeShimConfig.exports.");
-            RenderInteropMethodAccessor(classInfo, methodInfo);
-            ctx.Append("(");
-            RenderMethodInvocationParameters(methodInfo, "this.instance"); // TODO: consider retrieving param name from ctx localscope
-            ctx.AppendLine(");");
-            ctx.Append($"return ");
-            RenderInlineProxyConstruction(methodInfo.ReturnType, proxyClassName, "res");
-            ctx.AppendLine(";");
-        }
-        else // primitive return type or void
-        {
-            ctx.Append(methodInfo.ReturnType.ManagedType == KnownManagedType.Void ? string.Empty : "return ");
-            ctx.Append($"TypeShimConfig.exports.");
-            RenderInteropMethodAccessor(classInfo, methodInfo); 
-            ctx.Append("(");
-            RenderMethodInvocationParameters(methodInfo, "this.instance");
-            ctx.AppendLine(");");
-        }
+        ctx.Append("TypeShimConfig.exports.");
+        RenderInteropMethodAccessor(methodName);
+        ctx.Append("(");
+        RenderMethodInvocationParameters(methodParameters, "this.instance");
+        ctx.Append(")");
 
-        void RenderMethodInvocationParameters(MethodInfo methodInfo, string instanceParameterExpression)
+        void RenderMethodInvocationParameters(IEnumerable<MethodParameterInfo> parameters, string instanceParameterExpression)
         {
             bool isFirst = true;
-            foreach (MethodParameterInfo parameter in methodInfo.Parameters)
+            foreach (MethodParameterInfo parameter in parameters)
             {
                 if (!isFirst) ctx.Append(", ");
                 
@@ -167,30 +222,9 @@ internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSy
             }
         }
 
-        void RenderInteropMethodAccessor(ClassInfo classInfo, MethodInfo methodInfo)
+        void RenderInteropMethodAccessor(string methodName)
         {
-            ctx.Append(classInfo.Namespace).Append('.').Append(RenderConstants.InteropClassName(classInfo)).Append('.').Append(methodInfo.Name);
-        }
-
-        void RenderInlineProxyConstruction(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
-        {
-            if (typeInfo is { IsNullableType: true })
-            {
-                ctx.Append(sourceVarName).Append(" ? ");
-                RenderInlineProxyConstruction(typeInfo.TypeArgument!, proxyClassName, sourceVarName);
-                ctx.Append(" : null");
-            }
-            else if (typeInfo is { IsArrayType: true } or { IsTaskType: true })
-            {
-                string transformFunction = typeInfo.IsArrayType ? "map" : "then";
-                ctx.Append(sourceVarName).Append('.').Append(transformFunction).Append("(e => ");
-                RenderInlineProxyConstruction(typeInfo.TypeArgument!, proxyClassName, "e");
-                ctx.Append(')');
-            }
-            else
-            {
-                ctx.Append($"ProxyBase.fromHandle({proxyClassName}, {sourceVarName})");
-            }
+            ctx.Append(ctx.Class.Namespace).Append('.').Append(RenderConstants.InteropClassName(ctx.Class)).Append('.').Append(methodName);
         }
     }
 

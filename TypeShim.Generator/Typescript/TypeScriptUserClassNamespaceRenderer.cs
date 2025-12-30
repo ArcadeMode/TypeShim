@@ -11,7 +11,7 @@ internal sealed class TypeScriptUserClassNamespaceRenderer(ClassInfo classInfo, 
            .AppendLine($"export namespace {classInfo.Name} {{");
         using (ctx.Indent())
         {
-            TypescriptUserClassProxyRenderer proxyRenderer = new(classInfo, symbolNameProvider, ctx);
+            TypescriptUserClassProxyRenderer proxyRenderer = new(symbolNameProvider, ctx);
             proxyRenderer.Render();
             if (classInfo.IsSnapshotCompatible())
             {
