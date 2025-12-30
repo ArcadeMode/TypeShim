@@ -39,7 +39,7 @@ internal class TypeScriptUserClassSnapshotRendererTests
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassSnapshotRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export interface Snapshot {
@@ -89,7 +89,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassSnapshotRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export interface Snapshot {
@@ -138,7 +138,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassSnapshotRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""
 export interface Snapshot {
@@ -198,7 +198,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassSnapshotRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export interface Snapshot {
@@ -258,7 +258,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassSnapshotRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export interface Snapshot {
@@ -318,7 +318,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassSnapshotRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export interface Snapshot {
@@ -378,7 +378,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassSnapshotRenderer(classInfo, symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassSnapshotRenderer(symbolNameProvider, renderContext).Render();
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export interface Snapshot {

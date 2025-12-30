@@ -4,16 +4,15 @@ using System.Reflection;
 using System.Text;
 using TypeShim.Generator.Parsing;
 using TypeShim.Shared;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TypeShim.Generator.Typescript;
 
-internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
+internal sealed class TypeScriptUserClassSnapshotRenderer(TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
 {
     internal void Render()
     {
-        if (!classInfo.IsSnapshotCompatible())
-            throw new InvalidOperationException($"Type '{classInfo.Namespace}.{classInfo.Name}' is not snapshot-compatible.");
+        if (!ctx.Class.IsSnapshotCompatible())
+            throw new InvalidOperationException($"Type '{ctx.Class.Namespace}.{ctx.Class.Name}' is not snapshot-compatible.");
 
         ctx.Append($"export interface ").Append(RenderConstants.Snapshot).AppendLine(" {");
         using (ctx.Indent())
@@ -31,7 +30,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
 
     private void RenderInterfaceProperties()
     {
-        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.IsSnapshotCompatible()))
+        foreach (PropertyInfo propertyInfo in ctx.Class.Properties.Where(pi => pi.IsSnapshotCompatible()))
         {
             string propertyType = symbolNameProvider.GetUserClassSymbolNameIfExists(propertyInfo.Type, SymbolNameFlags.Snapshot) ?? symbolNameProvider.GetNakedSymbolReference(propertyInfo.Type);
             ctx.Append(propertyInfo.Name).Append(": ").Append(propertyType).AppendLine(";");
@@ -57,7 +56,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
                 ctx.AppendLine($"if (!v || typeof v !== 'object') return false;");
                 ctx.AppendLine($"const o = v as any;");
 
-                PropertyInfo[] propertyInfos = [.. classInfo.Properties.Where(pi => pi.IsSnapshotCompatible())];
+                PropertyInfo[] propertyInfos = [.. ctx.Class.Properties.Where(pi => pi.IsSnapshotCompatible())];
                 string structuralMatchExpression = propertyInfos.Length == 0 ? "true" : string.Join(" && ", GetPropertyTypeAssertionExpressions(propertyInfos));
                 ctx.Append("return ").Append(structuralMatchExpression).AppendLine(";");
             }
@@ -112,8 +111,8 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
 
     private void RenderSnapshotFunction(string proxyParamName)
     {
-        string paramType = symbolNameProvider.GetUserClassProxySymbolName(classInfo);
-        string returnType = symbolNameProvider.GetUserClassSnapshotSymbolName(classInfo);
+        string paramType = symbolNameProvider.GetUserClassProxySymbolName(ctx.Class);
+        string returnType = symbolNameProvider.GetUserClassSnapshotSymbolName(ctx.Class);
         ctx.Append($"export function snapshot(").Append(proxyParamName).Append(": ").Append(paramType).Append("): ").Append(returnType).AppendLine(" {");
         using (ctx.Indent())
         {
@@ -126,7 +125,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(ClassInfo classInfo, T
             ctx.AppendLine("return {");
             using (ctx.Indent())
             {
-                foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(pi => pi.IsSnapshotCompatible()))
+                foreach (PropertyInfo propertyInfo in ctx.Class.Properties.Where(pi => pi.IsSnapshotCompatible()))
                 {
                     ctx.Append(propertyInfo.Name).Append(": ")
                        .Append(GetSnapshotExpression(propertyInfo.Type, $"{proxyParamName}.{propertyInfo.Name}"))
