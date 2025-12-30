@@ -20,13 +20,20 @@ internal class TypescriptUserClassProxyRenderer(TypescriptSymbolNameProvider sym
         using (ctx.Indent())
         {
             methodRenderer.RenderProxyConstructor(ctx.Class.Constructor);
+            //ctx.AppendLine();
+            bool isFirst = true;
             foreach (MethodInfo methodInfo in ctx.Class.Methods)
             {
+                if (!isFirst) ctx.AppendLine();
                 methodRenderer.RenderProxyMethod(methodInfo);
+                isFirst = false;
             }
+            isFirst = true;
             foreach (PropertyInfo propertyInfo in ctx.Class.Properties.Where(p => p.IsSnapshotCompatible() || p.IsStatic))
             {
+                if (!isFirst) ctx.AppendLine();
                 methodRenderer.RenderProxyProperty(propertyInfo);
+                isFirst = false;
             }
         }
         ctx.AppendLine("}");

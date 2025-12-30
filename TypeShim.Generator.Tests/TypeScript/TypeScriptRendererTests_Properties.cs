@@ -52,7 +52,6 @@ export class Proxy extends ProxyBase {
   public set P1(value: {{typeScriptType}}) {
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value);
   }
-
 }
 
 """.Replace("{{typeScriptType}}", typeScriptType)));
@@ -101,7 +100,6 @@ export class Proxy extends ProxyBase {
   public static set P1(value: {{typeScriptType}}) {
     TypeShimConfig.exports.N1.C1Interop.set_P1(value);
   }
-
 }
 
 """.Replace("{{typeScriptType}}", typeScriptType)));
@@ -173,7 +171,6 @@ export class Proxy {
   public static get P4(): {{typeScriptType}} {
     return TypeShimConfig.exports.N1.C1Interop.get_P4();
   }
-
 }
 
 """.Replace("{{typeScriptType}}", typeScriptType)));
@@ -235,7 +232,6 @@ export class Proxy extends ProxyBase {
     const valueInstance = value instanceof UserClass.Proxy ? value.instance : value;
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
 """));
@@ -295,7 +291,6 @@ export class Proxy {
     const valueInstance = value instanceof UserClass.Proxy ? value.instance : value;
     TypeShimConfig.exports.N1.C1Interop.set_P1(valueInstance);
   }
-
 }
 
 """));
@@ -357,7 +352,6 @@ export class Proxy extends ProxyBase {
     const valueInstance = value ? value instanceof UserClass.Proxy ? value.instance : value : null;
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
 """));
@@ -419,7 +413,6 @@ export class Proxy extends ProxyBase {
     const valueInstance = value.then(e => e instanceof UserClass.Proxy ? e.instance : e);
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
 """));
@@ -481,7 +474,6 @@ export class Proxy extends ProxyBase {
     const valueInstance = value.then(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null);
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
 """));
@@ -543,7 +535,6 @@ export class Proxy extends ProxyBase {
     const valueInstance = value.map(e => e instanceof UserClass.Proxy ? e.instance : e);
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
 """));
@@ -592,8 +583,8 @@ export class Proxy extends ProxyBase {
 
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
-  constructor() {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  constructor(jsObject: UserClass.Snapshot) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): Array<UserClass.Proxy | null> {
@@ -605,7 +596,6 @@ export class Proxy extends ProxyBase {
     const valueInstance = value.map(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null);
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
 """));
@@ -667,7 +657,6 @@ export class Proxy extends ProxyBase {
     const valueInstance = value ? value.map(e => e instanceof UserClass.Proxy ? e.instance : e) : null;
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
 """));
@@ -729,7 +718,6 @@ export class Proxy extends ProxyBase {
     const valueInstance = value ? value.map(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null) : null;
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
 """));
@@ -791,7 +779,6 @@ export class Proxy extends ProxyBase {
     const valueInstance = value ? value.then(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null) : null;
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
 """));

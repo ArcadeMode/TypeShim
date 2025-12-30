@@ -11,21 +11,28 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
     {
         if (constructorInfo == null)
         {
-            ctx.AppendLine("private constructor() {}")
-               .AppendLine();
+            ctx.AppendLine("private constructor() {}");
         }
         else
         {
-            ctx.Append("constructor()");
-            RenderConstructorBody();
+            IEnumerable<MethodParameterInfo> parameterInfos = constructorInfo.GetParametersIncludingInitializerObject();
+            RenderConstructorSignature(parameterInfos);
+            RenderConstructorBody(parameterInfos);
         }
 
-        void RenderConstructorBody()
+        void RenderConstructorSignature(IEnumerable<MethodParameterInfo> parameterInfos)
+        {
+            ctx.Append("constructor(");
+            RenderParameterList(parameterInfos);
+            ctx.Append(")");
+        }
+
+        void RenderConstructorBody(IEnumerable<MethodParameterInfo> parameterInfos)
         {
             ctx.AppendLine(" {");
             using (ctx.Indent())
             {
-                //RenderHandleExtractionToConsts(methodInfo);
+                RenderHandleExtractionToConsts(parameterInfos);
                 if (symbolNameProvider.GetUserClassSymbolNameIfExists(constructorInfo.Type, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is string proxyClassName)
                 {
                     ctx.Append("super(");
@@ -54,7 +61,7 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
             if (methodInfo.ReturnType.IsTaskType) ctx.Append("async ");
             ctx.Append(methodInfo.Name)
                .Append('(');
-            RenderProxyMethodParameterList(methodInfo);
+            RenderParameterList(methodInfo.Parameters);
             ctx.Append("): ");
             string returnType = symbolNameProvider.GetUserClassSymbolNameIfExists(methodInfo.ReturnType, SymbolNameFlags.Proxy) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
             ctx.Append(returnType);
@@ -86,15 +93,15 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
             ctx.Append($"public ");
             if (methodInfo.IsStatic) ctx.Append("static ");
             ctx.Append("set ").Append(propertyInfo.Name).Append('(');
-            RenderProxyMethodParameterList(methodInfo);
+            RenderParameterList(methodInfo.Parameters);
             ctx.Append(')');
         }
     }
 
-    private void RenderProxyMethodParameterList(MethodInfo methodInfo)
+    private void RenderParameterList(IEnumerable<MethodParameterInfo> parameterInfos)
     {
         bool isFirst = true;
-        foreach (MethodParameterInfo parameterInfo in methodInfo.Parameters)
+        foreach (MethodParameterInfo parameterInfo in parameterInfos)
         {
             SymbolNameFlags flags = ContainsSnapshotCompatibleType(parameterInfo.Type) ? SymbolNameFlags.ProxySnapshotUnion : SymbolNameFlags.Proxy;
             string returnType = symbolNameProvider.GetUserClassSymbolNameIfExists(parameterInfo.Type, flags) ?? symbolNameProvider.GetNakedSymbolReference(parameterInfo.Type);
@@ -120,7 +127,7 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
         ctx.AppendLine(" {");
         using (ctx.Indent())
         {
-            RenderHandleExtractionToConsts(methodInfo);
+            RenderHandleExtractionToConsts(methodInfo.Parameters);
             if (symbolNameProvider.GetUserClassSymbolNameIfExists(methodInfo.ReturnType, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is string proxyClassName)
             {
                 // user class return type, wrap in proxy
@@ -138,8 +145,7 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
                 ctx.AppendLine(";");
             }
         }
-        ctx.AppendLine("}")
-           .AppendLine();
+        ctx.AppendLine("}");
 
         void RenderInlineProxyConstruction(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
         {
@@ -163,9 +169,9 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
         }
     }
 
-    private void RenderHandleExtractionToConsts(MethodInfo methodInfo)
+    private void RenderHandleExtractionToConsts(IEnumerable<MethodParameterInfo> parameterInfos)
     {
-        foreach (MethodParameterInfo parameterInfo in methodInfo.Parameters)
+        foreach (MethodParameterInfo parameterInfo in parameterInfos)
         {
             if (parameterInfo.IsInjectedInstanceParameter || !parameterInfo.Type.RequiresCLRTypeConversion || !parameterInfo.Type.ContainsExportedType())
                 continue;
