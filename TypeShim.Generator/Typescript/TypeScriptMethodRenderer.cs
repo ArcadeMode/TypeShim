@@ -11,7 +11,16 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
     {
         if (constructorInfo == null)
         {
-            ctx.AppendLine("private constructor() {}");
+            ctx.Append("private constructor() {");
+            if (!ctx.Class.IsStatic)
+            {
+                ctx.Append(" super(undefined!); "); // so TS compiles
+            }
+            ctx.AppendLine("}");
+        }
+        else if (constructorInfo == null)
+        {
+            ctx.AppendLine("private constructor() { super(undefined!); }");
         }
         else
         {

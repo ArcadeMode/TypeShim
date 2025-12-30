@@ -37,7 +37,7 @@ abstract class ProxyBase {
     this.instance = instance;
   }
 
-  static fromHandle<T extends ProxyBase>(ctor: new (...args: any[]) => T, handle: object): T {
+  static fromHandle<T extends ProxyBase>(ctor: { prototype: T }, handle: object): T {
     const obj = Object.create(ctor.prototype) as T;
     obj.instance = handle;
     return obj;

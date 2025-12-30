@@ -118,7 +118,7 @@ internal sealed class TypeScriptUserClassSnapshotRenderer(TypescriptSymbolNamePr
         {
             RenderSnapshotFunctionBody(proxyParamName);
         }
-        ctx.Append("}");
+        ctx.AppendLine("}");
 
         void RenderSnapshotFunctionBody(string proxyParamName)
         {
