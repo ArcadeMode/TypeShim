@@ -15,28 +15,34 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
         }
         else
         {
-            IEnumerable<MethodParameterInfo> parameterInfos = constructorInfo.GetParametersIncludingInitializerObject();
-            RenderConstructorSignature(parameterInfos);
-            RenderConstructorBody(parameterInfos);
+            RenderConstructorSignature();
+            RenderConstructorBody();
         }
 
-        void RenderConstructorSignature(IEnumerable<MethodParameterInfo> parameterInfos)
+        void RenderConstructorSignature()
         {
             ctx.Append("constructor(");
-            RenderParameterList(parameterInfos);
+            RenderParameterList(constructorInfo.Parameters);
+            if (constructorInfo.InitializerObject != null)
+            {
+                if (constructorInfo.Parameters.Length != 0) ctx.Append(", ");
+                
+                string returnType = symbolNameProvider.GetUserClassSnapshotSymbolName(ctx.Class);
+                ctx.Append(constructorInfo.InitializerObject.Name).Append(": ").Append(returnType);
+            }
             ctx.Append(")");
         }
 
-        void RenderConstructorBody(IEnumerable<MethodParameterInfo> parameterInfos)
+        void RenderConstructorBody()
         {
             ctx.AppendLine(" {");
             using (ctx.Indent())
             {
-                RenderHandleExtractionToConsts(parameterInfos);
+                RenderHandleExtractionToConsts(constructorInfo.Parameters);
                 if (symbolNameProvider.GetUserClassSymbolNameIfExists(constructorInfo.Type, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is string proxyClassName)
                 {
                     ctx.Append("super(");
-                    RenderInteropInvocation(constructorInfo.Name, constructorInfo.Parameters);
+                    RenderInteropInvocation(constructorInfo.Name, constructorInfo.Parameters, constructorInfo.InitializerObject);
                     ctx.AppendLine(");");
                 }
                 else
@@ -208,24 +214,28 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
         }
     }
 
-    private void RenderInteropInvocation(string methodName, IEnumerable<MethodParameterInfo> methodParameters)
+    private void RenderInteropInvocation(string methodName, IEnumerable<MethodParameterInfo> methodParameters, MethodParameterInfo? initializerObject = null)
     {
         ctx.Append("TypeShimConfig.exports.");
         RenderInteropMethodAccessor(methodName);
         ctx.Append("(");
-        RenderMethodInvocationParameters(methodParameters, "this.instance");
+        RenderMethodInvocationParameters("this.instance");
         ctx.Append(")");
 
-        void RenderMethodInvocationParameters(IEnumerable<MethodParameterInfo> parameters, string instanceParameterExpression)
+        void RenderMethodInvocationParameters(string instanceParameterExpression)
         {
             bool isFirst = true;
-            foreach (MethodParameterInfo parameter in parameters)
+            foreach (MethodParameterInfo parameter in methodParameters)
             {
                 if (!isFirst) ctx.Append(", ");
                 
                 ctx.Append(parameter.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(parameter));
                 isFirst = false;
             }
+            if (initializerObject == null) return;
+
+            if (!isFirst) ctx.Append(", ");
+            ctx.Append(initializerObject.Name);
         }
 
         void RenderInteropMethodAccessor(string methodName)

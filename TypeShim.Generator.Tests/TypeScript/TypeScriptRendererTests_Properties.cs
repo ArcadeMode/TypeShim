@@ -43,8 +43,8 @@ internal class TypeScriptRendererTests_Properties
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
-  constructor() {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  constructor(jsObject: C1.Snapshot) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): {{typeScriptType}} {
@@ -91,8 +91,8 @@ export class Proxy extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
-  constructor() {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  constructor(jsObject: C1.Snapshot) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public static get P1(): {{typeScriptType}} {
@@ -221,8 +221,8 @@ export class Proxy {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
-  constructor() {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  constructor(jsObject: C1.Snapshot) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): UserClass.Proxy {
@@ -341,8 +341,8 @@ export class Proxy {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
-  constructor() {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  constructor(jsObject: C1.Snapshot) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): UserClass.Proxy | null {
@@ -402,8 +402,8 @@ export class Proxy extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
-  constructor() {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  constructor(jsObject: C1.Snapshot) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): Promise<UserClass.Proxy> {
@@ -413,67 +413,6 @@ export class Proxy extends ProxyBase {
 
   public set P1(value: Promise<UserClass.Proxy | UserClass.Snapshot>) {
     const valueInstance = value.then(e => e instanceof UserClass.Proxy ? e.instance : e);
-    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
-  }
-}
-
-""");
-    }
-
-    [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithNullableUserClassTaskParameterType_RendersConversionsCorrectly()
-    {
-        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
-            using System;
-            using System.Threading.Tasks;
-            namespace N1;
-            [TSExport]
-            public class UserClass
-            {
-                public int Id { get; set; }
-            }
-        """);
-
-        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
-            using System;
-            using System.Threading.Tasks;
-            namespace N1;
-            [TSExport]
-            public class C1
-            {
-                public Task<UserClass?> P1 { get; set; }
-            }
-        """);
-
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
-        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
-        Assert.That(exportedClasses, Has.Count.EqualTo(2));
-        INamedTypeSymbol classSymbol = exportedClasses[0];
-        INamedTypeSymbol userClassSymbol = exportedClasses[1];
-
-        InteropTypeInfoCache typeCache = new();
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
-
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
-        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
-
-        AssertEx.EqualOrDiff(renderContext.ToString(), """    
-export class Proxy extends ProxyBase {
-  constructor() {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor());
-  }
-
-  public get P1(): Promise<UserClass.Proxy | null> | null {
-    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-    return res ? res.then(e => e ? ProxyBase.fromHandle(UserClass.Proxy, e) : null) : null;
-  }
-
-  public set P1(value: Promise<UserClass.Proxy | UserClass.Snapshot | null> | null) {
-    const valueInstance = value ? value.then(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null) : null;
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
 }
@@ -524,8 +463,8 @@ export class Proxy extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
-  constructor() {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  constructor(jsObject: C1.Snapshot) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): Array<UserClass.Proxy> {
@@ -585,7 +524,7 @@ export class Proxy extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
-  constructor(jsObject: UserClass.Snapshot) {
+  constructor(jsObject: C1.Snapshot) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
@@ -646,8 +585,8 @@ export class Proxy extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
-  constructor() {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  constructor(jsObject: C1.Snapshot) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): Array<UserClass.Proxy> | null {
@@ -707,8 +646,8 @@ export class Proxy extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
-  constructor() {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  constructor(jsObject: C1.Snapshot) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): Array<UserClass.Proxy | null> | null {
@@ -718,6 +657,67 @@ export class Proxy extends ProxyBase {
 
   public set P1(value: Array<UserClass.Proxy | UserClass.Snapshot | null> | null) {
     const valueInstance = value ? value.map(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null) : null;
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_InstanceParameter_WithNullableUserClassTaskParameterType_RendersConversionsCorrectly()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public Task<UserClass?> P1 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  constructor(jsObject: C1.Snapshot) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+  }
+
+  public get P1(): Promise<UserClass.Proxy | null> {
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+    return res.then(e => e ? ProxyBase.fromHandle(UserClass.Proxy, e) : null);
+  }
+
+  public set P1(value: Promise<UserClass.Proxy | UserClass.Snapshot | null>) {
+    const valueInstance = value.then(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null);
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
 }
@@ -768,7 +768,9 @@ export class Proxy extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
-  private constructor() {}
+  constructor(jsObject: C1.Snapshot) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+  }
 
   public get P1(): Promise<UserClass.Proxy | null> | null {
     const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
