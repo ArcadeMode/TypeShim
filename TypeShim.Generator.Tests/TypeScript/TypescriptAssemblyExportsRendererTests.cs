@@ -10,7 +10,7 @@ namespace TypeShim.Generator.Tests.TypeScript;
 internal class TypescriptAssemblyExportsRendererTests
 {
     [Test]
-    public void TypescriptAssemblyExportsRenderer_InstanceMethod_WithNullableUserClassParameterType_HasObjectOrNullType()
+    public void TypescriptAssemblyExportsRenderer_StaticMethod_WithNullableUserClassParameterType_HasObjectOrNullType()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -52,7 +52,7 @@ internal class TypescriptAssemblyExportsRendererTests
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(renderCtx.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderCtx.ToString(), """
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
@@ -61,6 +61,7 @@ export interface AssemblyExports{
     };
     N2: {
       UserClassInterop: {
+        ctor(jsObject: object): object;
         get_Id(instance: object): number;
         set_Id(instance: object, value: number): void;
       };
@@ -68,7 +69,7 @@ export interface AssemblyExports{
   };
 }
 
-"""));
+""");
     }
 
     [TestCase("bool", "boolean")]
@@ -102,17 +103,18 @@ export interface AssemblyExports{
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(renderCtx.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderCtx.ToString(), """
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
+      ctor(): object;
       DoStuff(instance: object, u: {{tsType}}): void;
     };
   };
 }
 
-""".Replace("{{tsType}}", tsType)));
+""".Replace("{{tsType}}", tsType));
     }
 
     [Test]
@@ -150,24 +152,30 @@ export interface AssemblyExports{
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
 
-        RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
+        RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(renderCtx.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderCtx.ToString(), """
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
+      ctor(): object;
       DoStuff(instance: object, u: Promise<object | null>): void;
+    };
+    UserClassInterop: {
+      ctor(jsObject: object): object;
+      get_Id(instance: object): number;
+      set_Id(instance: object, value: number): void;
     };
   };
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -205,24 +213,30 @@ export interface AssemblyExports{
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
 
-        RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
+        RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(renderCtx.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderCtx.ToString(), """    
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
-      DoStuff(instance: object, u: Array<object | null>): void;
+      ctor(): object;
+      DoStuff(instance: object, u: Promise<object | null>): void;
+    };
+    UserClassInterop: {
+      ctor(jsObject: object): object;
+      get_Id(instance: object): number;
+      set_Id(instance: object, value: number): void;
     };
   };
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -267,16 +281,17 @@ export interface AssemblyExports{
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
 
-        Assert.That(renderCtx.ToString(), Is.EqualTo("""    
+        AssertEx.EqualOrDiff(renderCtx.ToString(), """
 // Auto-generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
+      ctor(): object;
       DoStuff(instance: object, u: Array<object> | null): void;
     };
   };
 }
 
-"""));
+""");
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TypeShim.Generator.Parsing;
+using TypeShim.Shared;
 
 namespace TypeShim.Generator.Typescript;
 
@@ -44,27 +45,32 @@ internal sealed class TypescriptAssemblyExportsRenderer(
 
     private void RenderClassInteropMethods(ClassInfo classInfo)
     {
-        foreach (MethodInfo methodInfo in GetAllMethods(classInfo))
+        if (classInfo.Constructor is ConstructorInfo constructorInfo)
         {
-            RenderInteropMethodSignature(methodInfo);
+            constructorInfo = constructorInfo.WithInteropTypeInfo();
+            RenderInteropMethodSignature(constructorInfo.Name, constructorInfo.GetParametersIncludingInitializerObject(), constructorInfo.Type);
+        }
+        foreach (MethodInfo methodInfo in GetAllMethodsWithInteropTypeInfo(classInfo))
+        {
+            RenderInteropMethodSignature(methodInfo.Name, methodInfo.Parameters, methodInfo.ReturnType);
         }
     }
 
-    private void RenderInteropMethodSignature(MethodInfo methodInfo)
+    private void RenderInteropMethodSignature(string name, IEnumerable<MethodParameterInfo> parameters, InteropTypeInfo returnType)
     {
-        ctx.Append(methodInfo.Name).Append('(');
+        ctx.Append(name).Append('(');
         bool isFirst = true;
-        foreach (MethodParameterInfo parameterInfo in methodInfo.Parameters)
+        foreach (MethodParameterInfo parameterInfo in parameters)
         {
             if (!isFirst) ctx.Append(", ");
 
             ctx.Append(parameterInfo.Name).Append(": ").Append(symbolNameProvider.GetNakedSymbolReference(parameterInfo.Type));
             isFirst = false;
         }
-        ctx.Append("): ").Append(symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType)).AppendLine(";");
+        ctx.Append("): ").Append(symbolNameProvider.GetNakedSymbolReference(returnType)).AppendLine(";");
     }
 
-    private static IEnumerable<MethodInfo> GetAllMethods(ClassInfo classInfo)
+    private static IEnumerable<MethodInfo> GetAllMethodsWithInteropTypeInfo(ClassInfo classInfo)
     {
         foreach (MethodInfo methodInfo in classInfo.Methods.Select(m => m.WithInteropTypeInfo()))
         {
