@@ -226,7 +226,7 @@ export interface AssemblyExports{
   N1: {
     C1Interop: {
       ctor(): object;
-      DoStuff(instance: object, u: Promise<object | null>): void;
+      DoStuff(instance: object, u: Array<object | null>): void;
     };
     UserClassInterop: {
       ctor(jsObject: object): object;

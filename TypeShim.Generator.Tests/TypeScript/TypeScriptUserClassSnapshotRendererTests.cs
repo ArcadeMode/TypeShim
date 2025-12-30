@@ -59,6 +59,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
     P1: proxy.P1,
   };
 }
+
 """.Replace("{{typeScriptType}}", typeScriptType)));
     }
 
@@ -109,6 +110,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
     P1: proxy.P1,
   };
 }
+
 """.Replace("{{typeScriptType}}", typeScriptType).Replace("{{typeScriptElementType}}", typeScriptElementType)));
     }
 
@@ -158,6 +160,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
     P1: proxy.P1,
   };
 }
+
 """.Replace("{{tsTypeExpression}}", tsTypeExpression)));
     }
 
@@ -218,6 +221,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
     P1: UserClass.snapshot(proxy.P1),
   };
 }
+
 """));
     }
 
@@ -278,6 +282,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
     P1: proxy.P1 ? UserClass.snapshot(proxy.P1) : null,
   };
 }
+
 """));
     }
 
@@ -338,6 +343,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
     P1: proxy.P1.then(e => UserClass.snapshot(e)),
   };
 }
+
 """));
     }
 
@@ -398,6 +404,7 @@ export function snapshot(proxy: C1.Proxy): C1.Snapshot {
     P1: proxy.P1.map(e => UserClass.snapshot(e)),
   };
 }
+
 """));
     }
 }
