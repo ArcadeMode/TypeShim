@@ -99,7 +99,7 @@ export class Proxy extends ProxyBase {
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceMethod_WithUserClassReturnType_GeneratesArrayProxies()
+    public void TypeScriptUserClassProxy_InstanceMethod_WithUserClassArrayReturnType_GeneratesArrayProxies()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;

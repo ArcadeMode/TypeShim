@@ -9,7 +9,7 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator.Tests.TypeScript;
 
-internal class TypeScriptUserClassSnapshotRendererTests
+internal class TypeScriptUserClassShapeRendererTests
 {
     [TestCase("string", "string")]
     [TestCase("double", "number")]

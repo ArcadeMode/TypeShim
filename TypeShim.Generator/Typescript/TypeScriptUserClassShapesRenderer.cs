@@ -22,10 +22,15 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
 
     private void RenderPropertiesInterface()
     {
+        PropertyInfo[] propertyInfos = [.. ctx.Class.Properties.Where(p => !p.IsStatic)];
+
+        if (propertyInfos.Length == 0)
+            return;
+
         ctx.Append($"export interface ").Append(RenderConstants.Properties).AppendLine(" {");
         using (ctx.Indent())
         {
-            foreach (PropertyInfo propertyInfo in ctx.Class.Properties.Where(p => !p.IsStatic))
+            foreach (PropertyInfo propertyInfo in propertyInfos)
             {
                 string propertyType = symbolNameProvider.GetUserClassSymbolNameIfExists(propertyInfo.Type, SymbolNameFlags.Properties) ?? symbolNameProvider.GetNakedSymbolReference(propertyInfo.Type);
                 ctx.Append(propertyInfo.Name).Append(": ").Append(propertyType).AppendLine(";");
@@ -36,10 +41,14 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
 
     private void RenderInitializerInterface()
     {
+        PropertyInfo[]? propertyInfos = ctx.Class.Constructor?.MemberInitializers;
+        if (propertyInfos?.Length is 0 or null)
+            return;
+
         ctx.Append($"export interface ").Append(RenderConstants.Initializer).AppendLine(" {");
         using (ctx.Indent())
         {
-            foreach (PropertyInfo propertyInfo in ctx.Class.Properties.Where(p => !p.IsStatic && (p.SetMethod != null || p.InitMethod != null)))
+            foreach (PropertyInfo propertyInfo in propertyInfos)
             {
                 string propertyType = symbolNameProvider.GetUserClassSymbolNameIfExists(propertyInfo.Type, SymbolNameFlags.ProxyInitializerUnion) ?? symbolNameProvider.GetNakedSymbolReference(propertyInfo.Type);
                 ctx.Append(propertyInfo.Name).Append(": ").Append(propertyType).AppendLine(";");

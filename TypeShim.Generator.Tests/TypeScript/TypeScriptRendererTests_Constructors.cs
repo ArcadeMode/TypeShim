@@ -118,7 +118,6 @@ export class Proxy extends ProxyBase {
             [TSExport]
             public class C1(UserClass p1)
             {
-                public int P1 => default;
             }
         """);
 
@@ -135,19 +134,16 @@ export class Proxy extends ProxyBase {
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
-
+        // this type of constructor might be used as a copy constructor.
         Assert.That(renderContext.ToString(), Is.EqualTo("""    
 export class Proxy extends ProxyBase {
-  constructor(p1: UserClass.Proxy | UserClass.Snapshot) {
+  constructor(p1: UserClass.Proxy | UserClass.Initializer) {
     const p1Instance = p1 instanceof UserClass.Proxy ? p1.instance : p1;
     super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
   }
 
-  public get P1(): number {
-    return TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-  }
 }
 
 """));
@@ -156,55 +152,469 @@ export class Proxy extends ProxyBase {
     [Test]
     public void TypeScriptUserClassProxy_ParameterizedConstructor_WithNullableUserClassParameterType()
     {
-        Assert.Fail("Not implemented");
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1(UserClass? p1)
+            {
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        // this type of constructor might be used as a copy constructor.
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+export class Proxy extends ProxyBase {
+  constructor(p1: UserClass.Proxy | UserClass.Initializer | null) {
+    const p1Instance = p1 ? p1 instanceof UserClass.Proxy ? p1.instance : p1 : null;
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
+  }
+
+}
+
+"""));
     }
 
     [Test]
     public void TypeScriptUserClassProxy_ParameterizedConstructor_WithUserClassArrayParameterType()
     {
-        Assert.Fail("Not implemented");
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1(UserClass[] p1)
+            {
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        // this type of constructor might be used as a copy constructor.
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+export class Proxy extends ProxyBase {
+  constructor(p1: Array<UserClass.Proxy | UserClass.Initializer>) {
+    const p1Instance = p1.map(e => e instanceof UserClass.Proxy ? e.instance : e);
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
+  }
+
+}
+
+"""));
     }
 
     [Test]
     public void TypeScriptUserClassProxy_ParameterizedConstructor_WithNullableUserClassArrayParameterType()
     {
-        Assert.Fail("Not implemented");
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1(UserClass?[] p1)
+            {
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        // this type of constructor might be used as a copy constructor.
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+export class Proxy extends ProxyBase {
+  constructor(p1: Array<UserClass.Proxy | UserClass.Initializer | null>) {
+    const p1Instance = p1.map(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null);
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
+  }
+
+}
+
+"""));
     }
 
     [Test]
     public void TypeScriptUserClassProxy_ParameterizedConstructor_WithUserClassNullableArrayParameterType()
     {
-        Assert.Fail("Not implemented");
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1(UserClass[]? p1)
+            {
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        // this type of constructor might be used as a copy constructor.
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+export class Proxy extends ProxyBase {
+  constructor(p1: Array<UserClass.Proxy | UserClass.Initializer> | null) {
+    const p1Instance = p1 ? p1.map(e => e instanceof UserClass.Proxy ? e.instance : e) : null;
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
+  }
+
+}
+
+"""));
     }
 
     [Test]
     public void TypeScriptUserClassProxy_ParameterizedConstructor_WithNullableUserClassNullableArrayParameterType()
     {
-        Assert.Fail("Not implemented");
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1(UserClass?[]? p1)
+            {
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        // this type of constructor might be used as a copy constructor.
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+export class Proxy extends ProxyBase {
+  constructor(p1: Array<UserClass.Proxy | UserClass.Initializer | null> | null) {
+    const p1Instance = p1 ? p1.map(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null) : null;
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
+  }
+
+}
+
+"""));
     }
 
     [Test]
     public void TypeScriptUserClassProxy_ParameterizedConstructor_WithUserClassTaskParameterType()
     {
-        Assert.Fail("Not implemented");
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1(Task<UserClass> p1)
+            {
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        // this type of constructor might be used as a copy constructor.
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+export class Proxy extends ProxyBase {
+  constructor(p1: Promise<UserClass.Proxy | UserClass.Initializer>) {
+    const p1Instance = p1.then(e => e instanceof UserClass.Proxy ? e.instance : e);
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
+  }
+
+}
+
+"""));
     }
 
     [Test]
     public void TypeScriptUserClassProxy_ParameterizedConstructor_WithNullableUserClassTaskParameterType()
     {
-        Assert.Fail("Not implemented");
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1(Task<UserClass?> p1)
+            {
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        // this type of constructor might be used as a copy constructor.
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+export class Proxy extends ProxyBase {
+  constructor(p1: Promise<UserClass.Proxy | UserClass.Initializer | null>) {
+    const p1Instance = p1.then(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null);
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
+  }
+
+}
+
+"""));
     }
 
     [Test]
     public void TypeScriptUserClassProxy_ParameterizedConstructor_WithUserClassNullableTaskParameterType()
     {
-        Assert.Fail("Not implemented");
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1(Task<UserClass>? p1)
+            {
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        // this type of constructor might be used as a copy constructor.
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+export class Proxy extends ProxyBase {
+  constructor(p1: Promise<UserClass.Proxy | UserClass.Initializer> | null) {
+    const p1Instance = p1 ? p1.then(e => e instanceof UserClass.Proxy ? e.instance : e) : null;
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
+  }
+
+}
+
+"""));
     }
 
     [Test]
     public void TypeScriptUserClassProxy_ParameterizedConstructor_WithNullableUserClassNullableTaskParameterType()
     {
-        Assert.Fail("Not implemented");
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1(Task<UserClass?>? p1)
+            {
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        // this type of constructor might be used as a copy constructor.
+        Assert.That(renderContext.ToString(), Is.EqualTo("""    
+export class Proxy extends ProxyBase {
+  constructor(p1: Promise<UserClass.Proxy | UserClass.Initializer | null> | null) {
+    const p1Instance = p1 ? p1.then(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null) : null;
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
+  }
+
+}
+
+"""));
     }
 
     [Test]
@@ -237,8 +647,59 @@ export class Proxy extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
-  private constructor() {}
+  private constructor() { super(undefined!); }
 
+  public get P1(): object {
+    return TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+  }
+
+  public set P1(value: object) {
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value);
+  }
+}
+
+""");
+    }
+
+    [Test, Ignore("Needs reconsideration, if user does this, why not let them?")]
+    public void TypeScriptUserClassProxy_ParameterizedConstructor_AndIncompatiblePropertyType_GeneratesNoConstructor()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1(int i)
+            {
+                public Version P1 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  private constructor() { super(undefined!); }
+
+  public get P1(): object {
+    return TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+  }
+
+  public set P1(value: object) {
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value);
+  }
 }
 
 """);
