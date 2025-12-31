@@ -9,44 +9,16 @@ namespace TypeShim.Sample;
 
 public partial class Program
 {
-    private static IHost? _host;
     public static void Main(string[] args)
     {
         Console.WriteLine("WASM runtime is alive.");
 
-        string baseAddress = GetBaseAddress();
-        Initialize(baseAddress);
-    }
+        // You can put any startup logic here if needed, like set up DI even a whole host builder.
+        // even make JSImport calls
 
-    [JSImport("globalThis.window.getBaseURI")]
-    public static partial string GetBaseAddress();
+        // this could then be combined with a static accessor to expose certain services to JS.
 
-    static void Initialize(string baseAddress)
-    {
-        if (_host != null)
-        {
-            throw new InvalidOperationException("Module already initialized.");
-        }
-
-        Console.WriteLine("Initializing SampleModule...");
-
-        IConfigurationRoot config = new ConfigurationBuilder()
-            // if desired, add configuration sources here, may also be passed through parameters
-            .Build();
-        _host = new HostBuilder()
-            .ConfigureAppConfiguration((context, builder) =>
-            {
-                builder.AddConfiguration(config);
-            })
-            .ConfigureServices(services =>
-            {
-                services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseAddress) });
-                services.AddSingleton<PeopleApiClient>();
-                services.AddSingleton<PeopleProvider>();
-            })
-            .Build();
-
-        TypeShimSampleModule.PeopleProvider = _host.Services.GetRequiredService<PeopleProvider>();
-        Console.WriteLine("SampleModule initialized.");
+        // For this demo however, MyApp has been TSExport'ed and will be initialized from JS.
+        Console.WriteLine($"{nameof(MyApp)} can be initialized even without calling into Main");
     }
 }

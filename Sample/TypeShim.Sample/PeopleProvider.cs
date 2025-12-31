@@ -9,26 +9,32 @@ namespace TypeShim.Sample;
 
 
 [TSExport]
-public class PeopleProvider(PeopleApiClient? _apiClient = null)
+public class PeopleProvider
 {
-    private static Person[]? AllPeople;
-    public static Person?[]? PeopleCache => AllPeople ?? [];
-    public Task<TimeoutUnit?>? Unit { get; set; } = Task.FromResult<TimeoutUnit?>(null);
+    private readonly PeopleApiClient _apiClient;
+    private Person[]? AllPeople;
 
-    public void DoStuff(Task<TimeoutUnit?> task)
+    // internal constructor blocks access from JS
+    internal PeopleProvider(PeopleApiClient apiClient)
     {
-        Unit = task; 
+        _apiClient = apiClient;
     }
+
+    public Person[]? PeopleCache => AllPeople;
+    public Task<TimeoutUnit?>? DelayTask { get; set; } = null;
 
     public async Task<People> FetchPeopleAsync()
     {
         try
         {
-            await Task.Delay((await Unit)?.Timeout ?? 0);
+            if (DelayTask != null)
+            {
+                await Task.Delay((await DelayTask)?.Timeout ?? 0);
+            }
 
             if (AllPeople == null)
             {
-                AllPeople = [.. await _apiClient?.GetAllPeopleAsync()];
+                AllPeople = [.. await _apiClient.GetAllPeopleAsync()];
                 Console.WriteLine("Fetched people data from webapi. Count: " + AllPeople.Length);
             } 
             else
