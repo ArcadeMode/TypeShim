@@ -191,7 +191,7 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
     {
         foreach (MethodParameterInfo parameterInfo in parameterInfos)
         {
-            if (parameterInfo.IsInjectedInstanceParameter || !parameterInfo.Type.RequiresTypeConversion || !parameterInfo.Type.ContainsExportedType())
+            if (parameterInfo.IsInjectedInstanceParameter || !parameterInfo.Type.RequiresTypeConversion || !parameterInfo.Type.SupportsTypeConversion)
                 continue;
 
             if (symbolNameProvider.GetUserClassSymbolNameIfExists(parameterInfo.Type, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is not string proxyClassName)
@@ -258,6 +258,6 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
 
     private static string GetInteropInvocationVariable(MethodParameterInfo param) // TODO: get from ctx localscope (check param.Name call sites!)
     {
-        return param.Type.RequiresTypeConversion && param.Type.ContainsExportedType() ? $"{param.Name}Instance" : param.Name;
+        return param.Type.RequiresTypeConversion && param.Type.SupportsTypeConversion ? $"{param.Name}Instance" : param.Name;
     }
 }

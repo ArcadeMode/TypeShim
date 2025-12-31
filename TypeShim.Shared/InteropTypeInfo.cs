@@ -38,12 +38,6 @@ public sealed class InteropTypeInfo
     public required bool RequiresTypeConversion { get; init; }
     public required bool SupportsTypeConversion { get; init; }
 
-    [Obsolete("Use Requires/SupportsTypeConversion")]
-    public bool ContainsExportedType()
-    {
-        return this.IsTSExport || (TypeArgument?.ContainsExportedType() ?? false);
-    }
-
     public InteropTypeInfo GetInnermostType()
     {
         if (TypeArgument != null)

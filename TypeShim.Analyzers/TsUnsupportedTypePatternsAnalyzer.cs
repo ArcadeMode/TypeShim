@@ -64,7 +64,7 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
         {
             InteropTypeInfoBuilder builder = new(type, new InteropTypeInfoCache());
             InteropTypeInfo info = builder.Build();
-            if (info.RequiresTypeConversion && !info.ContainsExportedType())
+            if (info.RequiresTypeConversion && !info.SupportsTypeConversion)
             {
                 // needs to traverse interop boundary as object or JSObject and be converted in CLR
                 // however type is not TSExport, no conversion possible.
