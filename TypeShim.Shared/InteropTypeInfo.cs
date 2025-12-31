@@ -56,45 +56,20 @@ public sealed class InteropTypeInfo
     /// <returns></returns>
     public InteropTypeInfo AsInteropTypeInfo()
     {
-        if (TypeArgument == null && ManagedType is KnownManagedType.Object or KnownManagedType.JSObject)
+        return new InteropTypeInfo
         {
-            return new InteropTypeInfo
-            {
-                IsTSExport = false,
-                ManagedType = this.ManagedType,
-                JSTypeSyntax = this.JSTypeSyntax,
-                InteropTypeSyntax = this.InteropTypeSyntax,
-                CLRTypeSyntax = this.InteropTypeSyntax,
-                IsTaskType = false,
-                IsArrayType = false,
-                IsNullableType = this.IsNullableType,
-                RequiresTypeConversion = false,
-                TypeArgument = null,
-                SupportsTypeConversion = this.SupportsTypeConversion,
-            };
-
-        }
-        else if (TypeArgument != null)
-        {
-            return new InteropTypeInfo
-            {
-                IsTSExport = false,
-                ManagedType = this.ManagedType,
-                JSTypeSyntax = this.JSTypeSyntax,
-                InteropTypeSyntax = this.InteropTypeSyntax,
-                CLRTypeSyntax = this.InteropTypeSyntax,
-                IsTaskType = this.IsTaskType,
-                IsArrayType = this.IsArrayType,
-                IsNullableType = this.IsNullableType,
-                RequiresTypeConversion = false,
-                TypeArgument = TypeArgument.AsInteropTypeInfo(),
-                SupportsTypeConversion = this.SupportsTypeConversion,
-            };
-        }
-        else
-        {
-            return this;
-        }
+            IsTSExport = false,
+            ManagedType = this.ManagedType,
+            JSTypeSyntax = this.JSTypeSyntax,
+            InteropTypeSyntax = this.InteropTypeSyntax,
+            CLRTypeSyntax = this.InteropTypeSyntax, // essentially overwrite clr type with interop type
+            IsTaskType = this.IsTaskType,
+            IsArrayType = this.IsArrayType,
+            IsNullableType = this.IsNullableType,
+            RequiresTypeConversion = false,
+            TypeArgument = TypeArgument?.AsInteropTypeInfo(),
+            SupportsTypeConversion = this.SupportsTypeConversion,
+        };
     }
 
     public static readonly InteropTypeInfo JSObjectTypeInfo = new()
@@ -104,21 +79,6 @@ public sealed class InteropTypeInfo
         JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Object"),
         InteropTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
         CLRTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
-        IsTaskType = false,
-        IsArrayType = false,
-        IsNullableType = false,
-        RequiresTypeConversion = false,
-        TypeArgument = null,
-        SupportsTypeConversion = false,
-    };
-
-    private static readonly InteropTypeInfo CLRObjectTypeInfo = new()
-    {
-        IsTSExport = false,
-        ManagedType = KnownManagedType.Object,
-        JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Any"),
-        InteropTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),
-        CLRTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),
         IsTaskType = false,
         IsArrayType = false,
         IsNullableType = false,
