@@ -48,7 +48,7 @@ export interface Properties {
 export interface Initializer {
   P1: {{typeScriptType}};
 }
-export function properties(proxy: C1.Proxy): C1.Properties {
+export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
     P1: proxy.P1,
   };
@@ -93,7 +93,7 @@ export interface Properties {
 export interface Initializer {
   P1: {{typeScriptType}};
 }
-export function properties(proxy: C1.Proxy): C1.Properties {
+export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
     P1: proxy.P1,
   };
@@ -138,7 +138,7 @@ export interface Properties {
 export interface Initializer {
   P1: {{tsTypeExpression}};
 }
-export function properties(proxy: C1.Proxy): C1.Properties {
+export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
     P1: proxy.P1,
   };
@@ -193,7 +193,7 @@ export interface Properties {
 export interface Initializer {
   P1: UserClass.Proxy | UserClass.Initializer;
 }
-export function properties(proxy: C1.Proxy): C1.Properties {
+export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
     P1: UserClass.properties(proxy.P1),
   };
@@ -248,7 +248,7 @@ export interface Properties {
 export interface Initializer {
   P1: UserClass.Proxy | UserClass.Initializer;
 }
-export function properties(proxy: C1.Proxy): C1.Properties {
+export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
     P1: UserClass.properties(proxy.P1),
   };
@@ -303,7 +303,7 @@ export interface Properties {
 export interface Initializer {
   P1: UserClass.Proxy | UserClass.Initializer | null;
 }
-export function properties(proxy: C1.Proxy): C1.Properties {
+export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
     P1: proxy.P1 ? UserClass.properties(proxy.P1) : null,
   };
@@ -358,7 +358,7 @@ export interface Properties {
 export interface Initializer {
   P1: Promise<UserClass.Proxy | UserClass.Initializer>;
 }
-export function properties(proxy: C1.Proxy): C1.Properties {
+export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
     P1: proxy.P1.then(e => UserClass.properties(e)),
   };
@@ -413,7 +413,7 @@ export interface Properties {
 export interface Initializer {
   P1: Promise<UserClass.Proxy | UserClass.Initializer | null>;
 }
-export function properties(proxy: C1.Proxy): C1.Properties {
+export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
     P1: proxy.P1.then(e => e ? UserClass.properties(e) : null),
   };
@@ -468,7 +468,7 @@ export interface Properties {
 export interface Initializer {
   P1: Promise<UserClass.Proxy | UserClass.Initializer | null> | null;
 }
-export function properties(proxy: C1.Proxy): C1.Properties {
+export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
     P1: proxy.P1 ? proxy.P1.then(e => e ? UserClass.properties(e) : null) : null,
   };
@@ -523,7 +523,7 @@ export interface Properties {
 export interface Initializer {
   P1: Array<UserClass.Proxy | UserClass.Initializer>;
 }
-export function properties(proxy: C1.Proxy): C1.Properties {
+export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
     P1: proxy.P1.map(e => UserClass.properties(e)),
   };
@@ -578,7 +578,7 @@ export interface Properties {
 export interface Initializer {
   P1: Array<UserClass.Proxy | UserClass.Initializer | null>;
 }
-export function properties(proxy: C1.Proxy): C1.Properties {
+export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
     P1: proxy.P1.map(e => e ? UserClass.properties(e) : null),
   };
@@ -633,7 +633,7 @@ export interface Properties {
 export interface Initializer {
   P1: Array<UserClass.Proxy | UserClass.Initializer> | null;
 }
-export function properties(proxy: C1.Proxy): C1.Properties {
+export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
     P1: proxy.P1 ? proxy.P1.map(e => UserClass.properties(e)) : null,
   };

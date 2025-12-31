@@ -44,7 +44,7 @@ internal class TypeScriptUserClassSnapshotRendererTests_Constructors
 export interface Properties {
   P1: string;
 }
-export function properties(proxy: C1.Proxy): C1.Properties {
+export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
     P1: proxy.P1,
   };
