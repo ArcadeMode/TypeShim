@@ -203,6 +203,61 @@ export function properties(proxy: C1.Proxy): C1.Properties {
     }
 
     [Test]
+    public void TypeScriptUserClassShapes_InstancePropertyOfUserClassType_InitOnly_GeneratesProperty()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public UserClass P1 { get; init; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
+        ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
+        new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export interface Properties {
+  P1: UserClass.Properties;
+}
+export interface Initializer {
+  P1: UserClass.Proxy | UserClass.Initializer;
+}
+export function properties(proxy: C1.Proxy): C1.Properties {
+  return {
+    P1: UserClass.properties(proxy.P1),
+  };
+}
+
+""");
+    }
+
+    [Test]
     public void TypeScriptUserClassShapes_InstancePropertyOfNullableUserClassType_GeneratesProperty()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""

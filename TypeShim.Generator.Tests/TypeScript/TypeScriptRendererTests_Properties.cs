@@ -62,6 +62,50 @@ export class Proxy extends ProxyBase {
     [TestCase("string", "string")]
     [TestCase("double", "number")]
     [TestCase("bool", "boolean")]
+    public void TypeScriptUserClassProxy_InstanceProperty_GeneratesGetFunction(string typeExpression, string typeScriptType)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public {{typeExpression}} P1 { get; init; }
+            }
+        """.Replace("{{typeExpression}}", typeExpression));
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+  }
+
+  public get P1(): {{typeScriptType}} {
+    return TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+  }
+}
+
+""".Replace("{{typeScriptType}}", typeScriptType));
+    }
+
+    [TestCase("string", "string")]
+    [TestCase("double", "number")]
+    [TestCase("bool", "boolean")]
     public void TypeScriptUserClassProxy_NonStaticClass_StaticProperty_GeneratesGetAndSetFunctions(string typeExpression, string typeScriptType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -179,7 +223,7 @@ export class Proxy {
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithUserClassParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithUserClassParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -299,7 +343,7 @@ export class Proxy {
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithNullableUserClassParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithNullableUserClassParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -360,7 +404,7 @@ export class Proxy extends ProxyBase {
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithUserClassTaskParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithUserClassTaskParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -421,7 +465,7 @@ export class Proxy extends ProxyBase {
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithUserClassArrayParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithUserClassArrayParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -482,7 +526,7 @@ export class Proxy extends ProxyBase {
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithNullableUserClassArrayParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithNullableUserClassArrayParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -543,7 +587,7 @@ export class Proxy extends ProxyBase {
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithUserClassNullableArrayParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithUserClassNullableArrayParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -604,7 +648,7 @@ export class Proxy extends ProxyBase {
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithNullableUserClassNullableArrayParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithNullableUserClassNullableArrayParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -665,7 +709,7 @@ export class Proxy extends ProxyBase {
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithNullableUserClassTaskParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithNullableUserClassTaskParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -726,7 +770,7 @@ export class Proxy extends ProxyBase {
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithNullableUserClassNullableTaskParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithNullableUserClassNullableTaskParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;

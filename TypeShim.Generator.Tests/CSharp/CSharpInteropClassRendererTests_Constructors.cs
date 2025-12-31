@@ -201,6 +201,74 @@ public partial class C1Interop
     }
 
     [Test]
+    public void CSharpInteropClass_ParameterlessConstructor_WithInitOnlyProperties()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1()
+            {
+                public int P1 { get; init; }
+            }
+        """);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+
+        Assert.That(interopClass, Is.EqualTo("""    
+// Auto-generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = jsObject.GetPropertyAsInt32("P1"),
+        };
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static int get_P1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return typed_instance.P1;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = jsObject.GetPropertyAsInt32("P1"),
+        };
+    }
+}
+
+"""));
+    }
+
+    [Test]
     public void CSharpInteropClass_ParameterizedConstructor_WithSettableProperties()
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -253,6 +321,66 @@ public partial class C1Interop
     {
         C1 typed_instance = (C1)instance;
         typed_instance.P1 = value;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+}
+
+"""));
+    }
+
+    [Test]
+    public void CSharpInteropClass_ParameterizedConstructor_WithInitOnlyProperties()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1(int p1, double p2)
+            {
+                public int P1 { get; init; }
+            }
+        """);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+
+        Assert.That(interopClass, Is.EqualTo("""    
+// Auto-generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Number>] int p1, [JSMarshalAs<JSType.Number>] double p2, [JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        return new C1(p1, p2)
+        {
+            P1 = jsObject.GetPropertyAsInt32("P1"),
+        };
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static int get_P1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return typed_instance.P1;
     }
     public static C1 FromObject(object obj)
     {
