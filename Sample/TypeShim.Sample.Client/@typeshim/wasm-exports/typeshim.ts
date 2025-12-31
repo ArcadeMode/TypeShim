@@ -38,6 +38,12 @@ export interface AssemblyExports{
   TypeShim: {
     Sample: {
       Capabilities: {
+        ArraysDemoInterop: {
+          SumElements(instance: object, cool: object): number;
+          Append(instance: object, value: number): void;
+          get_IntArrayProperty(instance: object): Array<number>;
+          get_ApiClient(instance: object): object;
+        };
         PrimitivesDemoInterop: {
           ctor(jsObject: object): object;
           GetStringLength(instance: object): number;
@@ -49,12 +55,6 @@ export interface AssemblyExports{
           get_InitialStringProperty(instance: object): string;
           get_StringProperty(instance: object): string;
           set_StringProperty(instance: object, value: string): void;
-        };
-        ArraysDemoInterop: {
-          ctor(initialArray: Array<number>): object;
-          SumIntArray(instance: object): number;
-          AppendToIntArray(instance: object, value: number): void;
-          get_IntArrayProperty(instance: object): Array<number>;
         };
       };
       PeopleInterop: {
@@ -107,6 +107,38 @@ export interface AssemblyExports{
   };
 }
 
+// Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.ArraysDemo
+export namespace ArraysDemo {
+  export class Proxy extends ProxyBase {
+    private constructor() { super(undefined!); }
+
+    public SumElements(cool: object): number {
+      return TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.SumElements(this.instance, cool);
+    }
+
+    public Append(value: number): void {
+      TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.Append(this.instance, value);
+    }
+    public get IntArrayProperty(): Array<number> {
+      return TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.get_IntArrayProperty(this.instance);
+    }
+
+    public get ApiClient(): object {
+      return TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.get_ApiClient(this.instance);
+    }
+  }
+  export interface Properties {
+    IntArrayProperty: Array<number>;
+    ApiClient: object;
+  }
+  export function materialize(proxy: ArraysDemo.Proxy): ArraysDemo.Properties {
+    return {
+      IntArrayProperty: proxy.IntArrayProperty,
+      ApiClient: object.properties(proxy.ApiClient),
+    };
+  }
+}
+
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.PrimitivesDemo
 export namespace PrimitivesDemo {
   export class Proxy extends ProxyBase {
@@ -157,40 +189,10 @@ export namespace PrimitivesDemo {
     InitialStringProperty: string;
     StringProperty: string;
   }
-  export function properties(proxy: PrimitivesDemo.Proxy): PrimitivesDemo.Properties {
+  export function materialize(proxy: PrimitivesDemo.Proxy): PrimitivesDemo.Properties {
     return {
       InitialStringProperty: proxy.InitialStringProperty,
       StringProperty: proxy.StringProperty,
-    };
-  }
-}
-
-// Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.ArraysDemo
-export namespace ArraysDemo {
-  export class Proxy extends ProxyBase {
-    constructor(initialArray: Array<number>) {
-      super(TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.ctor(initialArray));
-    }
-
-    public SumIntArray(): number {
-      return TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.SumIntArray(this.instance);
-    }
-
-    public AppendToIntArray(value: number): void {
-      TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.AppendToIntArray(this.instance, value);
-    }
-    public get IntArrayProperty(): Array<number> {
-      return TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.get_IntArrayProperty(this.instance);
-    }
-  }
-  export interface Properties {
-    IntArrayProperty: Array<number>;
-  }
-  export interface Initializer {
-  }
-  export function properties(proxy: ArraysDemo.Proxy): ArraysDemo.Properties {
-    return {
-      IntArrayProperty: proxy.IntArrayProperty,
     };
   }
 }
@@ -218,7 +220,7 @@ export namespace People {
   export interface Initializer {
     All: Array<Person.Proxy | Person.Initializer>;
   }
-  export function properties(proxy: People.Proxy): People.Properties {
+  export function materialize(proxy: People.Proxy): People.Properties {
     return {
       All: proxy.All.map(e => Person.properties(e)),
     };
@@ -291,7 +293,7 @@ export namespace Person {
     Age: number;
     Pets: Array<Dog.Proxy | Dog.Initializer>;
   }
-  export function properties(proxy: Person.Proxy): Person.Properties {
+  export function materialize(proxy: Person.Proxy): Person.Properties {
     return {
       Id: proxy.Id,
       Name: proxy.Name,
@@ -349,7 +351,7 @@ export namespace Dog {
     Breed: string;
     Age: number;
   }
-  export function properties(proxy: Dog.Proxy): Dog.Properties {
+  export function materialize(proxy: Dog.Proxy): Dog.Properties {
     return {
       Name: proxy.Name,
       Breed: proxy.Breed,
@@ -374,11 +376,7 @@ export namespace MyApp {
       return ProxyBase.fromHandle(PeopleProvider.Proxy, res);
     }
   }
-  export interface Properties {
-  }
-  export interface Initializer {
-  }
-  export function properties(proxy: MyApp.Proxy): MyApp.Properties {
+  export function materialize(proxy: MyApp.Proxy): MyApp.Properties {
     return {
     };
   }
@@ -412,10 +410,7 @@ export namespace PeopleProvider {
     PeopleCache: Array<Person.Properties> | null;
     DelayTask: Promise<TimeoutUnit.Properties | null> | null;
   }
-  export interface Initializer {
-    DelayTask: Promise<TimeoutUnit.Proxy | TimeoutUnit.Initializer | null> | null;
-  }
-  export function properties(proxy: PeopleProvider.Proxy): PeopleProvider.Properties {
+  export function materialize(proxy: PeopleProvider.Proxy): PeopleProvider.Properties {
     return {
       PeopleCache: proxy.PeopleCache ? proxy.PeopleCache.map(e => Person.properties(e)) : null,
       DelayTask: proxy.DelayTask ? proxy.DelayTask.then(e => e ? TimeoutUnit.properties(e) : null) : null,
@@ -444,7 +439,7 @@ export namespace TimeoutUnit {
   export interface Initializer {
     Timeout: number;
   }
-  export function properties(proxy: TimeoutUnit.Proxy): TimeoutUnit.Properties {
+  export function materialize(proxy: TimeoutUnit.Proxy): TimeoutUnit.Properties {
     return {
       Timeout: proxy.Timeout,
     };

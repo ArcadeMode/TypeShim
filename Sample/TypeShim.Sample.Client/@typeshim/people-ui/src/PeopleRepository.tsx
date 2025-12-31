@@ -20,8 +20,8 @@ export class PeopleRepository {
         const persons: Person.Proxy[] = people.All;
         const person1 = persons[(Math.random() * persons.length) | 0];
         const person2 = persons[(Math.random() * persons.length) | 0];
-        const p = Person.properties(person2);
-        const jsPerson: Person.Props = { Id: 999, Name: "Snapshot Person", Age: 42, Pets: [] };
+        const p = Person.materialize(person2);
+        const jsPerson: Person.Properties = { Id: 999, Name: "Snapshot Person", Age: 42, Pets: [] };
         const person3 = new Person.Proxy({ 
             Id: 999, 
             Name: "Constructed Person", 
