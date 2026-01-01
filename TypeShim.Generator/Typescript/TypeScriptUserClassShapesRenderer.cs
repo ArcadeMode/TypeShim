@@ -102,7 +102,7 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
                 else // simple user type
                 {
                     string userClassName = symbolNameProvider.GetNakedSymbolReference(typeInfo);
-                    return $"{userClassName}.properties({propertyAccessorExpression})";
+                    return $"{userClassName}.{RenderConstants.PropertiesTSFunction}({propertyAccessorExpression})";
                 }
             }
             else // simple primitive

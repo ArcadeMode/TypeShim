@@ -261,7 +261,6 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         _ctx.AppendLine("{");
         using (_ctx.Indent())
         {
-            // TODO: support init properties
             foreach (PropertyInfo propertyInfo in propertiesInMapper)
             {
                 if (propertyToConvertedVarDict.TryGetValue(propertyInfo, out TypeConversionExpressionRenderDelegate? expressionRenderer))

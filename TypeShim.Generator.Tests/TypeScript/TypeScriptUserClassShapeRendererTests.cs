@@ -195,7 +195,7 @@ export interface Initializer {
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
-    P1: UserClass.properties(proxy.P1),
+    P1: UserClass.materialize(proxy.P1),
   };
 }
 
@@ -250,7 +250,7 @@ export interface Initializer {
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
-    P1: UserClass.properties(proxy.P1),
+    P1: UserClass.materialize(proxy.P1),
   };
 }
 
@@ -305,7 +305,7 @@ export interface Initializer {
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
-    P1: proxy.P1 ? UserClass.properties(proxy.P1) : null,
+    P1: proxy.P1 ? UserClass.materialize(proxy.P1) : null,
   };
 }
 
@@ -360,7 +360,7 @@ export interface Initializer {
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
-    P1: proxy.P1.then(e => UserClass.properties(e)),
+    P1: proxy.P1.then(e => UserClass.materialize(e)),
   };
 }
 
@@ -415,7 +415,7 @@ export interface Initializer {
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
-    P1: proxy.P1.then(e => e ? UserClass.properties(e) : null),
+    P1: proxy.P1.then(e => e ? UserClass.materialize(e) : null),
   };
 }
 
@@ -470,7 +470,7 @@ export interface Initializer {
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
-    P1: proxy.P1 ? proxy.P1.then(e => e ? UserClass.properties(e) : null) : null,
+    P1: proxy.P1 ? proxy.P1.then(e => e ? UserClass.materialize(e) : null) : null,
   };
 }
 
@@ -525,7 +525,7 @@ export interface Initializer {
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
-    P1: proxy.P1.map(e => UserClass.properties(e)),
+    P1: proxy.P1.map(e => UserClass.materialize(e)),
   };
 }
 
@@ -580,7 +580,7 @@ export interface Initializer {
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
-    P1: proxy.P1.map(e => e ? UserClass.properties(e) : null),
+    P1: proxy.P1.map(e => e ? UserClass.materialize(e) : null),
   };
 }
 
@@ -635,7 +635,7 @@ export interface Initializer {
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
-    P1: proxy.P1 ? proxy.P1.map(e => UserClass.properties(e)) : null,
+    P1: proxy.P1 ? proxy.P1.map(e => UserClass.materialize(e)) : null,
   };
 }
 
