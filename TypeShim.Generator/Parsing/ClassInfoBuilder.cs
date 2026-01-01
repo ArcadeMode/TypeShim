@@ -7,6 +7,8 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
 {
     internal ClassInfo Build()
     {
+        ThrowIfContainsRequiredFields();
+
         List<PropertyInfo> properties = BuildProperties();
         return new ClassInfo
         {
@@ -65,5 +67,18 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
         }
 
         return [.. methodInfos.Values];
+    }
+
+    private void ThrowIfContainsRequiredFields()
+    {
+        foreach (IFieldSymbol fieldSymbol in classSymbol.GetMembers().OfType<IFieldSymbol>())
+        {
+            if (fieldSymbol.DeclaredAccessibility != Accessibility.Public)
+                continue;
+            if (fieldSymbol.IsRequired)
+            {
+                throw new NotSupportedFieldException($"Field '{classSymbol.Name}.{fieldSymbol.Name}' is required. Required fields are currently not supported.");
+            }
+        }
     }
 }

@@ -15,6 +15,10 @@ public class NotSupportedPropertyException(string message, Exception? innerExcep
 {
 }
 
+public class NotSupportedFieldException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
+{
+}
+
 public class NotSupportedMethodException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
 {
 }
