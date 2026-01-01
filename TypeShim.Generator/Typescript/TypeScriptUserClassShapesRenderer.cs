@@ -13,20 +13,22 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
     {
         if (ctx.Class.IsStatic) return;
 
-        RenderPropertiesInterface();
-        RenderInitializerInterface();
+        PropertyInfo[] instancePropertyInfos = [.. ctx.Class.Properties.Where(p => !p.IsStatic)];
+        if (instancePropertyInfos.Length == 0)
+            return;
 
+        if (ctx.Class.Constructor?.MemberInitializers is { Length: > 0 } initializerPropertyInfos)
+        {
+            RenderInitializerInterface(initializerPropertyInfos);
+        }
+
+        RenderPropertiesInterface(instancePropertyInfos);
         const string proxyParamName = "proxy";
         RenderPropertiesFunction(proxyParamName);
     }
 
-    private void RenderPropertiesInterface()
+    private void RenderPropertiesInterface(PropertyInfo[] propertyInfos)
     {
-        PropertyInfo[] propertyInfos = [.. ctx.Class.Properties.Where(p => !p.IsStatic)];
-
-        if (propertyInfos.Length == 0)
-            return;
-
         ctx.Append($"export interface ").Append(RenderConstants.Properties).AppendLine(" {");
         using (ctx.Indent())
         {
@@ -39,12 +41,8 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
         ctx.AppendLine("}");
     }
 
-    private void RenderInitializerInterface()
+    private void RenderInitializerInterface(PropertyInfo[] propertyInfos)
     {
-        PropertyInfo[]? propertyInfos = ctx.Class.Constructor?.MemberInitializers;
-        if (propertyInfos?.Length is 0 or null)
-            return;
-
         ctx.Append($"export interface ").Append(RenderConstants.Initializer).AppendLine(" {");
         using (ctx.Indent())
         {

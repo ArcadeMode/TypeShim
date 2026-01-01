@@ -42,10 +42,10 @@ internal class TypeScriptUserClassShapeRendererTests
         new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export interface Properties {
+export interface Initializer {
   P1: {{typeScriptType}};
 }
-export interface Initializer {
+export interface Properties {
   P1: {{typeScriptType}};
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
@@ -87,10 +87,10 @@ export function materialize(proxy: C1.Proxy): C1.Properties {
         new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export interface Properties {
+export interface Initializer {
   P1: {{typeScriptType}};
 }
-export interface Initializer {
+export interface Properties {
   P1: {{typeScriptType}};
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
@@ -132,10 +132,10 @@ export function materialize(proxy: C1.Proxy): C1.Properties {
         new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export interface Properties {
+export interface Initializer {
   P1: {{tsTypeExpression}};
 }
-export interface Initializer {
+export interface Properties {
   P1: {{tsTypeExpression}};
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
@@ -187,11 +187,11 @@ export function materialize(proxy: C1.Proxy): C1.Properties {
         new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export interface Properties {
-  P1: UserClass.Properties;
-}
 export interface Initializer {
   P1: UserClass.Proxy | UserClass.Initializer;
+}
+export interface Properties {
+  P1: UserClass.Properties;
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
@@ -242,11 +242,11 @@ export function materialize(proxy: C1.Proxy): C1.Properties {
         new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export interface Properties {
-  P1: UserClass.Properties;
-}
 export interface Initializer {
   P1: UserClass.Proxy | UserClass.Initializer;
+}
+export interface Properties {
+  P1: UserClass.Properties;
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
@@ -297,11 +297,11 @@ export function materialize(proxy: C1.Proxy): C1.Properties {
         new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export interface Properties {
-  P1: UserClass.Properties | null;
-}
 export interface Initializer {
   P1: UserClass.Proxy | UserClass.Initializer | null;
+}
+export interface Properties {
+  P1: UserClass.Properties | null;
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
@@ -352,11 +352,11 @@ export function materialize(proxy: C1.Proxy): C1.Properties {
         new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export interface Properties {
-  P1: Promise<UserClass.Properties>;
-}
 export interface Initializer {
   P1: Promise<UserClass.Proxy | UserClass.Initializer>;
+}
+export interface Properties {
+  P1: Promise<UserClass.Properties>;
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
@@ -407,11 +407,11 @@ export function materialize(proxy: C1.Proxy): C1.Properties {
         new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export interface Properties {
-  P1: Promise<UserClass.Properties | null>;
-}
 export interface Initializer {
   P1: Promise<UserClass.Proxy | UserClass.Initializer | null>;
+}
+export interface Properties {
+  P1: Promise<UserClass.Properties | null>;
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
@@ -462,11 +462,11 @@ export function materialize(proxy: C1.Proxy): C1.Properties {
         new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export interface Properties {
-  P1: Promise<UserClass.Properties | null> | null;
-}
 export interface Initializer {
   P1: Promise<UserClass.Proxy | UserClass.Initializer | null> | null;
+}
+export interface Properties {
+  P1: Promise<UserClass.Properties | null> | null;
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
@@ -517,11 +517,11 @@ export function materialize(proxy: C1.Proxy): C1.Properties {
         new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export interface Properties {
-  P1: Array<UserClass.Properties>;
-}
 export interface Initializer {
   P1: Array<UserClass.Proxy | UserClass.Initializer>;
+}
+export interface Properties {
+  P1: Array<UserClass.Properties>;
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
@@ -572,11 +572,11 @@ export function materialize(proxy: C1.Proxy): C1.Properties {
         new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export interface Properties {
-  P1: Array<UserClass.Properties | null>;
-}
 export interface Initializer {
   P1: Array<UserClass.Proxy | UserClass.Initializer | null>;
+}
+export interface Properties {
+  P1: Array<UserClass.Properties | null>;
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
@@ -627,17 +627,128 @@ export function materialize(proxy: C1.Proxy): C1.Properties {
         new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export interface Properties {
-  P1: Array<UserClass.Properties> | null;
-}
 export interface Initializer {
   P1: Array<UserClass.Proxy | UserClass.Initializer> | null;
+}
+export interface Properties {
+  P1: Array<UserClass.Properties> | null;
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
     P1: proxy.P1 ? proxy.P1.map(e => UserClass.materialize(e)) : null,
   };
 }
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassShapes_InstancePropertyWithPrivateSetter_GeneratesNoInitializer()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public int P1 { get; private set; }
+                public string P2 { get; private set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export interface Properties {
+  P1: number;
+  P2: string;
+}
+export function materialize(proxy: C1.Proxy): C1.Properties {
+  return {
+    P1: proxy.P1,
+    P2: proxy.P2,
+  };
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassShapes_PrivatePropertiesAndPrivateConstructor_GeneratesNoShapes()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                private C1() {}
+                private int P1 { get; set; }
+                private string P2 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassShapes_PrivatePropertiesAndPublicConstructor_GeneratesNoShapes()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                private C1() {}
+                private int P1 { get; set; }
+                private string P2 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
 
 """);
     }
