@@ -1,21 +1,26 @@
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using TypeShim.Shared;
 
 namespace TypeShim.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
+internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-        [
-            TypeShimDiagnostics.UnsupportedTypeRule,
-            TypeShimDiagnostics.NonExportedTypeInMethodRule,
-            TypeShimDiagnostics.NonExportedTypeInPropertyRule,   
-            TypeShimDiagnostics.UnderDevelopmentTypeRule,
-        ];
+    [
+        TypeShimDiagnostics.AttributeOnPublicClassOnlyRule,
+        TypeShimDiagnostics.NonPublicSetterRule,
+        TypeShimDiagnostics.NoRequiredFieldsRule,
+        TypeShimDiagnostics.UnsupportedTypeRule,
+        TypeShimDiagnostics.NonExportedTypeInMethodRule,
+        TypeShimDiagnostics.NonExportedTypeInPropertyRule,
+        TypeShimDiagnostics.UnderDevelopmentTypeRule,
+    ];
 
     public override void Initialize(AnalysisContext context)
     {
@@ -33,7 +38,20 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
         if (!hasTSExport)
             return;
 
-        //Debugger.Launch();
+
+        AnalyzeClassAccessibility(context, type);
+        AnalyzeTypesUsedInInteropApi(context, type);
+        AnalyzeClassPropertiesForConstructionCompatibility(context, type);
+    }
+
+    private static void AnalyzeClassAccessibility(SymbolAnalysisContext context, INamedTypeSymbol type)
+    {
+        if (SymbolFacts.IsPublicClass(type)) return;
+        Report(context, TypeShimDiagnostics.AttributeOnPublicClassOnlyRule, type, type.Name);
+    }
+
+    private static void AnalyzeTypesUsedInInteropApi(SymbolAnalysisContext context, INamedTypeSymbol type)
+    {
         foreach (ISymbol member in type.GetMembers())
         {
             if (member.DeclaredAccessibility != Accessibility.Public)
@@ -49,10 +67,11 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
                     }
                     break;
                 case IPropertySymbol prop:
+                    CheckInstancePropertySetterAccessibility(context, prop);
                     CheckType(context, prop, prop.Type);
                     break;
                 case IFieldSymbol field:
-                    // TODO: report unsupported, do not public fields, especially not required fields.
+                    CheckInstanceFieldRequiredness(context, field);
                     break;
             }
         }
@@ -66,8 +85,6 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
             InteropTypeInfo info = builder.Build();
             if (info.RequiresTypeConversion && !info.SupportsTypeConversion)
             {
-                // needs to traverse interop boundary as object or JSObject and be converted in CLR
-                // however type is not TSExport, no conversion possible.
                 ReportNonTSExported(context, type, symbol);
             }
         }
@@ -79,6 +96,28 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
         {
             ReportUnderDevelopment(context, type, symbol);
         }
+    }
+
+    private static void CheckInstancePropertySetterAccessibility(SymbolAnalysisContext context, IPropertySymbol property)
+    {
+        if (property.IsStatic || property.IsIndexer || property.SetMethod is not IMethodSymbol setter) 
+            return;
+
+        Accessibility propertyAccessibility = property.DeclaredAccessibility is Accessibility.NotApplicable ? Accessibility.Private : property.DeclaredAccessibility;
+        Accessibility setterAccessibility = setter.DeclaredAccessibility is Accessibility.NotApplicable ? propertyAccessibility : setter.DeclaredAccessibility;
+        if (setterAccessibility is Accessibility.Public) 
+            return;
+        
+        Report(context, TypeShimDiagnostics.NonPublicSetterRule, property, property.Type);
+    }
+
+    private static void CheckInstanceFieldRequiredness(SymbolAnalysisContext context, IFieldSymbol field)
+    {
+        if (field.IsStatic || field.IsConst || field.IsImplicitlyDeclared)
+            return;
+        
+        if (field.DeclaredAccessibility == Accessibility.Public && field.IsRequired)
+            Report(context, TypeShimDiagnostics.NoRequiredFieldsRule, field, field.Name);
     }
 
     private static void ReportUnsupported(SymbolAnalysisContext context, ITypeSymbol providedType, ISymbol symbol)
@@ -104,5 +143,17 @@ public sealed class TsUnsupportedTypePatternsAnalyzer : DiagnosticAnalyzer
         var location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
         var typeText = type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
         context.ReportDiagnostic(Diagnostic.Create(descriptor, location, typeText));
+    }
+
+    private static void Report(SymbolAnalysisContext context, DiagnosticDescriptor descriptor, ISymbol symbol, ITypeSymbol type)
+    {
+        string propTypeName = type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+        Report(context, descriptor, symbol, propTypeName);
+    }
+
+    private static void Report(SymbolAnalysisContext context, DiagnosticDescriptor descriptor, ISymbol symbol, params object[] messageParams)
+    {
+        Location location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
+        context.ReportDiagnostic(Diagnostic.Create(descriptor, location, symbol.Name, messageParams));
     }
 }

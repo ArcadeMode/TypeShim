@@ -1,18 +1,11 @@
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Immutable;
 
 namespace TypeShim.Analyzers;
 
 internal static class TypeShimDiagnostics
 {
-    internal static readonly DiagnosticDescriptor AttributeOnPublicClassOnlyRule = new(
-        id: "TSHIM008",
-        title: "TSExport can only be used on public classes",
-        messageFormat: "'{0}' has [TSExport] and is not a class or has non-public accessibility",
-        category: "Usage",
-        defaultSeverity: DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        description: "TSExport is only supported on classes with public accessibility.");
-
     internal static readonly DiagnosticDescriptor UnsupportedTypeRule = new(
         id: "TSHIM005",
         title: "Unsupported type pattern",
@@ -31,6 +24,25 @@ internal static class TypeShimDiagnostics
         isEnabledByDefault: true,
         description: "Interop APIs should use TSExport-annotated classes or supported primitives as return- and parameter types.");
 
+    internal static readonly DiagnosticDescriptor UnderDevelopmentTypeRule = new(
+        id: "TSHIM007",
+        title: "Type under development",
+        messageFormat: "Type '{0}' is not yet implemented in TypeShim",
+        category: "TypeChecking",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "This type is under development and not yet implemented in TypeShim.");
+
+    internal static readonly DiagnosticDescriptor AttributeOnPublicClassOnlyRule = new(
+        id: "TSHIM008",
+        title: "TSExport can only be used on public classes",
+        messageFormat: "TSExport '{0}' must have public accessibility",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "TSExport is only supported on classes with public accessibility.");
+
+    [Obsolete("Use NonExportedTypeInMethodRule instead, actually just use NonExportedTypeOnInteropRule")]
     internal static readonly DiagnosticDescriptor NonExportedTypeInPropertyRule = new(
         id: "TSHIM009",
         title: "Non-TSExport type on a property in the interop API",
@@ -40,15 +52,6 @@ internal static class TypeShimDiagnostics
         isEnabledByDefault: true,
         description: "Interop APIs should use TSExport-annotated classes or supported primitives as property types.");
 
-    internal static readonly DiagnosticDescriptor UnderDevelopmentTypeRule = new(
-        id: "TSHIM007",
-        title: "Type under development",
-        messageFormat: "Type '{0}' is not yet implemented by TypeShim",
-        category: "TypeChecking",
-        defaultSeverity: DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        description: "This type is under development and not yet supported by TypeShim interop.");
-
     internal static readonly DiagnosticDescriptor NonPublicSetterRule = new(
         id: "TSHIM010",
         title: "Non-public set/init will be skipped during JSObject mapping",
@@ -57,5 +60,14 @@ internal static class TypeShimDiagnostics
         defaultSeverity: DiagnosticSeverity.Info,
         isEnabledByDefault: true,
         description: "TypeShim generates a JSObject mapper for each TSExport class. Properties with non-public set/init accessors are excluded from the generated JSObject mapper.");
+
+    internal static readonly DiagnosticDescriptor NoRequiredFieldsRule = new(
+        id: "TSHIM011",
+        title: "Required fields are not supported",
+        messageFormat: "Required fields are not supported, consider making '{0}' a property or an optional field",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "TypeShim does not support fields (yet), they're mostly ignored but required fields are banned to prevent invalid constructor initializers from being generated.");
 
 }
