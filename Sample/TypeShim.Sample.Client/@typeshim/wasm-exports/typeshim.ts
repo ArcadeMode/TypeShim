@@ -39,10 +39,10 @@ export interface AssemblyExports{
     Sample: {
       Capabilities: {
         ArraysDemoInterop: {
-          SumElements(instance: object, cool: object): number;
+          ctor(initialArray: Array<number>): object;
+          SumElements(instance: object): number;
           Append(instance: object, value: number): void;
           get_IntArrayProperty(instance: object): Array<number>;
-          get_ApiClient(instance: object): object;
         };
         PrimitivesDemoInterop: {
           ctor(jsObject: object): object;
@@ -110,10 +110,12 @@ export interface AssemblyExports{
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.Capabilities.ArraysDemo
 export namespace ArraysDemo {
   export class Proxy extends ProxyBase {
-    private constructor() { super(undefined!); }
+    constructor(initialArray: Array<number>) {
+      super(TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.ctor(initialArray));
+    }
 
-    public SumElements(cool: object): number {
-      return TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.SumElements(this.instance, cool);
+    public SumElements(): number {
+      return TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.SumElements(this.instance);
     }
 
     public Append(value: number): void {
@@ -122,19 +124,13 @@ export namespace ArraysDemo {
     public get IntArrayProperty(): Array<number> {
       return TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.get_IntArrayProperty(this.instance);
     }
-
-    public get ApiClient(): object {
-      return TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.get_ApiClient(this.instance);
-    }
   }
   export interface Properties {
     IntArrayProperty: Array<number>;
-    ApiClient: object;
   }
   export function materialize(proxy: ArraysDemo.Proxy): ArraysDemo.Properties {
     return {
       IntArrayProperty: proxy.IntArrayProperty,
-      ApiClient: object.properties(proxy.ApiClient),
     };
   }
 }
@@ -181,11 +177,11 @@ export namespace PrimitivesDemo {
       TypeShimConfig.exports.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.set_StringProperty(this.instance, value);
     }
   }
-  export interface Properties {
+  export interface Initializer {
     InitialStringProperty: string;
     StringProperty: string;
   }
-  export interface Initializer {
+  export interface Properties {
     InitialStringProperty: string;
     StringProperty: string;
   }
@@ -214,15 +210,15 @@ export namespace People {
       TypeShimConfig.exports.TypeShim.Sample.PeopleInterop.set_All(this.instance, valueInstance);
     }
   }
-  export interface Properties {
-    All: Array<Person.Properties>;
-  }
   export interface Initializer {
     All: Array<Person.Proxy | Person.Initializer>;
   }
+  export interface Properties {
+    All: Array<Person.Properties>;
+  }
   export function materialize(proxy: People.Proxy): People.Properties {
     return {
-      All: proxy.All.map(e => Person.properties(e)),
+      All: proxy.All.map(e => Person.materialize(e)),
     };
   }
 }
@@ -281,24 +277,24 @@ export namespace Person {
       TypeShimConfig.exports.TypeShim.Sample.PersonInterop.set_Pets(this.instance, valueInstance);
     }
   }
-  export interface Properties {
-    Id: number;
-    Name: string;
-    Age: number;
-    Pets: Array<Dog.Properties>;
-  }
   export interface Initializer {
     Id: number;
     Name: string;
     Age: number;
     Pets: Array<Dog.Proxy | Dog.Initializer>;
   }
+  export interface Properties {
+    Id: number;
+    Name: string;
+    Age: number;
+    Pets: Array<Dog.Properties>;
+  }
   export function materialize(proxy: Person.Proxy): Person.Properties {
     return {
       Id: proxy.Id,
       Name: proxy.Name,
       Age: proxy.Age,
-      Pets: proxy.Pets.map(e => Dog.properties(e)),
+      Pets: proxy.Pets.map(e => Dog.materialize(e)),
     };
   }
 }
@@ -341,12 +337,12 @@ export namespace Dog {
       TypeShimConfig.exports.TypeShim.Sample.DogInterop.set_Age(this.instance, value);
     }
   }
-  export interface Properties {
+  export interface Initializer {
     Name: string;
     Breed: string;
     Age: number;
   }
-  export interface Initializer {
+  export interface Properties {
     Name: string;
     Breed: string;
     Age: number;
@@ -375,10 +371,6 @@ export namespace MyApp {
       const res = TypeShimConfig.exports.TypeShim.Sample.MyAppInterop.GetPeopleProvider();
       return ProxyBase.fromHandle(PeopleProvider.Proxy, res);
     }
-  }
-  export function materialize(proxy: MyApp.Proxy): MyApp.Properties {
-    return {
-    };
   }
 }
 
@@ -412,8 +404,8 @@ export namespace PeopleProvider {
   }
   export function materialize(proxy: PeopleProvider.Proxy): PeopleProvider.Properties {
     return {
-      PeopleCache: proxy.PeopleCache ? proxy.PeopleCache.map(e => Person.properties(e)) : null,
-      DelayTask: proxy.DelayTask ? proxy.DelayTask.then(e => e ? TimeoutUnit.properties(e) : null) : null,
+      PeopleCache: proxy.PeopleCache ? proxy.PeopleCache.map(e => Person.materialize(e)) : null,
+      DelayTask: proxy.DelayTask ? proxy.DelayTask.then(e => e ? TimeoutUnit.materialize(e) : null) : null,
     };
   }
 }
@@ -433,10 +425,10 @@ export namespace TimeoutUnit {
       TypeShimConfig.exports.TypeShim.Sample.TimeoutUnitInterop.set_Timeout(this.instance, value);
     }
   }
-  export interface Properties {
+  export interface Initializer {
     Timeout: number;
   }
-  export interface Initializer {
+  export interface Properties {
     Timeout: number;
   }
   export function materialize(proxy: TimeoutUnit.Proxy): TimeoutUnit.Properties {
