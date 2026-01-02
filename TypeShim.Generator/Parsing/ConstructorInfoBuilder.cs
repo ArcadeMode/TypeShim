@@ -9,11 +9,8 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
     {
         PropertyInfo[] initializerProperties = [..classProperties.Where(p => p is { SetMethod: { } } or { InitMethod: { } })];
         MethodParameterInfo[] parameterInfos = [.. parameterInfoBuilder.Build()];
-        //if (!initializerProperties.All(p => p.Type.SupportsTypeConversion) || !parameterInfos.All(p => p.Type.SupportsTypeConversion))
-        //{
-        //    return null;
-        //}
-        // TODO: how can be dealt with optional parameters? For now user must provide all parameters when constructing from JS object.
+        
+        // TODO: somehow support optional parameters. For now user must provide all parameters when constructing from JS object.
         MethodParameterInfo? initializersObjectParameter = initializerProperties.Length == 0 ? null : new()
         {
             Name = "jsObject",

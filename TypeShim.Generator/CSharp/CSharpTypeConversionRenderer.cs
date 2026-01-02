@@ -17,16 +17,16 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         if (parameterInfo.Type is { IsNullableType: true, TypeArgument.IsTaskType: true }) // Task<T>?
         {
             string convertedTaskExpression = RenderNullableTaskTypeConversion(parameterInfo.Type, varName, varName);
-            _ctx.AppendLine($"{parameterInfo.Type.CLRTypeSyntax} {newVarName} = {convertedTaskExpression};");
+            _ctx.AppendLine($"{parameterInfo.Type.CSharpTypeSyntax} {newVarName} = {convertedTaskExpression};");
         }
         else if (parameterInfo.Type.IsTaskType) // Task<T>
         {
             string convertedTaskExpression = RenderTaskTypeConversion(parameterInfo.Type, varName, varName);
-            _ctx.AppendLine($"{parameterInfo.Type.CLRTypeSyntax} {newVarName} = {convertedTaskExpression};");
+            _ctx.AppendLine($"{parameterInfo.Type.CSharpTypeSyntax} {newVarName} = {convertedTaskExpression};");
         }
         else
         {
-            _ctx.Append($"{parameterInfo.Type.CLRTypeSyntax} {newVarName} = ");
+            _ctx.Append($"{parameterInfo.Type.CSharpTypeSyntax} {newVarName} = ");
             RenderInlineTypeConversion(parameterInfo.Type, varName, forceCovariantConversion: parameterInfo.IsInjectedInstanceParameter);
             _ctx.AppendLine(";");
         }
@@ -54,14 +54,14 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         }
         else // Tests guard against this case. Anyway, here is a state-of-the-art regression detector.
         {
-            throw new NotImplementedException($"Type conversion not implemented for type: {typeInfo.CLRTypeSyntax}. Please file an issue at https://github.com/ArcadeMode/TypeShim");
+            throw new NotImplementedException($"Type conversion not implemented for type: {typeInfo.CSharpTypeSyntax}. Please file an issue at https://github.com/ArcadeMode/TypeShim");
         }
     }
 
     private void RenderInlineCovariantTypeConversion(InteropTypeInfo typeInfo, string parameterName)
     {
         Debug.Assert(typeInfo.ManagedType is KnownManagedType.Object or KnownManagedType.Array, "Unexpected non-object or non-array type with required type conversion");
-        _ctx.Append($"({typeInfo.CLRTypeSyntax}){parameterName}");
+        _ctx.Append($"({typeInfo.CSharpTypeSyntax}){parameterName}");
     }
 
     private void RenderInlineObjectTypeConversion(InteropTypeInfo typeInfo, string parameterName)
@@ -72,7 +72,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         {
             ClassInfo exportedClass = _ctx.GetClassInfo(typeInfo);
             string targetInteropClass = RenderConstants.InteropClassName(exportedClass);
-            _ctx.Append($"{targetInteropClass}.{RenderConstants.FromObjectMethodName}({parameterName})");
+            _ctx.Append($"{targetInteropClass}.{RenderConstants.FromObject}({parameterName})");
         }
         else
         {
@@ -115,7 +115,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
     {
         InteropTypeInfo taskTypeParamInfo = targetTaskType.TypeArgument ?? throw new InvalidOperationException("Task type must have a type argument for conversion.");
         string tcsVarName = $"{sourceVarName}Tcs";
-        _ctx.AppendLine($"TaskCompletionSource<{taskTypeParamInfo.CLRTypeSyntax}> {tcsVarName} = new();")
+        _ctx.AppendLine($"TaskCompletionSource<{taskTypeParamInfo.CSharpTypeSyntax}> {tcsVarName} = new();")
             .AppendLine($"{sourceTaskExpression}.ContinueWith(t => {{");
         using (_ctx.Indent())
         {
@@ -134,7 +134,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         InteropTypeInfo taskTypeParamInfo = targetNullableTaskType.TypeArgument ?? throw new InvalidOperationException("Nullable type must have a type argument for conversion.");
         InteropTypeInfo taskReturnTypeParamInfo = taskTypeParamInfo.TypeArgument ?? throw new InvalidOperationException("Task type must have a type argument for conversion.");
         string tcsVarName = $"{sourceVarName}Tcs";
-        _ctx.AppendLine($"TaskCompletionSource<{taskReturnTypeParamInfo.CLRTypeSyntax}>? {tcsVarName} = {sourceTaskExpression} != null ? new() : null;");
+        _ctx.AppendLine($"TaskCompletionSource<{taskReturnTypeParamInfo.CSharpTypeSyntax}>? {tcsVarName} = {sourceTaskExpression} != null ? new() : null;");
         _ctx.AppendLine($"{sourceTaskExpression}?.ContinueWith(t => {{");
         using (_ctx.Indent())
         {

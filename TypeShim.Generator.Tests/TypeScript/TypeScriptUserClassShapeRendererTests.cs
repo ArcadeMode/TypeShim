@@ -203,6 +203,60 @@ export function materialize(proxy: C1.Proxy): C1.Properties {
     }
 
     [Test]
+    public void TypeScriptUserClassShapes_InstancePropertyOfNotExportedClassType_GeneratesProperty()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            //[TSExport]
+            public class BadUserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public BadUserClass P1 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypeScriptUserClassShapesRenderer(symbolNameProvider, renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export interface Initializer {
+  P1: ManagedObject;
+}
+export interface Properties {
+  P1: ManagedObject;
+}
+export function materialize(proxy: C1.Proxy): C1.Properties {
+  return {
+    P1: proxy.P1,
+  };
+}
+
+""");
+    }
+
+    [Test]
     public void TypeScriptUserClassShapes_InstancePropertyOfUserClassType_InitOnly_GeneratesProperty()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
@@ -783,10 +837,10 @@ export function materialize(proxy: C1.Proxy): C1.Properties {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export interface Initializer {
-  P1: object;
+  P1: ManagedObject;
 }
 export interface Properties {
-  P1: object;
+  P1: ManagedObject;
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {
@@ -827,10 +881,10 @@ export function materialize(proxy: C1.Proxy): C1.Properties {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export interface Initializer {
-  P1: object;
+  P1: ManagedObject;
 }
 export interface Properties {
-  P1: object;
+  P1: ManagedObject;
 }
 export function materialize(proxy: C1.Proxy): C1.Properties {
   return {

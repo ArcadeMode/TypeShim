@@ -1,7 +1,7 @@
-﻿using TypeShim.Shared;
-using TypeShim.Generator.Parsing;
+﻿
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace TypeShim.Generator.Typescript;
+namespace TypeShim.Shared;
 
 internal sealed class TypeScriptSymbolNameTemplate
 {
@@ -23,11 +23,11 @@ internal sealed class TypeScriptSymbolNameTemplate
         return template.Replace(SuffixPlaceholder, suffix);
     }
 
-    internal static TypeScriptSymbolNameTemplate ForUserType(InteropTypeInfo typeInfo)
+    internal static TypeScriptSymbolNameTemplate ForUserType(string originalTypeSyntax)
     {
         return new TypeScriptSymbolNameTemplate
         {
-            Template = $"{typeInfo.CLRTypeSyntax}{SuffixPlaceholder}",
+            Template = $"{originalTypeSyntax}{SuffixPlaceholder}",
             InnerTemplate = null
         };
     }
@@ -50,11 +50,11 @@ internal sealed class TypeScriptSymbolNameTemplate
         };
     }
 
-    internal static TypeScriptSymbolNameTemplate ForPromiseType(TypeScriptSymbolNameTemplate innerTemplate)
+    internal static TypeScriptSymbolNameTemplate ForPromiseType(TypeScriptSymbolNameTemplate? innerTemplate)
     {
         return new TypeScriptSymbolNameTemplate
         {
-            Template = $"Promise<{InnerPlaceholder}>",
+            Template = innerTemplate != null ? $"Promise<{InnerPlaceholder}>" : "Promise",
             InnerTemplate = innerTemplate
         };
     }

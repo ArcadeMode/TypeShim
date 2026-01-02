@@ -137,7 +137,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
     private void RenderMethodSignature(string name, InteropTypeInfo returnType, IEnumerable<MethodParameterInfo> parameterInfos)
     {
         _ctx.Append("public static ")
-            .Append(returnType.InteropTypeSyntax)
+            .Append(returnType.CSharpInteropTypeSyntax)
             .Append(' ')
             .Append(name)
             .Append('(');
@@ -157,7 +157,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                 JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(parameterInfo.Type);
                 _ctx.Append(marshalAsAttributeRenderer.RenderParameterAttribute().NormalizeWhitespace().ToFullString())
                     .Append(' ')
-                    .Append(parameterInfo.Type.InteropTypeSyntax)
+                    .Append(parameterInfo.Type.CSharpInteropTypeSyntax)
                     .Append(' ')
                     .Append(parameterInfo.Name);
                 isFirst = false;
@@ -205,7 +205,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     internal void RenderFromObjectMapper()
     {
-        _ctx.AppendLine($"public static {_ctx.Class.Type.CLRTypeSyntax} {RenderConstants.FromObjectMethodName}(object obj)");
+        _ctx.AppendLine($"public static {_ctx.Class.Type.CSharpTypeSyntax} {RenderConstants.FromObject}(object obj)");
         _ctx.AppendLine("{");
         using (_ctx.Indent())
         {
@@ -213,10 +213,10 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             _ctx.AppendLine("{");
             using (_ctx.Indent())
             {
-                _ctx.AppendLine($"{_ctx.Class.Type.CLRTypeSyntax} instance => instance,");
+                _ctx.AppendLine($"{_ctx.Class.Type.CSharpTypeSyntax} instance => instance,");
                 if (_ctx.Class is { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
                 {
-                    _ctx.AppendLine($"JSObject jsObj => {RenderConstants.FromJSObjectMethodName}(jsObj),");
+                    _ctx.AppendLine($"JSObject jsObj => {RenderConstants.FromJSObject}(jsObj),");
                 }
                 _ctx.AppendLine($"_ => throw new ArgumentException($\"Invalid object type {{obj?.GetType().ToString() ?? \"null\"}}\", nameof(obj)),");
             }
@@ -227,7 +227,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     internal void RenderFromJSObjectMapper(ConstructorInfo constructorInfo)
     {
-        _ctx.AppendLine($"public static {_ctx.Class.Type.CLRTypeSyntax} {RenderConstants.FromJSObjectMethodName}(JSObject jsObject)")
+        _ctx.AppendLine($"public static {_ctx.Class.Type.CSharpTypeSyntax} {RenderConstants.FromJSObject}(JSObject jsObject)")
             .AppendLine("{");
 
         using (_ctx.Indent())
@@ -242,7 +242,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         PropertyInfo[] propertiesInMapper = [.. constructorInfo.MemberInitializers];
         Dictionary<PropertyInfo, TypeConversionExpressionRenderDelegate> propertyToConvertedVarDict = RenderNonInlinableTypeConversions(propertiesInMapper);
 
-        _ctx.Append("return new ").Append(constructorInfo.Type.CLRTypeSyntax).Append('(');
+        _ctx.Append("return new ").Append(constructorInfo.Type.CSharpTypeSyntax).Append('(');
         bool isFirst = true;
         foreach (MethodParameterInfo param in constructorInfo.Parameters)
         {

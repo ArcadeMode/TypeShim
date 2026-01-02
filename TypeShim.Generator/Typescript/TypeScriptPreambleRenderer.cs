@@ -2,14 +2,14 @@
 
 namespace TypeShim.Generator.Typescript;
 
-internal class TypescriptConfigRenderer(RenderContext ctx)
+internal class TypeScriptPreambleRenderer(RenderContext ctx)
 {
     internal void Render()
     {
-        ctx.AppendLine(TypeShimConfigClass);
+        ctx.AppendLine(Preamble);
     }
 
-    private const string TypeShimConfigClass = """
+    private const string Preamble = """
 class TypeShimConfig {
   private static _exports: AssemblyExports | null = null;
 
@@ -32,16 +32,31 @@ class TypeShimConfig {
 export const TypeShimInitializer = { initialize: TypeShimConfig.initialize };
 
 abstract class ProxyBase {
-  instance: object;
-  constructor(instance: object) {
+  instance: ManagedObject;
+  constructor(instance: ManagedObject) {
     this.instance = instance;
   }
 
-  static fromHandle<T extends ProxyBase>(ctor: { prototype: T }, handle: object): T {
+  static fromHandle<T extends ProxyBase>(ctor: { prototype: T }, handle: ManagedObject): T {
     const obj = Object.create(ctor.prototype) as T;
     obj.instance = handle;
     return obj;
   }
+}
+
+export interface IDisposable {
+    dispose(): void;
+    get isDisposed(): boolean;
+}
+
+export interface ManagedObject extends IDisposable {
+    toString (): string;
+}
+
+export interface ManagedError extends IDisposable {
+    get stack(): any;
+    getSuperStack(): any; 
+    getManageStack(): any;
 }
 
 """;

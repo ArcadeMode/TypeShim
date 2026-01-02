@@ -10,7 +10,7 @@ using System;
 using System.Linq;
 
 
-public abstract record JSTypeInfo(KnownManagedType KnownType)
+internal abstract record JSTypeInfo(KnownManagedType KnownType)
 {
     public TypeSyntax? GetTypeSyntax()
     {
@@ -223,27 +223,27 @@ public abstract record JSTypeInfo(KnownManagedType KnownType)
     }
 }
 
-public sealed record JSInvalidTypeInfo() : JSTypeInfo(KnownManagedType.None);
+internal sealed record JSInvalidTypeInfo() : JSTypeInfo(KnownManagedType.None);
 
-public record JSSimpleTypeInfo(KnownManagedType KnownType) : JSTypeInfo(KnownType)
+internal record JSSimpleTypeInfo(KnownManagedType KnownType) : JSTypeInfo(KnownType)
 {
     public required TypeSyntax Syntax { get; init; }
 }
 
-public sealed record JSArrayTypeInfo(JSTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.Array);
+internal sealed record JSArrayTypeInfo(JSTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.Array);
 
-public sealed record JSSpanTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.Span);
+internal sealed record JSSpanTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.Span);
 
-public sealed record JSArraySegmentTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.ArraySegment);
+internal sealed record JSArraySegmentTypeInfo(JSSimpleTypeInfo ElementTypeInfo) : JSTypeInfo(KnownManagedType.ArraySegment);
 
-public sealed record JSTaskTypeInfo(JSTypeInfo ResultTypeInfo) : JSTypeInfo(KnownManagedType.Task);
+internal sealed record JSTaskTypeInfo(JSTypeInfo ResultTypeInfo) : JSTypeInfo(KnownManagedType.Task);
 
-public sealed record JSNullableTypeInfo(JSTypeInfo ResultTypeInfo, bool IsValueType) : JSTypeInfo(KnownManagedType.Nullable);
+internal sealed record JSNullableTypeInfo(JSTypeInfo ResultTypeInfo, bool IsValueType) : JSTypeInfo(KnownManagedType.Nullable);
 
-public sealed record JSFunctionTypeInfo(bool IsAction, JSSimpleTypeInfo[] ArgsTypeInfo) : JSTypeInfo(IsAction ? KnownManagedType.Action : KnownManagedType.Function);
+internal sealed record JSFunctionTypeInfo(bool IsAction, JSSimpleTypeInfo[] ArgsTypeInfo) : JSTypeInfo(IsAction ? KnownManagedType.Action : KnownManagedType.Function);
 
 
-public enum KnownManagedType : int
+internal enum KnownManagedType : int
 {
     None = 0,
     Void = 1,
@@ -274,7 +274,7 @@ public enum KnownManagedType : int
     Unknown,
 }
 
-public static class Constants
+internal static class Constants
 {
     public const string JSMarshalAsAttribute = "System.Runtime.InteropServices.JavaScript.JSMarshalAsAttribute`1";
     public const string MarshalUsingAttribute = "System.Runtime.InteropServices.Marshalling.MarshalUsingAttribute";

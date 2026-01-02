@@ -53,12 +53,12 @@ internal class SyntaxTreeParsingTests_Cache
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, cache).Build();
 
         Assert.That(userClassInfo.Type.IsNullableType, Is.False);
-        Assert.That(userClassInfo.Type.CLRTypeSyntax.ToString(), Is.EqualTo("MyClass"));
+        Assert.That(userClassInfo.Type.CSharpTypeSyntax.ToString(), Is.EqualTo("MyClass"));
         Assert.That(userClassInfo.Type.IsTSExport, Is.True);
 
         PropertyInfo p1PropertyInfo = c1ClassInfo.Properties.Single();
         Assert.That(p1PropertyInfo.Type.IsNullableType, Is.True);
-        Assert.That(p1PropertyInfo.Type.CLRTypeSyntax.ToString(), Is.EqualTo("MyClass?"));
+        Assert.That(p1PropertyInfo.Type.CSharpTypeSyntax.ToString(), Is.EqualTo("MyClass?"));
         Assert.That(p1PropertyInfo.Type.IsTSExport, Is.True);
     }
 }

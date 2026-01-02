@@ -20,7 +20,7 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
     private RenderContext RenderTypeShimConfig()
     {
         RenderContext configCtx = new(null, classInfos, RenderOptions.TypeScript);
-        TypescriptConfigRenderer configRenderer = new(configCtx);
+        TypeScriptPreambleRenderer configRenderer = new(configCtx);
         configRenderer.Render();
         return configCtx;
     }

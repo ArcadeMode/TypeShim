@@ -48,16 +48,10 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
             using (ctx.Indent())
             {
                 RenderHandleExtractionToConsts(constructorInfo.Parameters);
-                if (symbolNameProvider.GetUserClassSymbolNameIfExists(constructorInfo.Type, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is string proxyClassName)
-                {
-                    ctx.Append("super(");
-                    RenderInteropInvocation(constructorInfo.Name, constructorInfo.Parameters, constructorInfo.InitializerObject);
-                    ctx.AppendLine(");");
-                }
-                else
-                {
-                    throw new InvalidOperationException("Constructor must have a user class return type.");
-                }
+                string proxyClassName = symbolNameProvider.GetUserClassSymbolName(ctx.Class, SymbolNameFlags.Proxy);
+                ctx.Append("super(");
+                RenderInteropInvocation(constructorInfo.Name, constructorInfo.Parameters, constructorInfo.InitializerObject);
+                ctx.AppendLine(");");
             }
             ctx.AppendLine("}");
         }
@@ -77,8 +71,16 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
                .Append('(');
             RenderParameterList(methodInfo.Parameters);
             ctx.Append("): ");
-            string returnType = symbolNameProvider.GetUserClassSymbolNameIfExists(methodInfo.ReturnType, SymbolNameFlags.Proxy) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
-            ctx.Append(returnType);
+
+            if (methodInfo.ReturnType is { RequiresTypeConversion: true, SupportsTypeConversion: true })
+            {
+                ClassInfo classInfo = ctx.GetClassInfo(methodInfo.ReturnType.GetInnermostType());
+                ctx.Append(symbolNameProvider.GetUserClassSymbolName(classInfo, methodInfo.ReturnType, SymbolNameFlags.Proxy));
+            }
+            else
+            {
+                ctx.Append(symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType));
+            }
         }
     }
 
@@ -99,8 +101,17 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
         {
             ctx.Append($"public ");
             if (methodInfo.IsStatic) ctx.Append("static ");
-            string returnType = symbolNameProvider.GetUserClassSymbolNameIfExists(methodInfo.ReturnType, SymbolNameFlags.Proxy) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
-            ctx.Append("get ").Append(propertyInfo.Name).Append("(): ").Append(returnType);
+            ctx.Append("get ").Append(propertyInfo.Name).Append("(): ");
+
+            if (methodInfo.ReturnType is { RequiresTypeConversion: true, SupportsTypeConversion: true })
+            {
+                ClassInfo classInfo = ctx.GetClassInfo(methodInfo.ReturnType.GetInnermostType());
+                ctx.Append(symbolNameProvider.GetUserClassSymbolName(classInfo, methodInfo.ReturnType, SymbolNameFlags.Proxy));
+            }
+            else
+            {
+                ctx.Append(symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType));
+            }
         }
 
         void RenderProxyPropertySetterSignature(MethodInfo methodInfo)
@@ -134,10 +145,10 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
             ClassInfo classInfo = ctx.GetClassInfo(typeInfo.GetInnermostType());
             if (classInfo is { Constructor: { IsParameterless: true, AcceptsInitializer: true } })
             {
-                return symbolNameProvider.GetUserClassSymbolName(typeInfo, classInfo, SymbolNameFlags.ProxyInitializerUnion);
+                return symbolNameProvider.GetUserClassSymbolName(classInfo, typeInfo, SymbolNameFlags.ProxyInitializerUnion);
             }
 
-            return symbolNameProvider.GetUserClassSymbolName(typeInfo, classInfo, SymbolNameFlags.Proxy);
+            return symbolNameProvider.GetUserClassSymbolName(classInfo, typeInfo, SymbolNameFlags.Proxy);
         }
     }
 
@@ -147,8 +158,11 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
         using (ctx.Indent())
         {
             RenderHandleExtractionToConsts(methodInfo.Parameters);
-            if (symbolNameProvider.GetUserClassSymbolNameIfExists(methodInfo.ReturnType, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is string proxyClassName)
+
+            if (methodInfo.ReturnType is { RequiresTypeConversion: true, SupportsTypeConversion: true })
             {
+                ClassInfo classInfo = ctx.GetClassInfo(methodInfo.ReturnType.GetInnermostType());
+                string proxyClassName = symbolNameProvider.GetUserClassSymbolName(classInfo, SymbolNameFlags.Proxy);
                 // user class return type, wrap in proxy
                 ctx.Append("const res = ");
                 RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
@@ -157,7 +171,7 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
                 RenderInlineProxyConstruction(methodInfo.ReturnType, proxyClassName, "res");
                 ctx.AppendLine(";");
             }
-            else // primitive return type or void
+            else
             {
                 ctx.Append(methodInfo.ReturnType.ManagedType == KnownManagedType.Void ? string.Empty : "return ");
                 RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
@@ -195,12 +209,9 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
             if (parameterInfo.IsInjectedInstanceParameter || !parameterInfo.Type.RequiresTypeConversion || !parameterInfo.Type.SupportsTypeConversion)
                 continue;
 
-            if (symbolNameProvider.GetUserClassSymbolNameIfExists(parameterInfo.Type, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is not string proxyClassName)
-            {
-                throw new ArgumentException($"Invalid conversion-requiring type '{parameterInfo.Type.CLRTypeSyntax}' failed to resolve associated TypeScript proxy name.");
-            }
-
             ctx.Append($"const {GetInteropInvocationVariable(parameterInfo)} = ");
+            ClassInfo classInfo = ctx.GetClassInfo(parameterInfo.Type.GetInnermostType());
+            string proxyClassName = symbolNameProvider.GetUserClassSymbolName(classInfo, SymbolNameFlags.Proxy);
             RenderInlineHandleExtraction(parameterInfo.Type, proxyClassName, parameterInfo.Name);
             ctx.AppendLine(";");
         }

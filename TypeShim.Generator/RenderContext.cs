@@ -28,7 +28,7 @@ internal sealed class RenderContext(ClassInfo? targetClass, IEnumerable<ClassInf
     internal ClassInfo GetClassInfo(InteropTypeInfo type)
     {
         _typeToClassDict.TryGetValue(type, out ClassInfo? info);
-        return info ?? throw new NotFoundClassInfoException($"Could not find ClassInfo for type: {type.CLRTypeSyntax}");
+        return info ?? throw new NotFoundClassInfoException($"Could not find ClassInfo for type: {type.CSharpTypeSyntax}");
     }
 
     internal void EnterScope(MethodInfo methodInfo)

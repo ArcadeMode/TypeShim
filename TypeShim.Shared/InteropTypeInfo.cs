@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace TypeShim.Shared;
 
-public sealed class InteropTypeInfo
+internal sealed class InteropTypeInfo
 {
     public required KnownManagedType ManagedType { get; init; }
 
@@ -15,15 +15,18 @@ public sealed class InteropTypeInfo
     public required TypeSyntax JSTypeSyntax { get; init; }
 
     /// <summary>
-    /// Syntax for writing the CLR type on the interop method. This is usually equal to <see cref="CLRTypeSyntax"/>,<br/>
-    /// but e.g. YourClass, Task&lt;YourClass&gt; or YourClass[] have to be object, Task&lt;object&gt; or object[] for the interop method.
-    /// </summary>
-    public required TypeSyntax InteropTypeSyntax { get; init; }
-
-    /// <summary>
     /// Syntax for writing the CLR type in C# (i.e. the user's original type)
     /// </summary>
-    public required TypeSyntax CLRTypeSyntax { get; init; }
+    public required TypeSyntax CSharpTypeSyntax { get; init; }
+    
+    /// <summary>
+    /// Syntax for writing the CLR type on the interop method. This is usually equal to <see cref="CSharpTypeSyntax"/>,<br/>
+    /// but e.g. YourClass, Task&lt;YourClass&gt; or YourClass[] have to be object, Task&lt;object&gt; or object[] for the interop method.
+    /// </summary>
+    public required TypeSyntax CSharpInteropTypeSyntax { get; init; }
+    
+    public required TypeScriptSymbolNameTemplate TypeScriptTypeSyntax { get; init; }
+    public required TypeScriptSymbolNameTemplate TypeScriptInteropTypeSyntax { get; init; }
 
     /// <summary>
     /// Tasks and Arrays _may_ have type arguments
@@ -61,14 +64,16 @@ public sealed class InteropTypeInfo
             IsTSExport = false,
             ManagedType = this.ManagedType,
             JSTypeSyntax = this.JSTypeSyntax,
-            InteropTypeSyntax = this.InteropTypeSyntax,
-            CLRTypeSyntax = this.InteropTypeSyntax, // essentially overwrite clr type with interop type
+            CSharpTypeSyntax = this.CSharpInteropTypeSyntax, // essentially overwrite clr type with interop type
+            CSharpInteropTypeSyntax = this.CSharpInteropTypeSyntax,
+            TypeScriptTypeSyntax = this.TypeScriptInteropTypeSyntax,
+            TypeScriptInteropTypeSyntax = this.TypeScriptInteropTypeSyntax,
             IsTaskType = this.IsTaskType,
             IsArrayType = this.IsArrayType,
             IsNullableType = this.IsNullableType,
-            RequiresTypeConversion = false,
             TypeArgument = TypeArgument?.AsInteropTypeInfo(),
-            SupportsTypeConversion = this.SupportsTypeConversion,
+            RequiresTypeConversion = false,
+            SupportsTypeConversion = false,
         };
     }
 
@@ -76,9 +81,11 @@ public sealed class InteropTypeInfo
     {
         IsTSExport = false,
         ManagedType = KnownManagedType.JSObject,
+        TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForSimpleType("object"),
+        TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForSimpleType("object"),
         JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Object"),
-        InteropTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
-        CLRTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
+        CSharpInteropTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
+        CSharpTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
         IsTaskType = false,
         IsArrayType = false,
         IsNullableType = false,

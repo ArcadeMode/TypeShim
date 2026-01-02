@@ -11,18 +11,21 @@ internal sealed class TypeScriptTypeMapper(IEnumerable<ClassInfo> classInfos)
 
     public bool IsUserType(InteropTypeInfo typeInfo)
     {
-        return _userTypeNames.Contains(typeInfo.CLRTypeSyntax.ToString());
+        return _userTypeNames.Contains(typeInfo.CSharpTypeSyntax.ToString());
     }
 
     public TypeScriptSymbolNameTemplate ToTypeScriptType(InteropTypeInfo typeInfo)
     {
-        if (IsUserType(typeInfo)) 
-            return TypeScriptSymbolNameTemplate.ForUserType(typeInfo);
+        //if (typeInfo.RequiresTypeConversion && typeInfo.SupportsTypeConversion) 
+        //    return TypeScriptSymbolNameTemplate.ForUserType(typeInfo);
+
+        //if (typeInfo.RequiresTypeConversion && !typeInfo.SupportsTypeConversion && !typeInfo.IsTSExport && ) 
+        //    return TypeScriptSymbolNameTemplate.ForSimpleType("any");
 
         return typeInfo.ManagedType switch
         {
             KnownManagedType.Task 
-                => TypeScriptSymbolNameTemplate.ForPromiseType(ToTypeScriptType(typeInfo.TypeArgument ?? typeInfo)), // note: Task can be without type argument
+                => TypeScriptSymbolNameTemplate.ForPromiseType(typeInfo.TypeArgument != null ? ToTypeScriptType(typeInfo.TypeArgument) : null), // note: Task can be without type argument
             KnownManagedType.Array 
                 => TypeScriptSymbolNameTemplate.ForArrayType(ToTypeScriptType(typeInfo.TypeArgument ?? throw new ArgumentException("Array type must have a type argument"))), 
             KnownManagedType.Nullable 
@@ -30,7 +33,12 @@ internal sealed class TypeScriptTypeMapper(IEnumerable<ClassInfo> classInfos)
             KnownManagedType.None => TypeScriptSymbolNameTemplate.ForSimpleType("undefined"),
             KnownManagedType.Void => TypeScriptSymbolNameTemplate.ForSimpleType("void"),
             KnownManagedType.JSObject 
-            or KnownManagedType.Object
+                => TypeScriptSymbolNameTemplate.ForSimpleType("object"),
+            KnownManagedType.Object when typeInfo is { RequiresTypeConversion: true, SupportsTypeConversion: true }
+                => TypeScriptSymbolNameTemplate.ForUserType(typeInfo.CSharpTypeSyntax.ToString()),
+            KnownManagedType.Object when typeInfo is { RequiresTypeConversion: true, SupportsTypeConversion: false }
+                => TypeScriptSymbolNameTemplate.ForSimpleType("ManagedObject"),
+            KnownManagedType.Object when typeInfo is { RequiresTypeConversion: false }
                 => TypeScriptSymbolNameTemplate.ForSimpleType("object"),
             KnownManagedType.Boolean => TypeScriptSymbolNameTemplate.ForSimpleType("boolean"),
             KnownManagedType.Char 

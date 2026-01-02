@@ -10,36 +10,28 @@ internal enum SymbolNameFlags
     Properties = 2,
     Initializer = 4,
     ProxyInitializerUnion = Proxy | Initializer,
-    /// <summary>
-    /// Wether to strip the surrounding type information down to just the symbol name itself, without nullability, Task, array etc.
-    /// </summary>
-    Isolated = 16,
 }
 
 internal class TypescriptSymbolNameProvider(TypeScriptTypeMapper typeMapper)
 {
-    internal string GetUserClassSymbolName(InteropTypeInfo typeInfo, ClassInfo classInfo, SymbolNameFlags flags)
+    internal string GetUserClassSymbolName(ClassInfo classInfo, SymbolNameFlags flags)
     {
-        return GetUserClassSymbolName(typeInfo, classInfo.Type, flags);
+        return GetUserClassSymbolNameCore(classInfo.Type, classInfo.Type, flags);
     }
 
-    internal string? GetUserClassSymbolNameIfExists(InteropTypeInfo typeInfo, SymbolNameFlags flags)
+    internal string GetUserClassSymbolName(ClassInfo classInfo, InteropTypeInfo useSiteTypeInfo, SymbolNameFlags flags)
     {
-        if (ExtractUserType(typeInfo) is not InteropTypeInfo userTypeInfo)
-            return null;
-
-        return GetUserClassSymbolName(typeInfo, userTypeInfo, flags);
+        return GetUserClassSymbolNameCore(useSiteTypeInfo, classInfo.Type, flags);
     }
 
-    internal string GetUserClassSymbolName(InteropTypeInfo typeInfo, InteropTypeInfo userTypeInfo, SymbolNameFlags flags)
+    private string GetUserClassSymbolNameCore(InteropTypeInfo useSiteTypeInfo, InteropTypeInfo userTypeInfo, SymbolNameFlags flags)
     {
-        InteropTypeInfo targetType = flags.HasFlag(SymbolNameFlags.Isolated) ? userTypeInfo : typeInfo;
-        return (flags & ~SymbolNameFlags.Isolated) switch
+        return (flags) switch
         {
-            SymbolNameFlags.Proxy => $"{typeMapper.ToTypeScriptType(targetType).Render(suffix: $".{RenderConstants.Proxy}")}",
-            SymbolNameFlags.Properties => $"{typeMapper.ToTypeScriptType(targetType).Render(suffix: $".{RenderConstants.Properties}")}",
-            SymbolNameFlags.Initializer => $"{typeMapper.ToTypeScriptType(targetType).Render(suffix: $".{RenderConstants.Initializer}")}",
-            SymbolNameFlags.ProxyInitializerUnion => $"{typeMapper.ToTypeScriptType(targetType).Render(suffix: $".{RenderConstants.Proxy} | {typeMapper.ToTypeScriptType(userTypeInfo).Render(suffix: $".{RenderConstants.Initializer}")}")}",
+            SymbolNameFlags.Proxy => $"{useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Proxy}")}",
+            SymbolNameFlags.Properties => $"{useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Properties}")}",
+            SymbolNameFlags.Initializer => $"{useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Initializer}")}",
+            SymbolNameFlags.ProxyInitializerUnion => $"{useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Proxy} | {userTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Initializer}")}")}",
             _ => throw new NotImplementedException(),
         };
     }
@@ -49,17 +41,9 @@ internal class TypescriptSymbolNameProvider(TypeScriptTypeMapper typeMapper)
     /// </summary>
     /// <param name="typeInfo"></param>
     /// <returns></returns>
-    internal string GetNakedSymbolReference(InteropTypeInfo typeInfo) => GetSymbolNameInternal(typeInfo, string.Empty);
-    internal string GetUserClassSymbolName(ClassInfo classInfo) => GetSymbolNameInternal(classInfo.Type, string.Empty);
-    internal string GetUserClassSymbolName(ClassInfo classInfo, string typeSuffix) => GetSymbolNameInternal(classInfo.Type, $".{typeSuffix}");
-    private string GetSymbolNameInternal(InteropTypeInfo typeInfo, string suffix) => $"{typeMapper.ToTypeScriptType(typeInfo).Render(suffix)}";
-
-    private InteropTypeInfo? ExtractUserType(InteropTypeInfo typeInfo)
-    {
-        if (typeMapper.IsUserType(typeInfo))
-            return typeInfo;
-        if (typeInfo.TypeArgument is InteropTypeInfo argTypeInfo)
-            return ExtractUserType(argTypeInfo);
-        return null;
-    }
+    internal string GetNakedSymbolReference(InteropTypeInfo typeInfo) => GetSymbolNameCore(typeInfo, string.Empty);
+    internal string GetUserClassSymbolName(ClassInfo classInfo) => GetSymbolNameCore(classInfo.Type, string.Empty);
+    internal string GetUserClassSymbolName(ClassInfo classInfo, string typeSuffix) => GetSymbolNameCore(classInfo.Type, $".{typeSuffix}");
+    private string GetSymbolNameCore(InteropTypeInfo typeInfo, string suffix) => typeInfo.TypeScriptTypeSyntax.Render(suffix);
+    private string GetSymbolNameCoreOLD(InteropTypeInfo typeInfo, string suffix) => $"{typeMapper.ToTypeScriptType(typeInfo).Render(suffix)}";
 }

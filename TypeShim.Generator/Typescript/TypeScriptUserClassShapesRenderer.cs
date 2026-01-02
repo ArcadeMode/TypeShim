@@ -34,8 +34,17 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
         {
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
-                string propertyType = symbolNameProvider.GetUserClassSymbolNameIfExists(propertyInfo.Type, SymbolNameFlags.Properties) ?? symbolNameProvider.GetNakedSymbolReference(propertyInfo.Type);
-                ctx.Append(propertyInfo.Name).Append(": ").Append(propertyType).AppendLine(";");
+                ctx.Append(propertyInfo.Name).Append(": ");
+                if (propertyInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true })
+                {
+                    ClassInfo classInfo = ctx.GetClassInfo(propertyInfo.Type.GetInnermostType());
+                    ctx.Append(symbolNameProvider.GetUserClassSymbolName(classInfo, propertyInfo.Type, SymbolNameFlags.Properties));
+                }
+                else
+                {
+                    ctx.Append(symbolNameProvider.GetNakedSymbolReference(propertyInfo.Type));
+                }
+                ctx.AppendLine(";");
             }
         }
         ctx.AppendLine("}");
@@ -48,8 +57,17 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
         {
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
-                string propertyType = symbolNameProvider.GetUserClassSymbolNameIfExists(propertyInfo.Type, SymbolNameFlags.ProxyInitializerUnion) ?? symbolNameProvider.GetNakedSymbolReference(propertyInfo.Type);
-                ctx.Append(propertyInfo.Name).Append(": ").Append(propertyType).AppendLine(";");
+                ctx.Append(propertyInfo.Name).Append(": ");
+                if (propertyInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true })
+                {
+                    ClassInfo classInfo = ctx.GetClassInfo(propertyInfo.Type.GetInnermostType());
+                    ctx.Append(symbolNameProvider.GetUserClassSymbolName(classInfo, propertyInfo.Type, SymbolNameFlags.ProxyInitializerUnion));
+                }
+                else
+                {
+                    ctx.Append(symbolNameProvider.GetNakedSymbolReference(propertyInfo.Type));
+                }
+                ctx.AppendLine(";");
             }
         }
         ctx.AppendLine("}");

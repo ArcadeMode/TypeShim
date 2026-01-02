@@ -20,16 +20,31 @@ class TypeShimConfig {
 export const TypeShimInitializer = { initialize: TypeShimConfig.initialize };
 
 abstract class ProxyBase {
-  instance: object;
-  constructor(instance: object) {
+  instance: ManagedObject;
+  constructor(instance: ManagedObject) {
     this.instance = instance;
   }
 
-  static fromHandle<T extends ProxyBase>(ctor: { prototype: T }, handle: object): T {
+  static fromHandle<T extends ProxyBase>(ctor: { prototype: T }, handle: ManagedObject): T {
     const obj = Object.create(ctor.prototype) as T;
     obj.instance = handle;
     return obj;
   }
+}
+
+export interface IDisposable {
+    dispose(): void;
+    get isDisposed(): boolean;
+}
+
+export interface ManagedObject extends IDisposable {
+    toString (): string;
+}
+
+export interface ManagedError extends IDisposable {
+    get stack(): any;
+    getSuperStack(): any; 
+    getManageStack(): any;
 }
 
 
@@ -39,69 +54,69 @@ export interface AssemblyExports{
     Sample: {
       Capabilities: {
         ArraysDemoInterop: {
-          ctor(initialArray: Array<number>): object;
-          SumElements(instance: object): number;
-          Append(instance: object, value: number): void;
-          get_IntArrayProperty(instance: object): Array<number>;
+          ctor(initialArray: Array<number>): ManagedObject;
+          SumElements(instance: ManagedObject): number;
+          Append(instance: ManagedObject, value: number): void;
+          get_IntArrayProperty(instance: ManagedObject): Array<number>;
         };
         PrimitivesDemoInterop: {
-          ctor(jsObject: object): object;
-          GetStringLength(instance: object): number;
-          ToUpperCase(instance: object): string;
-          Concat(instance: object, str1: string, str2: string): string;
-          ContainsUpperCase(instance: object): boolean;
-          ResetBaseString(instance: object): void;
-          MultiplyString(instance: object, times: number): void;
-          get_InitialStringProperty(instance: object): string;
-          get_StringProperty(instance: object): string;
-          set_StringProperty(instance: object, value: string): void;
+          ctor(jsObject: object): ManagedObject;
+          GetStringLength(instance: ManagedObject): number;
+          ToUpperCase(instance: ManagedObject): string;
+          Concat(instance: ManagedObject, str1: string, str2: string): string;
+          ContainsUpperCase(instance: ManagedObject): boolean;
+          ResetBaseString(instance: ManagedObject): void;
+          MultiplyString(instance: ManagedObject, times: number): void;
+          get_InitialStringProperty(instance: ManagedObject): string;
+          get_StringProperty(instance: ManagedObject): string;
+          set_StringProperty(instance: ManagedObject, value: string): void;
         };
       };
       PeopleInterop: {
-        ctor(jsObject: object): object;
-        get_All(instance: object): Array<object>;
-        set_All(instance: object, value: Array<object>): void;
+        ctor(jsObject: object): ManagedObject;
+        get_All(instance: ManagedObject): Array<ManagedObject>;
+        set_All(instance: ManagedObject, value: Array<ManagedObject | object>): void;
       };
       PersonInterop: {
-        ctor(jsObject: object): object;
-        IsOlderThan(instance: object, other: object): boolean;
-        AdoptPet(instance: object): void;
-        Adopt(instance: object, newPet: object): void;
-        get_Id(instance: object): number;
-        set_Id(instance: object, value: number): void;
-        get_Name(instance: object): string;
-        set_Name(instance: object, value: string): void;
-        get_Age(instance: object): number;
-        set_Age(instance: object, value: number): void;
-        get_Pets(instance: object): Array<object>;
-        set_Pets(instance: object, value: Array<object>): void;
+        ctor(jsObject: object): ManagedObject;
+        IsOlderThan(instance: ManagedObject, other: ManagedObject | object): boolean;
+        AdoptPet(instance: ManagedObject): void;
+        Adopt(instance: ManagedObject, newPet: ManagedObject | object): void;
+        get_Id(instance: ManagedObject): number;
+        set_Id(instance: ManagedObject, value: number): void;
+        get_Name(instance: ManagedObject): string;
+        set_Name(instance: ManagedObject, value: string): void;
+        get_Age(instance: ManagedObject): number;
+        set_Age(instance: ManagedObject, value: number): void;
+        get_Pets(instance: ManagedObject): Array<ManagedObject>;
+        set_Pets(instance: ManagedObject, value: Array<ManagedObject | object>): void;
       };
       DogInterop: {
-        ctor(jsObject: object): object;
-        Bark(instance: object): string;
-        GetAge(instance: object, asHumanYears: boolean): number;
-        get_Name(instance: object): string;
-        set_Name(instance: object, value: string): void;
-        get_Breed(instance: object): string;
-        set_Breed(instance: object, value: string): void;
-        get_Age(instance: object): number;
-        set_Age(instance: object, value: number): void;
+        ctor(jsObject: object): ManagedObject;
+        Bark(instance: ManagedObject): string;
+        GetAge(instance: ManagedObject, asHumanYears: boolean): number;
+        get_Name(instance: ManagedObject): string;
+        set_Name(instance: ManagedObject, value: string): void;
+        get_Breed(instance: ManagedObject): string;
+        set_Breed(instance: ManagedObject, value: string): void;
+        get_Age(instance: ManagedObject): number;
+        set_Age(instance: ManagedObject, value: number): void;
       };
       MyAppInterop: {
-        ctor(): object;
+        ctor(): ManagedObject;
         Initialize(baseAddress: string): void;
-        GetPeopleProvider(): object;
+        GetPeopleProvider(): ManagedObject;
       };
       PeopleProviderInterop: {
-        FetchPeopleAsync(instance: object): Promise<object>;
-        get_PeopleCache(instance: object): Array<object> | null;
-        get_DelayTask(instance: object): Promise<object | null> | null;
-        set_DelayTask(instance: object, value: Promise<object | null> | null): void;
+        FetchPeopleAsync(instance: ManagedObject): Promise<ManagedObject>;
+        get_PeopleCache(instance: ManagedObject): Array<ManagedObject> | null;
+        get_DelayTask(instance: ManagedObject): Promise<ManagedObject | null> | null;
+        set_DelayTask(instance: ManagedObject, value: Promise<ManagedObject | object | null> | null): void;
       };
       TimeoutUnitInterop: {
-        ctor(jsObject: object): object;
-        get_Timeout(instance: object): number;
-        set_Timeout(instance: object, value: number): void;
+        ctor(jsObject: object): ManagedObject;
+        get_Timeout(instance: ManagedObject): number;
+        set_Timeout(instance: ManagedObject, value: number): void;
       };
     };
   };

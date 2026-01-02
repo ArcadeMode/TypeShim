@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace TypeShim.Shared;
 
-public sealed class InteropTypeInfoCache
+internal sealed class InteropTypeInfoCache
 {
     private readonly Dictionary<ITypeSymbol, InteropTypeInfo> _cache = new(SymbolEqualityComparer.IncludeNullability);
     public InteropTypeInfo GetOrAdd(ITypeSymbol typeSymbol, Func<InteropTypeInfo> factory)

@@ -651,11 +651,11 @@ export class Proxy extends ProxyBase {
     super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
-  public get P1(): object {
+  public get P1(): ManagedObject {
     return TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
   }
 
-  public set P1(value: object) {
+  public set P1(value: ManagedObject) {
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value);
   }
 }
@@ -697,11 +697,11 @@ export class Proxy extends ProxyBase {
     super(TypeShimConfig.exports.N1.C1Interop.ctor(i, jsObject));
   }
 
-  public get P1(): object {
+  public get P1(): ManagedObject {
     return TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
   }
 
-  public set P1(value: object) {
+  public set P1(value: ManagedObject) {
     TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value);
   }
 }
