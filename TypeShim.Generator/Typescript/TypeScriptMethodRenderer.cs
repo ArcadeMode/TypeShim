@@ -5,193 +5,271 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator.Typescript;
 
-internal sealed class TypeScriptMethodRenderer(ClassInfo classInfo, TypescriptSymbolNameProvider symbolNameProvider)
+internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
 {
-    private readonly StringBuilder sb = new();
-
-    internal string GetRenderedContent()
+    internal void RenderProxyConstructor(ConstructorInfo? constructorInfo)
     {
-        return sb.ToString();
-    }
-
-    internal void RenderProxyMethod(int depth, MethodInfo methodInfo)
-    {
-        string indent = new(' ', depth * 2);
-        sb.AppendLine($"{indent}public {RenderProxyMethodSignature(methodInfo.WithoutInstanceParameter())} {{");
-        RenderMethodBodyContent(depth + 1, methodInfo);
-        sb.AppendLine($"{indent}}}");
-        sb.AppendLine();
-
-        string RenderProxyMethodSignature(MethodInfo methodInfo)
+        if (constructorInfo == null)
         {
-            string returnType = symbolNameProvider.GetUserClassSymbolNameIfExists(methodInfo.ReturnType, SymbolNameFlags.Proxy) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
+            ctx.Append("private constructor() {");
+            if (!ctx.Class.IsStatic)
+            {
+                ctx.Append(" super(undefined!); "); // so TS compiles
+            }
+            ctx.AppendLine("}");
+        }
+        else if (constructorInfo == null)
+        {
+            ctx.AppendLine("private constructor() { super(undefined!); }");
+        }
+        else
+        {
+            RenderConstructorSignature();
+            RenderConstructorBody();
+        }
 
-            string optionalAsync = methodInfo.ReturnType.IsTaskType ? "async " : string.Empty;
-            return $"{optionalAsync}{methodInfo.Name}({GetProxyMethodParameterList(methodInfo)}): {returnType}";
+        void RenderConstructorSignature()
+        {
+            ctx.Append("constructor(");
+            RenderParameterList(constructorInfo.Parameters);
+            if (constructorInfo.InitializerObject != null)
+            {
+                if (constructorInfo.Parameters.Length != 0) ctx.Append(", ");
+                
+                string returnType = symbolNameProvider.GetUserClassSymbolName(ctx.Class, RenderConstants.Initializer);
+                ctx.Append(constructorInfo.InitializerObject.Name).Append(": ").Append(returnType);
+            }
+            ctx.Append(")");
+        }
+
+        void RenderConstructorBody()
+        {
+            ctx.AppendLine(" {");
+            using (ctx.Indent())
+            {
+                RenderHandleExtractionToConsts(constructorInfo.Parameters);
+                string proxyClassName = symbolNameProvider.GetUserClassSymbolName(ctx.Class, SymbolNameFlags.Proxy);
+                ctx.Append("super(");
+                RenderInteropInvocation(constructorInfo.Name, constructorInfo.Parameters, constructorInfo.InitializerObject);
+                ctx.AppendLine(");");
+            }
+            ctx.AppendLine("}");
         }
     }
 
-    internal void RenderProxyProperty(int depth, PropertyInfo propertyInfo)
+    internal void RenderProxyMethod(MethodInfo methodInfo)
     {
-        string indent = new(' ', depth * 2);
+        RenderProxyMethodSignature(methodInfo.WithoutInstanceParameter());
+        RenderMethodBody(methodInfo);
+
+        void RenderProxyMethodSignature(MethodInfo methodInfo)
+        {
+            ctx.Append("public ");
+            if (methodInfo.IsStatic) ctx.Append("static ");
+            if (methodInfo.ReturnType.IsTaskType) ctx.Append("async ");
+            ctx.Append(methodInfo.Name)
+               .Append('(');
+            RenderParameterList(methodInfo.Parameters);
+            ctx.Append("): ");
+
+            if (methodInfo.ReturnType is { RequiresTypeConversion: true, SupportsTypeConversion: true })
+            {
+                ClassInfo classInfo = ctx.GetClassInfo(methodInfo.ReturnType.GetInnermostType());
+                ctx.Append(symbolNameProvider.GetUserClassSymbolName(classInfo, methodInfo.ReturnType, SymbolNameFlags.Proxy));
+            }
+            else
+            {
+                ctx.Append(symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType));
+            }
+        }
+    }
+
+    internal void RenderProxyProperty(PropertyInfo propertyInfo)
+    {
         MethodInfo getterInfo = propertyInfo.GetMethod;
-        sb.AppendLine($"{indent}public {RenderProxyPropertyGetterSignature(getterInfo.WithoutInstanceParameter())} {{");
-        RenderMethodBodyContent(depth + 1, getterInfo);
-        sb.AppendLine($"{indent}}}");
-        sb.AppendLine();
+        RenderProxyPropertyGetterSignature(getterInfo.WithoutInstanceParameter());
+        RenderMethodBody(getterInfo);
 
         if (propertyInfo.SetMethod is MethodInfo setterInfo)
         {
-            sb.AppendLine($"{indent}public {RenderProxyPropertySetterSignature(setterInfo.WithoutInstanceParameter())} {{");
-            RenderMethodBodyContent(depth + 1, setterInfo);
-            sb.AppendLine($"{indent}}}");
-            sb.AppendLine();
+            ctx.AppendLine();
+            RenderProxyPropertySetterSignature(setterInfo.WithoutInstanceParameter());
+            RenderMethodBody(setterInfo);
         }
 
-        string RenderProxyPropertyGetterSignature(MethodInfo methodInfo)
+        void RenderProxyPropertyGetterSignature(MethodInfo methodInfo)
         {
-            string returnType = symbolNameProvider.GetUserClassSymbolNameIfExists(methodInfo.ReturnType, SymbolNameFlags.Proxy) ?? symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType);
-            return $"get {propertyInfo.Name}({GetProxyMethodParameterList(methodInfo)}): {returnType}";
-        }
+            ctx.Append($"public ");
+            if (methodInfo.IsStatic) ctx.Append("static ");
+            ctx.Append("get ").Append(propertyInfo.Name).Append("(): ");
 
-        string RenderProxyPropertySetterSignature(MethodInfo methodInfo)
-        {
-            return $"set {propertyInfo.Name}({GetProxyMethodParameterList(methodInfo)})";
-        }
-    }
-
-    private string GetProxyMethodParameterList(MethodInfo methodInfo)
-    {
-        return string.Join(", ", methodInfo.MethodParameters.Select(p =>
-        {
-            SymbolNameFlags flags = ContainsSnapshotCompatibleType(p.Type) ? SymbolNameFlags.ProxySnapshotUnion : SymbolNameFlags.Proxy;
-            string returnType = symbolNameProvider.GetUserClassSymbolNameIfExists(p.Type, flags) ?? symbolNameProvider.GetNakedSymbolReference(p.Type);
-            return $"{p.Name}: {returnType}";
-        }));
-
-        static bool ContainsSnapshotCompatibleType(InteropTypeInfo typeInfo)
-        {
-            if (typeInfo.IsSnapshotCompatible)
-                return true;
-            if (typeInfo.TypeArgument is InteropTypeInfo innerTypeInfo)
-                return ContainsSnapshotCompatibleType(innerTypeInfo);
-            return false;
-        }
-    }
-
-    internal void RenderMethodBodyContent(int depth, MethodInfo methodInfo)
-    {
-        RenderManagedObjectConstAssignments(depth, methodInfo);
-        RenderInteropInvocation(depth, methodInfo);
-    }
-
-    private void RenderManagedObjectConstAssignments(int depth, MethodInfo methodInfo)
-    {
-        string indent = new(' ', depth * 2);
-        foreach (MethodParameterInfo parameterInfo in methodInfo.MethodParameters)
-        {
-            if (parameterInfo.IsInjectedInstanceParameter || !parameterInfo.Type.RequiresCLRTypeConversion || !parameterInfo.Type.ContainsExportedType())
-                continue;
-
-            if (symbolNameProvider.GetUserClassSymbolNameIfExists(parameterInfo.Type, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is not string proxyClassName)
+            if (methodInfo.ReturnType is { RequiresTypeConversion: true, SupportsTypeConversion: true })
             {
-                throw new ArgumentException($"Invalid conversion-requiring type '{parameterInfo.Type.CLRTypeSyntax}' failed to resolve associated TypeScript proxy name.");
+                ClassInfo classInfo = ctx.GetClassInfo(methodInfo.ReturnType.GetInnermostType());
+                ctx.Append(symbolNameProvider.GetUserClassSymbolName(classInfo, methodInfo.ReturnType, SymbolNameFlags.Proxy));
+            }
+            else
+            {
+                ctx.Append(symbolNameProvider.GetNakedSymbolReference(methodInfo.ReturnType));
+            }
+        }
+
+        void RenderProxyPropertySetterSignature(MethodInfo methodInfo)
+        {
+            ctx.Append($"public ");
+            if (methodInfo.IsStatic) ctx.Append("static ");
+            ctx.Append("set ").Append(propertyInfo.Name).Append('(');
+            RenderParameterList(methodInfo.Parameters);
+            ctx.Append(')');
+        }
+    }
+
+    private void RenderParameterList(IEnumerable<MethodParameterInfo> parameterInfos)
+    {
+        bool isFirst = true;
+        foreach (MethodParameterInfo parameterInfo in parameterInfos)
+        {
+            if (!isFirst) ctx.Append(", ");
+
+            ctx.Append(parameterInfo.Name).Append(": ").Append(ResolveReturnType(parameterInfo.Type));
+            isFirst = false;
+        }
+
+        string ResolveReturnType(InteropTypeInfo typeInfo)
+        {
+            if (!typeInfo.RequiresTypeConversion || !typeInfo.SupportsTypeConversion)
+            {
+                return symbolNameProvider.GetNakedSymbolReference(typeInfo);
             }
 
-            sb.Append($"{indent}const {GetInteropInvocationVariable(parameterInfo)} = ");
-            RenderInlineToManagedObjectConversion(parameterInfo.Type, proxyClassName, parameterInfo.Name);
-            sb.AppendLine(";");
+            ClassInfo classInfo = ctx.GetClassInfo(typeInfo.GetInnermostType());
+            if (classInfo is { Constructor: { IsParameterless: true, AcceptsInitializer: true } })
+            {
+                return symbolNameProvider.GetUserClassSymbolName(classInfo, typeInfo, SymbolNameFlags.ProxyInitializerUnion);
+            }
+
+            return symbolNameProvider.GetUserClassSymbolName(classInfo, typeInfo, SymbolNameFlags.Proxy);
         }
     }
 
-    private void RenderInteropInvocation(int depth, MethodInfo methodInfo)
+    private void RenderMethodBody(MethodInfo methodInfo)
     {
-        string indent = new(' ', depth * 2);
-        string interopInvoke = RenderMethodCallParametersWithInstanceParameterExpression(methodInfo, "this.instance"); // note: instance parameter will be unused for static methods
-
-        InteropTypeInfo returnType = methodInfo.ReturnType;
-
-        if (symbolNameProvider.GetUserClassSymbolNameIfExists(returnType, SymbolNameFlags.Proxy | SymbolNameFlags.Isolated) is string proxyClassName)
+        ctx.AppendLine(" {");
+        using (ctx.Indent())
         {
-            // user class return type, wrap in proxy
-            sb.AppendLine($"{indent}const res = this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({interopInvoke});");
-            sb.Append($"{indent}return ");
-            RenderInlineToProxyConversion(returnType, proxyClassName, "res");
-            sb.AppendLine(";");
+            RenderHandleExtractionToConsts(methodInfo.Parameters);
+
+            if (methodInfo.ReturnType is { RequiresTypeConversion: true, SupportsTypeConversion: true })
+            {
+                ClassInfo classInfo = ctx.GetClassInfo(methodInfo.ReturnType.GetInnermostType());
+                string proxyClassName = symbolNameProvider.GetUserClassSymbolName(classInfo, SymbolNameFlags.Proxy);
+                // user class return type, wrap in proxy
+                ctx.Append("const res = ");
+                RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
+                ctx.AppendLine(";");
+                ctx.Append($"return ");
+                RenderInlineProxyConstruction(methodInfo.ReturnType, proxyClassName, "res");
+                ctx.AppendLine(";");
+            }
+            else
+            {
+                ctx.Append(methodInfo.ReturnType.ManagedType == KnownManagedType.Void ? string.Empty : "return ");
+                RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
+                ctx.AppendLine(";");
+            }
         }
-        else // primitive return type or void
-        {
-            string optionalReturn = returnType.ManagedType == KnownManagedType.Void ? string.Empty : "return ";
-            sb.AppendLine($"{indent}{optionalReturn}this.interop.{ResolveInteropMethodAccessor(classInfo, methodInfo)}({interopInvoke});");
-        }
+        ctx.AppendLine("}");
 
-        string RenderMethodCallParametersWithInstanceParameterExpression(MethodInfo methodInfo, string instanceParameterExpression)
+        void RenderInlineProxyConstruction(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
         {
-            return string.Join(", ", methodInfo.MethodParameters.Select(p => p.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(p)));
+            if (typeInfo is { IsNullableType: true })
+            {
+                ctx.Append(sourceVarName).Append(" ? ");
+                RenderInlineProxyConstruction(typeInfo.TypeArgument!, proxyClassName, sourceVarName);
+                ctx.Append(" : null");
+            }
+            else if (typeInfo is { IsArrayType: true } or { IsTaskType: true })
+            {
+                string transformFunction = typeInfo.IsArrayType ? "map" : "then";
+                ctx.Append(sourceVarName).Append('.').Append(transformFunction).Append("(e => ");
+                RenderInlineProxyConstruction(typeInfo.TypeArgument!, proxyClassName, "e");
+                ctx.Append(')');
+            }
+            else
+            {
+                ctx.Append($"ProxyBase.fromHandle({proxyClassName}, {sourceVarName})");
+            }
         }
     }
 
-    private void RenderInlineToProxyConversion(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
-    {        
-        if (typeInfo is { IsNullableType: true })
-        {
-            sb.Append($"{sourceVarName} ? ");
-            RenderInlineToProxyConversion(typeInfo.TypeArgument!, proxyClassName, sourceVarName);
-            sb.Append(" : null");
-        }
-        else if (typeInfo is { IsArrayType: true } or { IsTaskType: true })
-        {
-            string transformFunction = typeInfo.IsArrayType ? "map" : "then";
-            sb.Append($"{sourceVarName}.{transformFunction}(e => ");
-            RenderInlineToProxyConversion(typeInfo.TypeArgument!, proxyClassName, "e");
-            sb.Append(')');
-        }
-        else
-        {
-            sb.Append($"new {proxyClassName}({sourceVarName}, this.interop)");
-        }
-    }
-
-    private void RenderInlineToManagedObjectConversion(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
+    private void RenderHandleExtractionToConsts(IEnumerable<MethodParameterInfo> parameterInfos)
     {
-        if (typeInfo is { IsNullableType: true })
+        foreach (MethodParameterInfo parameterInfo in parameterInfos)
         {
-            sb.Append($"{sourceVarName} ? ");
-            RenderInlineToManagedObjectConversion(typeInfo.TypeArgument!, proxyClassName, sourceVarName);
-            sb.Append(" : null");
+            if (parameterInfo.IsInjectedInstanceParameter || !parameterInfo.Type.RequiresTypeConversion || !parameterInfo.Type.SupportsTypeConversion)
+                continue;
+
+            ctx.Append($"const {GetInteropInvocationVariable(parameterInfo)} = ");
+            ClassInfo classInfo = ctx.GetClassInfo(parameterInfo.Type.GetInnermostType());
+            string proxyClassName = symbolNameProvider.GetUserClassSymbolName(classInfo, SymbolNameFlags.Proxy);
+            RenderInlineHandleExtraction(parameterInfo.Type, proxyClassName, parameterInfo.Name);
+            ctx.AppendLine(";");
         }
-        else if (typeInfo is { IsArrayType: true } or { IsTaskType: true })
+
+        void RenderInlineHandleExtraction(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
         {
-            string transformFunction = typeInfo.IsArrayType ? "map" : "then";
-            sb.Append($"{sourceVarName}.{transformFunction}(e => ");
-            RenderInlineToManagedObjectConversion(typeInfo.TypeArgument!, proxyClassName, "e");
-            sb.Append(')');
-        }
-        else
-        {
-            sb.Append($"{sourceVarName} instanceof {proxyClassName} ? {sourceVarName}.instance : {sourceVarName}");
+            if (typeInfo is { IsNullableType: true })
+            {
+                ctx.Append(sourceVarName).Append(" ? ");
+                RenderInlineHandleExtraction(typeInfo.TypeArgument!, proxyClassName, sourceVarName);
+                ctx.Append(" : null");
+            }
+            else if (typeInfo is { IsArrayType: true } or { IsTaskType: true })
+            {
+                string transformFunction = typeInfo.IsArrayType ? "map" : "then";
+                ctx.Append(sourceVarName).Append('.').Append(transformFunction).Append("(e => ");
+                RenderInlineHandleExtraction(typeInfo.TypeArgument!, proxyClassName, "e");
+                ctx.Append(')');
+            }
+            else
+            {
+                ctx.Append(sourceVarName).Append(" instanceof ").Append(proxyClassName).Append(" ? ").Append(sourceVarName).Append(".instance : ").Append(sourceVarName);
+            }
         }
     }
 
-    private string ResolveInteropMethodAccessor(ClassInfo classInfo, MethodInfo methodInfo)
+    private void RenderInteropInvocation(string methodName, IEnumerable<MethodParameterInfo> methodParameters, MethodParameterInfo? initializerObject = null)
     {
-        return $"{classInfo.Namespace}.{symbolNameProvider.GetInteropInterfaceName(classInfo)}.{methodInfo.Name}";
+        ctx.Append("TypeShimConfig.exports.");
+        RenderInteropMethodAccessor(methodName);
+        ctx.Append("(");
+        RenderMethodInvocationParameters("this.instance");
+        ctx.Append(")");
+
+        void RenderMethodInvocationParameters(string instanceParameterExpression)
+        {
+            bool isFirst = true;
+            foreach (MethodParameterInfo parameter in methodParameters)
+            {
+                if (!isFirst) ctx.Append(", ");
+                
+                ctx.Append(parameter.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(parameter));
+                isFirst = false;
+            }
+            if (initializerObject == null) return;
+
+            if (!isFirst) ctx.Append(", ");
+            ctx.Append(initializerObject.Name);
+        }
+
+        void RenderInteropMethodAccessor(string methodName)
+        {
+            ctx.Append(ctx.Class.Namespace).Append('.').Append(RenderConstants.InteropClassName(ctx.Class)).Append('.').Append(methodName);
+        }
     }
 
-    private static string GetNewProxyExpression(InteropTypeInfo returnTypeInfo, string proxyClassName, string instanceName)
+    private static string GetInteropInvocationVariable(MethodParameterInfo param) // TODO: get from ctx localscope (check param.Name call sites!)
     {
-        if (returnTypeInfo.IsNullableType)
-        {
-            return $"{instanceName} ? new {proxyClassName}({instanceName}, this.interop) : null";
-        }
-        else
-        {
-            return $"new {proxyClassName}({instanceName}, this.interop)";
-        }
-    }
-
-    private static string GetInteropInvocationVariable(MethodParameterInfo param)
-    {
-        return param.Type.RequiresCLRTypeConversion && param.Type.ContainsExportedType() ? $"{param.Name}Instance" : param.Name;
+        return param.Type.RequiresTypeConversion && param.Type.SupportsTypeConversion ? $"{param.Name}Instance" : param.Name;
     }
 }

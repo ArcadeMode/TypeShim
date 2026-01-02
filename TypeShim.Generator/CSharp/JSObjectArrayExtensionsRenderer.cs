@@ -14,8 +14,6 @@ internal sealed class JSObjectArrayExtensionsRenderer()
     {
         sb.AppendLine("// JSImports for the type marshalling process");
 
-        // TODO: try provide module to user for importing with JSHost.Import ?? needs referencing in JSImport(xx)
-
         // raison d'etre: type mapping limitations: https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mapping-limitations
         // 1. JSObject has no means to retrieve arrays beside ByteArray (automapping user classes with an array property type is therefore not possible by default)
         // 2. Nested types cannot be represented on the interop boundary (i.e. Task<int[]>
@@ -56,23 +54,23 @@ public static partial class JSObjectArrayExtensions
         return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsObjectArray(value) : [];
     }
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Array<JSType.Number>>]
     public static partial int[] MarshallAsIntArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Array<JSType.Number>>]
     public static partial double[] MarshallAsDoubleArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Array<JSType.String>>]
     public static partial string[] MarshallAsStringArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Array<JSType.Object>>]
     public static partial JSObject[] MarshallAsJSObjectArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("globalThis.window.unwrap")]
+    [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static partial object[] MarshallAsObjectArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
 }

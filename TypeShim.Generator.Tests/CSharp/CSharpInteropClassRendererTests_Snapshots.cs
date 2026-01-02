@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
+using TypeShim.Shared;
 
 namespace TypeShim.Generator.Tests.CSharp;
 
@@ -31,10 +32,12 @@ internal class CSharpInteropClassRendererTests_Snapshots
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -42,6 +45,15 @@ using System.Threading.Tasks;
 namespace N1;
 public partial class C1Interop
 {
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = jsObject.{{jsObjectMethod}}("P1"),
+        };
+    }
     [JSExport]
     [return: JSMarshalAs<{{jsType}}>]
     public static {{typeExpression}} get_P1([JSMarshalAs<JSType.Any>] object instance)
@@ -67,7 +79,7 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        return new()
+        return new C1()
         {
             P1 = jsObject.{{jsObjectMethod}}("P1"),
         };
@@ -76,13 +88,13 @@ public partial class C1Interop
 
 """.Replace("{{typeExpression}}", interopTypeExpression)
    .Replace("{{jsType}}", jsType)
-   .Replace("{{jsObjectMethod}}", jsObjectMethod)));
+   .Replace("{{jsObjectMethod}}", jsObjectMethod));
     }
 
     [TestCase("string", "string", "JSType.String")]
     [TestCase("double", "double", "JSType.Number")]
     [TestCase("bool", "bool", "JSType.Boolean")]
-    public void CSharpInteropClass_SupportedPropertyType_AndUnsupportedPropertyType_GeneratesNoFromJSObjectMethod(string typeExpression, string interopTypeExpression, string jsType)
+    public void CSharpInteropClass_SupportedPropertyType_AndNotExportedReferenceType_GeneratesNoFromJSObjectMethod(string typeExpression, string interopTypeExpression, string jsType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -92,7 +104,6 @@ public partial class C1Interop
             [TSExport]
             public class C1
             {
-                public {{typeExpression}} P1 { get; set; }
                 public List<{{typeExpression}}> P2 { get; set; }
             }
         """.Replace("{{typeExpression}}", typeExpression));
@@ -102,10 +113,12 @@ public partial class C1Interop
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -114,18 +127,13 @@ namespace N1;
 public partial class C1Interop
 {
     [JSExport]
-    [return: JSMarshalAs<{{jsType}}>]
-    public static {{typeExpression}} get_P1([JSMarshalAs<JSType.Any>] object instance)
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
     {
-        C1 typed_instance = (C1)instance;
-        return typed_instance.P1;
-    }
-    [JSExport]
-    [return: JSMarshalAs<JSType.Void>]
-    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<{{jsType}}>] {{typeExpression}} value)
-    {
-        C1 typed_instance = (C1)instance;
-        typed_instance.P1 = value;
+        return new C1()
+        {
+            P2 = (List<{{typeExpression}}>)jsObject.GetPropertyAsObject("P2"),
+        };
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Any>]
@@ -147,18 +155,26 @@ public partial class C1Interop
         return obj switch
         {
             C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        return new C1()
+        {
+            P2 = (List<{{typeExpression}}>)jsObject.GetPropertyAsObject("P2"),
         };
     }
 }
 
 """.Replace("{{typeExpression}}", interopTypeExpression)
-   .Replace("{{jsType}}", jsType)));
+   .Replace("{{jsType}}", jsType));
     }
 
     [TestCase("Version")]
     [TestCase("Uri")]
-    public void CSharpInteropClass_SupportedPropertyType_AndUnsupportedPropertyArrayType_GeneratesNoFromJSObjectMethod(string typeName)
+    public void CSharpInteropClass_SupportedPropertyType_AndNotExportedArrayType_GeneratesNoFromJSObjectMethod(string typeName)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -176,10 +192,12 @@ public partial class C1Interop
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.Last();
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -187,6 +205,16 @@ using System.Threading.Tasks;
 namespace N1;
 public partial class C1Interop
 {
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = ({{typeName}}[])jsObject.GetPropertyAsObjectArray("P1"),
+            P2 = jsObject.GetPropertyAsInt32("P2"),
+        };
+    }
     [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static object[] get_P1([JSMarshalAs<JSType.Any>] object instance)
@@ -221,11 +249,140 @@ public partial class C1Interop
         return obj switch
         {
             C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = ({{typeName}}[])jsObject.GetPropertyAsObjectArray("P1"),
+            P2 = jsObject.GetPropertyAsInt32("P2"),
         };
     }
 }
 
-""".Replace("{{typeName}}", typeName)));
+""".Replace("{{typeName}}", typeName));
+    }
+
+    [TestCase("Version")]
+    [TestCase("Uri")]
+    public void CSharpInteropClass_SupportedPropertyType_AndNotExportedTaskType_GeneratesNoFromJSObjectMethod(string typeName)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public Task<{{typeName}}> P1 { get; set; }
+                public int P2 { get; set; }
+            }
+        """.Replace("{{typeName}}", typeName));
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses.Last();
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+
+        AssertEx.EqualOrDiff(interopClass, """    
+// Auto-generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        var P1Tmp = jsObject.GetPropertyAsObjectTask("P1");
+        TaskCompletionSource<{{typeName}}> P1Tcs = new();
+        P1Tmp.ContinueWith(t => {
+            if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) P1Tcs.SetCanceled();
+            else P1Tcs.SetResult(({{typeName}})t.Result);
+        }, TaskContinuationOptions.ExecuteSynchronously);
+        return new C1()
+        {
+            P1 = P1Tcs.Task,
+            P2 = jsObject.GetPropertyAsInt32("P2"),
+        };
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
+    public static Task<object> get_P1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        TaskCompletionSource<object> retValTcs = new();
+        typed_instance.P1.ContinueWith(t => {
+            if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) retValTcs.SetCanceled();
+            else retValTcs.SetResult((object)t.Result);
+        }, TaskContinuationOptions.ExecuteSynchronously);
+        return retValTcs.Task;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> value)
+    {
+        C1 typed_instance = (C1)instance;
+        TaskCompletionSource<{{typeName}}> valueTcs = new();
+        value.ContinueWith(t => {
+            if (t.IsFaulted) valueTcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) valueTcs.SetCanceled();
+            else valueTcs.SetResult(({{typeName}})t.Result);
+        }, TaskContinuationOptions.ExecuteSynchronously);
+        Task<{{typeName}}> typed_value = valueTcs.Task;
+        typed_instance.P1 = typed_value;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static int get_P2([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return typed_instance.P2;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P2([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] int value)
+    {
+        C1 typed_instance = (C1)instance;
+        typed_instance.P2 = value;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        var P1Tmp = jsObject.GetPropertyAsObjectTask("P1");
+        TaskCompletionSource<{{typeName}}> P1Tcs = new();
+        P1Tmp.ContinueWith(t => {
+            if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) P1Tcs.SetCanceled();
+            else P1Tcs.SetResult(({{typeName}})t.Result);
+        }, TaskContinuationOptions.ExecuteSynchronously);
+        return new C1()
+        {
+            P1 = P1Tcs.Task,
+            P2 = jsObject.GetPropertyAsInt32("P2"),
+        };
+    }
+}
+
+""".Replace("{{typeName}}", typeName));
     }
 }

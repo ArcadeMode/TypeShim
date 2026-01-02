@@ -4,43 +4,38 @@ using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
 
-internal class TypescriptUserClassProxyRenderer(ClassInfo classInfo, TypescriptSymbolNameProvider symbolNameProvider)
+internal class TypescriptUserClassProxyRenderer(TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
 {
-    private readonly StringBuilder sb = new();
-    private readonly TypeScriptMethodRenderer methodRenderer = new(classInfo, symbolNameProvider);
+    private readonly TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider, ctx);
 
-    internal string Render(int depth)
+    internal void Render()
     {
-        string interopInterfaceName = symbolNameProvider.GetModuleInteropClassName();
-        RenderProxyClass(interopInterfaceName, depth);
-        return sb.ToString();
-    }
-
-    private void RenderProxyClass(string interopInterfaceName, int depth)
-    {
-        string indent = new(' ', depth * 2);
-        string indent2 = new(' ', (depth + 1) * 2);
-        string indent3 = new(' ', (depth + 2) * 2);
-
-        sb.AppendLine($"{indent}export class {symbolNameProvider.GetUserClassProxySymbolName()} {{");
-        sb.AppendLine($"{indent2}interop: {interopInterfaceName};");
-        sb.AppendLine($"{indent2}instance: object;");
-        sb.AppendLine();
-        sb.AppendLine($"{indent2}constructor(instance: object, interop: {interopInterfaceName}) {{");
-        sb.AppendLine($"{indent3}this.interop = interop;");
-        sb.AppendLine($"{indent3}this.instance = instance;");
-        sb.AppendLine($"{indent2}}}");
-        sb.AppendLine();
-
-        foreach (MethodInfo methodInfo in classInfo.Methods.Where(m => !m.IsStatic))
+        ctx.Append($"export class ").Append(RenderConstants.Proxy);
+        if (!ctx.Class.IsStatic)
         {
-            methodRenderer.RenderProxyMethod(depth + 1, methodInfo);
+            ctx.Append($" extends ProxyBase");
         }
-        foreach (PropertyInfo propertyInfo in classInfo.Properties.Where(p => !p.IsStatic && p.Type.IsSnapshotCompatible))
+        ctx.AppendLine(" {");
+
+        using (ctx.Indent())
         {
-            methodRenderer.RenderProxyProperty(depth + 1, propertyInfo);
+            methodRenderer.RenderProxyConstructor(ctx.Class.Constructor);
+            ctx.AppendLine();
+            bool isFirst = true;
+            foreach (MethodInfo methodInfo in ctx.Class.Methods)
+            {
+                if (!isFirst) ctx.AppendLine();
+                methodRenderer.RenderProxyMethod(methodInfo);
+                isFirst = false;
+            }
+            isFirst = true;
+            foreach (PropertyInfo propertyInfo in ctx.Class.Properties)
+            {
+                if (!isFirst) ctx.AppendLine();
+                methodRenderer.RenderProxyProperty(propertyInfo);
+                isFirst = false;
+            }
         }
-        sb.Append(methodRenderer.GetRenderedContent());
-        sb.AppendLine($"{indent}}}");
+        ctx.AppendLine("}");
     }
 }

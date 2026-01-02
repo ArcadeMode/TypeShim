@@ -6,7 +6,7 @@ internal sealed class MethodInfo
 {
     internal required bool IsStatic { get; init; }
     internal required string Name { get; init; }
-    internal required IReadOnlyCollection<MethodParameterInfo> MethodParameters { get; init; }
+    internal required IReadOnlyCollection<MethodParameterInfo> Parameters { get; init; }
     internal required InteropTypeInfo ReturnType { get; init; }
 
     public MethodInfo WithoutInstanceParameter()
@@ -15,7 +15,7 @@ internal sealed class MethodInfo
         {
             IsStatic = this.IsStatic,
             Name = this.Name,
-            MethodParameters = [.. this.MethodParameters.Where(p => !p.IsInjectedInstanceParameter)],
+            Parameters = [.. this.Parameters.Where(p => !p.IsInjectedInstanceParameter)],
             ReturnType = this.ReturnType,
         };
     }
@@ -26,7 +26,7 @@ internal sealed class MethodInfo
         {
             IsStatic = this.IsStatic,
             Name = this.Name,
-            MethodParameters = [.. this.MethodParameters.Select(p => p.WithInteropTypeInfo())],
+            Parameters = [.. this.Parameters.Select(p => p.WithInteropTypeInfo())],
             ReturnType = this.ReturnType.AsInteropTypeInfo(),
         };
     }

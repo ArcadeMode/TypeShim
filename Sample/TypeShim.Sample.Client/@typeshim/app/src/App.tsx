@@ -2,17 +2,18 @@ import { useMemo, useState } from 'react';
 import Home from './pages/Home';
 import People from './pages/People';
 import CapabilitiesPage from './pages/Capabilities';
-import type { AssemblyExports } from '@typeshim/wasm-exports';
 
-import { launchWasmRuntime } from '@typeshim/wasm-exports';
+import { createWasmRuntime, MyApp, TypeShimInitializer } from '@typeshim/wasm-exports';
 
 type Page = 'home' | 'people' | 'capabilities';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
 
-  const exportsPromise: Promise<AssemblyExports> = useMemo(() => {
-    return launchWasmRuntime() as Promise<AssemblyExports>;
+  useMemo(async () => {
+    const runtimeInfo = await createWasmRuntime();
+    TypeShimInitializer.initialize(runtimeInfo);
+    MyApp.Proxy.Initialize(document.baseURI);
   }, []);
 
   return (
@@ -51,8 +52,8 @@ function App() {
       </header>
       <main style={{ padding: '1rem', maxWidth: 800, margin: '0 auto' }}>
         {currentPage === 'home' && <Home />}
-        {currentPage === 'people' && <People exportsPromise={exportsPromise} />}
-        {currentPage === 'capabilities' && <CapabilitiesPage exportsPromise={exportsPromise} />}
+        {currentPage === 'people' && <People />}
+        {currentPage === 'capabilities' && <CapabilitiesPage />}
       </main>
     </div>
   );

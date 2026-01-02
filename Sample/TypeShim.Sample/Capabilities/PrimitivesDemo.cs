@@ -1,38 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace TypeShim.Sample.Capabilities;
 
-[TSModule]
-public static class CapabilitiesModule
-{
-    public static CapabilitiesProvider GetCapabilitiesProvider() => new CapabilitiesProvider();
-}
-
-[TSExport]
-public class CapabilitiesProvider
-{
-    public PrimitivesDemo GetPrimitivesDemo(string baseString)
-    {
-        return new() 
-        { 
-            InitialStringProperty = baseString, 
-            StringProperty = baseString 
-        };
-    }
-
-    public ArraysDemo GetArraysDemo()
-    {
-        return new();
-    }
-}
-
 [TSExport]
 public class PrimitivesDemo
 {
-    public required string InitialStringProperty { get; set; }
+    public required string InitialStringProperty { get; init; }
     public required string StringProperty { get; set; }
 
     public int GetStringLength()
@@ -77,26 +53,4 @@ public class PrimitivesDemo
         }
         StringProperty = sb.ToString();
     }
-}
-
-[TSExport]
-public class ArraysDemo
-{
-    public int[] IntArrayProperty { get; set; } = Array.Empty<int>();
-    
-    public int SumIntArray()
-    {
-        int sum = 0;
-        foreach (var item in IntArrayProperty)
-        {
-            sum += item;
-        }
-        return sum;
-    }
-    public void AppendToIntArray(int value)
-    {
-        var list = new List<int>(IntArrayProperty) { value };
-        IntArrayProperty = list.ToArray();
-    }
-
 }

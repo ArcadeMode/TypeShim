@@ -1,2 +1,5 @@
-
-export function launchWasmRuntime(args?: string | undefined): Promise<AssemblyExports>;
+export type DotnetWasmRuntimeInfo = {
+    assemblyExports: AssemblyExports;
+    setModuleImports: (moduleName: string, imports: object) => void;
+}
+export function createWasmRuntime(args?: string | undefined): Promise<DotnetWasmRuntimeInfo>;

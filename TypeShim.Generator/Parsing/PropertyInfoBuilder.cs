@@ -9,31 +9,42 @@ internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropert
     {
         if (propertySymbol.DeclaredAccessibility != Accessibility.Public)
         {
-            throw new UnsupportedPropertyException($"Property {classSymbol}.{propertySymbol} must have accessibility 'Public'.");
+            throw new NotSupportedPropertyException($"Property {classSymbol}.{propertySymbol} must have accessibility 'Public'.");
         }
 
         if (propertySymbol.GetMethod is not IMethodSymbol methodSymbol)
         {
-            throw new UnsupportedPropertyException("Properties without get are not supported");
+            throw new NotSupportedPropertyException("Properties without get are not supported");
         }
 
         MethodInfoBuilder methodInfoBuilder = new(classSymbol, methodSymbol, typeInfoCache);
         MethodInfo getMethod = methodInfoBuilder.Build();
 
         MethodInfo? setMethod = null;
-        if (propertySymbol.SetMethod is IMethodSymbol setMethodSymbol && !setMethodSymbol.IsInitOnly && setMethodSymbol.DeclaredAccessibility == Accessibility.Public)
+        MethodInfo? initMethod = null;
+        
+        if (propertySymbol.SetMethod is IMethodSymbol setMethodSymbol && setMethodSymbol.DeclaredAccessibility == Accessibility.Public)
         {
             MethodInfoBuilder setMethodInfoBuilder = new(classSymbol, setMethodSymbol, typeInfoCache);
-            setMethod = setMethodInfoBuilder.Build();
+            if (setMethodSymbol.IsInitOnly)
+            {
+                initMethod = setMethodInfoBuilder.Build();
+            }
+            else
+            {
+                setMethod = setMethodInfoBuilder.Build();
+            }
         }
 
         return new PropertyInfo
         {
             Name = propertySymbol.Name,
             IsStatic = propertySymbol.IsStatic,
+            IsRequired = propertySymbol.IsRequired,
             Type = typeInfoBuilder.Build(),
             GetMethod = getMethod,
             SetMethod = setMethod,
+            InitMethod = initMethod,
         };
     }
 }

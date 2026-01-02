@@ -4,6 +4,7 @@ using NUnit.Framework.Internal;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
 using TypeShim.Generator.Typescript;
+using TypeShim.Shared;
 
 namespace TypeShim.Generator.Tests.TypeScript;
 
@@ -12,7 +13,7 @@ internal class TypeScriptUserClassProxyRendererTests_Methods
     [TestCase("string", "string")]
     [TestCase("double", "number")]
     [TestCase("bool", "boolean")]
-    public void TypeScriptUserClassProxy_InstanceMethod_GeneratesSimpleFunction(string typeExpression, string typeScriptType)
+    public void TypeScriptUserClassProxy_InstanceMethod_WithPrimitiveReturnType(string typeExpression, string typeScriptType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -30,35 +31,75 @@ internal class TypeScriptUserClassProxyRendererTests_Methods
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
-
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
   public DoP1(): {{typeScriptType}} {
-    return this.interop.N1.C1Interop.DoP1(this.instance);
+    return TypeShimConfig.exports.N1.C1Interop.DoP1(this.instance);
   }
-
 }
 
-""".Replace("{{typeScriptType}}", typeScriptType)));
+""".Replace("{{typeScriptType}}", typeScriptType));
+    }
+
+    [TestCase("string?", "string | null")]
+    [TestCase("double?", "number | null")]
+    [TestCase("bool?", "boolean | null")]
+    public void TypeScriptUserClassProxy_InstanceMethod_WithNullablePrimitiveReturnType(string typeExpression, string typeScriptType)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public {{typeExpression}} DoP1() {}
+            }
+        """.Replace("{{typeExpression}}", typeExpression));
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public DoP1(): {{typeScriptType}} {
+    return TypeShimConfig.exports.N1.C1Interop.DoP1(this.instance);
+  }
+}
+
+""".Replace("{{typeScriptType}}", typeScriptType));
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceMethod_WithUserClassReturnType_GeneratesArrayProxies()
+    public void TypeScriptUserClassProxy_InstanceMethod_WithUserClassArrayReturnType_GeneratesArrayProxies()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -88,33 +129,29 @@ export class Proxy {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
-
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
   public GetAll(): Array<UserClass.Proxy> {
-    const res = this.interop.N1.C1Interop.GetAll(this.instance);
-    return res.map(e => new UserClass.Proxy(e, this.interop));
+    const res = TypeShimConfig.exports.N1.C1Interop.GetAll(this.instance);
+    return res.map(e => ProxyBase.fromHandle(UserClass.Proxy, e));
   }
-
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -148,33 +185,29 @@ export class Proxy {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
-
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
   public GetMaybe(): UserClass.Proxy | null {
-    const res = this.interop.N1.C1Interop.GetMaybe(this.instance);
-    return res ? new UserClass.Proxy(res, this.interop) : null;
+    const res = TypeShimConfig.exports.N1.C1Interop.GetMaybe(this.instance);
+    return res ? ProxyBase.fromHandle(UserClass.Proxy, res) : null;
   }
-
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -208,32 +241,29 @@ export class Proxy {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
-  public DoStuff(u: UserClass.Proxy | UserClass.Snapshot): void {
+  public DoStuff(u: UserClass.Proxy | UserClass.Initializer): void {
     const uInstance = u instanceof UserClass.Proxy ? u.instance : u;
-    this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
+    TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
-
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -267,33 +297,30 @@ export class Proxy {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
-  public DoStuff(u: UserClass.Proxy | UserClass.Snapshot, v: UserClass.Proxy | UserClass.Snapshot): void {
+  public DoStuff(u: UserClass.Proxy | UserClass.Initializer, v: UserClass.Proxy | UserClass.Initializer): void {
     const uInstance = u instanceof UserClass.Proxy ? u.instance : u;
     const vInstance = v instanceof UserClass.Proxy ? v.instance : v;
-    this.interop.N1.C1Interop.DoStuff(this.instance, uInstance, vInstance);
+    TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance, vInstance);
   }
-
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -327,32 +354,29 @@ export class Proxy {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """  
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
-  public DoStuff(u: UserClass.Proxy | UserClass.Snapshot | null): void {
+  public DoStuff(u: UserClass.Proxy | UserClass.Initializer | null): void {
     const uInstance = u ? u instanceof UserClass.Proxy ? u.instance : u : null;
-    this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
+    TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
-
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -386,33 +410,31 @@ export class Proxy {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
-  public DoStuff(u: Array<UserClass.Proxy | UserClass.Snapshot>): void {
+  public DoStuff(u: Array<UserClass.Proxy | UserClass.Initializer>): void {
     const uInstance = u.map(e => e instanceof UserClass.Proxy ? e.instance : e);
-    this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
+    TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
-
 }
 
-"""));
+""");
     }
+
     [Test]
     public void TypeScriptUserClassProxy_InstanceMethod_WithUserClassTaskParameterType_ExtractsInstanceProperty()
     {
@@ -444,31 +466,70 @@ export class Proxy {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
-  public DoStuff(u: Promise<UserClass.Proxy | UserClass.Snapshot>): void {
+  public DoStuff(u: Promise<UserClass.Proxy | UserClass.Initializer>): void {
     const uInstance = u.then(e => e instanceof UserClass.Proxy ? e.instance : e);
-    this.interop.N1.C1Interop.DoStuff(this.instance, uInstance);
+    TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
   }
-
 }
 
-"""));
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_InstanceMethod_WithVoidTaskParameterType_ExtractsInstanceProperty()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public void DoStuff(Task u) {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class Proxy extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public DoStuff(u: Promise): void {
+    TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, u);
+  }
+}
+
+""");
     }
 }

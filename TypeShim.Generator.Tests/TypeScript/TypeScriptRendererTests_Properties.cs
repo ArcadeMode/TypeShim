@@ -1,8 +1,11 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using TypeShim.Generator.CSharp;
+using System;
+using System.Collections.Generic;
+using System.Text;
 using TypeShim.Generator.Parsing;
 using TypeShim.Generator.Typescript;
+using TypeShim.Shared;
 
 namespace TypeShim.Generator.Tests.TypeScript;
 
@@ -29,41 +32,81 @@ internal class TypeScriptRendererTests_Properties
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
-
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): {{typeScriptType}} {
-    return this.interop.N1.C1Interop.get_P1(this.instance);
+    return TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
   }
 
   public set P1(value: {{typeScriptType}}) {
-    this.interop.N1.C1Interop.set_P1(this.instance, value);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value);
   }
-
 }
 
-""".Replace("{{typeScriptType}}", typeScriptType)));
+""".Replace("{{typeScriptType}}", typeScriptType));
     }
 
     [TestCase("string", "string")]
     [TestCase("double", "number")]
     [TestCase("bool", "boolean")]
-    public void TypeScriptUserClassProxy_StaticProperty_GeneratesNothing(string typeExpression, string typeScriptType)
+    public void TypeScriptUserClassProxy_InstanceProperty_GeneratesGetFunction(string typeExpression, string typeScriptType)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public {{typeExpression}} P1 { get; init; }
+            }
+        """.Replace("{{typeExpression}}", typeExpression));
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+  }
+
+  public get P1(): {{typeScriptType}} {
+    return TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+  }
+}
+
+""".Replace("{{typeScriptType}}", typeScriptType));
+    }
+
+    [TestCase("string", "string")]
+    [TestCase("double", "number")]
+    [TestCase("bool", "boolean")]
+    public void TypeScriptUserClassProxy_NonStaticClass_StaticProperty_GeneratesGetAndSetFunctions(string typeExpression, string typeScriptType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -81,39 +124,43 @@ export class Proxy {
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
-
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
+  public static get P1(): {{typeScriptType}} {
+    return TypeShimConfig.exports.N1.C1Interop.get_P1();
+  }
+
+  public static set P1(value: {{typeScriptType}}) {
+    TypeShimConfig.exports.N1.C1Interop.set_P1(value);
+  }
 }
 
-""".Replace("{{typeScriptType}}", typeScriptType)));
+""".Replace("{{typeScriptType}}", typeScriptType));
     }
 
     [TestCase("string", "string")]
     [TestCase("double", "number")]
     [TestCase("bool", "boolean")]
-    public void TypeScriptUserModuleClass_StaticProperty_GeneratesGetAndSetFunctions(string typeExpression, string typeScriptType)
+    public void TypeScriptUserClassProxy_StaticProperty_GeneratesGetAndSetFunctions(string typeExpression, string typeScriptType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TSModule]
+            [TSExport]
             public static class C1
             {
                 public static {{typeExpression}} P1 { get; set; }
@@ -128,7 +175,8 @@ export class Proxy {
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
@@ -139,48 +187,43 @@ export class Proxy {
             HierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider),
         };
 
-        string interopClass = new TypescriptUserModuleClassRenderer(classInfo, symbolNameProvider).Render();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""
-// Auto-generated TypeShim TSModule class. Source class: N1.C1
-export class C1 {
-  private interop: AssemblyExports;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class Proxy {
+  private constructor() {}
 
-  constructor(interop: AssemblyExports) {
-    this.interop = interop;
+  public static get P1(): {{typeScriptType}} {
+    return TypeShimConfig.exports.N1.C1Interop.get_P1();
   }
 
-  public get P1(): {{typeScriptType}} {
-    return this.interop.N1.C1Interop.get_P1();
+  public static set P1(value: {{typeScriptType}}) {
+    TypeShimConfig.exports.N1.C1Interop.set_P1(value);
   }
 
-  public set P1(value: {{typeScriptType}}) {
-    this.interop.N1.C1Interop.set_P1(value);
+  public static get P2(): {{typeScriptType}} {
+    return TypeShimConfig.exports.N1.C1Interop.get_P2();
   }
 
-  public get P2(): {{typeScriptType}} {
-    return this.interop.N1.C1Interop.get_P2();
+  public static set P2(value: {{typeScriptType}}) {
+    TypeShimConfig.exports.N1.C1Interop.set_P2(value);
   }
 
-  public set P2(value: {{typeScriptType}}) {
-    this.interop.N1.C1Interop.set_P2(value);
+  public static get P3(): {{typeScriptType}} {
+    return TypeShimConfig.exports.N1.C1Interop.get_P3();
   }
 
-  public get P3(): {{typeScriptType}} {
-    return this.interop.N1.C1Interop.get_P3();
+  public static get P4(): {{typeScriptType}} {
+    return TypeShimConfig.exports.N1.C1Interop.get_P4();
   }
-
-  public get P4(): {{typeScriptType}} {
-    return this.interop.N1.C1Interop.get_P4();
-  }
-
 }
 
-""".Replace("{{typeScriptType}}", typeScriptType)));
+""".Replace("{{typeScriptType}}", typeScriptType));
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithUserClassParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithUserClassParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -210,41 +253,38 @@ export class C1 {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): UserClass.Proxy {
-    const res = this.interop.N1.C1Interop.get_P1(this.instance);
-    return new UserClass.Proxy(res, this.interop);
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+    return ProxyBase.fromHandle(UserClass.Proxy, res);
   }
 
-  public set P1(value: UserClass.Proxy | UserClass.Snapshot) {
+  public set P1(value: UserClass.Proxy | UserClass.Initializer) {
     const valueInstance = value instanceof UserClass.Proxy ? value.instance : value;
-    this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
-"""));
+""");
     }
 
     [Test]
-    public void TypeScriptUserClassModule_InstanceParameter_WithUserClassParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_StaticParameter_WithUserClassParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -261,7 +301,7 @@ export class Proxy {
             using System;
             using System.Threading.Tasks;
             namespace N1;
-            [TSModule]
+            [TSExport]
             public static class C1
             {
                 public static UserClass P1 { get; set; }
@@ -274,40 +314,36 @@ export class Proxy {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserModuleClassRenderer(classInfo, symbolNameProvider).Render();
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""
-// Auto-generated TypeShim TSModule class. Source class: N1.C1
-export class C1 {
-  private interop: AssemblyExports;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class Proxy {
+  private constructor() {}
 
-  constructor(interop: AssemblyExports) {
-    this.interop = interop;
+  public static get P1(): UserClass.Proxy {
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1();
+    return ProxyBase.fromHandle(UserClass.Proxy, res);
   }
 
-  public get P1(): UserClass.Proxy {
-    const res = this.interop.N1.C1Interop.get_P1();
-    return new UserClass.Proxy(res, this.interop);
-  }
-
-  public set P1(value: UserClass.Proxy | UserClass.Snapshot) {
+  public static set P1(value: UserClass.Proxy | UserClass.Initializer) {
     const valueInstance = value instanceof UserClass.Proxy ? value.instance : value;
-    this.interop.N1.C1Interop.set_P1(valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(valueInstance);
   }
-
 }
 
-"""));
+""");
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithNullableUserClassParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithNullableUserClassParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -337,41 +373,38 @@ export class C1 {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): UserClass.Proxy | null {
-    const res = this.interop.N1.C1Interop.get_P1(this.instance);
-    return res ? new UserClass.Proxy(res, this.interop) : null;
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+    return res ? ProxyBase.fromHandle(UserClass.Proxy, res) : null;
   }
 
-  public set P1(value: UserClass.Proxy | UserClass.Snapshot | null) {
+  public set P1(value: UserClass.Proxy | UserClass.Initializer | null) {
     const valueInstance = value ? value instanceof UserClass.Proxy ? value.instance : value : null;
-    this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
-"""));
+""");
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithUserClassTaskParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithUserClassTaskParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -401,105 +434,38 @@ export class Proxy {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): Promise<UserClass.Proxy> {
-    const res = this.interop.N1.C1Interop.get_P1(this.instance);
-    return res.then(e => new UserClass.Proxy(e, this.interop));
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+    return res.then(e => ProxyBase.fromHandle(UserClass.Proxy, e));
   }
 
-  public set P1(value: Promise<UserClass.Proxy | UserClass.Snapshot>) {
+  public set P1(value: Promise<UserClass.Proxy | UserClass.Initializer>) {
     const valueInstance = value.then(e => e instanceof UserClass.Proxy ? e.instance : e);
-    this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
-"""));
+""");
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithNullableUserClassTaskParameterType_RendersConversionsCorrectly()
-    {
-        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
-            using System;
-            using System.Threading.Tasks;
-            namespace N1;
-            [TSExport]
-            public class UserClass
-            {
-                public int Id { get; set; }
-            }
-        """);
-
-        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
-            using System;
-            using System.Threading.Tasks;
-            namespace N1;
-            [TSExport]
-            public class C1
-            {
-                public Task<UserClass?> P1 { get; set; }
-            }
-        """);
-
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
-        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
-        Assert.That(exportedClasses, Has.Count.EqualTo(2));
-        INamedTypeSymbol classSymbol = exportedClasses[0];
-        INamedTypeSymbol userClassSymbol = exportedClasses[1];
-
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
-
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
-
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
-  }
-
-  public get P1(): Promise<UserClass.Proxy | null> {
-    const res = this.interop.N1.C1Interop.get_P1(this.instance);
-    return res.then(e => e ? new UserClass.Proxy(e, this.interop) : null);
-  }
-
-  public set P1(value: Promise<UserClass.Proxy | UserClass.Snapshot | null>) {
-    const valueInstance = value.then(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null);
-    this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
-  }
-
-}
-
-"""));
-    }
-
-    [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithUserClassArrayParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithUserClassArrayParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -529,41 +495,38 @@ export class Proxy {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): Array<UserClass.Proxy> {
-    const res = this.interop.N1.C1Interop.get_P1(this.instance);
-    return res.map(e => new UserClass.Proxy(e, this.interop));
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+    return res.map(e => ProxyBase.fromHandle(UserClass.Proxy, e));
   }
 
-  public set P1(value: Array<UserClass.Proxy | UserClass.Snapshot>) {
+  public set P1(value: Array<UserClass.Proxy | UserClass.Initializer>) {
     const valueInstance = value.map(e => e instanceof UserClass.Proxy ? e.instance : e);
-    this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
-"""));
+""");
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithNullableUserClassArrayParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithNullableUserClassArrayParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -593,41 +556,38 @@ export class Proxy {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): Array<UserClass.Proxy | null> {
-    const res = this.interop.N1.C1Interop.get_P1(this.instance);
-    return res.map(e => e ? new UserClass.Proxy(e, this.interop) : null);
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+    return res.map(e => e ? ProxyBase.fromHandle(UserClass.Proxy, e) : null);
   }
 
-  public set P1(value: Array<UserClass.Proxy | UserClass.Snapshot | null>) {
+  public set P1(value: Array<UserClass.Proxy | UserClass.Initializer | null>) {
     const valueInstance = value.map(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null);
-    this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
-"""));
+""");
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithUserClassNullableArrayParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithUserClassNullableArrayParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -657,41 +617,38 @@ export class Proxy {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): Array<UserClass.Proxy> | null {
-    const res = this.interop.N1.C1Interop.get_P1(this.instance);
-    return res ? res.map(e => new UserClass.Proxy(e, this.interop)) : null;
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+    return res ? res.map(e => ProxyBase.fromHandle(UserClass.Proxy, e)) : null;
   }
 
-  public set P1(value: Array<UserClass.Proxy | UserClass.Snapshot> | null) {
+  public set P1(value: Array<UserClass.Proxy | UserClass.Initializer> | null) {
     const valueInstance = value ? value.map(e => e instanceof UserClass.Proxy ? e.instance : e) : null;
-    this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
-"""));
+""");
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithNullableUserClassNullableArrayParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithNullableUserClassNullableArrayParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -721,41 +678,99 @@ export class Proxy {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): Array<UserClass.Proxy | null> | null {
-    const res = this.interop.N1.C1Interop.get_P1(this.instance);
-    return res ? res.map(e => e ? new UserClass.Proxy(e, this.interop) : null) : null;
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+    return res ? res.map(e => e ? ProxyBase.fromHandle(UserClass.Proxy, e) : null) : null;
   }
 
-  public set P1(value: Array<UserClass.Proxy | UserClass.Snapshot | null> | null) {
+  public set P1(value: Array<UserClass.Proxy | UserClass.Initializer | null> | null) {
     const valueInstance = value ? value.map(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null) : null;
-    this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
-"""));
+""");
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_InstanceParameter_WithNullableUserClassNullableTaskParameterType_RendersConversionsCorrectly()
+    public void TypeScriptUserClassProxy_InstanceProperty_WithNullableUserClassTaskParameterType_RendersConversionsCorrectly()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public Task<UserClass?> P1 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+  }
+
+  public get P1(): Promise<UserClass.Proxy | null> {
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+    return res.then(e => e ? ProxyBase.fromHandle(UserClass.Proxy, e) : null);
+  }
+
+  public set P1(value: Promise<UserClass.Proxy | UserClass.Initializer | null>) {
+    const valueInstance = value.then(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_InstanceProperty_WithNullableUserClassNullableTaskParameterType_RendersConversionsCorrectly()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
             using System;
@@ -785,36 +800,33 @@ export class Proxy {
         INamedTypeSymbol classSymbol = exportedClasses[0];
         INamedTypeSymbol userClassSymbol = exportedClasses[1];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol).Build();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
         TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
         TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
 
-        string interopClass = new TypescriptUserClassProxyRenderer(classInfo, symbolNameProvider).Render(0);
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-export class Proxy {
-  interop: AssemblyExports;
-  instance: object;
-
-  constructor(instance: object, interop: AssemblyExports) {
-    this.interop = interop;
-    this.instance = instance;
+        AssertEx.EqualOrDiff(renderContext.ToString(), """    
+export class Proxy extends ProxyBase {
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
 
   public get P1(): Promise<UserClass.Proxy | null> | null {
-    const res = this.interop.N1.C1Interop.get_P1(this.instance);
-    return res ? res.then(e => e ? new UserClass.Proxy(e, this.interop) : null) : null;
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+    return res ? res.then(e => e ? ProxyBase.fromHandle(UserClass.Proxy, e) : null) : null;
   }
 
-  public set P1(value: Promise<UserClass.Proxy | UserClass.Snapshot | null> | null) {
+  public set P1(value: Promise<UserClass.Proxy | UserClass.Initializer | null> | null) {
     const valueInstance = value ? value.then(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null) : null;
-    this.interop.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
   }
-
 }
 
-"""));
+""");
     }
 }

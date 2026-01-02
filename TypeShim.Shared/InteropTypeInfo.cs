@@ -1,14 +1,12 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace TypeShim.Shared;
 
-public sealed class InteropTypeInfo
+internal sealed class InteropTypeInfo
 {
-    public required bool IsTSExport { get; init; }
-
-    public required bool IsTSModule { get; init; }
-
     public required KnownManagedType ManagedType { get; init; }
 
     /// <summary>
@@ -17,31 +15,42 @@ public sealed class InteropTypeInfo
     public required TypeSyntax JSTypeSyntax { get; init; }
 
     /// <summary>
-    /// Syntax for writing the CLR type on the interop method. This is usually equal to <see cref="CLRTypeSyntax"/>,<br/>
-    /// but e.g. YourClass, Task&lt;YourClass&gt; or YourClass[] have to be object, Task&lt;object&gt; or object[] for the interop method.
-    /// </summary>
-    public required TypeSyntax InteropTypeSyntax { get; init; }
-
-    /// <summary>
     /// Syntax for writing the CLR type in C# (i.e. the user's original type)
     /// </summary>
-    public required TypeSyntax CLRTypeSyntax { get; init; }
+    public required TypeSyntax CSharpTypeSyntax { get; init; }
+    
+    /// <summary>
+    /// Syntax for writing the CLR type on the interop method. This is usually equal to <see cref="CSharpTypeSyntax"/>,<br/>
+    /// but e.g. YourClass, Task&lt;YourClass&gt; or YourClass[] have to be object, Task&lt;object&gt; or object[] for the interop method.
+    /// </summary>
+    public required TypeSyntax CSharpInteropTypeSyntax { get; init; }
+    
+    public required TypeScriptSymbolNameTemplate TypeScriptTypeSyntax { get; init; }
+    public required TypeScriptSymbolNameTemplate TypeScriptInteropTypeSyntax { get; init; }
 
     /// <summary>
     /// Tasks and Arrays _may_ have type arguments
     /// </summary>
     public required InteropTypeInfo? TypeArgument { get; init; }
 
-    public required bool RequiresCLRTypeConversion { get; init; }
-
     public required bool IsTaskType { get; init; }
     public required bool IsArrayType { get; init; }
     public required bool IsNullableType { get; init; }
-    public required bool IsSnapshotCompatible { get; init; }
 
-    public bool ContainsExportedType()
+    public required bool IsTSExport { get; init; }
+    public required bool RequiresTypeConversion { get; init; }
+    public required bool SupportsTypeConversion { get; init; }
+
+    public InteropTypeInfo GetInnermostType()
     {
-        return this.IsTSExport || (TypeArgument?.ContainsExportedType() ?? false);
+        if (TypeArgument != null)
+        {
+            return TypeArgument.GetInnermostType();
+        }
+        else
+        {
+            return this;
+        }
     }
 
     /// <summary>
@@ -50,62 +59,38 @@ public sealed class InteropTypeInfo
     /// <returns></returns>
     public InteropTypeInfo AsInteropTypeInfo()
     {
-        if (TypeArgument == null && ManagedType is KnownManagedType.Object or KnownManagedType.JSObject)
+        return new InteropTypeInfo
         {
-            return new InteropTypeInfo
-            {
-                IsTSExport = false,
-                IsTSModule = false,
-                ManagedType = this.ManagedType,
-                JSTypeSyntax = CLRObjectTypeInfo.JSTypeSyntax,
-                InteropTypeSyntax = CLRObjectTypeInfo.InteropTypeSyntax,
-                CLRTypeSyntax = CLRObjectTypeInfo.CLRTypeSyntax,
-                IsTaskType = false,
-                IsArrayType = false,
-                IsNullableType = this.IsNullableType,
-                RequiresCLRTypeConversion = false,
-                TypeArgument = null,
-                IsSnapshotCompatible = this.IsSnapshotCompatible,
-            };
-
-        }
-        else if (TypeArgument != null)
-        {
-            return new InteropTypeInfo
-            {
-                IsTSExport = false,
-                IsTSModule = false,
-                ManagedType = this.ManagedType,
-                JSTypeSyntax = this.JSTypeSyntax,
-                InteropTypeSyntax = this.InteropTypeSyntax,
-                CLRTypeSyntax = this.InteropTypeSyntax,
-                IsTaskType = this.IsTaskType,
-                IsArrayType = this.IsArrayType,
-                IsNullableType = this.IsNullableType,
-                RequiresCLRTypeConversion = false,
-                TypeArgument = TypeArgument.AsInteropTypeInfo(),
-                IsSnapshotCompatible = this.IsSnapshotCompatible,
-            };
-        }
-        else
-        {
-            return this;
-        }
+            IsTSExport = false,
+            ManagedType = this.ManagedType,
+            JSTypeSyntax = this.JSTypeSyntax,
+            CSharpTypeSyntax = this.CSharpInteropTypeSyntax, // essentially overwrite clr type with interop type
+            CSharpInteropTypeSyntax = this.CSharpInteropTypeSyntax,
+            TypeScriptTypeSyntax = this.TypeScriptInteropTypeSyntax,
+            TypeScriptInteropTypeSyntax = this.TypeScriptInteropTypeSyntax,
+            IsTaskType = this.IsTaskType,
+            IsArrayType = this.IsArrayType,
+            IsNullableType = this.IsNullableType,
+            TypeArgument = TypeArgument?.AsInteropTypeInfo(),
+            RequiresTypeConversion = false,
+            SupportsTypeConversion = false,
+        };
     }
 
-    private static readonly InteropTypeInfo CLRObjectTypeInfo = new()
+    public static readonly InteropTypeInfo JSObjectTypeInfo = new()
     {
         IsTSExport = false,
-        IsTSModule = false,
-        ManagedType = KnownManagedType.Object,
-        JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Any"),
-        InteropTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),
-        CLRTypeSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)),
+        ManagedType = KnownManagedType.JSObject,
+        TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForSimpleType("object"),
+        TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForSimpleType("object"),
+        JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Object"),
+        CSharpInteropTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
+        CSharpTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
         IsTaskType = false,
         IsArrayType = false,
         IsNullableType = false,
-        RequiresCLRTypeConversion = false,
+        RequiresTypeConversion = false,
         TypeArgument = null,
-        IsSnapshotCompatible = false, // Transform a jsobject into .. ? ergo not snapshot compatible
+        SupportsTypeConversion = false,
     };
 }

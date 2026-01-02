@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
+using TypeShim.Shared;
 
 namespace TypeShim.Generator.Tests.CSharp;
 
@@ -27,7 +28,7 @@ internal class CSharpInteropClassRendererTests_SystemNumericReturnType
             using System;
             namespace N1;
             [TSExport]
-            public class C1
+            public static class C1
             {
                 public static {{typeExpression}} M1()
                 {
@@ -41,8 +42,10 @@ internal class CSharpInteropClassRendererTests_SystemNumericReturnType
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        InteropTypeInfoCache typeInfoCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeInfoCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -57,14 +60,6 @@ public partial class C1Interop
     public static {{typeExpression}} M1()
     {
         return C1.M1();
-    }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
-        {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
     }
 }
 
@@ -91,7 +86,7 @@ public partial class C1Interop
             using System;
             namespace N1;
             [TSExport]
-            public class C1
+            public static class C1
             {
                 public static {{typeExpression}} M1()
                 {
@@ -105,8 +100,10 @@ public partial class C1Interop
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        InteropTypeInfoCache typeInfoCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeInfoCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -121,14 +118,6 @@ public partial class C1Interop
     public static {{typeExpression}} M1()
     {
         return C1.M1();
-    }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
-        {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
     }
 }
 

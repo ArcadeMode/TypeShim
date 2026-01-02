@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
+using TypeShim.Shared;
 
 namespace TypeShim.Generator.Tests.CSharp;
 
@@ -14,7 +15,7 @@ internal class CSharpInteropClassRendererTests_SystemStringReturnType
             using System;
             namespace N1;
             [TSExport]
-            public class C1
+            public static class C1
             {
                 public static string M1()
                 {
@@ -28,10 +29,12 @@ internal class CSharpInteropClassRendererTests_SystemStringReturnType
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -45,27 +48,19 @@ public partial class C1Interop
     {
         return C1.M1();
     }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
-        {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
-    }
 }
 
-"""));
+""");
     }
 
     [Test]
-    public void CSharpInteropClass_DynamicMethod_HasJSTypeString_ForStringReturnType()
+    public void CSharpInteropClass_InstanceMethod_HasJSTypeString_ForStringReturnType()
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
             [TSExport]
-            public class C1
+            public static class C1
             {
                 public string M1()
                 {
@@ -79,10 +74,12 @@ public partial class C1Interop
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 // Auto-generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -97,16 +94,8 @@ public partial class C1Interop
         C1 typed_instance = (C1)instance;
         return typed_instance.M1();
     }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
-        {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
-    }
 }
 
-"""));
+""");
     }
 }

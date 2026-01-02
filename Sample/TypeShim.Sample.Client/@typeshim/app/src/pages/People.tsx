@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { PeopleList, PeopleGrid } from '@typeshim/people-ui';
 import { PeopleRepository } from '@typeshim/people-ui';
-import type { AssemblyExports } from '@typeshim/wasm-exports';
 
-export default function People({ exportsPromise }: { exportsPromise: Promise<AssemblyExports> }) {
+export default function People() {
     const [view, setView] = useState<'list' | 'grid'>('list');
     const toggle = () => setView(v => (v === 'list' ? 'grid' : 'list'));
-    const repository = new PeopleRepository(exportsPromise);
+    const repository = new PeopleRepository();
     return (
     <div>
         <p>

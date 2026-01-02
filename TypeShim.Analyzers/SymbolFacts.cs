@@ -7,6 +7,9 @@ namespace TypeShim.Analyzers;
 
 internal static class SymbolFacts
 {
+    internal static bool IsPublicClass(INamedTypeSymbol type)
+        => type.TypeKind == TypeKind.Class && type.DeclaredAccessibility == Accessibility.Public;
+
     internal static bool HasAttribute(INamedTypeSymbol type, string fullName)
     {
         string globalFullName = $"global::{fullName}";

@@ -1,11 +1,9 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import { AssemblyExports, CapabilitiesModule, CapabilitiesProvider, ArraysDemo } from '@typeshim/wasm-exports/typeshim';
+import { ArraysDemo } from '@typeshim/wasm-exports/typeshim';
 
-export interface ArraysDemoProps {
-  exportsPromise?: Promise<AssemblyExports>;
-}
+export interface ArraysDemoProps {}
 
 type ArraysDemoState = {
   instance: ArraysDemo.Proxy;
@@ -13,29 +11,11 @@ type ArraysDemoState = {
   setValue: number;
 };
 
-export const ArraysDemoComponent: React.FC<ArraysDemoProps> = ({ exportsPromise }) => {
-  const [cap, setCap] = useState<CapabilitiesProvider.Proxy | null>(null);
+export const ArraysDemoComponent: React.FC<ArraysDemoProps> = () => {
   const [demos, setDemos] = useState<ArraysDemoState[]>([]);
 
-  useEffect(() => {
-    (async () => {
-      let exports: AssemblyExports;
-      if (exportsPromise) {
-        exports = await exportsPromise;
-      } else {
-        const starter: any = (window as any).wasmModuleStarter;
-        if (!starter) throw new Error('wasmModuleStarter not found. Ensure dotnet-start.js is loaded.');
-        exports = await (starter.exports as Promise<AssemblyExports>);
-      }
-      const module = new CapabilitiesModule(exports);
-      const provider = module.GetCapabilitiesProvider();
-      setCap(provider);
-    })().catch(console.error);
-  }, [exportsPromise]);
-
   const createDemo = () => {
-    if (!cap) return;
-    const instance: ArraysDemo.Proxy = cap.GetArraysDemo();
+    const instance: ArraysDemo.Proxy = new ArraysDemo.Proxy([1, 2, 3, 4, 5]);
     setDemos(prev => [{ instance, appendValue: 0, setValue: 0 }, ...prev]);
   };
 
@@ -56,7 +36,7 @@ export const ArraysDemoComponent: React.FC<ArraysDemoProps> = ({ exportsPromise 
 
       <div style={{ marginBottom: '1rem', padding: '0.75rem' }}>
         capabilities.GetArraysDemo()
-        <button onClick={createDemo} disabled={!cap} style={{ padding: '0.25rem 0.5rem', margin: '0 0.5rem', borderRadius: 4, borderWidth: 1 }}>Invoke</button>
+        <button onClick={createDemo} style={{ padding: '0.25rem 0.5rem', margin: '0 0.5rem', borderRadius: 4, borderWidth: 1 }}>Invoke</button>
       </div>
 
       <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr' }}>

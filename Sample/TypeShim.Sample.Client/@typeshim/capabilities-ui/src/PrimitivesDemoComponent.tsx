@@ -1,36 +1,21 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import { AssemblyExports, CapabilitiesProvider, PrimitivesDemo, CapabilitiesModule } from '@typeshim/wasm-exports/typeshim';
+import { PrimitivesDemo } from '@typeshim/wasm-exports/typeshim';
 
 export interface PrimitivesDemoProps {
-  exportsPromise?: Promise<AssemblyExports>;
 }
 
-export const PrimitivesDemoComponent: React.FC<PrimitivesDemoProps> = ({ exportsPromise }) => {
-  const [cap, setCap] = useState<CapabilitiesProvider.Proxy | null>(null);
+export const PrimitivesDemoComponent: React.FC<PrimitivesDemoProps> = () => {
   const [newBaseInput, setNewBaseInput] = useState('Hello');
   const [demos, setDemos] = useState<Array<{ instance: PrimitivesDemo.Proxy; concatA: string; concatB: string; multiplyCount: number; multiplyResult?: string }>>([]);
 
-  useEffect(() => {
-    (async () => {
-      let exports: AssemblyExports;
-      if (exportsPromise) {
-        exports = await exportsPromise;
-      } else {
-        const starter: any = (window as any).wasmModuleStarter;
-        if (!starter) throw new Error('wasmModuleStarter not found. Ensure dotnet-start.js is loaded.');
-        exports = await (starter.exports as Promise<AssemblyExports>);
-      }
-      const module = new CapabilitiesModule(exports);
-      const capabilities = module.GetCapabilitiesProvider();
-      setCap(capabilities);
-    })().catch(console.error);
-  }, [exportsPromise]);
-
   const createDemo = () => {
-    if (!cap) return;
-    const instance = cap.GetPrimitivesDemo(newBaseInput);
+    
+    const instance = new PrimitivesDemo.Proxy({
+      InitialStringProperty: newBaseInput,
+      StringProperty: newBaseInput
+    });
     setDemos(prev => [{ instance, concatA: 'foo', concatB: 'bar', multiplyCount: 2, multiplyResult: 'Void' }, ...prev]);
   };
 
@@ -69,7 +54,7 @@ export const PrimitivesDemoComponent: React.FC<PrimitivesDemoProps> = ({ exports
 
       <div style={{ marginBottom: '1rem', padding: '0.75rem' }}>
         capabilities.GetPrimitivesDemo(<input value={newBaseInput} onChange={e => setNewBaseInput(e.target.value)} style={{ width: '60px' }} />)
-        <button onClick={createDemo} disabled={!cap} style={{ padding: '0.25rem 0.5rem', margin: '0 0.5rem', borderRadius: 4, borderWidth: 1 }}>Invoke</button>
+        <button onClick={createDemo} style={{ padding: '0.25rem 0.5rem', margin: '0 0.5rem', borderRadius: 4, borderWidth: 1 }}>Invoke</button>
       </div>      
 
       <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: '1fr' }}>

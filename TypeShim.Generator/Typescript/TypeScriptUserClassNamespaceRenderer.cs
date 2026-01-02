@@ -3,22 +3,20 @@ using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
 
-internal sealed class TypeScriptUserClassNamespaceRenderer(ClassInfo classInfo, TypescriptSymbolNameProvider symbolNameProvider)
+internal sealed class TypeScriptUserClassNamespaceRenderer(TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
 {
-    private readonly StringBuilder sb = new();
-    internal string Render()
+    internal void Render()
     {
-        sb.AppendLine($"// Auto-generated TypeScript namespace for class: {classInfo.Namespace}.{classInfo.Name}");
-        sb.AppendLine($"export namespace {symbolNameProvider.GetUserClassNamespace(classInfo)} {{");
-        TypescriptUserClassProxyRenderer proxyRenderer = new(classInfo, symbolNameProvider);
-        sb.AppendLine(proxyRenderer.Render(depth: 1));
-        
-        if (classInfo.IsSnapshotCompatible())
+        ctx.AppendLine($"// Auto-generated TypeScript namespace for class: {ctx.Class.Namespace}.{ctx.Class.Name}")
+           .AppendLine($"export namespace {ctx.Class.Name} {{");
+        using (ctx.Indent())
         {
-            TypeScriptUserClassSnapshotRenderer snapshotRenderer = new(classInfo, symbolNameProvider);
-            sb.AppendLine(snapshotRenderer.Render(depth: 1));
+            TypescriptUserClassProxyRenderer proxyRenderer = new(symbolNameProvider, ctx);
+            proxyRenderer.Render();
+
+            TypeScriptUserClassShapesRenderer propertiesRenderer = new(symbolNameProvider, ctx);
+            propertiesRenderer.Render();
         }
-        sb.AppendLine($"}}");
-        return sb.ToString();
+        ctx.AppendLine("}");
     }
 }

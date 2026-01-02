@@ -2,8 +2,13 @@
 using Microsoft.CodeAnalysis.CSharp;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
+using TypeShim.Shared;
 
 namespace TypeShim.Generator.Tests.CSharp;
+
+internal static class Util {
+
+}
 
 internal class CSharpInteropClassRendererTests_SystemArrayReturnType
 {
@@ -22,6 +27,7 @@ internal class CSharpInteropClassRendererTests_SystemArrayReturnType
             [TSExport]
             public class C1
             {
+                private C1() {}
                 public static {{typeExpression}}[] M1()
                 {
                     return [];
@@ -34,8 +40,10 @@ internal class CSharpInteropClassRendererTests_SystemArrayReturnType
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -87,6 +95,7 @@ public partial class C1Interop
             [TSExport]
             public class C1
             {
+                private C1() {}
                 public static MyClass[] M1()
                 {
                     return new[] { new MyClass() };
@@ -99,8 +108,10 @@ public partial class C1Interop
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -152,6 +163,7 @@ public partial class C1Interop
             [TSExport]
             public class C1
             {
+                private C1() {}
                 public Task<MyClass> M1()
                 {
                     return Task.FromResult(new MyClass());
@@ -164,8 +176,10 @@ public partial class C1Interop
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
         INamedTypeSymbol classSymbol = exportedClasses.First();
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions
@@ -212,6 +226,7 @@ public partial class C1Interop
             [TSExport]
             public class C1
             {
+                private C1() {}
                 public static {{typeName}}[] M1()
                 {
                     return new[] { {{objectCreation}} };
@@ -223,8 +238,10 @@ public partial class C1Interop
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.Last();
 
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol).Build();
-        string interopClass = new CSharpInteropClassRenderer(classInfo).Render();
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 // Auto-generated TypeScript interop definitions

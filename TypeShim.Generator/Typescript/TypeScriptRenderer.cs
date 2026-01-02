@@ -1,40 +1,46 @@
 ﻿using System.Text;
 using TypeShim.Generator.Parsing;
 using TypeShim.Generator.Typescript;
+using TypeShim.Generator.CSharp;
+using TypeShim.Generator;
 
 internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo moduleInfo, TypescriptSymbolNameProvider symbolNameProvider)
 {
-    private readonly StringBuilder sourceBuilder = new();
+    private readonly StringBuilder sb = new();
 
     internal string Render()
     {
-        RenderInteropInterfaces();        
-        RenderUserClasses();
-        return sourceBuilder.ToString();
+        foreach(RenderContext ctx in (RenderContext[])[RenderTypeShimConfig(), RenderAssemblyExports(), .. RenderUserClasses()])
+        {
+            sb.AppendLine(ctx.ToString());
+        }
+        return sb.ToString();
     }
 
-    private void RenderInteropInterfaces()
+    private RenderContext RenderTypeShimConfig()
     {
-        TypescriptInteropModuleInterfaceRenderer moduleInterfaceRenderer = new(moduleInfo.HierarchyInfo, symbolNameProvider);
-        sourceBuilder.AppendLine(moduleInterfaceRenderer.Render());
+        RenderContext configCtx = new(null, classInfos, RenderOptions.TypeScript);
+        TypeScriptPreambleRenderer configRenderer = new(configCtx);
+        configRenderer.Render();
+        return configCtx;
+    }
+
+    private RenderContext RenderAssemblyExports()
+    {
+        RenderContext renderCtx = new(null, classInfos, RenderOptions.TypeScript);
+        TypescriptAssemblyExportsRenderer moduleInterfaceRenderer = new(moduleInfo.HierarchyInfo, symbolNameProvider, renderCtx);
+        moduleInterfaceRenderer.Render();
+        return renderCtx;
+    }
+
+    private IEnumerable<RenderContext> RenderUserClasses()
+    {
         foreach (ClassInfo classInfo in classInfos)
         {
-            TypescriptInteropInterfaceRenderer interopInterfaceRenderer = new(classInfo, symbolNameProvider);
-            sourceBuilder.AppendLine(interopInterfaceRenderer.Render());
-        }
-    }
-
-    private void RenderUserClasses()
-    {
-        foreach (ClassInfo classInfo in classInfos.Where(c => c.Type.IsTSExport))
-        {
-            TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(classInfo, symbolNameProvider);
-            sourceBuilder.AppendLine(namespaceRenderer.Render());
-        }
-        foreach (ClassInfo moduleClassInfo in classInfos.Where(c => c.Type.IsTSModule))
-        {
-            TypescriptUserModuleClassRenderer moduleClassRenderer = new(moduleClassInfo, symbolNameProvider);
-            sourceBuilder.AppendLine(moduleClassRenderer.Render());
+            RenderContext renderCtx = new(classInfo, classInfos, RenderOptions.TypeScript);
+            TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(symbolNameProvider, renderCtx);
+            namespaceRenderer.Render();
+            yield return renderCtx;
         }
     }
 }
