@@ -58,7 +58,7 @@ export const ArraysDemoComponent: React.FC<ArraysDemoProps> = () => {
             <div style={{ fontFamily: 'monospace', background: '#f7f7f7', padding: '0.5rem', borderRadius: 6, marginBottom: '0.5rem' }}>
               <div>
                 <span>instance.SumIntArray()</span>
-                <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ {demo.instance.SumIntArray()}</span>
+                <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ {demo.instance.SumElements()}</span>
               </div>
             </div>
 
@@ -70,7 +70,7 @@ export const ArraysDemoComponent: React.FC<ArraysDemoProps> = () => {
                     setDemos(prev => prev.map((d, i) => i === idx ? { ...d, appendValue: Number.isFinite(val) ? val : 0 } : d))
                   }}
                   style={{ width: '60px' }} />)</span>
-              <button onClick={() => { demo.instance.AppendToIntArray(demo.appendValue); setDemos(prev => prev.map((d, i) => i === idx ? { ...d } : d)) }} 
+              <button onClick={() => { demo.instance.Append(demo.appendValue); setDemos(prev => prev.map((d, i) => i === idx ? { ...d } : d)) }} 
                       style={{ padding: '0.25rem 0.5rem', margin: '0 0.5rem', borderRadius: 4, borderWidth: 1 }}>Invoke</button>
               <span style={{ marginLeft: 8, color: 'rebeccapurple' }}>→ Void</span>
             </div>

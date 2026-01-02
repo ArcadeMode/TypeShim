@@ -6,16 +6,15 @@ using TypeShim;
 
 namespace TypeShim.Sample;
 
-
-
 [TSExport]
 public class PeopleProvider
 {
     private readonly PeopleApiClient _apiClient;
     private Person[]? AllPeople;
 
-    // internal constructor blocks access from JS
-    internal PeopleProvider(PeopleApiClient apiClient)
+    // internal constructor would block access from JS (not everything needs to be constructable from JS)
+    // but to demo how it is then exposed as 'ManagedObject', this constructor is kept public.
+    public PeopleProvider(PeopleApiClient apiClient)
     {
         _apiClient = apiClient;
     }

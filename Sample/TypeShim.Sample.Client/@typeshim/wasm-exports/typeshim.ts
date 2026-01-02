@@ -108,6 +108,7 @@ export interface AssemblyExports{
         GetPeopleProvider(): ManagedObject;
       };
       PeopleProviderInterop: {
+        ctor(apiClient: ManagedObject, jsObject: object): ManagedObject;
         FetchPeopleAsync(instance: ManagedObject): Promise<ManagedObject>;
         get_PeopleCache(instance: ManagedObject): Array<ManagedObject> | null;
         get_DelayTask(instance: ManagedObject): Promise<ManagedObject | null> | null;
@@ -392,7 +393,9 @@ export namespace MyApp {
 // Auto-generated TypeScript namespace for class: TypeShim.Sample.PeopleProvider
 export namespace PeopleProvider {
   export class Proxy extends ProxyBase {
-    private constructor() { super(undefined!); }
+    constructor(apiClient: ManagedObject, jsObject: PeopleProvider.Initializer) {
+      super(TypeShimConfig.exports.TypeShim.Sample.PeopleProviderInterop.ctor(apiClient, jsObject));
+    }
 
     public async FetchPeopleAsync(): Promise<People.Proxy> {
       const res = TypeShimConfig.exports.TypeShim.Sample.PeopleProviderInterop.FetchPeopleAsync(this.instance);
@@ -412,6 +415,9 @@ export namespace PeopleProvider {
       const valueInstance = value ? value.then(e => e ? e instanceof TimeoutUnit.Proxy ? e.instance : e : null) : null;
       TypeShimConfig.exports.TypeShim.Sample.PeopleProviderInterop.set_DelayTask(this.instance, valueInstance);
     }
+  }
+  export interface Initializer {
+    DelayTask: Promise<TimeoutUnit.Proxy | TimeoutUnit.Initializer | null> | null;
   }
   export interface Properties {
     PeopleCache: Array<Person.Properties> | null;
