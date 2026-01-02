@@ -13,15 +13,13 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
         {
             return null;
         }
-
-        MethodParameterInfo? initializersObjectParameter = initializerProperties.Length == 0 
-            ? null 
-            : new()
-            {
-                Name = "jsObject",
-                IsInjectedInstanceParameter = false,
-                Type = InteropTypeInfo.JSObjectTypeInfo //TODO: consider swapping for nullable JSObject, for cases where initializer is optional
-            };
+        // TODO: how can be dealt with optional parameters? For now user must provide all parameters when constructing from JS object.
+        MethodParameterInfo? initializersObjectParameter = initializerProperties.Length == 0 ? null : new()
+        {
+            Name = "jsObject",
+            IsInjectedInstanceParameter = false,
+            Type = InteropTypeInfo.JSObjectTypeInfo
+        };
 
         return new ConstructorInfo
         {

@@ -6,7 +6,6 @@ namespace TypeShim.Analyzers;
 
 internal static class LocationFinder
 {
-
     internal static Location GetDefaultLocation(ISymbol symbol)
             => symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
 
@@ -14,12 +13,10 @@ internal static class LocationFinder
     {
         foreach (SyntaxReference syntaxRef in parameter.DeclaringSyntaxReferences)
         {
-            SyntaxNode node = syntaxRef.GetSyntax(t);
-
-            if (node is ParameterSyntax { Type: TypeSyntax ts })
+            if (syntaxRef.GetSyntax(t) is ParameterSyntax { Type: TypeSyntax ts })
                 return ts.GetLocation();
         }
-        return GetDefaultLocation(method); // TODO; try pass parameter
+        return GetDefaultLocation(parameter);
     }
 
     internal static Location GetMethodReturnTypeLocation(IMethodSymbol method, CancellationToken t)

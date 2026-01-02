@@ -47,7 +47,7 @@ internal static class JSObjectMethodResolver
                 { ManagedType: KnownManagedType.Exception } => "GetPropertyAsExceptionTask",
                 { ManagedType: KnownManagedType.String } => "GetPropertyAsStringTask",
                 { ManagedType: KnownManagedType.JSObject } => "GetPropertyAsJSObjectTask",
-                { ManagedType: KnownManagedType.Object, IsTSExport: true } => "GetPropertyAsJSObjectTask", // TODO: include fromJSObject mapping?
+                { ManagedType: KnownManagedType.Object, IsTSExport: true } => "GetPropertyAsJSObjectTask",
                 { ManagedType: KnownManagedType.Nullable } returnTypeInfo => returnTypeInfo.TypeArgument switch
                 {
                     { ManagedType: KnownManagedType.JSObject } => "GetPropertyAsJSObjectTask",

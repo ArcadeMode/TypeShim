@@ -19,11 +19,14 @@ internal sealed class TypeScriptTypeMapper(IEnumerable<ClassInfo> classInfos)
         if (IsUserType(typeInfo)) 
             return TypeScriptSymbolNameTemplate.ForUserType(typeInfo);
 
-        if (typeInfo.IsNullableType) 
-            return TypeScriptSymbolNameTemplate.ForNullableType(ToTypeScriptType(typeInfo.TypeArgument ?? throw new ArgumentException("Nullable type must have a type argument")));
-
         return typeInfo.ManagedType switch
         {
+            KnownManagedType.Task 
+                => TypeScriptSymbolNameTemplate.ForPromiseType(ToTypeScriptType(typeInfo.TypeArgument ?? typeInfo)), // note: Task can be without type argument
+            KnownManagedType.Array 
+                => TypeScriptSymbolNameTemplate.ForArrayType(ToTypeScriptType(typeInfo.TypeArgument ?? throw new ArgumentException("Array type must have a type argument"))), 
+            KnownManagedType.Nullable 
+                => TypeScriptSymbolNameTemplate.ForNullableType(ToTypeScriptType(typeInfo.TypeArgument ?? throw new ArgumentException("Nullable type must have a type argument"))),
             KnownManagedType.None => TypeScriptSymbolNameTemplate.ForSimpleType("undefined"),
             KnownManagedType.Void => TypeScriptSymbolNameTemplate.ForSimpleType("void"),
             KnownManagedType.JSObject 
@@ -40,18 +43,18 @@ internal sealed class TypeScriptTypeMapper(IEnumerable<ClassInfo> classInfos)
             or KnownManagedType.Single 
             or KnownManagedType.IntPtr 
                 => TypeScriptSymbolNameTemplate.ForSimpleType("number"),
-            KnownManagedType.Exception => TypeScriptSymbolNameTemplate.ForSimpleType("Error"),
             KnownManagedType.DateTime
             or KnownManagedType.DateTimeOffset => TypeScriptSymbolNameTemplate.ForSimpleType("Date"),
-            KnownManagedType.Task => TypeScriptSymbolNameTemplate.ForPromiseType(ToTypeScriptType(typeInfo.TypeArgument ?? typeInfo)),
-            KnownManagedType.Array 
-                => TypeScriptSymbolNameTemplate.ForArrayType(ToTypeScriptType(typeInfo.TypeArgument ?? typeInfo)),
+            KnownManagedType.Exception => TypeScriptSymbolNameTemplate.ForSimpleType("Error"),
+
+            // TODO: add support for ArraySegment<T> and Span<T> i.e. MemoryView
             KnownManagedType.ArraySegment
             or KnownManagedType.Span
-                => throw new NotImplementedException("ArraySegment and Span are not yet supported"), // MemoryView TODO
-            KnownManagedType.Nullable => throw new NotImplementedException("Nullable value-types are not yet supported"), // return "something | null" ?
+                => throw new NotImplementedException("ArraySegment and Span are not yet supported"),
+            // TODO: add support for Action and Function types
             KnownManagedType.Action => throw new NotImplementedException("Action is not yet supported"), // "(() => void)"
             KnownManagedType.Function => throw new NotImplementedException("Function is not yet supported"), // "Function"
+            
             KnownManagedType.Unknown 
             or _ => TypeScriptSymbolNameTemplate.ForSimpleType("any"),
         };

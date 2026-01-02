@@ -7,8 +7,6 @@ internal sealed class JSObjectTaskExtensionsRenderer()
     private readonly StringBuilder sb = new();
     public string Render()
     {
-        // TODO: try provide module to user for importing with JSHost.Import ?? needs referencing in JSImport(xx)
-
         // raison d'etre: type mapping limitations: https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mapping-limitations
         // 1. JSObject has no means to retrieve arrays beside ByteArray (automapping user classes with an array property type is therefore not possible by default)
         // 2. Nested types cannot be represented on the interop boundary (i.e. Task<int[]>

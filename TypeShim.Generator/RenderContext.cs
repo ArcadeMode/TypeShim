@@ -9,7 +9,7 @@ namespace TypeShim.Generator;
 
 internal sealed class RenderContext(ClassInfo? targetClass, IEnumerable<ClassInfo> allClasses, RenderOptions options)
 {
-    internal ClassInfo Class => targetClass ?? throw new InvalidOperationException("Not rendering any particular class"); // TODO: improve api to avoid needing this
+    internal ClassInfo Class => targetClass ?? throw new InvalidOperationException("Not rendering any particular class");
     internal LocalScope LocalScope => _localScope ?? throw new InvalidOperationException("No active method in context");
 
     private readonly Dictionary<InteropTypeInfo, ClassInfo> _typeToClassDict = allClasses.ToDictionary(c => c.Type);
