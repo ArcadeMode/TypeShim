@@ -11,8 +11,8 @@ export class PeopleRepository {
 
     public SetDelays(jsTimeout: number, csDelay: number) {
         const peopleProvider: PeopleProvider.Proxy = MyApp.Proxy.GetPeopleProvider();
-        const timeoutUnit: TimeoutUnit.Properties | null = { Timeout: csDelay };
-        peopleProvider.DelayTask = new Promise<TimeoutUnit.Properties | null>((resolve) => setTimeout(() => resolve(timeoutUnit), jsTimeout));
+        const timeoutUnit: TimeoutUnit.Initializer | null = { Timeout: csDelay };
+        peopleProvider.DelayTask = new Promise<TimeoutUnit.Initializer | null>((resolve) => setTimeout(() => resolve(timeoutUnit), jsTimeout));
     }
 
     private PrintAgeMethodUsage(people: People.Proxy) {
@@ -21,7 +21,7 @@ export class PeopleRepository {
         const person1 = persons[(Math.random() * persons.length) | 0];
         const person2 = persons[(Math.random() * persons.length) | 0];
         const p = Person.materialize(person2);
-        const jsPerson: Person.Properties = { Id: 999, Name: "Snapshot Person", Age: 42, Pets: [] };
+        const jsPerson: Person.Initializer = { Id: 999, Name: "Snapshot Person", Age: 42, Pets: [] };
         const person3 = new Person.Proxy({ 
             Id: 999, 
             Name: "Constructed Person", 

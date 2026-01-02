@@ -9,7 +9,7 @@ internal static class RenderConstants
 
     internal const string AssemblyExports = "AssemblyExports";
     internal const string Proxy = "Proxy";
-    internal const string Properties = "Properties";
+    internal const string Properties = "Snapshot";
     internal const string Initializer = "Initializer";
 
     internal const string PropertiesTSFunction = "materialize";

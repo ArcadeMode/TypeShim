@@ -141,10 +141,10 @@ export namespace ArraysDemo {
       return TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.get_IntArrayProperty(this.instance);
     }
   }
-  export interface Properties {
+  export interface Snapshot {
     IntArrayProperty: Array<number>;
   }
-  export function materialize(proxy: ArraysDemo.Proxy): ArraysDemo.Properties {
+  export function materialize(proxy: ArraysDemo.Proxy): ArraysDemo.Snapshot {
     return {
       IntArrayProperty: proxy.IntArrayProperty,
     };
@@ -197,11 +197,11 @@ export namespace PrimitivesDemo {
     InitialStringProperty: string;
     StringProperty: string;
   }
-  export interface Properties {
+  export interface Snapshot {
     InitialStringProperty: string;
     StringProperty: string;
   }
-  export function materialize(proxy: PrimitivesDemo.Proxy): PrimitivesDemo.Properties {
+  export function materialize(proxy: PrimitivesDemo.Proxy): PrimitivesDemo.Snapshot {
     return {
       InitialStringProperty: proxy.InitialStringProperty,
       StringProperty: proxy.StringProperty,
@@ -229,10 +229,10 @@ export namespace People {
   export interface Initializer {
     All: Array<Person.Proxy | Person.Initializer>;
   }
-  export interface Properties {
-    All: Array<Person.Properties>;
+  export interface Snapshot {
+    All: Array<Person.Snapshot>;
   }
-  export function materialize(proxy: People.Proxy): People.Properties {
+  export function materialize(proxy: People.Proxy): People.Snapshot {
     return {
       All: proxy.All.map(e => Person.materialize(e)),
     };
@@ -299,13 +299,13 @@ export namespace Person {
     Age: number;
     Pets: Array<Dog.Proxy | Dog.Initializer>;
   }
-  export interface Properties {
+  export interface Snapshot {
     Id: number;
     Name: string;
     Age: number;
-    Pets: Array<Dog.Properties>;
+    Pets: Array<Dog.Snapshot>;
   }
-  export function materialize(proxy: Person.Proxy): Person.Properties {
+  export function materialize(proxy: Person.Proxy): Person.Snapshot {
     return {
       Id: proxy.Id,
       Name: proxy.Name,
@@ -358,12 +358,12 @@ export namespace Dog {
     Breed: string;
     Age: number;
   }
-  export interface Properties {
+  export interface Snapshot {
     Name: string;
     Breed: string;
     Age: number;
   }
-  export function materialize(proxy: Dog.Proxy): Dog.Properties {
+  export function materialize(proxy: Dog.Proxy): Dog.Snapshot {
     return {
       Name: proxy.Name,
       Breed: proxy.Breed,
@@ -419,11 +419,11 @@ export namespace PeopleProvider {
   export interface Initializer {
     DelayTask: Promise<TimeoutUnit.Proxy | TimeoutUnit.Initializer | null> | null;
   }
-  export interface Properties {
-    PeopleCache: Array<Person.Properties> | null;
-    DelayTask: Promise<TimeoutUnit.Properties | null> | null;
+  export interface Snapshot {
+    PeopleCache: Array<Person.Snapshot> | null;
+    DelayTask: Promise<TimeoutUnit.Snapshot | null> | null;
   }
-  export function materialize(proxy: PeopleProvider.Proxy): PeopleProvider.Properties {
+  export function materialize(proxy: PeopleProvider.Proxy): PeopleProvider.Snapshot {
     return {
       PeopleCache: proxy.PeopleCache ? proxy.PeopleCache.map(e => Person.materialize(e)) : null,
       DelayTask: proxy.DelayTask ? proxy.DelayTask.then(e => e ? TimeoutUnit.materialize(e) : null) : null,
@@ -449,10 +449,10 @@ export namespace TimeoutUnit {
   export interface Initializer {
     Timeout: number;
   }
-  export interface Properties {
+  export interface Snapshot {
     Timeout: number;
   }
-  export function materialize(proxy: TimeoutUnit.Proxy): TimeoutUnit.Properties {
+  export function materialize(proxy: TimeoutUnit.Proxy): TimeoutUnit.Snapshot {
     return {
       Timeout: proxy.Timeout,
     };
