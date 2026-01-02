@@ -1,9 +1,12 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using TypeShim.Shared;
 
 namespace TypeShim.Analyzers;
@@ -16,9 +19,9 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         TypeShimDiagnostics.AttributeOnPublicClassOnlyRule,
         TypeShimDiagnostics.NonPublicSetterRule,
         TypeShimDiagnostics.NoRequiredFieldsRule,
+        TypeShimDiagnostics.NoOverloadsRule,
         TypeShimDiagnostics.UnsupportedTypeRule,
-        TypeShimDiagnostics.NonExportedTypeInMethodRule,
-        TypeShimDiagnostics.NonExportedTypeInPropertyRule,
+        TypeShimDiagnostics.NonExportedTypeInInteropApiRule,
         TypeShimDiagnostics.UnderDevelopmentTypeRule,
     ];
 
@@ -40,35 +43,35 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
 
 
         AnalyzeClassAccessibility(context, type);
-        AnalyzeTypesUsedInInteropApi(context, type);
-        AnalyzeClassPropertiesForConstructionCompatibility(context, type);
+        AnalyzeMembers(context, type);
     }
 
-    private static void AnalyzeClassAccessibility(SymbolAnalysisContext context, INamedTypeSymbol type)
+    private static void AnalyzeClassAccessibility(SymbolAnalysisContext context, INamedTypeSymbol classSymbol)
     {
-        if (SymbolFacts.IsPublicClass(type)) return;
-        Report(context, TypeShimDiagnostics.AttributeOnPublicClassOnlyRule, type, type.Name);
+        if (SymbolFacts.IsPublicClass(classSymbol)) return;
+
+        context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.AttributeOnPublicClassOnlyRule, LocationFinder.GetDefaultLocation(classSymbol), classSymbol.Name));
     }
 
-    private static void AnalyzeTypesUsedInInteropApi(SymbolAnalysisContext context, INamedTypeSymbol type)
+    private static void AnalyzeMembers(SymbolAnalysisContext context, INamedTypeSymbol type)
     {
+        HashSet<string> seenMethodNames = [];
         foreach (ISymbol member in type.GetMembers())
         {
             if (member.DeclaredAccessibility != Accessibility.Public)
                 continue;
-
+            
             switch (member)
             {
-                case IMethodSymbol method when method.MethodKind == MethodKind.Ordinary:
-                    CheckType(context, method, method.ReturnType);
-                    foreach (var p in method.Parameters)
-                    {
-                        CheckType(context, method, p.Type);
-                    }
+                case IMethodSymbol method when method.MethodKind is MethodKind.Ordinary or MethodKind.Constructor:
+                    CheckForOverloads(context, seenMethodNames, method);
+                    CheckMethodReturnType(context, method);
+                    foreach (IParameterSymbol parameter in method.Parameters)
+                        CheckMethodParameterType(context, method, parameter);
                     break;
                 case IPropertySymbol prop:
                     CheckInstancePropertySetterAccessibility(context, prop);
-                    CheckType(context, prop, prop.Type);
+                    CheckPropertyType(context, prop);
                     break;
                 case IFieldSymbol field:
                     CheckInstanceFieldRequiredness(context, field);
@@ -77,7 +80,75 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static void CheckType(SymbolAnalysisContext context, ISymbol symbol, ITypeSymbol type)
+    private static void CheckForOverloads(SymbolAnalysisContext context, HashSet<string> seenMethodNames, IMethodSymbol member)
+    {
+        if (seenMethodNames.Contains(member.Name))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.NoOverloadsRule, LocationFinder.GetDefaultLocation(member), member.Name));
+        }
+        else
+        {
+            seenMethodNames.Add(member.Name);
+        }
+    }
+
+    private static void CheckMethodReturnType(SymbolAnalysisContext context, IMethodSymbol method)
+    {
+        if (TryGetTypeDiagnostic(method.ReturnType) is DiagnosticDescriptor descriptor)
+        {
+            Location location = LocationFinder.GetMethodReturnTypeLocation(method, context.CancellationToken);
+            string typeName = method.ReturnType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+            context.ReportDiagnostic(Diagnostic.Create(descriptor, location, typeName));
+        }
+    }
+
+    private static void CheckMethodParameterType(SymbolAnalysisContext context, IMethodSymbol method, IParameterSymbol parameter)
+    {
+        if (TryGetTypeDiagnostic(parameter.Type) is DiagnosticDescriptor descriptor)
+        {
+            Location location = LocationFinder.GetMethodParameterLocation(method, parameter, context.CancellationToken);
+            string typeName = parameter.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+            context.ReportDiagnostic(Diagnostic.Create(descriptor, location, typeName));
+        }
+    }
+
+    private static void CheckPropertyType(SymbolAnalysisContext context, IPropertySymbol property)
+    {
+        if (TryGetTypeDiagnostic(property.Type) is DiagnosticDescriptor descriptor)
+        {
+            Location location = LocationFinder.GetPropertyTypeLocation(property, context.CancellationToken);
+            string typeName = property.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+            context.ReportDiagnostic(Diagnostic.Create(descriptor, location, typeName));
+        }
+    }
+
+    private static void CheckInstancePropertySetterAccessibility(SymbolAnalysisContext context, IPropertySymbol property)
+    {
+        if (property.IsStatic || property.IsIndexer || property.SetMethod is not IMethodSymbol setter)
+            return;
+
+        Accessibility propertyAccessibility = property.DeclaredAccessibility is Accessibility.NotApplicable ? Accessibility.Private : property.DeclaredAccessibility;
+        Accessibility setterAccessibility = setter.DeclaredAccessibility is Accessibility.NotApplicable ? propertyAccessibility : setter.DeclaredAccessibility;
+        if (setterAccessibility is Accessibility.Public)
+            return;
+
+        string propertyName = property.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+        context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.NonPublicSetterRule, LocationFinder.GetDefaultLocation(property), propertyName));
+    }
+
+    private static void CheckInstanceFieldRequiredness(SymbolAnalysisContext context, IFieldSymbol field)
+    {
+        if (field.IsStatic || field.IsConst || field.IsImplicitlyDeclared)
+            return;
+
+        if (field.DeclaredAccessibility == Accessibility.Public && field.IsRequired)
+        {
+            string fieldName = field.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+            context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.NoRequiredFieldsRule, LocationFinder.GetDefaultLocation(field), fieldName));
+        }
+    }
+
+    private static DiagnosticDescriptor? TryGetTypeDiagnostic(ITypeSymbol type)
     {
         try
         {
@@ -85,75 +156,17 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
             InteropTypeInfo info = builder.Build();
             if (info.RequiresTypeConversion && !info.SupportsTypeConversion)
             {
-                ReportNonTSExported(context, type, symbol);
+                return TypeShimDiagnostics.NonExportedTypeInInteropApiRule;
             }
         }
         catch (NotSupportedTypeException)
         {
-            ReportUnsupported(context, type, symbol);
+            return TypeShimDiagnostics.UnsupportedTypeRule;
         }
         catch (NotImplementedException)
         {
-            ReportUnderDevelopment(context, type, symbol);
+            return TypeShimDiagnostics.UnderDevelopmentTypeRule;
         }
-    }
-
-    private static void CheckInstancePropertySetterAccessibility(SymbolAnalysisContext context, IPropertySymbol property)
-    {
-        if (property.IsStatic || property.IsIndexer || property.SetMethod is not IMethodSymbol setter) 
-            return;
-
-        Accessibility propertyAccessibility = property.DeclaredAccessibility is Accessibility.NotApplicable ? Accessibility.Private : property.DeclaredAccessibility;
-        Accessibility setterAccessibility = setter.DeclaredAccessibility is Accessibility.NotApplicable ? propertyAccessibility : setter.DeclaredAccessibility;
-        if (setterAccessibility is Accessibility.Public) 
-            return;
-        
-        Report(context, TypeShimDiagnostics.NonPublicSetterRule, property, property.Type);
-    }
-
-    private static void CheckInstanceFieldRequiredness(SymbolAnalysisContext context, IFieldSymbol field)
-    {
-        if (field.IsStatic || field.IsConst || field.IsImplicitlyDeclared)
-            return;
-        
-        if (field.DeclaredAccessibility == Accessibility.Public && field.IsRequired)
-            Report(context, TypeShimDiagnostics.NoRequiredFieldsRule, field, field.Name);
-    }
-
-    private static void ReportUnsupported(SymbolAnalysisContext context, ITypeSymbol providedType, ISymbol symbol)
-    {
-        var location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
-        var typeText = providedType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.UnsupportedTypeRule, location, typeText));
-    }
-
-    private static void ReportUnderDevelopment(SymbolAnalysisContext context, ITypeSymbol providedType, ISymbol symbol)
-    {
-        var location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
-        var typeText = providedType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.UnderDevelopmentTypeRule, location, typeText));
-    }
-
-    private static void ReportNonTSExported(SymbolAnalysisContext context, ITypeSymbol type, ISymbol symbol)
-    {
-        DiagnosticDescriptor descriptor = symbol is IPropertySymbol
-            ? TypeShimDiagnostics.NonExportedTypeInPropertyRule
-            : TypeShimDiagnostics.NonExportedTypeInMethodRule;
-
-        var location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
-        var typeText = type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        context.ReportDiagnostic(Diagnostic.Create(descriptor, location, typeText));
-    }
-
-    private static void Report(SymbolAnalysisContext context, DiagnosticDescriptor descriptor, ISymbol symbol, ITypeSymbol type)
-    {
-        string propTypeName = type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        Report(context, descriptor, symbol, propTypeName);
-    }
-
-    private static void Report(SymbolAnalysisContext context, DiagnosticDescriptor descriptor, ISymbol symbol, params object[] messageParams)
-    {
-        Location location = symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
-        context.ReportDiagnostic(Diagnostic.Create(descriptor, location, symbol.Name, messageParams));
+        return null;
     }
 }

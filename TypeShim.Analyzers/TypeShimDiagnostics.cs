@@ -15,14 +15,14 @@ internal static class TypeShimDiagnostics
         isEnabledByDefault: true,
         description: "The provided type is currently unsupported by .NET Type Marshalling and/or TypeShim interop.");
 
-    internal static readonly DiagnosticDescriptor NonExportedTypeInMethodRule = new(
+    internal static readonly DiagnosticDescriptor NonExportedTypeInInteropApiRule = new(
         id: "TSHIM006",
         title: "Non-TSExport type on a method in the interop API",
-        messageFormat: "Type '{0}' is not annotated with [TSExport], it will be exported to TypeScript as 'object'",
+        messageFormat: "Type '{0}' has no [TSExport] annotation, it will present in TypeScript as 'object' and is only an opaque handle at runtime",
         category: "Design",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "Interop APIs should use TSExport-annotated classes or supported primitives as return- and parameter types.");
+        description: "TSExport public API should use supported .NET-JS interop types or (other) TSExport classes.");
 
     internal static readonly DiagnosticDescriptor UnderDevelopmentTypeRule = new(
         id: "TSHIM007",
@@ -42,24 +42,23 @@ internal static class TypeShimDiagnostics
         isEnabledByDefault: true,
         description: "TSExport is only supported on classes with public accessibility.");
 
-    [Obsolete("Use NonExportedTypeInMethodRule instead, actually just use NonExportedTypeOnInteropRule")]
-    internal static readonly DiagnosticDescriptor NonExportedTypeInPropertyRule = new(
+    internal static readonly DiagnosticDescriptor NoOverloadsRule = new(
         id: "TSHIM009",
-        title: "Non-TSExport type on a property in the interop API",
-        messageFormat: "Type '{0}' is not annotated with [TSExport], properties cannot contain unmarshallable types",
-        category: "Design",
+        title: "Overloading is not supported",
+        messageFormat: "Public member overloading is not supported, consider decreasing the number of public overloads of '{0}' by lowering accessibility or changing names",
+        category: "Usage",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "Interop APIs should use TSExport-annotated classes or supported primitives as property types.");
+        description: "TypeShim does not support fields (yet), they're mostly ignored but required fields are banned to prevent invalid constructor initializers from being generated.");
 
     internal static readonly DiagnosticDescriptor NonPublicSetterRule = new(
         id: "TSHIM010",
         title: "Non-public set/init will be skipped during JSObject mapping",
-        messageFormat: "Property '{0}' has a non-public setter/init accessor and will be skipped in JSObject to '{1}' mapping",
+        messageFormat: "Property '{0}' has a non-public set/init, it will not be available in the TypeScript constructor of class '{1}'",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Info,
         isEnabledByDefault: true,
-        description: "TypeShim generates a JSObject mapper for each TSExport class. Properties with non-public set/init accessors are excluded from the generated JSObject mapper.");
+        description: "TypeShim generates initializer objects to use in conjuction with constructors and for automatic JSObject mapping. Properties with non-public set/init's are excluded from this feature.");
 
     internal static readonly DiagnosticDescriptor NoRequiredFieldsRule = new(
         id: "TSHIM011",
