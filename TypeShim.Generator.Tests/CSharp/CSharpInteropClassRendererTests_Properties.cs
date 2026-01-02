@@ -224,6 +224,15 @@ public partial class C1Interop
 {
     [JSExport]
     [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = jsObject.GetPropertyAsObject("P1"),
+        };
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
     public static object get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
         C1 typed_instance = (C1)instance;
@@ -241,7 +250,15 @@ public partial class C1Interop
         return obj switch
         {
             C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = jsObject.GetPropertyAsObject("P1"),
         };
     }
 }
@@ -1037,7 +1054,7 @@ public partial class C1Interop
 
     [TestCase("Version")]
     [TestCase("Uri")]
-    public void CSharpInteropClass_InstanceProperty_WithNonUserClassArrayType_HasNoFromJSObjectMethod(string typeName) //i.e. is not snapshot compatible
+    public void CSharpInteropClass_InstanceProperty_WithNonUserClassArrayType_ConvertsWithCast_InConstructorAndFromJSObjectMethod(string typeName) //i.e. is not snapshot compatible
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -1068,6 +1085,15 @@ namespace N1;
 public partial class C1Interop
 {
     [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = ({{typeName}}[])jsObject.GetPropertyAsObjectArray("P1"),
+        };
+    }
+    [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static object[] get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
@@ -1087,7 +1113,15 @@ public partial class C1Interop
         return obj switch
         {
             C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = ({{typeName}}[])jsObject.GetPropertyAsObjectArray("P1"),
         };
     }
 }

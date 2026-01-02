@@ -44,14 +44,15 @@ internal class TypescriptSymbolNameProvider(TypeScriptTypeMapper typeMapper)
         };
     }
 
-    internal string GetUserClassSymbolName(ClassInfo classInfo, string typeSuffix) => $"{typeMapper.ToTypeScriptType(classInfo.Type).Render(suffix: $".{typeSuffix}")}";
-
     /// <summary>
     /// returns the TypeScript type name without any suffixes. Mostly useful for non-user types like string, int with accomodations for Tasks, arrays etc.
     /// </summary>
     /// <param name="typeInfo"></param>
     /// <returns></returns>
-    internal string GetNakedSymbolReference(InteropTypeInfo typeInfo) => typeMapper.ToTypeScriptType(typeInfo).Render(suffix: string.Empty);
+    internal string GetNakedSymbolReference(InteropTypeInfo typeInfo) => GetSymbolNameInternal(typeInfo, string.Empty);
+    internal string GetUserClassSymbolName(ClassInfo classInfo) => GetSymbolNameInternal(classInfo.Type, string.Empty);
+    internal string GetUserClassSymbolName(ClassInfo classInfo, string typeSuffix) => GetSymbolNameInternal(classInfo.Type, $".{typeSuffix}");
+    private string GetSymbolNameInternal(InteropTypeInfo typeInfo, string suffix) => $"{typeMapper.ToTypeScriptType(typeInfo).Render(suffix)}";
 
     private InteropTypeInfo? ExtractUserType(InteropTypeInfo typeInfo)
     {

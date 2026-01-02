@@ -618,7 +618,7 @@ export class Proxy extends ProxyBase {
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_ParameterlessConstructor_AndIncompatiblePropertyType_GeneratesNoConstructor()
+    public void TypeScriptUserClassProxy_ParameterlessConstructor_AndUnexportedPropertyType()
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -647,7 +647,9 @@ export class Proxy extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class Proxy extends ProxyBase {
-  private constructor() { super(undefined!); }
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+  }
 
   public get P1(): object {
     return TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
@@ -661,8 +663,8 @@ export class Proxy extends ProxyBase {
 """);
     }
 
-    [Test, Ignore("Needs reconsideration, if user does this, why not let them?")]
-    public void TypeScriptUserClassProxy_ParameterizedConstructor_AndIncompatiblePropertyType_GeneratesNoConstructor()
+    [Test]
+    public void TypeScriptUserClassProxy_ParameterizedConstructor_AndUnexportedPropertyType()
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -691,7 +693,9 @@ export class Proxy extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class Proxy extends ProxyBase {
-  private constructor() { super(undefined!); }
+  constructor(i: number, jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(i, jsObject));
+  }
 
   public get P1(): object {
     return TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);

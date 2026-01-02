@@ -126,11 +126,12 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
 
         string ResolveReturnType(InteropTypeInfo typeInfo)
         {
-            if (ctx.GetClassInfo(typeInfo.GetInnermostType()) is not ClassInfo classInfo)
+            if (!typeInfo.RequiresTypeConversion || !typeInfo.SupportsTypeConversion)
             {
                 return symbolNameProvider.GetNakedSymbolReference(typeInfo);
             }
 
+            ClassInfo classInfo = ctx.GetClassInfo(typeInfo.GetInnermostType());
             if (classInfo is { Constructor: { IsParameterless: true, AcceptsInitializer: true } })
             {
                 return symbolNameProvider.GetUserClassSymbolName(typeInfo, classInfo, SymbolNameFlags.ProxyInitializerUnion);

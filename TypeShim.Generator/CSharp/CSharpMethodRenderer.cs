@@ -214,7 +214,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             using (_ctx.Indent())
             {
                 _ctx.AppendLine($"{_ctx.Class.Type.CLRTypeSyntax} instance => instance,");
-                if (_ctx.Class is { IsStatic: false, Constructor: { AcceptsInitializer: true, IsParameterless: true } })
+                if (_ctx.Class is { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
                 {
                     _ctx.AppendLine($"JSObject jsObj => {RenderConstants.FromJSObjectMethodName}(jsObj),");
                 }

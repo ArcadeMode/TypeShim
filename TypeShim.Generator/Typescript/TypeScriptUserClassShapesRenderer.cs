@@ -89,7 +89,7 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
                 InteropTypeInfo innerTypeInfo = typeInfo.TypeArgument ?? throw new InvalidOperationException("Nullable type must have a type argument.");
                 return $"{propertyAccessorExpression} ? {GetPropertyValueExpression(innerTypeInfo, propertyAccessorExpression)} : null";
             }
-            else if (typeInfo.RequiresTypeConversion)
+            else if (typeInfo.RequiresTypeConversion && typeInfo.SupportsTypeConversion)
             {
                 if (typeInfo.IsArrayType || typeInfo.IsTaskType)
                 {
@@ -97,13 +97,14 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
                     string transformFunction = typeInfo.IsArrayType ? "map" : "then";
                     return $"{propertyAccessorExpression}.{transformFunction}(e => {GetPropertyValueExpression(elementTypeInfo, "e")})";
                 }
-                else // simple user type
+                else // exported user type
                 {
-                    string userClassName = symbolNameProvider.GetNakedSymbolReference(typeInfo);
+                    ClassInfo exportedClass = ctx.GetClassInfo(typeInfo);
+                    string userClassName = symbolNameProvider.GetUserClassSymbolName(exportedClass);
                     return $"{userClassName}.{RenderConstants.PropertiesTSFunction}({propertyAccessorExpression})";
                 }
             }
-            else // simple primitive
+            else // simple primitive or unconvertable class
             {
                 return propertyAccessorExpression;
             }

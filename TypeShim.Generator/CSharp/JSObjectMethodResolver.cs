@@ -15,6 +15,7 @@ internal static class JSObjectMethodResolver
             KnownManagedType.Int32 => "GetPropertyAsInt32",
             KnownManagedType.JSObject => "GetPropertyAsJSObject",
             KnownManagedType.Object when typeInfo.IsTSExport => "GetPropertyAsJSObject", // exported object types have a FromJSObject mapper
+            KnownManagedType.Object when !typeInfo.IsTSExport => "GetPropertyAsObject", // non-exports are just casted to their original type.
             KnownManagedType.Array => typeInfo.TypeArgument switch
             {
                 { ManagedType: KnownManagedType.Byte } => "GetPropertyAsByteArray",
@@ -23,10 +24,12 @@ internal static class JSObjectMethodResolver
                 { ManagedType: KnownManagedType.String } => "GetPropertyAsStringArray",
                 { ManagedType: KnownManagedType.JSObject } => "GetPropertyAsJSObjectArray",
                 { ManagedType: KnownManagedType.Object, IsTSExport: true } => "GetPropertyAsJSObjectArray", // exported object types have a FromJSObject mapper
+                { ManagedType: KnownManagedType.Object, IsTSExport: false } => "GetPropertyAsObjectArray", // non-exports are just casted to their original type.
                 { ManagedType: KnownManagedType.Nullable } elemTypeInfo => elemTypeInfo.TypeArgument switch
                 {
                     { ManagedType: KnownManagedType.JSObject } => "GetPropertyAsJSObjectArray",
                     { ManagedType: KnownManagedType.Object, IsTSExport: true } => "GetPropertyAsJSObjectArray", // exported object types have a FromJSObject mapper
+                    { ManagedType: KnownManagedType.Object, IsTSExport: false } => "GetPropertyAsObjectArray", // non-exports are just casted to their original type.
                     _ => throw new InvalidOperationException($"Array of nullable type '{elemTypeInfo?.ManagedType}' cannot be marshalled through TypeShim JSObject extensions"),
                 },
                 _ => throw new InvalidOperationException($"Array of type '{typeInfo.TypeArgument?.ManagedType}' cannot be marshalled through TypeShim JSObject extensions"),
@@ -48,10 +51,12 @@ internal static class JSObjectMethodResolver
                 { ManagedType: KnownManagedType.String } => "GetPropertyAsStringTask",
                 { ManagedType: KnownManagedType.JSObject } => "GetPropertyAsJSObjectTask",
                 { ManagedType: KnownManagedType.Object, IsTSExport: true } => "GetPropertyAsJSObjectTask",
+                { ManagedType: KnownManagedType.Object, IsTSExport: false } => "GetPropertyAsObjectTask",
                 { ManagedType: KnownManagedType.Nullable } returnTypeInfo => returnTypeInfo.TypeArgument switch
                 {
                     { ManagedType: KnownManagedType.JSObject } => "GetPropertyAsJSObjectTask",
                     { ManagedType: KnownManagedType.Object, IsTSExport: true } => "GetPropertyAsJSObjectTask", // exported object types have a FromJSObject mapper
+                    { ManagedType: KnownManagedType.Object, IsTSExport: false } => "GetPropertyAsObjectTask", // exported object types have a FromJSObject mapper
                     _ => throw new InvalidOperationException($"Task of nullable type '{returnTypeInfo?.ManagedType}' cannot be marshalled through TypeShim JSObject extensions"),
                 },
                 _ => throw new InvalidOperationException($"Task of type '{typeInfo.TypeArgument?.ManagedType}' cannot be marshalled through TypeShim JSObject extensions"),

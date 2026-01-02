@@ -30,3 +30,7 @@ public class NotSupportedMethodOverloadException(string message, Exception? inne
 public class NotSupportedConstructorOverloadException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
 {
 }
+
+public class NotFoundClassInfoException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
+{
+}

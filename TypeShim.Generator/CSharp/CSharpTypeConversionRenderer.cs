@@ -68,8 +68,9 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
     {
         Debug.Assert(typeInfo.ManagedType == KnownManagedType.Object, "Attempting object type conversion with non-object");
 
-        if (_ctx.GetClassInfo(typeInfo) is ClassInfo exportedClass)
+        if (typeInfo.RequiresTypeConversion && typeInfo.SupportsTypeConversion)
         {
+            ClassInfo exportedClass = _ctx.GetClassInfo(typeInfo);
             string targetInteropClass = RenderConstants.InteropClassName(exportedClass);
             _ctx.Append($"{targetInteropClass}.{RenderConstants.FromObjectMethodName}({parameterName})");
         }

@@ -145,7 +145,7 @@ internal class SyntaxTreeParsingTests_Constructors
     }
 
     [Test]
-    public void ClassInfoBuilder_PrimaryConstructor_UnmarshallableParameter_ReturnsNullConstructor()
+    public void ClassInfoBuilder_PrimaryConstructor_UnmarshallableParameter_ReturnsConstructor()
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -165,6 +165,9 @@ internal class SyntaxTreeParsingTests_Constructors
         INamedTypeSymbol classSymbol = exportedClasses.Last();
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
-        Assert.That(classInfo.Constructor, Is.Null);
+        Assert.That(classInfo.Constructor, Is.Not.Null);
+        MethodParameterInfo param = classInfo.Constructor.Parameters[0];
+        Assert.That(param.Type.RequiresTypeConversion, Is.True);
+        Assert.That(param.Type.SupportsTypeConversion, Is.False);
     }
 }
