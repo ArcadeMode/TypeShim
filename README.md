@@ -1,38 +1,48 @@
 <h1 align=center tabindex=-1>TypeShim</h1>
 <p align=center tabindex=-1>
-  <i>Generated strongly-typed .NET-JS interop facades with rich semantics.</i>
+  <i>Strongly-typed .NET-JS interop facade generation</i>
 </p>
 
 ## Why TypeShim
 The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), while powerful, lacks type information and exclusively supports static methods. It requires repetitive code patterns for type transformation and quite some boilerplate to achieve reasonable ergonomics in your code.
 
-Enter: _TypeShim_. Drop a `[TSExport]`/`[TSModule]` on your C# class and _voilà_, TypeShim generates a set of JSExport methods which are neatly wrapped by TypeScript classes to provide access to your .NET class as if it were truely exported to TypeScript.
+Enter: _TypeShim_. Drop a `[TSExport]` on your C# class and _voilà_, TypeShim generates a set of JSExport methods which are neatly wrapped by TypeScript classes to provide access to your .NET class as if it were truly exported to TypeScript.
 
 ## Features at a glance
 
 - 🏭 Generated for _your_ project, recognizable class names in TypeScript.
 - 💰 [Enriched type marshalling](#enriched-type-support) 
 - 🛡 Type-safety across the interop boundary
-- 🔃 Powerful state locality semantics 🚧
-- 🏷️ Enhanced member access (methods and properties)
-- 🦜 Repetitive interop patterns generated automatically
-- 🪶 Lightweight: won't interfere with existing JSExport/JSImports.
-- 👍 Minimal setup: just [NuGet install](#installing) and add one attribute to your class.
+- 🤖 Automatically export
+  - Constructors
+  - Static ánd instance methods
+  - Static ánd instance properties
+- 🦜 Automatic repetitive interop patterns
+- 🪁 Lightweight: won't lock you in or interfere with other JSExport/JSImport.
+- 👍 Minimal setup: [NuGet install](#installing) + one `[TSExport]`.
 
 ## Semantically rich TypeScript interop library
 
 TypeShim doesn't just export your C# classes but provides you with a rich interop API which orients around data locality. The following components are central in the generated interop: 
 
-#### `[TSModule]` makes your static classes accessible in TypeScript.
-A TSModule acts as an interop entrypoint, from a TSModule you can return your first `[TSExport]`ed class instances. The associated TypeScript class can be constructed with your WASM [getAssemblyExports() result](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-) as constructor parameter. On the C# side you are free to construct/populate these static classes however you see fit. Supports both methods and properties.
+Generally you will be using `[TSExport]` annotate your classes, then controlling which members are public to define your interop API. Any class annotated with the TSExportAttribute will receive a TypeScript counterpart including its constructors, methods and properties, both static and instance. Language semantics are most entirely preserved across the interop boundary. Do check out the [limitations](#limitations) section.
 
-#### `[TSExport]` makes your instance classes accessible in TypeScript.
-Simply return these types from any method or property getter. Even use them as method parameters and in property setters. All public properties and methods are accessible in TypeScript, internal and private members are not exported.
-These classes have two interop 'modis':
+An exported class receives the following subcomponents in TypeScript:
 
-`Proxy` a proxy class lives in the dotnet runtime. Its public methods and properties will be transparently accessed through interop, so a method invoke or property assignment will reflect in the dotnet runtime.
+`Proxy` a proxy class lives in the dotnet runtime. Its public methods and properties will be transparently accessed through interop, so a method invoke or property assignment will reflect in the dotnet runtime. They can be constructed or retrieved through methods and properties. They may also be used as parameters or property types as you normally would with your classes.
 
-`Snapshot` a snapshot lives in the JS runtime. Snapshots are property only objects in JS, methods cannot be snapshotted, nor can delegate type properties. A snapshot can either be 'taken' from a proxy or constructed as a new JS object. Snapshots can be passed into methods and properties of proxies and TSModule instances, TypeShim will generate mappings from JSObject into C# class instances. The primary use cases of snapshots are read-heavy contexts and passing objects as input into dotnet.
+`Properties` is a type that is present if your class has public properties. An instance of `MyClass.Properties` can be retrieved from a Proxy with the provided `MyClass.materialize(your_instance)` function. Snapshots are property only objects in JS, fully decoupled from the dotnet object. 
+
+`Initializer` is a type that is conditionally present
+Snapshots can be passed into methods and properties of proxies and TSModule instances, TypeShim will generate mappings from JSObject into C# class instances. The primary use cases of snapshots are read-heavy contexts and passing objects as input into dotnet.
+
+### <a name="limitations"></a>Limitations
+
+TSExports are subject to minimal, but some, constraints. 
+- overloading
+- array value semantics
+
+> ⚠ As overloading is not a real language feature in JavaScript nor TypeScript, this is currently not supported in TypeShim either. You can still define overloads that are not public. This goes for both constructors and methods.
 
 ### Samples
 Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your wasm browserapp as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-) in order to retrieve its `exports`. 
