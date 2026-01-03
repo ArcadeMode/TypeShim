@@ -8,8 +8,6 @@ The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client
 
 Enter: _TypeShim_. Drop one `[TSExport]` on your C# class(es) and _voilà_, TypeShim generates the necessary JSExport methods that perform repetitive type transformations and even class instantiations for you. The void that JSExport leaves on the JS side is filled with a rich TypeScript client that enables you to use your .NET classes as if they were truly exported to TypeScript. 
 
-Code changes reflect instantly in your TypeScript project, easy and reliable.
-
 ## Features at a glance
 
 - 🏭 No-nonsense [interop](#concepts) generation.
