@@ -215,13 +215,11 @@ public UsingRawJSExport(exports: any) {
 
 ## Semantically rich TypeScript interop
 
-TypeShim makes your C# classes accessible from TypeScript, with some powerful features built in so you can take control over your classes ánd data locality. First, you will be using `[TSExport]` annotate your classes, then controlling which members are public to define your interop API. Any class annotated with the TSExportAttribute will receive a TypeScript counterpart which includes the public members you have chosen. 
+First, you will be using `[TSExport]` annotate your classes  to define your interop API. Every annotated class will receive a TypeScript counterpart. The build-time generated TypeScript can provide the following subcomponents for each exported class:
 
-The build-time generated TypeScript can provide the following subcomponents for each exported class:
+`Proxy` this type procides access to your C# class. To aquire an instance you may invoke your exported constructor or returned by any method and/or property. Proxies may also be used as parameters and will behave as typical reference types when performing any such operation. Instance members will transparently invoke the appropriate interop method. 
 
-`Proxy` this type grants access to your C# class which, naturally, lives in the dotnet runtime. Proxies may contain static members that may be accessed as static in TypeScript too. To aquire an instance you may invoke your exported constructor or returned by any method and/or property. Proxies may also be used as parameters and will behave as typical reference types when performing any such operation. Instance members will transparently invoke the appropriate interop method. 
-
-`Snapshot` is a type that is present if your class has public properties. An instance of `MyClass.Snapshot` can be retrieved from a Proxy with the provided `MyClass.materialize(your_instance)` function. Snapshots are fully decoupled from the dotnet object and live in the JS runtime. This is useful when you no longer require the Proxy instance but want to continue working with its data. Properties of types that are exported will be materialized as well.
+`Snapshot` is a type that is present if your class has public properties. An instance of `MyClass.Snapshot` can be retrieved from a Proxy with the provided `MyClass.materialize(your_instance)` function. Snapshots are JS objects. This type is useful when you no longer require the Proxy instance but want to continue working with its data. 
 
 `Initializer` is a type that is present if the exported class has an exported constructor and accepts an initializer body in `new()` expressions. Initializer objects live in the JS runtime and may be used in the process of creating dotnet object instances, first and foremost in the constructor of the associated Proxy.
 
