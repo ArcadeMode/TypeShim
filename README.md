@@ -4,35 +4,35 @@
 </p>
 
 ## Why TypeShim
-The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), while powerful, lacks type information and exclusively supports static methods. It requires repetitive code patterns for type transformation and quite some boilerplate to achieve reasonable ergonomics in your code.
+The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), while powerful, is somewhat cumbersome to use. It requires repetitive code patterns and quite some boilerplate to use. The lack of class support mean that many method annotations have to be written for a lot of use cases. Finally the exclusive support for static methods makes referencing class instances just as difficult. 
 
-Enter: _TypeShim_. Drop a `[TSExport]` on your C# class and _voilà_, TypeShim generates a set of JSExport methods which are neatly wrapped by TypeScript classes to provide access to your .NET class as if it were truly exported to TypeScript.
+Enter: _TypeShim_. Drop one `[TSExport]` on your C# class(es) and _voilà_, TypeShim generates rich JSExport methods that perform repetitive type transformations and even instantiations for you. The void that JSExport leaves on the JS side is filled with a rich TypeScript client that enables you to use your .NET classes as if they were truly exported to TypeScript. 
+
+Code changes reflect instantly in your TypeScript project, easy and reliable.
 
 ## Features at a glance
 
-- 🏭 Generated for _your_ project, recognizable class names in TypeScript.
-- 💰 [Enriched type marshalling](#enriched-type-support) .
+- 🏭 Generated for _your_ project.
+- 💰 [Enriched type marshalling](#enriched-type-support).
 - 🛡 Type-safety across the interop boundary.
 - 🤖 Automatically export:
   - Constructors.
   - Static ánd instance methods.
   - Static ánd instance properties.
 - 🦜 Implements repetitive interop patterns for you.
-- 🪁 Lightweight: won't lock you in or interfere with other JSExport/JSImport.
-- 👍 Minimal setup: [NuGet install](#installing) + one `[TSExport]`.
+- 🪁 Lightweight: won't lock you in.
+- 🧩 Compatible with your other JSExport/JSImport.
+- 👍 [Easy setup](#installing)
 
 ## Samples
 Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your wasm browserapp as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-) in order to retrieve its `exports`. 
 
 
 ### TypeShim
-Preservation of type information across the interop boundary, including instance method and property access.
+A simple example where we have an app about 'people', just to show basic language use powered by TypeShim.
+The C# implementation is just classes with the mentioned `[TSExport]` annotation.
 
-<details>
-    <summary>See the <code>TypeShim</code> C# implementation of <code>PeopleRepository</code> and <code>Person</code></summary>
-&nbsp;
-
-  ```csharp
+```csharp
 using TypeShim;
 
 namespace Sample.People;
@@ -71,18 +71,19 @@ public class Person
     }
 }
 ```
-</details>
 
- ```js
+And the TypeScript side can look like this. One extra type is the TypeShimInitializer which should be passed the created runtime before engaging with interop. This is so helper functions for type marshalling can be set up a reference to the assembly exports can be retrieved.
+
+```js
 using { TypeShimInitializer, PeopleRepository, Person } from './typeshim.ts';
 
 public UsingTypeShim() {
     const runtime = await dotnet.withApplicationArguments(args).create()
     TypeShimInitializer.initialize(runtime);
 
-    const repository = new PeopleRepository.Proxy();
-    const alice: Person.Proxy = repository.GetPerson(0);
-    const bob = new Person.Proxy({
+    const repository = new PeopleRepository();
+    const alice: Person = repository.GetPerson(0);
+    const bob = new Person({
       Name: 'Bob',
       Age: 20
     });
@@ -93,22 +94,43 @@ public UsingTypeShim() {
     console.log(alice.IsOlderThan(bob)) // prints true
 
     repository.AddPerson({ Name: "Charlie", Age: 40 });
-    const charlie: Person.Proxy = repository.GetPerson(1);
+    const charlie: Person = repository.GetPerson(1);
     console.log(alice.IsOlderThan(charlie)) // prints false
     console.log(bob.IsOlderThan(charlie)) // prints true
 }
 ```
 
-### 'Raw' JSExport
-The same behavior as the TypeShim sample, with handwritten JSExport. Certain parts enabled by TypeShim have not been replicated as the point may be clear at a glance: this is a large amount of difficult to maintain boilerplate if you have to write it yourself.
+#### 'Raw' JSExport
+Here you can see a quick demonstration of roughly the same behavior as the TypeShim sample, with handwritten JSExport. Certain parts enabled by TypeShim have not been replicated as the point may be clear at a glance: this is a large amount of difficult to maintain boilerplate if you have to write it yourself.
 
 <details>
-  <summary>See the <code>JSExport</code> C# implementation of <code>PeopleRepository</code> and <code>Person</code></summary>
+  <summary>See the 'Raw' <code>JSExport</code> implementation</summary>
 &nbsp;
 
 Note the error sensitivity of passing untyped objects across the interop boundary.
 
-  ```csharp
+```ts
+public UsingRawJSExport(exports: any) {
+    const runtime = await dotnet.withApplicationArguments(args).create();
+    const exports = runtime.assemblyExports;
+
+    const repository: any = exports.Sample.People.PeopleRepository.GetInstance(); 
+    const alice: any = exports.Sample.People.PeopleRepository.GetPerson(repository, 0);
+    const bob: any = exports.Sample.People.People.ConstructPerson("Bob", 20);
+    
+    console.log(exports.Sample.People.Person.GetName(alice), exports.Sample.People.Person.GetName(bob)); // prints "Alice", "Bob"
+    console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints false
+    exports.Sample.People.Person.SetAge(alice, 30);
+    console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints true
+
+    exports.Sample.People.PeopleRepository.AddPerson(repository, "Charlie", 40);
+    const charlie: any = exports.Sample.People.PeopleRepository.GetPerson(repository, 1);
+    console.log(alice.IsOlderThan(charlie)) // prints false
+    console.log(bob.IsOlderThan(charlie)) // prints true
+}
+```
+
+```csharp
 namespace Sample.People;
 
 public class PeopleRepository
@@ -198,43 +220,29 @@ public class Person
 ```
 </details>
 
-```js
-public UsingRawJSExport(exports: any) {
-    const runtime = await dotnet.withApplicationArguments(args).create();
-    const exports = runtime.assemblyExports;
+## TypeShim Concepts
 
-    const repository: any = exports.Sample.People.PeopleRepository.GetInstance(); 
-    const alice: any = exports.Sample.People.PeopleRepository.GetPerson(repository, 0);
-    const bob: any = exports.Sample.People.People.ConstructPerson("Bob", 20);
-    console.log(exports.Sample.People.Person.GetName(alice), exports.Sample.People.Person.GetName(bob)); // prints "Alice", "Bob"
-    console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints false
-    exports.Sample.People.Person.SetAge(alice, 30);
-    console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints true
-}
-```
-
-## Semantically rich TypeScript interop
-
-First, you will be using `[TSExport]` annotate your classes  to define your interop API. Every annotated class will receive a TypeScript counterpart. The build-time generated TypeScript can provide the following subcomponents for each exported class:
+Lets briefly introduce the concepts that are used in TypeShim. For starters, you will be using `[TSExport]` to annotate your classes  to define your interop API. Every annotated class will receive a TypeScript counterpart. The members included in the TypeScript code are limited to the _public_ members. That includes constructors, properties and methods, both static and instance.
 
 The build-time generated TypeScript can provide the following subcomponents for each exported class `MyClass`:
 
 ### Proxies (`MyClass`)
-`MyClass` grants access to the exported C# `MyClass` class _in a proxying capacity_, this type will also be referred to as a `Proxy`. A proxy only contains _public_ members and a dotnet instance of the class being proxied _always_ lives in the dotnet runtime. To aquire an instance you may invoke your exported constructor or returned by any method and/or property. Alternatively you can access static members all the same. Proxies may also be used as parameters and will behave as typical reference types when performing any such operation.
+`MyClass` grants access to the exported C# `MyClass` class _in a proxying capacity_, this type will also be referred to as a `Proxy`. A dotnet instance of the class being proxied _always_ lives in the dotnet runtime when you receive a proxy instance, changes to the dotnet object will reflect in typescript. To aquire an instance you may invoke your exported constructor or returned by any method and/or property. Alternatively you can access static members all the same. Proxies may also be used as parameters and will behave as typical reference types when performing any such operation.
 
 ### Snapshots (`MyClass.Snapshot`)
-The snapshot type is created if your class has public properties. TypeShim provides a utility function `MyClass.materialize(your_instance)` that returns a snapshot. Snapshots are fully decoupled from the dotnet object and live in the JS runtime. This is useful when you no longer require the Proxy instance but want to continue working with its data. Properties of proxy types will be materialized as well.
+The snapshot type is created if your class has public properties. TypeShim provides a utility function `MyClass.materialize(your_instance)` that returns a snapshot. Snapshots are fully decoupled from the dotnet object and live in the JS runtime, this means that changes to the proxy object do not reflect in a snapshot. Properties of proxy types will be materialized as well. This is useful when you no longer require the Proxy instance but want to continue working with its data.
 
 ### Initializers (`MyClass.Initializer`)
 The `Initializer` type is created if the exported class has an exported constructor and accepts an initializer body in `new()` expressions. Initializer objects live in the JS runtime and may be used in the process of creating dotnet object instances, if it exists it will be a parameter in the constructor of the associated Proxy.
 
 Additionally, _if the class exports a parameterless constructor_ then initializer objects can also be passed instead of proxies in method parameters, property setters and even in other initializer objects. TypeShim will construct the appropriate dotnet class instance(s) from the initializer. Initializer's can even contain properties of Proxy type instead of an Initializer if you want to reference an existing object. Below a brief demonstration of the provided flexibility.
 
-> Arrays of mixed proxies and initializers are supported. The contained initializers will be constructed into new dotnet class instances while the object references behind the proxies are preserved.
+> 💡 Arrays of mixed proxies and initializers are supported as parameters for methods if the above conditions for the array element type are satisfied. The contained initializer objects will be constructed into new dotnet class instances while the object references behind the proxies are preserved.
 
-<table style="width:100%">
+
+<table>
 <tr>
-<td>
+<td style="width: 400px;">
 
 ```ts
 const bike = new Bike("Ducati", { 
@@ -242,14 +250,16 @@ const bike = new Bike("Ducati", {
   Hp: 147
 });
 const rider = new Rider({
-    Name: "Dude",
+    Name: "Casey Stoner",
     Bike: bike
 });
 
 ```
 
+Passing an object reference in an initializer object.
+
 </td>
-<td>
+<td style="width: 400px;">
 
 ```ts
 const bike: Bike.Initializer = {
@@ -258,12 +268,27 @@ const bike: Bike.Initializer = {
   Hp: 147
 };
 const rider = new Rider({
-    Name: "Dude",
+    Name: "Pecco",
     Bike: bike
 });
 ```
+
+Passing an initializer object in another initializer object.
+
+</td>
+</tr>
+<tr>
+<td>
+
+
+
+</td>
+<td>
+
+
   
 </td>
+</tr>
 </table>
 
 ## <a name="enriched-type-support"></a> Enriched Type support
