@@ -7,7 +7,7 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator.Typescript;
 
-internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
+internal sealed class TypeScriptUserClassShapesRenderer(RenderContext ctx)
 {
     internal void RenderPropertiesInterface(PropertyInfo[] propertyInfos)
     {
@@ -42,7 +42,7 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
                 ctx.Append(propertyInfo.Name).Append(": ");
                 if (propertyInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true })
                 {
-                    ClassInfo classInfo = ctx.GetClassInfo(propertyInfo.Type.GetInnermostType());
+                    ClassInfo classInfo = ctx.SymbolMap.GetClassInfo(propertyInfo.Type.GetInnermostType());
                     TypeShimSymbolType symbolType = classInfo is { Constructor: { IsParameterless: true, AcceptsInitializer: true } }
                         ? TypeShimSymbolType.ProxyInitializerUnion
                         : TypeShimSymbolType.Proxy;

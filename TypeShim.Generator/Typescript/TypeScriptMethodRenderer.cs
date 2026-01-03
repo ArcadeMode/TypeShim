@@ -5,7 +5,7 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator.Typescript;
 
-internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
+internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
 {
     internal void RenderProxyConstructor(ConstructorInfo? constructorInfo)
     {
@@ -210,8 +210,7 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
             ctx.Append("const ");
             ctx.Append(GetInteropInvocationVariable(parameterInfo));
             ctx.Append(" = ");
-            ClassInfo classInfo = ctx.GetClassInfo(parameterInfo.Type.GetInnermostType());
-            string proxyClassName = ctx.SymbolMap.GetUserClassSymbolName(classInfo, TypeShimSymbolType.Proxy);
+            string proxyClassName = ctx.SymbolMap.GetUserClassSymbolName(parameterInfo.Type.GetInnermostType(), TypeShimSymbolType.Proxy);
             RenderInlineHandleExtraction(parameterInfo.Type, proxyClassName, parameterInfo.Name);
             ctx.AppendLine(";");
         }

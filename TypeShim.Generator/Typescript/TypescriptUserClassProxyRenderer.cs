@@ -4,9 +4,9 @@ using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
 
-internal class TypescriptUserClassProxyRenderer(TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
+internal class TypescriptUserClassProxyRenderer(RenderContext ctx)
 {
-    private readonly TypeScriptMethodRenderer methodRenderer = new(symbolNameProvider, ctx);
+    private readonly TypeScriptMethodRenderer methodRenderer = new(ctx);
 
     internal void Render()
     {

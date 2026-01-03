@@ -45,10 +45,7 @@ internal class TypescriptAssemblyExportsRendererTests
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
-
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo]);
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
@@ -108,10 +105,7 @@ export interface AssemblyExports{
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
-
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo]);
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
@@ -170,10 +164,7 @@ export interface AssemblyExports{
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
-
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo]);
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
@@ -234,10 +225,7 @@ export interface AssemblyExports{
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
-
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo]);
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
@@ -285,10 +273,7 @@ export interface AssemblyExports{
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
-
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo]);
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
@@ -341,10 +326,7 @@ export interface AssemblyExports{
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
-
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo]);
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
@@ -402,10 +384,7 @@ export interface AssemblyExports{
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
-
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo]);
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
@@ -463,10 +442,7 @@ export interface AssemblyExports{
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider); //deliberate omit userClassInfo to reduce noise in baseline
-
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo]); //deliberate omit userClassInfo to reduce noise in baseline
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
@@ -506,10 +482,7 @@ export interface AssemblyExports{
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
-
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo]);
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
@@ -549,10 +522,7 @@ export interface AssemblyExports{
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
-
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo]);
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
@@ -593,10 +563,7 @@ export interface AssemblyExports{
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
-
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo]);
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
@@ -638,10 +605,7 @@ export interface AssemblyExports{
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
-
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo]);
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 

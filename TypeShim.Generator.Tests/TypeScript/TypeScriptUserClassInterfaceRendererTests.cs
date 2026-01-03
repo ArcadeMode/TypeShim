@@ -35,11 +35,8 @@ internal class TypeScriptUserClassInterfaceRendererTests
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
@@ -82,11 +79,8 @@ export namespace C1 {
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
@@ -130,10 +124,8 @@ export namespace C1 {
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
@@ -186,11 +178,8 @@ export namespace C1 {
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
         ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
@@ -242,11 +231,8 @@ export namespace C1 {
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
@@ -299,11 +285,8 @@ export namespace C1 {
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
         ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
@@ -356,11 +339,8 @@ export namespace C1 {
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
         ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
@@ -413,11 +393,8 @@ export namespace C1 {
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
         ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
@@ -470,11 +447,8 @@ export namespace C1 {
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
         ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
@@ -527,11 +501,8 @@ export namespace C1 {
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
         ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
@@ -584,11 +555,8 @@ export namespace C1 {
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
         ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
@@ -641,11 +609,8 @@ export namespace C1 {
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
         ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
@@ -698,11 +663,8 @@ export namespace C1 {
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
         ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
@@ -744,11 +706,8 @@ export namespace C1 {
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
@@ -789,11 +748,8 @@ export namespace C1 {
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 

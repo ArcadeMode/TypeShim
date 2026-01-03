@@ -34,11 +34,8 @@ internal class TypeScriptUserClassProxyRendererTests_Methods
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
@@ -78,11 +75,8 @@ export class C1 extends ProxyBase {
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
@@ -133,11 +127,8 @@ export class C1 extends ProxyBase {
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
@@ -189,11 +180,8 @@ export class C1 extends ProxyBase {
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
@@ -245,11 +233,8 @@ export class C1 extends ProxyBase {
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
@@ -301,11 +286,8 @@ export class C1 extends ProxyBase {
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
@@ -358,11 +340,8 @@ export class C1 extends ProxyBase {
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """  
 export class C1 extends ProxyBase {
@@ -414,11 +393,8 @@ export class C1 extends ProxyBase {
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
@@ -470,11 +446,8 @@ export class C1 extends ProxyBase {
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo, userClassInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
@@ -513,11 +486,8 @@ export class C1 extends ProxyBase {
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {

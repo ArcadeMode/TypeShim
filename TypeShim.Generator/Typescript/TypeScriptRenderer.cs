@@ -4,7 +4,7 @@ using TypeShim.Generator.Typescript;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator;
 
-internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo moduleInfo, TypescriptSymbolNameProvider symbolNameProvider)
+internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo moduleInfo)
 {
     private readonly StringBuilder sb = new();
 
@@ -39,9 +39,9 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
         {
             RenderContext renderCtx = new(classInfo, classInfos, RenderOptions.TypeScript);
             renderCtx.AppendLine($"// Generated TypeScript definitions for class: {renderCtx.Class.Namespace}.{renderCtx.Class.Name}");
-            TypescriptUserClassProxyRenderer proxyRenderer = new(symbolNameProvider, renderCtx);
+            TypescriptUserClassProxyRenderer proxyRenderer = new(renderCtx);
             proxyRenderer.Render();
-            TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(symbolNameProvider, renderCtx);
+            TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(renderCtx);
             namespaceRenderer.Render();
             yield return renderCtx;
         }
