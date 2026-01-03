@@ -7,15 +7,23 @@ internal sealed class TypeScriptUserClassNamespaceRenderer(TypescriptSymbolNameP
 {
     internal void Render()
     {
-        ctx.AppendLine($"// Auto-generated TypeScript definitions for class: {ctx.Class.Namespace}.{ctx.Class.Name}");
-        TypescriptUserClassProxyRenderer proxyRenderer = new(symbolNameProvider, ctx);
-        proxyRenderer.Render();
+        if (ctx.Class.IsStatic) return;
+
+        PropertyInfo[] instancePropertyInfos = [.. ctx.Class.Properties.Where(p => !p.IsStatic)];
+        if (instancePropertyInfos.Length == 0)
+            return;
 
         ctx.AppendLine($"export namespace {ctx.Class.Name} {{");
         using (ctx.Indent())
         {
-            TypeScriptUserClassShapesRenderer propertiesRenderer = new(symbolNameProvider, ctx);
-            propertiesRenderer.Render();
+            TypeScriptUserClassShapesRenderer shapesRenderer = new(symbolNameProvider, ctx);
+            if (ctx.Class.Constructor?.MemberInitializers is { Length: > 0 } initializerPropertyInfos)
+            {
+                shapesRenderer.RenderInitializerInterface(initializerPropertyInfos);
+            }
+            shapesRenderer.RenderPropertiesInterface(instancePropertyInfos);
+            const string proxyParamName = "proxy";
+            shapesRenderer.RenderPropertiesFunction(proxyParamName);
         }
         ctx.AppendLine("}");
     }

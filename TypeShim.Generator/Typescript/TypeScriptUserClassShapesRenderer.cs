@@ -9,25 +9,7 @@ namespace TypeShim.Generator.Typescript;
 
 internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProvider symbolNameProvider, RenderContext ctx)
 {
-    internal void Render()
-    {
-        if (ctx.Class.IsStatic) return;
-
-        PropertyInfo[] instancePropertyInfos = [.. ctx.Class.Properties.Where(p => !p.IsStatic)];
-        if (instancePropertyInfos.Length == 0)
-            return;
-
-        if (ctx.Class.Constructor?.MemberInitializers is { Length: > 0 } initializerPropertyInfos)
-        {
-            RenderInitializerInterface(initializerPropertyInfos);
-        }
-
-        RenderPropertiesInterface(instancePropertyInfos);
-        const string proxyParamName = "proxy";
-        RenderPropertiesFunction(proxyParamName);
-    }
-
-    private void RenderPropertiesInterface(PropertyInfo[] propertyInfos)
+    internal void RenderPropertiesInterface(PropertyInfo[] propertyInfos)
     {
         ctx.Append($"export interface ").Append(RenderConstants.Properties).AppendLine(" {");
         using (ctx.Indent())
@@ -50,7 +32,7 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
         ctx.AppendLine("}");
     }
 
-    private void RenderInitializerInterface(PropertyInfo[] propertyInfos)
+    internal void RenderInitializerInterface(PropertyInfo[] propertyInfos)
     {
         ctx.Append($"export interface ").Append(RenderConstants.Initializer).AppendLine(" {");
         using (ctx.Indent())
@@ -73,11 +55,11 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
         ctx.AppendLine("}");
     }
 
-    private void RenderPropertiesFunction(string proxyParamName)
+    internal void RenderPropertiesFunction(string proxyParamName)
     {
         string paramType = symbolNameProvider.GetUserClassSymbolName(ctx.Class, SymbolNameFlags.Proxy);
         string returnType = symbolNameProvider.GetUserClassSymbolName(ctx.Class, SymbolNameFlags.Properties);
-        ctx.Append($"export function ").Append(RenderConstants.PropertiesTSFunction).Append('(').Append(proxyParamName).Append(": ").Append(paramType).Append("): ").Append(returnType).AppendLine(" {");
+        ctx.Append($"export function ").Append(RenderConstants.ProxyMaterializeFunction).Append('(').Append(proxyParamName).Append(": ").Append(paramType).Append("): ").Append(returnType).AppendLine(" {");
         using (ctx.Indent())
         {
             RenderFunctionBody(proxyParamName);
@@ -119,7 +101,7 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
                 {
                     ClassInfo exportedClass = ctx.GetClassInfo(typeInfo);
                     string userClassName = symbolNameProvider.GetUserClassSymbolName(exportedClass);
-                    return $"{userClassName}.{RenderConstants.PropertiesTSFunction}({propertyAccessorExpression})";
+                    return $"{userClassName}.{RenderConstants.ProxyMaterializeFunction}({propertyAccessorExpression})";
                 }
             }
             else // simple primitive or unconvertable class

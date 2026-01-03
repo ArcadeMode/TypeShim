@@ -38,6 +38,9 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
         foreach (ClassInfo classInfo in classInfos)
         {
             RenderContext renderCtx = new(classInfo, classInfos, RenderOptions.TypeScript);
+            renderCtx.AppendLine($"// Generated TypeScript definitions for class: {renderCtx.Class.Namespace}.{renderCtx.Class.Name}");
+            TypescriptUserClassProxyRenderer proxyRenderer = new(symbolNameProvider, renderCtx);
+            proxyRenderer.Render();
             TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(symbolNameProvider, renderCtx);
             namespaceRenderer.Render();
             yield return renderCtx;
