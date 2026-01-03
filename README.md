@@ -314,7 +314,7 @@ TypeShim aims to continue to broaden its type support. Suggestions and contribut
 | `Func<T1, T2, TResult>` | `Function`| 🚧   |      |
 | `Func<T1, T2, T3, TResult>` | `Function` | 🚧 |      |
 
-*<sub>For `[TSExport]`/`[TSModule]` classes</sub>
+*<sub>For `[TSExport]` annotated classes</sub>
 
 ## Run the sample
 
@@ -348,7 +348,7 @@ TypeShim is configured through MSBuild properties, you may provide these through
 TSExports are subject to minimal, but some, constraints. 
 - Certain types are not supported by either TypeShim or .NET wasm type marshalling. Analyzers have been implemented to notify of such cases.
 - As overloading is not a real language feature in JavaScript nor TypeScript, this is currently not supported in TypeShim either. You can still define overloads that are not public. This goes for both constructors and methods.
-- By default, JSExport yields value semantics for Array instances, this one reference type that is atypical. It is under consideration to adres but most simply you may define your own List class to preserve reference semantics.
+- By default, JSExport yields value semantics for Array instances, this one reference type that is atypical. It is under consideration to adres but an effective alternative is to define your own List class to preserve reference semantics.
 
 
 ## Contributing
