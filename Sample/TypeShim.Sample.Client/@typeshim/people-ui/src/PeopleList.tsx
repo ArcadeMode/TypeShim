@@ -11,7 +11,7 @@ export interface PeopleListProps {
 }
 
 export const PeopleList: React.FC<PeopleListProps> = ({ emptyText = 'No people found.', repository }) => {
-  const [people, setPeople] = useState<Person.Proxy[]>([]);
+  const [people, setPeople] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

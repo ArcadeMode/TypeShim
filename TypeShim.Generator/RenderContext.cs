@@ -3,33 +3,22 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using TypeShim.Generator.Parsing;
+using TypeShim.Generator.Typescript;
 using TypeShim.Shared;
 
 namespace TypeShim.Generator;
 
 internal sealed class RenderContext(ClassInfo? targetClass, IEnumerable<ClassInfo> allClasses, RenderOptions options)
 {
-    internal ClassInfo Class => targetClass ?? throw new InvalidOperationException("Not rendering any particular class");
+    internal ClassInfo Class => targetClass ?? throw new InvalidOperationException("Not class in RenderContext");
     internal LocalScope LocalScope => _localScope ?? throw new InvalidOperationException("No active method in context");
+    internal SymbolMap SymbolMap { get; } = new(allClasses);
 
-    private readonly Dictionary<InteropTypeInfo, ClassInfo> _typeToClassDict = allClasses.ToDictionary(c => c.Type);
     private readonly StringBuilder _sb = new();
 
     private int _currentDepth = 0;
     private bool _isNewLine = true;
     private LocalScope? _localScope;
-
-    internal ClassInfo? GetClassInfoSafe(InteropTypeInfo type)
-    {
-        _typeToClassDict.TryGetValue(type, out ClassInfo? info);
-        return info;
-    }
-
-    internal ClassInfo GetClassInfo(InteropTypeInfo type)
-    {
-        _typeToClassDict.TryGetValue(type, out ClassInfo? info);
-        return info ?? throw new NotFoundClassInfoException($"Could not find ClassInfo for type: {type.CSharpTypeSyntax}");
-    }
 
     internal void EnterScope(MethodInfo methodInfo)
     {
@@ -64,7 +53,7 @@ internal sealed class RenderContext(ClassInfo? targetClass, IEnumerable<ClassInf
 
     internal RenderContext AppendLine(string line)
     {
-        if (!string.IsNullOrEmpty(line))AppendIndentIfNewLine();
+        if (!string.IsNullOrEmpty(line)) AppendIndentIfNewLine();
         _sb.AppendLine(line);
         _isNewLine = true;
         return this;

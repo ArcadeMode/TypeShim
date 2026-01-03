@@ -52,13 +52,11 @@ static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInf
 
 static void GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)
 {
-    TypeScriptTypeMapper typeMapper = new(classInfos);
-    TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
     ModuleInfo moduleInfo = new()
     {
         ExportedClasses = classInfos,
-        HierarchyInfo = ModuleHierarchyInfo.FromClasses(classInfos, symbolNameProvider)
+        HierarchyInfo = ModuleHierarchyInfo.FromClasses(classInfos)
     };
-    TypeScriptRenderer tsRenderer = new(classInfos, moduleInfo, symbolNameProvider);
+    TypeScriptRenderer tsRenderer = new(classInfos, moduleInfo);
     File.WriteAllText(parsedArgs.TsOutputFilePath, tsRenderer.Render());
 }

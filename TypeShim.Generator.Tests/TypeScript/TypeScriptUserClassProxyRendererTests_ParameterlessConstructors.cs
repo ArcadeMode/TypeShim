@@ -33,14 +33,11 @@ internal class TypeScriptUserClassProxyRendererTests_ParameterlessConstructors
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
 
-        TypeScriptTypeMapper typeMapper = new([classInfo]);
-        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
-
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
-export class Proxy extends ProxyBase {
+export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }

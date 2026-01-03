@@ -35,7 +35,7 @@ internal class CSharpInteropClassRendererTests_SystemDateTimeParameterType
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript interop definitions
+// TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
@@ -81,7 +81,7 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript interop definitions
+// TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { PrimitivesDemo } from '@typeshim/wasm-exports/typeshim';
 
 export interface PrimitivesDemoProps {
@@ -8,15 +8,25 @@ export interface PrimitivesDemoProps {
 
 export const PrimitivesDemoComponent: React.FC<PrimitivesDemoProps> = () => {
   const [newBaseInput, setNewBaseInput] = useState('Hello');
-  const [demos, setDemos] = useState<Array<{ instance: PrimitivesDemo.Proxy; concatA: string; concatB: string; multiplyCount: number; multiplyResult?: string }>>([]);
+  const [demos, setDemos] = useState<Array<{ 
+    instance: PrimitivesDemo; 
+    concatA: string; concatB: 
+    string; multiplyCount: number; 
+    multiplyResult?: string 
+  }>>([]);
 
   const createDemo = () => {
     
-    const instance = new PrimitivesDemo.Proxy({
+    const instance = new PrimitivesDemo({
       InitialStringProperty: newBaseInput,
       StringProperty: newBaseInput
     });
-    setDemos(prev => [{ instance, concatA: 'foo', concatB: 'bar', multiplyCount: 2, multiplyResult: 'Void' }, ...prev]);
+    setDemos(prev => [{ 
+      instance, 
+      concatA: 'foo', 
+      concatB: 'bar', 
+      multiplyCount: 2, 
+      multiplyResult: 'Void' }, ...prev]);
   };
 
   const handleMultiplyInvoke = (idx: number) => {

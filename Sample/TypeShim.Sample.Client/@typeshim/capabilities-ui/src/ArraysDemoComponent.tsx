@@ -6,7 +6,7 @@ import { ArraysDemo } from '@typeshim/wasm-exports/typeshim';
 export interface ArraysDemoProps {}
 
 type ArraysDemoState = {
-  instance: ArraysDemo.Proxy;
+  instance: ArraysDemo;
   appendValue: number;
   setValue: number;
 };
@@ -15,7 +15,7 @@ export const ArraysDemoComponent: React.FC<ArraysDemoProps> = () => {
   const [demos, setDemos] = useState<ArraysDemoState[]>([]);
 
   const createDemo = () => {
-    const instance: ArraysDemo.Proxy = new ArraysDemo.Proxy([1, 2, 3, 4, 5]);
+    const instance: ArraysDemo = new ArraysDemo([1, 2, 3, 4, 5]);
     setDemos(prev => [{ instance, appendValue: 0, setValue: 0 }, ...prev]);
   };
 

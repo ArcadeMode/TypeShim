@@ -13,7 +13,7 @@ function App() {
   useMemo(async () => {
     const runtimeInfo = await createWasmRuntime();
     TypeShimInitializer.initialize(runtimeInfo);
-    MyApp.Proxy.Initialize(document.baseURI);
+    MyApp.Initialize(document.baseURI);
   }, []);
 
   return (

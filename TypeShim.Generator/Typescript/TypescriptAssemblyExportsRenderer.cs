@@ -9,12 +9,11 @@ namespace TypeShim.Generator.Typescript;
 /// </summary>
 internal sealed class TypescriptAssemblyExportsRenderer(
     ModuleHierarchyInfo moduleHierarchyInfo,
-    TypescriptSymbolNameProvider symbolNameProvider,
     RenderContext ctx)
 {
     internal void Render()
     {
-        ctx.AppendLine("// Auto-generated TypeScript module exports interface")
+        ctx.AppendLine("// TypeShim generated TypeScript module exports interface")
            .Append("export interface ").Append(RenderConstants.AssemblyExports).AppendLine("{");
         using (ctx.Indent())
         {
@@ -67,7 +66,7 @@ internal sealed class TypescriptAssemblyExportsRenderer(
             ctx.Append(parameterInfo.Name).Append(": ");
             if (!parameterInfo.IsInjectedInstanceParameter // TODO: remove IsInjectedInstanceParameter property and split into separate methodInfo property
                 && parameterInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true } 
-                && ctx.GetClassInfo(parameterInfo.Type.GetInnermostType()) is { Constructor: { IsParameterless: true, AcceptsInitializer: true } })
+                && ctx.SymbolMap.GetClassInfo(parameterInfo.Type.GetInnermostType()) is { Constructor: { IsParameterless: true, AcceptsInitializer: true } })
             {
                 // parameter's type can be constructed from an initializer object
                 ctx.Append(parameterInfo.Type.TypeScriptInteropTypeSyntax.Render(suffix: " | object"));

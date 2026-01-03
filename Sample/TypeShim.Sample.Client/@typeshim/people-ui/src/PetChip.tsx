@@ -2,8 +2,8 @@ import React from 'react';
 import { Dog } from '@typeshim/wasm-exports';
 
 export interface PetChipProps {
-  petProxy: Dog.Proxy;
-  onClick?: (pet: Dog.Proxy) => void;
+  petProxy: Dog;
+  onClick?: (pet: Dog) => void;
 }
 
 export const PetChip: React.FC<PetChipProps> = ({ petProxy, onClick }) => {

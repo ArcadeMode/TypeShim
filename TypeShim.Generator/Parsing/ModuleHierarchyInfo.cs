@@ -9,7 +9,7 @@ internal class ModuleHierarchyInfo
 
     private readonly Dictionary<string, ModuleHierarchyInfo> _children = [];
 
-    internal static ModuleHierarchyInfo FromClasses(IEnumerable<ClassInfo> classInfos, TypescriptSymbolNameProvider symbolNameProvider)
+    internal static ModuleHierarchyInfo FromClasses(IEnumerable<ClassInfo> classInfos)
     {
         ModuleHierarchyInfo moduleInfo = new() { ExportedClass = null };
         foreach (ClassInfo classInfo in classInfos)
