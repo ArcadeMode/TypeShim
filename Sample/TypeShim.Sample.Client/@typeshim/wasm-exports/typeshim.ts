@@ -48,7 +48,7 @@ export interface ManagedError extends IDisposable {
 }
 
 
-// Auto-generated TypeScript module exports interface
+// TypeShim generated TypeScript module exports interface
 export interface AssemblyExports{
   TypeShim: {
     Sample: {
@@ -123,7 +123,7 @@ export interface AssemblyExports{
   };
 }
 
-// Auto-generated TypeScript definitions for class: TypeShim.Sample.Capabilities.ArraysDemo
+// TypeShim generated TypeScript definitions for class: TypeShim.Sample.Capabilities.ArraysDemo
 export class ArraysDemo extends ProxyBase {
   constructor(initialArray: Array<number>) {
     super(TypeShimConfig.exports.TypeShim.Sample.Capabilities.ArraysDemoInterop.ctor(initialArray));
@@ -151,7 +151,7 @@ export namespace ArraysDemo {
   }
 }
 
-// Auto-generated TypeScript definitions for class: TypeShim.Sample.Capabilities.PrimitivesDemo
+// TypeShim generated TypeScript definitions for class: TypeShim.Sample.Capabilities.PrimitivesDemo
 export class PrimitivesDemo extends ProxyBase {
   constructor(jsObject: PrimitivesDemo.Initializer) {
     super(TypeShimConfig.exports.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.ctor(jsObject));
@@ -209,7 +209,7 @@ export namespace PrimitivesDemo {
   }
 }
 
-// Auto-generated TypeScript definitions for class: TypeShim.Sample.People
+// TypeShim generated TypeScript definitions for class: TypeShim.Sample.People
 export class People extends ProxyBase {
   constructor(jsObject: People.Initializer) {
     super(TypeShimConfig.exports.TypeShim.Sample.PeopleInterop.ctor(jsObject));
@@ -239,7 +239,7 @@ export namespace People {
   }
 }
 
-// Auto-generated TypeScript definitions for class: TypeShim.Sample.Person
+// TypeShim generated TypeScript definitions for class: TypeShim.Sample.Person
 export class Person extends ProxyBase {
   constructor(jsObject: Person.Initializer) {
     super(TypeShimConfig.exports.TypeShim.Sample.PersonInterop.ctor(jsObject));
@@ -315,7 +315,7 @@ export namespace Person {
   }
 }
 
-// Auto-generated TypeScript definitions for class: TypeShim.Sample.Dog
+// TypeShim generated TypeScript definitions for class: TypeShim.Sample.Dog
 export class Dog extends ProxyBase {
   constructor(jsObject: Dog.Initializer) {
     super(TypeShimConfig.exports.TypeShim.Sample.DogInterop.ctor(jsObject));
@@ -372,7 +372,7 @@ export namespace Dog {
   }
 }
 
-// Auto-generated TypeScript definitions for class: TypeShim.Sample.MyApp
+// TypeShim generated TypeScript definitions for class: TypeShim.Sample.MyApp
 export class MyApp extends ProxyBase {
   constructor() {
     super(TypeShimConfig.exports.TypeShim.Sample.MyAppInterop.ctor());
@@ -387,10 +387,8 @@ export class MyApp extends ProxyBase {
     return ProxyBase.fromHandle(PeopleProvider, res);
   }
 }
-export namespace MyApp {
-}
 
-// Auto-generated TypeScript definitions for class: TypeShim.Sample.PeopleProvider
+// TypeShim generated TypeScript definitions for class: TypeShim.Sample.PeopleProvider
 export class PeopleProvider extends ProxyBase {
   constructor(apiClient: ManagedObject, jsObject: PeopleProvider.Initializer) {
     super(TypeShimConfig.exports.TypeShim.Sample.PeopleProviderInterop.ctor(apiClient, jsObject));
@@ -431,7 +429,7 @@ export namespace PeopleProvider {
   }
 }
 
-// Auto-generated TypeScript definitions for class: TypeShim.Sample.TimeoutUnit
+// TypeShim generated TypeScript definitions for class: TypeShim.Sample.TimeoutUnit
 export class TimeoutUnit extends ProxyBase {
   constructor(jsObject: TimeoutUnit.Initializer) {
     super(TypeShimConfig.exports.TypeShim.Sample.TimeoutUnitInterop.ctor(jsObject));
