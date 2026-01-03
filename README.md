@@ -277,18 +277,6 @@ Passing an initializer object in another initializer object.
 
 </td>
 </tr>
-<tr>
-<td>
-
-
-
-</td>
-<td>
-
-
-  
-</td>
-</tr>
 </table>
 
 ## <a name="enriched-type-support"></a> Enriched Type support
