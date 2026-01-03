@@ -59,10 +59,10 @@ jobs:
           dotnet restore TypeShim.slnx
 
       - name: Build
-        run: dotnet build TypeShim.slnx -c Release --no-restore
+        run: dotnet build TypeShim/TypeShim.csproj -c Release --no-restore
 
       - name: Test
-        run: dotnet test TypeShim.slnx -c Release --no-build
+        run: dotnet test TypeShim/TypeShim.csproj -c Release --no-build
 
       - name: Pack TypeShim
         env:
