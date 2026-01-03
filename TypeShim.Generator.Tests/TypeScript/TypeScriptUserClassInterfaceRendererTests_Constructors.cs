@@ -227,4 +227,61 @@ export namespace C1 {
 
 """);
     }
+
+    [Test]
+    public void UserClassNamespace_InstancePropertyOfUserClassTypeThatIsNotInitializerCompatible_GeneratesNoInitializerTypeUnion()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; private set; } // No public setter, so not initializer-compatible
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public UserClass P1 { get; set; } // public setter, but UserClass is not initializer-compatible
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
+        ClassInfo userclassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
+
+        TypeScriptTypeMapper typeMapper = new([classInfo, userclassInfo]);
+        TypescriptSymbolNameProvider symbolNameProvider = new(typeMapper);
+
+        RenderContext renderContext = new(classInfo, [classInfo, userclassInfo], RenderOptions.TypeScript);
+        new TypeScriptUserClassNamespaceRenderer(symbolNameProvider, renderContext).Render();
+        // note however that Initializer is still generated, just without union type!
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export namespace C1 {
+  export interface Initializer {
+    P1: UserClass;
+  }
+  export interface Snapshot {
+    P1: UserClass.Snapshot;
+  }
+  export function materialize(proxy: C1): C1.Snapshot {
+    return {
+      P1: UserClass.materialize(proxy.P1),
+    };
+  }
+}
+
+""");
+    }
 }

@@ -3,45 +3,38 @@ using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
 
-internal enum SymbolNameFlags
+internal enum TypeShimSymbolType
 {
-    None = 0,
-    Proxy = 1,
-    Properties = 2,
-    Initializer = 4,
-    ProxyInitializerUnion = Proxy | Initializer,
+    None,
+    Proxy,
+    Namespace,
+    Snapshot,
+    Initializer,
+    ProxyInitializerUnion,
 }
 
 internal class TypescriptSymbolNameProvider(TypeScriptTypeMapper typeMapper)
 {
-    internal string GetUserClassSymbolName(ClassInfo classInfo, SymbolNameFlags flags)
+    internal string GetUserClassSymbolName(ClassInfo classInfo, TypeShimSymbolType flags)
     {
         return GetUserClassSymbolNameCore(classInfo.Type, classInfo.Type, flags);
     }
 
-    internal string GetUserClassSymbolName(ClassInfo classInfo, InteropTypeInfo useSiteTypeInfo, SymbolNameFlags flags)
+    internal string GetUserClassSymbolName(ClassInfo classInfo, InteropTypeInfo useSiteTypeInfo, TypeShimSymbolType flags)
     {
         return GetUserClassSymbolNameCore(useSiteTypeInfo, classInfo.Type, flags);
     }
 
-    private string GetUserClassSymbolNameCore(InteropTypeInfo useSiteTypeInfo, InteropTypeInfo userTypeInfo, SymbolNameFlags flags)
+    private static string GetUserClassSymbolNameCore(InteropTypeInfo useSiteTypeInfo, InteropTypeInfo userTypeInfo, TypeShimSymbolType flags)
     {
         return (flags) switch
         {
-            SymbolNameFlags.Proxy => useSiteTypeInfo.TypeScriptTypeSyntax.Render(),
-            SymbolNameFlags.Properties => useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Properties}"),
-            SymbolNameFlags.Initializer => useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Initializer}"),
-            SymbolNameFlags.ProxyInitializerUnion => useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $" | {userTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Initializer}")}"),
+            TypeShimSymbolType.Proxy => useSiteTypeInfo.TypeScriptTypeSyntax.Render(),
+            TypeShimSymbolType.Namespace => useSiteTypeInfo.TypeScriptTypeSyntax.Render(),
+            TypeShimSymbolType.Snapshot => useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Properties}"),
+            TypeShimSymbolType.Initializer => useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Initializer}"),
+            TypeShimSymbolType.ProxyInitializerUnion => useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $" | {userTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Initializer}")}"),
             _ => throw new NotImplementedException(),
         };
     }
-
-    /// <summary>
-    /// returns the TypeScript type name without any suffixes. Mostly useful for non-user types like string, int with accomodations for Tasks, arrays etc.
-    /// </summary>
-    /// <param name="typeInfo"></param>
-    /// <returns></returns>
-    internal string GetNakedSymbolReference(InteropTypeInfo typeInfo) => GetSymbolNameCore(typeInfo, string.Empty);
-    internal string GetUserClassSymbolName(ClassInfo classInfo) => GetSymbolNameCore(classInfo.Type, string.Empty);
-    private string GetSymbolNameCore(InteropTypeInfo typeInfo, string suffix) => typeInfo.TypeScriptTypeSyntax.Render(suffix);
 }

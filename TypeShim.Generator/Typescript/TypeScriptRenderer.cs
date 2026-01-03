@@ -28,7 +28,7 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
     private RenderContext RenderAssemblyExports()
     {
         RenderContext renderCtx = new(null, classInfos, RenderOptions.TypeScript);
-        TypescriptAssemblyExportsRenderer moduleInterfaceRenderer = new(moduleInfo.HierarchyInfo, symbolNameProvider, renderCtx);
+        TypescriptAssemblyExportsRenderer moduleInterfaceRenderer = new(moduleInfo.HierarchyInfo, renderCtx);
         moduleInterfaceRenderer.Render();
         return renderCtx;
     }

@@ -19,12 +19,12 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
                 ctx.Append(propertyInfo.Name).Append(": ");
                 if (propertyInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true })
                 {
-                    ClassInfo classInfo = ctx.GetClassInfo(propertyInfo.Type.GetInnermostType());
-                    ctx.Append(symbolNameProvider.GetUserClassSymbolName(classInfo, propertyInfo.Type, SymbolNameFlags.Properties));
+                    string snapshotSymbolName = ctx.SymbolMap.GetUserClassSymbolName(propertyInfo.Type, TypeShimSymbolType.Snapshot);
+                    ctx.Append(snapshotSymbolName);
                 }
                 else
                 {
-                    ctx.Append(symbolNameProvider.GetNakedSymbolReference(propertyInfo.Type));
+                    ctx.Append(propertyInfo.Type.TypeScriptTypeSyntax.Render());
                 }
                 ctx.AppendLine(";");
             }
@@ -43,11 +43,14 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
                 if (propertyInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true })
                 {
                     ClassInfo classInfo = ctx.GetClassInfo(propertyInfo.Type.GetInnermostType());
-                    ctx.Append(symbolNameProvider.GetUserClassSymbolName(classInfo, propertyInfo.Type, SymbolNameFlags.ProxyInitializerUnion));
+                    TypeShimSymbolType symbolType = classInfo is { Constructor: { IsParameterless: true, AcceptsInitializer: true } }
+                        ? TypeShimSymbolType.ProxyInitializerUnion
+                        : TypeShimSymbolType.Proxy;
+                    ctx.Append(ctx.SymbolMap.GetUserClassSymbolName(classInfo, propertyInfo.Type, symbolType));
                 }
                 else
                 {
-                    ctx.Append(symbolNameProvider.GetNakedSymbolReference(propertyInfo.Type));
+                    ctx.Append(propertyInfo.Type.TypeScriptTypeSyntax.Render());
                 }
                 ctx.AppendLine(";");
             }
@@ -57,8 +60,8 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
 
     internal void RenderPropertiesFunction(string proxyParamName)
     {
-        string paramType = symbolNameProvider.GetUserClassSymbolName(ctx.Class, SymbolNameFlags.Proxy);
-        string returnType = symbolNameProvider.GetUserClassSymbolName(ctx.Class, SymbolNameFlags.Properties);
+        string paramType = ctx.SymbolMap.GetUserClassSymbolName(ctx.Class, TypeShimSymbolType.Proxy);
+        string returnType = ctx.SymbolMap.GetUserClassSymbolName(ctx.Class, TypeShimSymbolType.Snapshot);
         ctx.Append($"export function ").Append(RenderConstants.ProxyMaterializeFunction).Append('(').Append(proxyParamName).Append(": ").Append(paramType).Append("): ").Append(returnType).AppendLine(" {");
         using (ctx.Indent())
         {
@@ -99,9 +102,8 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
                 }
                 else // exported user type
                 {
-                    ClassInfo exportedClass = ctx.GetClassInfo(typeInfo);
-                    string userClassName = symbolNameProvider.GetUserClassSymbolName(exportedClass);
-                    return $"{userClassName}.{RenderConstants.ProxyMaterializeFunction}({propertyAccessorExpression})";
+                    string tsNamespace = ctx.SymbolMap.GetUserClassSymbolName(typeInfo, TypeShimSymbolType.Namespace);
+                    return $"{tsNamespace}.{RenderConstants.ProxyMaterializeFunction}({propertyAccessorExpression})";
                 }
             }
             else // simple primitive or unconvertable class

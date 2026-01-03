@@ -50,7 +50,7 @@ internal class TypescriptAssemblyExportsRendererTests
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
 // Auto-generated TypeScript module exports interface
@@ -113,7 +113,7 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
 // Auto-generated TypeScript module exports interface
@@ -175,7 +175,7 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
 // Auto-generated TypeScript module exports interface
@@ -239,7 +239,7 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
 // Auto-generated TypeScript module exports interface
@@ -290,7 +290,7 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
-        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
 // Auto-generated TypeScript module exports interface
@@ -346,7 +346,7 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
 // Auto-generated TypeScript module exports interface
@@ -407,7 +407,7 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """    
 // Auto-generated TypeScript module exports interface
@@ -468,7 +468,7 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider); //deliberate omit userClassInfo to reduce noise in baseline
 
         RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
-        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
 // Auto-generated TypeScript module exports interface
@@ -511,7 +511,7 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
-        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """    
 // Auto-generated TypeScript module exports interface
@@ -554,7 +554,7 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
-        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
 // Auto-generated TypeScript module exports interface
@@ -598,7 +598,7 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
-        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
 // Auto-generated TypeScript module exports interface
@@ -643,7 +643,7 @@ export interface AssemblyExports{
         ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo], symbolNameProvider);
 
         RenderContext renderCtx = new(null, [classInfo], RenderOptions.TypeScript);
-        new TypescriptAssemblyExportsRenderer(hierarchyInfo, symbolNameProvider, renderCtx).Render();
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
 // Auto-generated TypeScript module exports interface
