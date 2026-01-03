@@ -214,7 +214,7 @@ public class Person
 ```
 </details>
 
-## <a href="#concepts"></a> TypeShim Concepts
+## <a name="concepts"></a> TypeShim Concepts
 
 Lets briefly introduce the concepts that are used in TypeShim. For starters, you will be using `[TSExport]` to annotate your classes  to define your interop API. Every annotated class will receive a TypeScript counterpart. The members included in the TypeScript code are limited to the _public_ members. That includes constructors, properties and methods, both static and instance.
 
