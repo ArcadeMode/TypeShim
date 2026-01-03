@@ -2,27 +2,26 @@ import { People, Person, PeopleProvider, TimeoutUnit, MyApp } from '@typeshim/wa
 
 export class PeopleRepository {
 
-    public async getAllPeople(): Promise<Person.Proxy[]> {
-        const peopleProvider: PeopleProvider.Proxy = MyApp.Proxy.GetPeopleProvider();
-        const people: People.Proxy = await peopleProvider.FetchPeopleAsync();
-        this.PrintAgeMethodUsage(people);
+    public async getAllPeople(): Promise<Person[]> {
+        const peopleProvider: PeopleProvider = MyApp.GetPeopleProvider();
+        const people: People = await peopleProvider.FetchPeopleAsync();
         return people.All;
     }
 
     public SetDelays(jsTimeout: number, csDelay: number) {
-        const peopleProvider: PeopleProvider.Proxy = MyApp.Proxy.GetPeopleProvider();
+        const peopleProvider: PeopleProvider = MyApp.GetPeopleProvider();
         const timeoutUnit: TimeoutUnit.Initializer | null = { Timeout: csDelay };
         peopleProvider.DelayTask = new Promise<TimeoutUnit.Initializer | null>((resolve) => setTimeout(() => resolve(timeoutUnit), jsTimeout));
     }
 
-    private PrintAgeMethodUsage(people: People.Proxy) {
+    private async PrintAgeMethodUsage() {
         console.log("Demonstrating Person.IsOlderThan method:");
-        const persons: Person.Proxy[] = people.All;
+        const persons: Person[] = (await MyApp.GetPeopleProvider().FetchPeopleAsync()).All;
         const person1 = persons[(Math.random() * persons.length) | 0];
         const person2 = persons[(Math.random() * persons.length) | 0];
         const p = Person.materialize(person2);
         const jsPerson: Person.Initializer = { Id: 999, Name: "Snapshot Person", Age: 42, Pets: [] };
-        const person3 = new Person.Proxy({ 
+        const person3 = new Person({ 
             Id: 999, 
             Name: "Constructed Person", 
             Age: 420, 

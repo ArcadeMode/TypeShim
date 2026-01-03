@@ -3,11 +3,11 @@ import { Person, Dog } from '@typeshim/wasm-exports';
 import { PetChip } from './PetChip';
 
 export interface PersonCardProps {
-  initPerson: Person.Proxy;
+  initPerson: Person;
 }
 
 export const PersonCard: React.FC<PersonCardProps> = ({ initPerson }) => {
-  const [wrapper, setPerson] = useState<{person: Person.Proxy}>({person: initPerson});
+  const [wrapper, setPerson] = useState<{person: Person}>({person: initPerson});
   const person = wrapper.person;
   return (
     <div
