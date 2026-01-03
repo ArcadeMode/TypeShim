@@ -40,7 +40,7 @@ internal class TypeScriptUserClassProxyRendererTests_ParameterizedConstructors
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export class Proxy extends ProxyBase {
+export class C1 extends ProxyBase {
   constructor(p1: {{typeScriptType}}) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor(p1));
   }
@@ -84,7 +84,7 @@ export class Proxy extends ProxyBase {
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export class Proxy extends ProxyBase {
+export class C1 extends ProxyBase {
   constructor(p1: {{typeScriptType}}) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor(p1));
   }
@@ -138,9 +138,9 @@ export class Proxy extends ProxyBase {
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
         // this type of constructor might be used as a copy constructor.
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export class Proxy extends ProxyBase {
-  constructor(p1: UserClass.Proxy | UserClass.Initializer) {
-    const p1Instance = p1 instanceof UserClass.Proxy ? p1.instance : p1;
+export class C1 extends ProxyBase {
+  constructor(p1: UserClass | UserClass.Initializer) {
+    const p1Instance = p1 instanceof UserClass ? p1.instance : p1;
     super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
   }
 
@@ -190,9 +190,9 @@ export class Proxy extends ProxyBase {
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
         // this type of constructor might be used as a copy constructor.
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export class Proxy extends ProxyBase {
-  constructor(p1: UserClass.Proxy | UserClass.Initializer | null) {
-    const p1Instance = p1 ? p1 instanceof UserClass.Proxy ? p1.instance : p1 : null;
+export class C1 extends ProxyBase {
+  constructor(p1: UserClass | UserClass.Initializer | null) {
+    const p1Instance = p1 ? p1 instanceof UserClass ? p1.instance : p1 : null;
     super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
   }
 
@@ -242,9 +242,9 @@ export class Proxy extends ProxyBase {
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
         // this type of constructor might be used as a copy constructor.
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export class Proxy extends ProxyBase {
-  constructor(p1: Array<UserClass.Proxy | UserClass.Initializer>) {
-    const p1Instance = p1.map(e => e instanceof UserClass.Proxy ? e.instance : e);
+export class C1 extends ProxyBase {
+  constructor(p1: Array<UserClass | UserClass.Initializer>) {
+    const p1Instance = p1.map(e => e instanceof UserClass ? e.instance : e);
     super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
   }
 
@@ -294,9 +294,9 @@ export class Proxy extends ProxyBase {
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
         // this type of constructor might be used as a copy constructor.
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export class Proxy extends ProxyBase {
-  constructor(p1: Array<UserClass.Proxy | UserClass.Initializer | null>) {
-    const p1Instance = p1.map(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null);
+export class C1 extends ProxyBase {
+  constructor(p1: Array<UserClass | UserClass.Initializer | null>) {
+    const p1Instance = p1.map(e => e ? e instanceof UserClass ? e.instance : e : null);
     super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
   }
 
@@ -346,9 +346,9 @@ export class Proxy extends ProxyBase {
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
         // this type of constructor might be used as a copy constructor.
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export class Proxy extends ProxyBase {
-  constructor(p1: Array<UserClass.Proxy | UserClass.Initializer> | null) {
-    const p1Instance = p1 ? p1.map(e => e instanceof UserClass.Proxy ? e.instance : e) : null;
+export class C1 extends ProxyBase {
+  constructor(p1: Array<UserClass | UserClass.Initializer> | null) {
+    const p1Instance = p1 ? p1.map(e => e instanceof UserClass ? e.instance : e) : null;
     super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
   }
 
@@ -398,9 +398,9 @@ export class Proxy extends ProxyBase {
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
         // this type of constructor might be used as a copy constructor.
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export class Proxy extends ProxyBase {
-  constructor(p1: Array<UserClass.Proxy | UserClass.Initializer | null> | null) {
-    const p1Instance = p1 ? p1.map(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null) : null;
+export class C1 extends ProxyBase {
+  constructor(p1: Array<UserClass | UserClass.Initializer | null> | null) {
+    const p1Instance = p1 ? p1.map(e => e ? e instanceof UserClass ? e.instance : e : null) : null;
     super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
   }
 
@@ -450,9 +450,9 @@ export class Proxy extends ProxyBase {
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
         // this type of constructor might be used as a copy constructor.
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export class Proxy extends ProxyBase {
-  constructor(p1: Promise<UserClass.Proxy | UserClass.Initializer>) {
-    const p1Instance = p1.then(e => e instanceof UserClass.Proxy ? e.instance : e);
+export class C1 extends ProxyBase {
+  constructor(p1: Promise<UserClass | UserClass.Initializer>) {
+    const p1Instance = p1.then(e => e instanceof UserClass ? e.instance : e);
     super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
   }
 
@@ -502,9 +502,9 @@ export class Proxy extends ProxyBase {
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
         // this type of constructor might be used as a copy constructor.
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export class Proxy extends ProxyBase {
-  constructor(p1: Promise<UserClass.Proxy | UserClass.Initializer | null>) {
-    const p1Instance = p1.then(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null);
+export class C1 extends ProxyBase {
+  constructor(p1: Promise<UserClass | UserClass.Initializer | null>) {
+    const p1Instance = p1.then(e => e ? e instanceof UserClass ? e.instance : e : null);
     super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
   }
 
@@ -554,9 +554,9 @@ export class Proxy extends ProxyBase {
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
         // this type of constructor might be used as a copy constructor.
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export class Proxy extends ProxyBase {
-  constructor(p1: Promise<UserClass.Proxy | UserClass.Initializer> | null) {
-    const p1Instance = p1 ? p1.then(e => e instanceof UserClass.Proxy ? e.instance : e) : null;
+export class C1 extends ProxyBase {
+  constructor(p1: Promise<UserClass | UserClass.Initializer> | null) {
+    const p1Instance = p1 ? p1.then(e => e instanceof UserClass ? e.instance : e) : null;
     super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
   }
 
@@ -606,9 +606,9 @@ export class Proxy extends ProxyBase {
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
         // this type of constructor might be used as a copy constructor.
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export class Proxy extends ProxyBase {
-  constructor(p1: Promise<UserClass.Proxy | UserClass.Initializer | null> | null) {
-    const p1Instance = p1 ? p1.then(e => e ? e instanceof UserClass.Proxy ? e.instance : e : null) : null;
+export class C1 extends ProxyBase {
+  constructor(p1: Promise<UserClass | UserClass.Initializer | null> | null) {
+    const p1Instance = p1 ? p1.then(e => e ? e instanceof UserClass ? e.instance : e : null) : null;
     super(TypeShimConfig.exports.N1.C1Interop.ctor(p1Instance));
   }
 
@@ -646,7 +646,7 @@ export class Proxy extends ProxyBase {
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
-export class Proxy extends ProxyBase {
+export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
   }
@@ -692,7 +692,7 @@ export class Proxy extends ProxyBase {
         new TypescriptUserClassProxyRenderer(symbolNameProvider, renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-export class Proxy extends ProxyBase {
+export class C1 extends ProxyBase {
   constructor(i: number, jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor(i, jsObject));
   }

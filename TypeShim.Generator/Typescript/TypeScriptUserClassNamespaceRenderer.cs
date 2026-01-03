@@ -7,13 +7,13 @@ internal sealed class TypeScriptUserClassNamespaceRenderer(TypescriptSymbolNameP
 {
     internal void Render()
     {
-        ctx.AppendLine($"// Auto-generated TypeScript namespace for class: {ctx.Class.Namespace}.{ctx.Class.Name}")
-           .AppendLine($"export namespace {ctx.Class.Name} {{");
+        ctx.AppendLine($"// Auto-generated TypeScript definitions for class: {ctx.Class.Namespace}.{ctx.Class.Name}");
+        TypescriptUserClassProxyRenderer proxyRenderer = new(symbolNameProvider, ctx);
+        proxyRenderer.Render();
+
+        ctx.AppendLine($"export namespace {ctx.Class.Name} {{");
         using (ctx.Indent())
         {
-            TypescriptUserClassProxyRenderer proxyRenderer = new(symbolNameProvider, ctx);
-            proxyRenderer.Render();
-
             TypeScriptUserClassShapesRenderer propertiesRenderer = new(symbolNameProvider, ctx);
             propertiesRenderer.Render();
         }

@@ -75,8 +75,8 @@ internal sealed class TypeScriptUserClassShapesRenderer(TypescriptSymbolNameProv
 
     private void RenderPropertiesFunction(string proxyParamName)
     {
-        string paramType = symbolNameProvider.GetUserClassSymbolName(ctx.Class, RenderConstants.Proxy);
-        string returnType = symbolNameProvider.GetUserClassSymbolName(ctx.Class, RenderConstants.Properties);
+        string paramType = symbolNameProvider.GetUserClassSymbolName(ctx.Class, SymbolNameFlags.Proxy);
+        string returnType = symbolNameProvider.GetUserClassSymbolName(ctx.Class, SymbolNameFlags.Properties);
         ctx.Append($"export function ").Append(RenderConstants.PropertiesTSFunction).Append('(').Append(proxyParamName).Append(": ").Append(paramType).Append("): ").Append(returnType).AppendLine(" {");
         using (ctx.Indent())
         {

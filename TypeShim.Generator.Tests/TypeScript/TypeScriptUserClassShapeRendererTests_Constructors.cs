@@ -44,7 +44,7 @@ internal class TypeScriptUserClassSnapshotRendererTests_Constructors
 export interface Snapshot {
   P1: string;
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1,
   };

@@ -36,7 +36,7 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
             {
                 if (constructorInfo.Parameters.Length != 0) ctx.Append(", ");
                 
-                string returnType = symbolNameProvider.GetUserClassSymbolName(ctx.Class, RenderConstants.Initializer);
+                string returnType = symbolNameProvider.GetUserClassSymbolName(ctx.Class, SymbolNameFlags.Initializer);
                 ctx.Append(constructorInfo.InitializerObject.Name).Append(": ").Append(returnType);
             }
             ctx.Append(")");

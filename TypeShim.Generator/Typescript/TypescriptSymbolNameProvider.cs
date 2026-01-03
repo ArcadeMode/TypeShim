@@ -28,10 +28,10 @@ internal class TypescriptSymbolNameProvider(TypeScriptTypeMapper typeMapper)
     {
         return (flags) switch
         {
-            SymbolNameFlags.Proxy => $"{useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Proxy}")}",
-            SymbolNameFlags.Properties => $"{useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Properties}")}",
-            SymbolNameFlags.Initializer => $"{useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Initializer}")}",
-            SymbolNameFlags.ProxyInitializerUnion => $"{useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Proxy} | {userTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Initializer}")}")}",
+            SymbolNameFlags.Proxy => useSiteTypeInfo.TypeScriptTypeSyntax.Render(),
+            SymbolNameFlags.Properties => useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Properties}"),
+            SymbolNameFlags.Initializer => useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Initializer}"),
+            SymbolNameFlags.ProxyInitializerUnion => useSiteTypeInfo.TypeScriptTypeSyntax.Render(suffix: $" | {userTypeInfo.TypeScriptTypeSyntax.Render(suffix: $".{RenderConstants.Initializer}")}"),
             _ => throw new NotImplementedException(),
         };
     }
@@ -43,7 +43,5 @@ internal class TypescriptSymbolNameProvider(TypeScriptTypeMapper typeMapper)
     /// <returns></returns>
     internal string GetNakedSymbolReference(InteropTypeInfo typeInfo) => GetSymbolNameCore(typeInfo, string.Empty);
     internal string GetUserClassSymbolName(ClassInfo classInfo) => GetSymbolNameCore(classInfo.Type, string.Empty);
-    internal string GetUserClassSymbolName(ClassInfo classInfo, string typeSuffix) => GetSymbolNameCore(classInfo.Type, $".{typeSuffix}");
     private string GetSymbolNameCore(InteropTypeInfo typeInfo, string suffix) => typeInfo.TypeScriptTypeSyntax.Render(suffix);
-    private string GetSymbolNameCoreOLD(InteropTypeInfo typeInfo, string suffix) => $"{typeMapper.ToTypeScriptType(typeInfo).Render(suffix)}";
 }

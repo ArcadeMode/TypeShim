@@ -48,7 +48,7 @@ export interface Initializer {
 export interface Snapshot {
   P1: {{typeScriptType}};
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1,
   };
@@ -93,7 +93,7 @@ export interface Initializer {
 export interface Snapshot {
   P1: {{typeScriptType}};
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1,
   };
@@ -138,7 +138,7 @@ export interface Initializer {
 export interface Snapshot {
   P1: {{tsTypeExpression}};
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1,
   };
@@ -188,12 +188,12 @@ export function materialize(proxy: C1.Proxy): C1.Snapshot {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export interface Initializer {
-  P1: UserClass.Proxy | UserClass.Initializer;
+  P1: UserClass | UserClass.Initializer;
 }
 export interface Snapshot {
   P1: UserClass.Snapshot;
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: UserClass.materialize(proxy.P1),
   };
@@ -247,7 +247,7 @@ export interface Initializer {
 export interface Snapshot {
   P1: ManagedObject;
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1,
   };
@@ -297,12 +297,12 @@ export function materialize(proxy: C1.Proxy): C1.Snapshot {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export interface Initializer {
-  P1: UserClass.Proxy | UserClass.Initializer;
+  P1: UserClass | UserClass.Initializer;
 }
 export interface Snapshot {
   P1: UserClass.Snapshot;
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: UserClass.materialize(proxy.P1),
   };
@@ -352,12 +352,12 @@ export function materialize(proxy: C1.Proxy): C1.Snapshot {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export interface Initializer {
-  P1: UserClass.Proxy | UserClass.Initializer | null;
+  P1: UserClass | UserClass.Initializer | null;
 }
 export interface Snapshot {
   P1: UserClass.Snapshot | null;
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1 ? UserClass.materialize(proxy.P1) : null,
   };
@@ -407,12 +407,12 @@ export function materialize(proxy: C1.Proxy): C1.Snapshot {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export interface Initializer {
-  P1: Promise<UserClass.Proxy | UserClass.Initializer>;
+  P1: Promise<UserClass | UserClass.Initializer>;
 }
 export interface Snapshot {
   P1: Promise<UserClass.Snapshot>;
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1.then(e => UserClass.materialize(e)),
   };
@@ -462,12 +462,12 @@ export function materialize(proxy: C1.Proxy): C1.Snapshot {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export interface Initializer {
-  P1: Promise<UserClass.Proxy | UserClass.Initializer | null>;
+  P1: Promise<UserClass | UserClass.Initializer | null>;
 }
 export interface Snapshot {
   P1: Promise<UserClass.Snapshot | null>;
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1.then(e => e ? UserClass.materialize(e) : null),
   };
@@ -517,12 +517,12 @@ export function materialize(proxy: C1.Proxy): C1.Snapshot {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export interface Initializer {
-  P1: Promise<UserClass.Proxy | UserClass.Initializer | null> | null;
+  P1: Promise<UserClass | UserClass.Initializer | null> | null;
 }
 export interface Snapshot {
   P1: Promise<UserClass.Snapshot | null> | null;
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1 ? proxy.P1.then(e => e ? UserClass.materialize(e) : null) : null,
   };
@@ -572,12 +572,12 @@ export function materialize(proxy: C1.Proxy): C1.Snapshot {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export interface Initializer {
-  P1: Array<UserClass.Proxy | UserClass.Initializer>;
+  P1: Array<UserClass | UserClass.Initializer>;
 }
 export interface Snapshot {
   P1: Array<UserClass.Snapshot>;
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1.map(e => UserClass.materialize(e)),
   };
@@ -627,12 +627,12 @@ export function materialize(proxy: C1.Proxy): C1.Snapshot {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export interface Initializer {
-  P1: Array<UserClass.Proxy | UserClass.Initializer | null>;
+  P1: Array<UserClass | UserClass.Initializer | null>;
 }
 export interface Snapshot {
   P1: Array<UserClass.Snapshot | null>;
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1.map(e => e ? UserClass.materialize(e) : null),
   };
@@ -682,12 +682,12 @@ export function materialize(proxy: C1.Proxy): C1.Snapshot {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export interface Initializer {
-  P1: Array<UserClass.Proxy | UserClass.Initializer> | null;
+  P1: Array<UserClass | UserClass.Initializer> | null;
 }
 export interface Snapshot {
   P1: Array<UserClass.Snapshot> | null;
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1 ? proxy.P1.map(e => UserClass.materialize(e)) : null,
   };
@@ -729,7 +729,7 @@ export interface Snapshot {
   P1: number;
   P2: string;
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1,
     P2: proxy.P2,
@@ -842,7 +842,7 @@ export interface Initializer {
 export interface Snapshot {
   P1: ManagedObject;
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1,
   };
@@ -886,7 +886,7 @@ export interface Initializer {
 export interface Snapshot {
   P1: ManagedObject;
 }
-export function materialize(proxy: C1.Proxy): C1.Snapshot {
+export function materialize(proxy: C1): C1.Snapshot {
   return {
     P1: proxy.P1,
   };
