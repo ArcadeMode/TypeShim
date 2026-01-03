@@ -25,16 +25,74 @@ Enter: _TypeShim_. Drop a `[TSExport]` on your C# class and _voilà_, TypeShim g
 
 TypeShim doesn't just export your C# classes but provides you with a rich interop API which orients around data locality. The following components are central in the generated interop: 
 
-Generally you will be using `[TSExport]` annotate your classes, then controlling which members are public to define your interop API. Any class annotated with the TSExportAttribute will receive a TypeScript counterpart including its constructors, methods and properties, both static and instance. Language semantics are most entirely preserved across the interop boundary. Do check out the [limitations](#limitations) section.
+Generally you will be using `[TSExport]` annotate your classes, then controlling which members are public to define your interop API. Any class annotated with the TSExportAttribute will receive a TypeScript counterpart including its constructors, methods and properties, both static and instance. The generated TypeScript consists of the following subcomponents:
 
-An exported class receives the following subcomponents in TypeScript:
+`Proxy` this type grants access to your C# class which, naturally, lives in the dotnet runtime. Proxies may contain static members that may be accessed as static in TypeScript too. To aquire an instance you may invoke your exported constructor or returned by any method and/or property. Proxies may also be used as parameters and will behave as typical reference types when performing any such operation. Instance members will transparently invoke the appropriate interop method. 
 
-`Proxy` a proxy class lives in the dotnet runtime. Its public methods and properties will be transparently accessed through interop, so a method invoke or property assignment will reflect in the dotnet runtime. They can be constructed or retrieved through methods and properties. They may also be used as parameters or property types as you normally would with your classes.
+`Snapshot` is a type that is present if your class has public properties. An instance of `MyClass.Snapshot` can be retrieved from a Proxy with the provided `MyClass.materialize(your_instance)` function. Snapshots are fully decoupled from the dotnet object and live in the JS runtime. This is useful when you no longer require the Proxy instance but want to continue working with its data. Properties of types that are exported will be materialized as well.
 
-`Properties` is a type that is present if your class has public properties. An instance of `MyClass.Properties` can be retrieved from a Proxy with the provided `MyClass.materialize(your_instance)` function. Snapshots are property only objects in JS, fully decoupled from the dotnet object. 
+`Initializer` is a type that is conditionally present if the exported class has an exported constructor and accepts an initializer body in `new()` expressions. Initializer objects live in the JS runtime and may be used in the process of creating dotnet object instances. Initializers are first and foremost used in the generated constructor of the associated Proxy. It enables syntax like:
+<table style="width:100%">
+<tr>
+<td>
 
-`Initializer` is a type that is conditionally present
-Snapshots can be passed into methods and properties of proxies and TSModule instances, TypeShim will generate mappings from JSObject into C# class instances. The primary use cases of snapshots are read-heavy contexts and passing objects as input into dotnet.
+```ts
+new Car.Proxy({ 
+  Brand: "Suzuki",
+  Doors: 4
+})
+```
+
+</td>
+<td>
+
+```ts
+new Bike.Proxy("Ducati", { 
+  Cc: 1200,
+  Hp: 147
+})
+```
+  
+</td>
+</table>
+
+Additionally, _if the class's exported constructor is parameterless_ then initializer objects can also be passed as method parameters, property setters and even in other initializer objects. TypeShim will construct the appropriate class instance from the initializer. This enables highly transparent marshalling of objects across the interop boundary.
+
+The initializer type will tend to be similar to the Snapshot type, the primary difference is that it can contain properties of (other) Initializer types _or_ Proxies. This enables constructing dotnet classes from a mix of input from both JavaScript ánd dotnet. Below demonstrates
+
+<table style="width:100%">
+<tr>
+<td>
+
+```ts
+const bike = new Bike.Proxy("Ducati", { 
+  Cc: 1200,
+  Hp: 147
+});
+const rider = new Rider.Proxy({
+    Name: "Dude",
+    Bike: bike
+})
+
+```
+
+</td>
+<td>
+
+```ts
+const bike: Bike.Initializer = {
+  Brand: "Ducati" 
+  Cc: 1200,
+  Hp: 147
+});
+const rider = new Rider.Proxy({
+    Name: "Dude",
+    Bike: bike
+})
+```
+  
+</td>
+</table>
 
 ### <a name="limitations"></a>Limitations
 
@@ -60,12 +118,6 @@ using TypeShim;
 
 namespace Sample.People;
 
-[TsModule]
-public static class PeopleModule
-{
-    public static PeopleRepository { get; internal set; } = new PeopleRepository();
-}
-
 [TsExport]
 public class PeopleRepository
 {
@@ -74,11 +126,6 @@ public class PeopleRepository
         {
             Name = "Alice",
             Age = 26,
-        },
-        new Person()
-        {
-            Name = "Bob",
-            Age = 28,
         }
     ];
 
@@ -108,27 +155,31 @@ public class Person
 </details>
 
  ```js
-public UsingTypeShim(exports: AssemblyExports) {
-    const module = new PeopleModule(exports)
-    const alice: Person.Proxy = module.PeopleRepository.GetPerson(0);
-    const bob: Person.Proxy = module.PeopleRepository.GetPerson(1);
+using { TypeShimInitializer, PeopleRepository, Person } from './typeshim.ts';
+
+public UsingTypeShim() {
+    const runtime = await dotnet.withApplicationArguments(args).create()
+    TypeShimInitializer.initialize(runtime);
+    const repository = new PeopleRepository.Proxy();
+    const alice: Person.Proxy = repository.GetPerson(0);
+    const bob = new Person.Proxy({
+      Name: 'Bob',
+      Age: 20
+    });
     console.log(alice.Name, bob.Name); // prints "Alice", "Bob"
     console.log(alice.IsOlderThan(bob)) // prints false
     alice.Age = 30;
     console.log(alice.IsOlderThan(bob)) // prints true
 
-    const _charlie: Person.Snapshot = { Name: "Charlie", Age: 29 }
-    module.PeopleRepository.AddPerson(_charlie);
-    const charlie: Person.Proxy = module.PeopleRepository.GetPerson(2);
+    repository.AddPerson({ Name: "Charlie", Age: 40 });
+    const charlie: Person.Proxy = repository.GetPerson(1);
     console.log(alice.IsOlderThan(charlie)) // prints false
     console.log(bob.IsOlderThan(charlie)) // prints true
-    const _bob: Person.Snapshot = Person.snapshot(bob);
-    console.log(_bob.Age) // prints 28
 }
 ```
 
 ### 'Raw' JSExport
-The exact same behavior as the TypeShim sample, with handwritten JSExport.
+The same behavior as the TypeShim sample, with handwritten JSExport. Certain parts enabled by TypeShim have not been replicated as the point may be clear at a glance: this is a large amount of difficult to maintain boilerplate if you have to write it yourself.
 
 <details>
   <summary>See the <code>JSExport</code> C# implementation of <code>PeopleRepository</code> and <code>Person</code></summary>
@@ -139,17 +190,6 @@ Note the error sensitivity of passing untyped objects across the interop boundar
   ```csharp
 namespace Sample.People;
 
-public class PeopleModule 
-{
-    private static readonly PersonRepository _instance = new();
-    [JSExport]
-    [return: JSMarshalAsType<JSType.Object>]
-    public static object GetPeopleRepository()
-    {
-        return _instance;
-    }
-}
-
 public class PeopleRepository
 {
     internal List<Person> People = [
@@ -157,13 +197,16 @@ public class PeopleRepository
         {
             Name = "Alice",
             Age = 26,
-        },
-        new Person()
-        {
-            Name = "Bob",
-            Age = 29,
         }
     ];
+
+    private static readonly PersonRepository _instance = new();
+    [JSExport]
+    [return: JSMarshalAsType<JSType.Object>]
+    public static object GetInstance()
+    {
+        return _instance;
+    }
 
     [JSExport]
     [return: JSMarshalAsType<JSType.Object>]
@@ -179,6 +222,17 @@ public class Person
     public string Name { get; set; }
     public int Age { get; set; }
     
+    [JSExport]
+    [return: JSMarshalAsType<JSType.String>]
+    public static string ConstructPerson([JSMarshalAsType<JSType.Object>] JSObject obj)
+    {
+        return new Person() // Fragile
+        {
+            Name = obj.GetPropertyAsString("Name"),
+            Age = obj.GetPropertyAsInt32("Age")
+        }
+    }
+
     [JSExport]
     [return: JSMarshalAsType<JSType.String>]
     public static string GetName([JSMarshalAsType<JSType.Object>] object instance)
@@ -225,9 +279,12 @@ public class Person
 
 ```js
 public UsingRawJSExport(exports: any) {
-    const repository: any = exports.Sample.People.PeopleModule.GetPeopleRepository(); 
+    const runtime = await dotnet.withApplicationArguments(args).create();
+    const exports = runtime.assemblyExports;
+
+    const repository: any = exports.Sample.People.PeopleRepository.GetInstance(); 
     const alice: any = exports.Sample.People.PeopleRepository.GetPerson(repository, 0);
-    const bob: any = exports.Sample.People.PeopleRepository.GetPerson(repository, 1);
+    const bob: any = exports.Sample.People.People.ConstructPerson("Bob", 20);
     console.log(exports.Sample.People.Person.GetName(alice), exports.Sample.People.Person.GetName(bob)); // prints "Alice", "Bob"
     console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints false
     exports.Sample.People.Person.SetAge(alice, 30);
