@@ -215,7 +215,7 @@ public UsingRawJSExport(exports: any) {
 
 ## Semantically rich TypeScript interop
 
-TypeShim makes your C# classes accessible from TypeScript, with some powerful features built in so you can take control over your classes ánd data locality. First, you will be using `[TSExport]` annotate your classes, then controlling which members are public to define your interop API. Any class annotated with the TSExportAttribute will receive a TypeScript counterpart which includes the public members you have chosen. 
+First, you will be using `[TSExport]` annotate your classes  to define your interop API. Every annotated class will receive a TypeScript counterpart. The build-time generated TypeScript can provide the following subcomponents for each exported class:
 
 The build-time generated TypeScript can provide the following subcomponents for each exported class `MyClass`:
 
@@ -268,13 +268,11 @@ const rider = new Rider({
 
 ## <a name="enriched-type-support"></a> Enriched Type support
 
-TypeShim enriches the supported types by JSExport by adding _your_ classes to the [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings). Repetitive patterns for type transformation and higher order types that you'd have to lower into the supported types yourself are readily supported and tested in TypeShim.
+TypeShim enriches the supported types by JSExport by adding _your_ classes to the [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings). Repetitive patterns for type transformation are readily supported and tested in TypeShim.
 
-Ofcourse, TypeShim brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. This work is largely completed, but some types are still on the roadmap for support.  Support for generics is limited to `Task` and `[]`. Every supported type can be used in methods as return and parameter types, they are also supported as property types. 
+Ofcourse, TypeShim brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. This work is largely completed.  Support for generics is limited to `Task` and `[]`.
 
-> TypeShim and JSExport/JSImport are perfectly usable side-by-side, in case you want to handroll parts of your interop.
-
-TypeShim aims to continue to broaden its type support in order to improve the developer experience of .NET Wasm browser apps. Notably `Task<int[]>` generates compiler error's with JSExport but is within reach to support in TypeShim. Other commonly used types include `Enum` and `IEnumerable`. 
+TypeShim aims to continue to broaden its type support. Suggestions and contributions are welcome.
 
 | TypeShim Shimmed Type | Mapped Type | Support | Note |
 |----------------------|-------------|--------|------|
@@ -358,7 +356,7 @@ TypeShim is configured through MSBuild properties, you may provide these through
 TSExports are subject to minimal, but some, constraints. 
 - Certain types are not supported by either TypeShim or .NET wasm type marshalling. Analyzers have been implemented to notify of such cases.
 - As overloading is not a real language feature in JavaScript nor TypeScript, this is currently not supported in TypeShim either. You can still define overloads that are not public. This goes for both constructors and methods.
-- By default, JSExport yields value semantics for Array instances, this one reference type that is atypical. It is under consideration to adres but most simply you may define your own List class to preserve reference semantics.
+- By default, JSExport yields value semantics for Array instances, this one reference type that is atypical. It is under consideration to adres but an effective alternative is to define your own List class to preserve reference semantics.
 
 
 ## Contributing
