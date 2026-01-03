@@ -4,25 +4,21 @@
 </p>
 
 ## Why TypeShim
-The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), while powerful, is somewhat cumbersome to use. It requires repetitive code patterns and quite some boilerplate to use. The lack of class support mean that many method annotations have to be written for a lot of use cases. Finally the exclusive support for static methods makes referencing class instances just as difficult. 
+The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), while powerful, is somewhat cumbersome to use. It requires repetitive code patterns and quite some boilerplate to use. The lack of class support mean that many method annotations have to be written for a lot of use cases. Finally there is no type information available to use in your TypeScript project.
 
-Enter: _TypeShim_. Drop one `[TSExport]` on your C# class(es) and _voilà_, TypeShim generates rich JSExport methods that perform repetitive type transformations and even instantiations for you. The void that JSExport leaves on the JS side is filled with a rich TypeScript client that enables you to use your .NET classes as if they were truly exported to TypeScript. 
+Enter: _TypeShim_. Drop one `[TSExport]` on your C# class(es) and _voilà_, TypeShim generates rich JSExport methods that perform repetitive type transformations and even class instantiations for you. The void that JSExport leaves on the JS side is filled with a rich TypeScript client that enables you to use your .NET classes as if they were truly exported to TypeScript. 
 
 Code changes reflect instantly in your TypeScript project, easy and reliable.
 
 ## Features at a glance
 
-- 🏭 Generated for _your_ project.
+- 🏭 No-nonsense [interop](#concepts) generation.
+- 🌱 Opt-in with just one attribute.
+- 🤖 Export full classes: constructors, methods and properties.
 - 💰 [Enriched type marshalling](#enriched-type-support).
 - 🛡 Type-safety across the interop boundary.
-- 🤖 Automatically export:
-  - Constructors.
-  - Static ánd instance methods.
-  - Static ánd instance properties.
-- 🦜 Implements repetitive interop patterns for you.
-- 🪁 Lightweight: won't lock you in.
-- 🧩 Compatible with your other JSExport/JSImport.
 - 👍 [Easy setup](#installing)
+- 🧩 Compatible with your other JSExport/JSImport.
 
 ## Samples
 Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your wasm browserapp as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-) in order to retrieve its `exports`. 
@@ -220,7 +216,7 @@ public class Person
 ```
 </details>
 
-## TypeShim Concepts
+## <a href="#concepts"></a> TypeShim Concepts
 
 Lets briefly introduce the concepts that are used in TypeShim. For starters, you will be using `[TSExport]` to annotate your classes  to define your interop API. Every annotated class will receive a TypeScript counterpart. The members included in the TypeScript code are limited to the _public_ members. That includes constructors, properties and methods, both static and instance.
 
