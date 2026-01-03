@@ -217,26 +217,31 @@ public UsingRawJSExport(exports: any) {
 
 TypeShim makes your C# classes accessible from TypeScript, with some powerful features built in so you can take control over your classes ánd data locality. First, you will be using `[TSExport]` annotate your classes, then controlling which members are public to define your interop API. Any class annotated with the TSExportAttribute will receive a TypeScript counterpart which includes the public members you have chosen. 
 
-The build-time generated TypeScript can provide the following subcomponents for each exported class:
+The build-time generated TypeScript can provide the following subcomponents for each exported class `MyClass`:
 
-`Proxy` this type grants access to your C# class which, naturally, lives in the dotnet runtime. Proxies may contain static members that may be accessed as static in TypeScript too. To aquire an instance you may invoke your exported constructor or returned by any method and/or property. Proxies may also be used as parameters and will behave as typical reference types when performing any such operation. Instance members will transparently invoke the appropriate interop method. 
+### Proxies (`MyClass`)
+`MyClass` grants access to the exported C# `MyClass` class _in a proxying capacity_, this type will also be referred to as a `Proxy`. A proxy only contains _public_ members and a dotnet instance of the class being proxied _always_ lives in the dotnet runtime. To aquire an instance you may invoke your exported constructor or returned by any method and/or property. Alternatively you can access static members all the same. Proxies may also be used as parameters and will behave as typical reference types when performing any such operation.
 
-`Snapshot` is a type that is present if your class has public properties. An instance of `MyClass.Snapshot` can be retrieved from a Proxy with the provided `MyClass.materialize(your_instance)` function. Snapshots are fully decoupled from the dotnet object and live in the JS runtime. This is useful when you no longer require the Proxy instance but want to continue working with its data. Properties of types that are exported will be materialized as well.
+### Snapshots (`MyClass.Snapshot`)
+The snapshot type is created if your class has public properties. TypeShim provides a utility function `MyClass.materialize(your_instance)` that returns a snapshot. Snapshots are fully decoupled from the dotnet object and live in the JS runtime. This is useful when you no longer require the Proxy instance but want to continue working with its data. Properties of proxy types will be materialized as well.
 
-`Initializer` is a type that is present if the exported class has an exported constructor and accepts an initializer body in `new()` expressions. Initializer objects live in the JS runtime and may be used in the process of creating dotnet object instances, first and foremost in the constructor of the associated Proxy.
+### Initializers (`MyClass.Initializer`)
+The `Initializer` type is created if the exported class has an exported constructor and accepts an initializer body in `new()` expressions. Initializer objects live in the JS runtime and may be used in the process of creating dotnet object instances, if it exists it will be a parameter in the constructor of the associated Proxy.
 
 Additionally, _if the class exports a parameterless constructor_ then initializer objects can also be passed instead of proxies in method parameters, property setters and even in other initializer objects. TypeShim will construct the appropriate dotnet class instance(s) from the initializer. Initializer's can even contain properties of Proxy type instead of an Initializer if you want to reference an existing object. Below a brief demonstration of the provided flexibility.
+
+> Arrays of mixed proxies and initializers are supported. The contained initializers will be constructed into new dotnet class instances while the object references behind the proxies are preserved.
 
 <table style="width:100%">
 <tr>
 <td>
 
 ```ts
-const bike = new Bike.Proxy("Ducati", { 
+const bike = new Bike("Ducati", { 
   Cc: 1200,
   Hp: 147
 });
-const rider = new Rider.Proxy({
+const rider = new Rider({
     Name: "Dude",
     Bike: bike
 });
@@ -252,7 +257,7 @@ const bike: Bike.Initializer = {
   Cc: 1200,
   Hp: 147
 };
-const rider = new Rider.Proxy({
+const rider = new Rider({
     Name: "Dude",
     Bike: bike
 });
@@ -273,6 +278,8 @@ TypeShim aims to continue to broaden its type support in order to improve the de
 
 | TypeShim Shimmed Type | Mapped Type | Support | Note |
 |----------------------|-------------|--------|------|
+| `Object` (`object`)  | `ManagedObject`       | ✅     | a disposable opaque handle |
+| `TClass`  | `ManagedObject`       | ✅     |  unexported reference types    |
 | `TClass`                  |  `TClass`        | ✅     | `TClass` generated in TypeScript* |
 | `Task<TClass>`            | `Promise<TClass>`| ✅     | `TClass` generated in TypeScript* |
 | `Task<T[]>`            | `Promise<T[]>`| 💡     | under consideration (for all array-compatible `T`) |
@@ -298,9 +305,8 @@ TypeShim aims to continue to broaden its type support in order to improve the de
 | `DateTime`           | `Date`      | ✅     |      |
 | `DateTimeOffset`     | `Date`      | ✅     |      |
 | `Exception`          | `Error`     | ✅     |      |
-| `JSObject`           | `Object`    | ✅     | You must process the JSObject manually |
+| `JSObject`           | `Object`    | ✅     | Requires manual JSObject handling |
 | `String`             | `String`    | ✅     |      |
-| `Object` (`object`)  | `Any`       | ✅     |      |
 | `T[]`         | `T[]`| ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) |
 | `Span<Byte>`         | `MemoryView`| 🚧     |      |
 | `Span<Int32>`        | `MemoryView`| 🚧     |      |
@@ -318,7 +324,7 @@ TypeShim aims to continue to broaden its type support in order to improve the de
 | `Func<T1, T2, TResult>` | `Function`| 🚧   |      |
 | `Func<T1, T2, T3, TResult>` | `Function` | 🚧 |      |
 
-*<sub>For `[TSExport]`/`[TSModule]` classes</sub>
+*<sub>For `[TSExport]` classes</sub>
 
 ## Run the sample
 
