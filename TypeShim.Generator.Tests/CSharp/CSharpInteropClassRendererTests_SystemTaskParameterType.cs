@@ -51,7 +51,7 @@ internal class CSharpInteropClassRendererTests_SystemTaskParameterType
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript interop definitions
+// TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
@@ -122,7 +122,7 @@ public partial class C1Interop
         // Important assertion here, Task<object> required for interop, cannot be simply casted to Task<MyClass>
         // the return type is void so we cannot await either, hence the TaskCompletionSource-based conversion.
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript interop definitions
+// TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
@@ -197,7 +197,7 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript interop definitions
+// TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
@@ -261,7 +261,7 @@ public partial class C1Interop
         // Note: as there is no known mapping for these types, there is no 'FromObject' mapping, instead just try to cast ("taskTcs.SetResult(({{typeName}})t.Result)")
         // the user shouldnt be able to do much with the object anyway as its untyped on the JS/TS side.
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript interop definitions
+// TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
@@ -322,7 +322,7 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
-// Auto-generated TypeScript interop definitions
+// TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;

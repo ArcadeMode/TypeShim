@@ -50,7 +50,7 @@ internal class TypescriptAssemblyExportsRendererTests
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
-// Auto-generated TypeScript module exports interface
+// TypeShim generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
@@ -110,7 +110,7 @@ export interface AssemblyExports{
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
-// Auto-generated TypeScript module exports interface
+// TypeShim generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
@@ -169,7 +169,7 @@ export interface AssemblyExports{
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
-// Auto-generated TypeScript module exports interface
+// TypeShim generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
@@ -230,7 +230,7 @@ export interface AssemblyExports{
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
-// Auto-generated TypeScript module exports interface
+// TypeShim generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
@@ -278,7 +278,7 @@ export interface AssemblyExports{
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
-// Auto-generated TypeScript module exports interface
+// TypeShim generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
@@ -331,7 +331,7 @@ export interface AssemblyExports{
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
-// Auto-generated TypeScript module exports interface
+// TypeShim generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
@@ -389,7 +389,7 @@ export interface AssemblyExports{
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """    
-// Auto-generated TypeScript module exports interface
+// TypeShim generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
@@ -447,7 +447,7 @@ export interface AssemblyExports{
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
-// Auto-generated TypeScript module exports interface
+// TypeShim generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
@@ -487,7 +487,7 @@ export interface AssemblyExports{
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """    
-// Auto-generated TypeScript module exports interface
+// TypeShim generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
@@ -527,7 +527,7 @@ export interface AssemblyExports{
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
-// Auto-generated TypeScript module exports interface
+// TypeShim generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
@@ -568,7 +568,7 @@ export interface AssemblyExports{
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
-// Auto-generated TypeScript module exports interface
+// TypeShim generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {
@@ -610,7 +610,7 @@ export interface AssemblyExports{
         new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
 
         AssertEx.EqualOrDiff(renderCtx.ToString(), """
-// Auto-generated TypeScript module exports interface
+// TypeShim generated TypeScript module exports interface
 export interface AssemblyExports{
   N1: {
     C1Interop: {

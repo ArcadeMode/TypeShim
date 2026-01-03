@@ -38,7 +38,7 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
         foreach (ClassInfo classInfo in classInfos)
         {
             RenderContext renderCtx = new(classInfo, classInfos, RenderOptions.TypeScript);
-            renderCtx.AppendLine($"// Generated TypeScript definitions for class: {renderCtx.Class.Namespace}.{renderCtx.Class.Name}");
+            renderCtx.AppendLine($"// TypeShim generated TypeScript definitions for class: {renderCtx.Class.Namespace}.{renderCtx.Class.Name}");
             TypescriptUserClassProxyRenderer proxyRenderer = new(renderCtx);
             proxyRenderer.Render();
             TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(renderCtx);

@@ -13,7 +13,7 @@ internal sealed class TypescriptAssemblyExportsRenderer(
 {
     internal void Render()
     {
-        ctx.AppendLine("// Auto-generated TypeScript module exports interface")
+        ctx.AppendLine("// TypeShim generated TypeScript module exports interface")
            .Append("export interface ").Append(RenderConstants.AssemblyExports).AppendLine("{");
         using (ctx.Indent())
         {
