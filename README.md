@@ -21,55 +21,7 @@ Enter: _TypeShim_. Drop a `[TSExport]` on your C# class and _voilà_, TypeShim g
 - 🪁 Lightweight: won't lock you in or interfere with other JSExport/JSImport.
 - 👍 Minimal setup: [NuGet install](#installing) + one `[TSExport]`.
 
-## Semantically rich TypeScript interop library
-
-TypeShim makes your C# classes accessible from TypeScript, with some powerful features built in so you can take control over your classes ánd data locality. First, you will be using `[TSExport]` annotate your classes, then controlling which members are public to define your interop API. Any class annotated with the TSExportAttribute will receive a TypeScript counterpart which includes the public members you have chosen. 
-
-The generated TypeScript consists of the following subcomponents:
-
-`Proxy` this type grants access to your C# class which, naturally, lives in the dotnet runtime. Proxies may contain static members that may be accessed as static in TypeScript too. To aquire an instance you may invoke your exported constructor or returned by any method and/or property. Proxies may also be used as parameters and will behave as typical reference types when performing any such operation. Instance members will transparently invoke the appropriate interop method. 
-
-`Snapshot` is a type that is present if your class has public properties. An instance of `MyClass.Snapshot` can be retrieved from a Proxy with the provided `MyClass.materialize(your_instance)` function. Snapshots are fully decoupled from the dotnet object and live in the JS runtime. This is useful when you no longer require the Proxy instance but want to continue working with its data. Properties of types that are exported will be materialized as well.
-
-`Initializer` is a type that is conditionally present if the exported class has an exported constructor and accepts an initializer body in `new()` expressions. Initializer objects live in the JS runtime and may be used in the process of creating dotnet object instances. Initializers are first and foremost used in the generated constructor of the associated Proxy.
-
-Additionally, _if the class exports a parameterless constructor_ then initializer objects can also be passed instead of proxies in method parameters, property setters and even in other initializer objects. TypeShim will construct the appropriate dotnet class instance(s) from the initializer. Another powerful feature is that Initializer's can contain properties of (other) Initializer types _or_ Proxies. This enables constructing dotnet classes from a mix of input from both JavaScript ánd dotnet. Below demonstrates the flexibility this allows.
-
-<table style="width:100%">
-<tr>
-<td>
-
-```ts
-const bike = new Bike.Proxy("Ducati", { 
-  Cc: 1200,
-  Hp: 147
-});
-const rider = new Rider.Proxy({
-    Name: "Dude",
-    Bike: bike
-});
-
-```
-
-</td>
-<td>
-
-```ts
-const bike: Bike.Initializer = {
-  Brand: "Ducati" 
-  Cc: 1200,
-  Hp: 147
-};
-const rider = new Rider.Proxy({
-    Name: "Dude",
-    Bike: bike
-});
-```
-  
-</td>
-</table>
-
-### Samples
+## Samples
 Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your wasm browserapp as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-) in order to retrieve its `exports`. 
 
 
@@ -127,12 +79,14 @@ using { TypeShimInitializer, PeopleRepository, Person } from './typeshim.ts';
 public UsingTypeShim() {
     const runtime = await dotnet.withApplicationArguments(args).create()
     TypeShimInitializer.initialize(runtime);
+
     const repository = new PeopleRepository.Proxy();
     const alice: Person.Proxy = repository.GetPerson(0);
     const bob = new Person.Proxy({
       Name: 'Bob',
       Age: 20
     });
+
     console.log(alice.Name, bob.Name); // prints "Alice", "Bob"
     console.log(alice.IsOlderThan(bob)) // prints false
     alice.Age = 30;
@@ -258,6 +212,54 @@ public UsingRawJSExport(exports: any) {
     console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints true
 }
 ```
+
+## Semantically rich TypeScript interop
+
+TypeShim makes your C# classes accessible from TypeScript, with some powerful features built in so you can take control over your classes ánd data locality. First, you will be using `[TSExport]` annotate your classes, then controlling which members are public to define your interop API. Any class annotated with the TSExportAttribute will receive a TypeScript counterpart which includes the public members you have chosen. 
+
+The build-time generated TypeScript can provide the following subcomponents for each exported class:
+
+`Proxy` this type grants access to your C# class which, naturally, lives in the dotnet runtime. Proxies may contain static members that may be accessed as static in TypeScript too. To aquire an instance you may invoke your exported constructor or returned by any method and/or property. Proxies may also be used as parameters and will behave as typical reference types when performing any such operation. Instance members will transparently invoke the appropriate interop method. 
+
+`Snapshot` is a type that is present if your class has public properties. An instance of `MyClass.Snapshot` can be retrieved from a Proxy with the provided `MyClass.materialize(your_instance)` function. Snapshots are fully decoupled from the dotnet object and live in the JS runtime. This is useful when you no longer require the Proxy instance but want to continue working with its data. Properties of types that are exported will be materialized as well.
+
+`Initializer` is a type that is present if the exported class has an exported constructor and accepts an initializer body in `new()` expressions. Initializer objects live in the JS runtime and may be used in the process of creating dotnet object instances, first and foremost in the constructor of the associated Proxy.
+
+Additionally, _if the class exports a parameterless constructor_ then initializer objects can also be passed instead of proxies in method parameters, property setters and even in other initializer objects. TypeShim will construct the appropriate dotnet class instance(s) from the initializer. Initializer's can even contain properties of Proxy type instead of an Initializer if you want to reference an existing object. Below a brief demonstration of the provided flexibility.
+
+<table style="width:100%">
+<tr>
+<td>
+
+```ts
+const bike = new Bike.Proxy("Ducati", { 
+  Cc: 1200,
+  Hp: 147
+});
+const rider = new Rider.Proxy({
+    Name: "Dude",
+    Bike: bike
+});
+
+```
+
+</td>
+<td>
+
+```ts
+const bike: Bike.Initializer = {
+  Brand: "Ducati" 
+  Cc: 1200,
+  Hp: 147
+};
+const rider = new Rider.Proxy({
+    Name: "Dude",
+    Bike: bike
+});
+```
+  
+</td>
+</table>
 
 ## <a name="enriched-type-support"></a> Enriched Type support
 
