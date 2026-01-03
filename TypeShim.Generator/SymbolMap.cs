@@ -1,10 +1,24 @@
-﻿using TypeShim.Shared;
-using TypeShim.Generator.Parsing;
+﻿using TypeShim.Generator.Parsing;
+using TypeShim.Shared;
 
-namespace TypeShim.Generator.Typescript;
+namespace TypeShim.Generator;
 
-internal class TypescriptSymbolNameProvider(TypeScriptTypeMapper typeMapper)
+internal sealed class SymbolMap(IEnumerable<ClassInfo> allClasses)
 {
+    private readonly Dictionary<InteropTypeInfo, ClassInfo> _typeToClassDict = allClasses.ToDictionary(c => c.Type);
+
+    internal ClassInfo GetClassInfo(InteropTypeInfo type)
+    {
+        _typeToClassDict.TryGetValue(type, out ClassInfo? info);
+        return info ?? throw new NotFoundClassInfoException($"Could not find ClassInfo for type: {type.CSharpTypeSyntax}");
+    }
+
+    internal string GetUserClassSymbolName(InteropTypeInfo type, TypeShimSymbolType flags)
+    {
+        ClassInfo classInfo = GetClassInfo(type.GetInnermostType());
+        return GetUserClassSymbolNameCore(type, classInfo.Type, flags);
+    }
+
     internal string GetUserClassSymbolName(ClassInfo classInfo, TypeShimSymbolType flags)
     {
         return GetUserClassSymbolNameCore(classInfo.Type, classInfo.Type, flags);

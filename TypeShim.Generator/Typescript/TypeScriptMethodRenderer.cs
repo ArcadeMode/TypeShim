@@ -74,8 +74,8 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
 
             if (methodInfo.ReturnType is { RequiresTypeConversion: true, SupportsTypeConversion: true })
             {
-                string proxyClassName = ctx.SymbolMap.GetUserClassSymbolName(methodInfo.ReturnType, TypeShimSymbolType.Proxy);
-                ctx.Append(proxyClassName);
+                string returnTypeAsProxy = ctx.SymbolMap.GetUserClassSymbolName(methodInfo.ReturnType, TypeShimSymbolType.Proxy);
+                ctx.Append(returnTypeAsProxy);
             }
             else
             {
@@ -105,8 +105,8 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
 
             if (methodInfo.ReturnType is { RequiresTypeConversion: true, SupportsTypeConversion: true })
             {
-                string proxyClassName = ctx.SymbolMap.GetUserClassSymbolName(methodInfo.ReturnType, TypeShimSymbolType.Proxy);
-                ctx.Append(proxyClassName);
+                string returnTypeAsProxy = ctx.SymbolMap.GetUserClassSymbolName(methodInfo.ReturnType, TypeShimSymbolType.Proxy);
+                ctx.Append(returnTypeAsProxy);
             }
             else
             {
@@ -142,7 +142,7 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
                 return typeInfo.TypeScriptTypeSyntax.Render();
             }
 
-            ClassInfo classInfo = ctx.GetClassInfo(typeInfo.GetInnermostType());
+            ClassInfo classInfo = ctx.SymbolMap.GetClassInfo(typeInfo.GetInnermostType());
             TypeShimSymbolType symbolName = classInfo is { Constructor: { IsParameterless: true, AcceptsInitializer: true } } 
                 ? TypeShimSymbolType.ProxyInitializerUnion // initializer also accepted
                 : TypeShimSymbolType.Proxy;
@@ -160,8 +160,7 @@ internal sealed class TypeScriptMethodRenderer(TypescriptSymbolNameProvider symb
 
             if (methodInfo.ReturnType is { RequiresTypeConversion: true, SupportsTypeConversion: true })
             {
-                ClassInfo classInfo = ctx.GetClassInfo(methodInfo.ReturnType.GetInnermostType());
-                string proxyClassName = ctx.SymbolMap.GetUserClassSymbolName(classInfo, TypeShimSymbolType.Proxy);
+                string proxyClassName = ctx.SymbolMap.GetUserClassSymbolName(methodInfo.ReturnType.GetInnermostType(), TypeShimSymbolType.Proxy);
                 // user class return type, wrap in proxy
                 ctx.Append("const res = ");
                 RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
