@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
+using System.Runtime.InteropServices.JavaScript;
 
 namespace TypeShim.Generator.CSharp;
 
@@ -25,6 +26,7 @@ internal static class CSharpPartialCompilation
         [
             // manually targetted assemblies
             typeof(object).Assembly,
+            typeof(JSObject).Assembly,
             //typeof(TsExportAttribute).Assembly
 
             .. AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location)) // include loaded assemblies

@@ -64,5 +64,30 @@ internal class SyntaxTreeParsingTests_Methods
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         Assert.That(classInfo.Methods.ToList(), Has.Count.EqualTo(1));
     }
+
+    [Test]
+    public void ClassInfoBuilder_ParsesMethod_WithJSObjectParameter()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        namespace N1;
+        [TSExport]
+        public class C1
+        {
+            public void M1(JSObject jsObject)
+            {
+            }
+        }
+    """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        Assert.That(classInfo.Methods.ToList(), Has.Count.EqualTo(1));
+    }
 }
 
