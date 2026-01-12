@@ -72,10 +72,6 @@ export interface AssemblyExports{
           set_StringProperty(instance: ManagedObject, value: string): void;
         };
       };
-      JSObjectTestInterop: {
-        ctor(): ManagedObject;
-        DoThing(instance: ManagedObject, jsObject: object): void;
-      };
       PeopleInterop: {
         ctor(jsObject: object): ManagedObject;
         get_All(instance: ManagedObject): Array<ManagedObject>;
@@ -210,17 +206,6 @@ export namespace PrimitivesDemo {
       InitialStringProperty: proxy.InitialStringProperty,
       StringProperty: proxy.StringProperty,
     };
-  }
-}
-
-// TypeShim generated TypeScript definitions for class: TypeShim.Sample.JSObjectTest
-export class JSObjectTest extends ProxyBase {
-  constructor() {
-    super(TypeShimConfig.exports.TypeShim.Sample.JSObjectTestInterop.ctor());
-  }
-
-  public DoThing(jsObject: object): void {
-    TypeShimConfig.exports.TypeShim.Sample.JSObjectTestInterop.DoThing(this.instance, jsObject);
   }
 }
 

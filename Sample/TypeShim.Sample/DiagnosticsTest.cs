@@ -103,13 +103,3 @@ namespace TypeShim.Sample;
 
 //    public required int InternalRequiredField;   
 //}
-
-[TSExport]
-public class JSObjectTest
-{
-    public void DoThing(JSObject jsObject)
-    {
-        var val = jsObject.GetPropertyAsInt32("someProperty");
-        Console.WriteLine("someProperty: " + val);
-    }
-}

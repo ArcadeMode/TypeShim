@@ -12,7 +12,7 @@ internal static class JSObjectMethodResolver
             KnownManagedType.Boolean => "GetPropertyAsBoolean",
             KnownManagedType.Double => "GetPropertyAsDouble",
             KnownManagedType.String => "GetPropertyAsString",
-            KnownManagedType.Int32 => "GetPropertyAsInt32",
+            KnownManagedType.Int32 => "GetPropertyAsInt32Nullable",
             KnownManagedType.JSObject => "GetPropertyAsJSObject",
             KnownManagedType.Object when typeInfo.IsTSExport => "GetPropertyAsJSObject", // exported object types have a FromJSObject mapper
             KnownManagedType.Object when !typeInfo.IsTSExport => "GetPropertyAsObject", // non-exports are just casted to their original type.
