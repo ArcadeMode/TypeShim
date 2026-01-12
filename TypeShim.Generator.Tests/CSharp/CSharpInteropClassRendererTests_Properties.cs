@@ -488,7 +488,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectArray("P1"), e => e != null ? MyClassInterop.FromObject(e) : null),
+            P1 = Array.ConvertAll((jsObject.GetPropertyAsJSObjectArray("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))), e => e != null ? MyClassInterop.FromObject(e) : null),
         };
     }
     [JSExport]
@@ -519,7 +519,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectArray("P1"), e => e != null ? MyClassInterop.FromObject(e) : null),
+            P1 = Array.ConvertAll((jsObject.GetPropertyAsJSObjectArray("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))), e => e != null ? MyClassInterop.FromObject(e) : null),
         };
     }
 }

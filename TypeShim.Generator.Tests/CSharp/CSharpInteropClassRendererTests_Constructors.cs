@@ -378,7 +378,7 @@ public partial class C1Interop
     {
         return new C1(p1, p2)
         {
-            P1 = jsObject.GetPropertyAsInt32("P1"),
+            P1 = (jsObject.GetPropertyAsInt32Nullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
         };
     }
     [JSExport]
