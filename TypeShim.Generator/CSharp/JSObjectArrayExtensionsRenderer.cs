@@ -19,7 +19,7 @@ internal sealed class JSObjectArrayExtensionsRenderer()
         // 2. Nested types cannot be represented on the interop boundary (i.e. Task<int[]>
 
         sb.AppendLine(JSObjectArrayExtensionsClass);
-        //TODO: reconsider targetting different moniker and provide this class through TypeShim nuget so the user can utilize these directly if they so wish.
+        //TODO: Consider targeting different moniker and provide this class through TypeShim nuget so the user can utilize these directly if they so wish.
         return sb.ToString();
     }
 
@@ -29,29 +29,29 @@ using System.Runtime.InteropServices.JavaScript;
 
 public static partial class JSObjectArrayExtensions
 {
-    public static int[] GetPropertyAsInt32Array(this JSObject jsObject, string propertyName)
+    public static int[]? GetPropertyAsInt32Array(this JSObject jsObject, string propertyName)
     {
-        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsIntArray(value) : [];
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsIntArray(value) : null;
     }
 
-    public static double[] GetPropertyAsDoubleArray(this JSObject jsObject, string propertyName)
+    public static double[]? GetPropertyAsDoubleArray(this JSObject jsObject, string propertyName)
     {
-        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsDoubleArray(value) : [];
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsDoubleArray(value) : null;
     }
 
-    public static string[] GetPropertyAsStringArray(this JSObject jsObject, string propertyName)
+    public static string[]? GetPropertyAsStringArray(this JSObject jsObject, string propertyName)
     {
-        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsStringArray(value) : [];
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsStringArray(value) : null;
     }
 
-    public static JSObject[] GetPropertyAsJSObjectArray(this JSObject jsObject, string propertyName)
+    public static JSObject[]? GetPropertyAsJSObjectArray(this JSObject jsObject, string propertyName)
     {
-        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsJSObjectArray(value) : [];
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsJSObjectArray(value) : null;
     }
 
-    public static object[] GetPropertyAsObjectArray(this JSObject jsObject, string propertyName)
+    public static object[]? GetPropertyAsObjectArray(this JSObject jsObject, string propertyName)
     {
-        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsObjectArray(value) : [];
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsObjectArray(value) : null;
     }
 
     [JSImport("unwrap", "@typeshim")]

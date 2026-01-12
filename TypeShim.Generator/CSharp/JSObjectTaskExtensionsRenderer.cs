@@ -12,10 +12,9 @@ internal sealed class JSObjectTaskExtensionsRenderer()
         // 2. Nested types cannot be represented on the interop boundary (i.e. Task<int[]>
 
         sb.AppendLine(JSObjectTaskExtensionsClass);
-        //TODO: reconsider targetting different moniker and provide this class through TypeShim nuget so the user can utilize these directly if they so wish.
+        //TODO: Consider targeting different moniker and provide this class through TypeShim nuget so the user can utilize these directly if they so wish.
         return sb.ToString();
     }
-
 
     private const string JSObjectTaskExtensionsClass = """
 #nullable enable

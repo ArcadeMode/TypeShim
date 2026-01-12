@@ -138,10 +138,10 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         _ctx.AppendLine($"{sourceTaskExpression}?.ContinueWith(t => {{");
         using (_ctx.Indent())
         {
-            _ctx.AppendLine($"if (t.IsFaulted) {tcsVarName}.SetException(t.Exception.InnerExceptions);")
-                .AppendLine($"else if (t.IsCanceled) {tcsVarName}.SetCanceled();");
+            _ctx.AppendLine($"if (t.IsFaulted) {tcsVarName}!.SetException(t.Exception.InnerExceptions);")
+                .AppendLine($"else if (t.IsCanceled) {tcsVarName}!.SetCanceled();");
 
-            _ctx.Append($"else {tcsVarName}.SetResult(");
+            _ctx.Append($"else {tcsVarName}!.SetResult(");
             RenderInlineTypeConversion(taskReturnTypeParamInfo, "t.Result");
             _ctx.AppendLine(");");
 

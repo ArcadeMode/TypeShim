@@ -47,6 +47,7 @@ internal class CSharpInteropClassRendererTests_Properties
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -137,6 +138,7 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -215,6 +217,7 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -290,6 +293,7 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -379,6 +383,7 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -469,6 +474,7 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -558,6 +564,7 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -650,6 +657,7 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -742,6 +750,7 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -858,6 +867,7 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -974,6 +984,7 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;
@@ -1077,6 +1088,7 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
 using System.Runtime.InteropServices.JavaScript;

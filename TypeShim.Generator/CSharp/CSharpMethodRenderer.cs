@@ -268,15 +268,19 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                     _ctx.Append($"{propertyInfo.Name} = ");
                     expressionRenderer.Render();
                 }
-                else if (propertyInfo.Type.RequiresTypeConversion)
-                {
-                    string propertyRetrievalExpression = $"jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
-                    _ctx.Append($"{propertyInfo.Name} = ");
-                    _conversionRenderer.RenderInlineTypeConversion(propertyInfo.Type, propertyRetrievalExpression);
-                }
                 else
                 {
-                    _ctx.Append($"{propertyInfo.Name} = jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")"); // TODO: error handling? (null / missing props?)
+                    _ctx.Append($"{propertyInfo.Name} = ");
+                    string propertyRetrievalExpression = $"jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
+                    if (propertyInfo.Type is { IsNullableType: false })
+                    {
+                        propertyRetrievalExpression = $"({propertyRetrievalExpression} ?? throw new ArgumentException(\"Non-nullable property '{propertyInfo.Name}' missing or of invalid type\", nameof(jsObject)))";
+                    }
+
+                    if (propertyInfo.Type.RequiresTypeConversion)
+                        _conversionRenderer.RenderInlineTypeConversion(propertyInfo.Type, propertyRetrievalExpression);
+                    else
+                        _ctx.Append(propertyRetrievalExpression);
                 }
                 _ctx.AppendLine(",");
             }
@@ -291,21 +295,23 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                 if (propertyInfo.Type is { IsNullableType: true, TypeArgument.IsTaskType: true })
                 {
                     string tmpVarName = $"{propertyInfo.Name}Tmp";
-                    _ctx.AppendLine($"var {tmpVarName} = jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type.TypeArgument!)}(\"{propertyInfo.Name}\");");
+                    _ctx.AppendLine($"var {tmpVarName} = jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\");");
                     string convertedTaskExpression = _conversionRenderer.RenderNullableTaskTypeConversion(propertyInfo.Type, propertyInfo.Name, tmpVarName);
                     convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => _ctx.Append(convertedTaskExpression)));
                 }
                 else if (propertyInfo.Type is { IsTaskType: true, RequiresTypeConversion: true })
                 {
                     string tmpVarName = $"{propertyInfo.Name}Tmp";
-                    _ctx.AppendLine($"var {tmpVarName} = jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\");");
+                    _ctx.Append($"var {tmpVarName} = jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")")
+                        .Append($" ?? throw new ArgumentException(\"Non-nullable property '{propertyInfo.Name}' missing or of invalid type\", nameof(jsObject))")
+                        .AppendLine(";");
                     string convertedTaskExpression = _conversionRenderer.RenderTaskTypeConversion(propertyInfo.Type, propertyInfo.Name, tmpVarName);
                     convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => _ctx.Append(convertedTaskExpression)));
                 }
                 else if (propertyInfo.Type is { IsNullableType: true, RequiresTypeConversion: true })
                 {
                     string tmpVarName = $"{propertyInfo.Name}Tmp";
-                    _ctx.AppendLine($"var {tmpVarName} = jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type.TypeArgument!)}(\"{propertyInfo.Name}\");");
+                    _ctx.AppendLine($"var {tmpVarName} = jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\");");
                     convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => _conversionRenderer.RenderInlineTypeConversion(propertyInfo.Type, tmpVarName)));
                 }
             }
