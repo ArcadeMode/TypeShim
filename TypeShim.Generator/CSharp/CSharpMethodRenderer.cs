@@ -126,7 +126,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             }
             else // setter
             {
-                string valueVarName = _ctx.LocalScope.GetAccessorExpression(methodInfo.Parameters.ElementAt(1));
+                string valueVarName = _ctx.LocalScope.GetAccessorExpression(methodInfo.Parameters.First(p => !p.IsInjectedInstanceParameter));
                 _ctx.AppendLine($"{accessorExpression} = {valueVarName};");
             }
         }
