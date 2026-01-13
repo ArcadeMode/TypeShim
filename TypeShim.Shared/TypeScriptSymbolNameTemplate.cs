@@ -54,7 +54,7 @@ internal sealed class TypeScriptSymbolNameTemplate
     {
         return new TypeScriptSymbolNameTemplate
         {
-            Template = innerTemplate != null ? $"Promise<{InnerPlaceholder}>" : "Promise",
+            Template = innerTemplate != null ? $"Promise<{InnerPlaceholder}>" : "Promise<void>",
             InnerTemplate = innerTemplate
         };
     }
