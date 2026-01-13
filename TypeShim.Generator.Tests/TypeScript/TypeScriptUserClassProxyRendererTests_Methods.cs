@@ -495,7 +495,7 @@ export class C1 extends ProxyBase {
     super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
-  public DoStuff(u: Promise): void {
+  public DoStuff(u: Promise<void>): void {
     TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, u);
   }
 }
