@@ -299,7 +299,7 @@ public partial class C1Interop
     }
 
     [Test]
-    public void CSharpInteropClass_InstanceMethod_HasJSTypePromiseAny_ForNullableVoidTaskParameterType()
+    public void CSharpInteropClass_InstanceMethod_HasJSTypePromiseVoid_ForNullableVoidTaskParameterType()
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -325,7 +325,7 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
@@ -351,6 +351,83 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
+    }
+
+    [Test]
+    public void CSharpInteropClass_InstanceProperty_HasJSTypePromiseVoid_ForVoidTaskPropertyType()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public Task P1 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+
+        AssertEx.EqualOrDiff(interopClass, """
+#nullable enable
+// TypeShim generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = (jsObject.GetPropertyAsVoidTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
+        };
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Promise<JSType.Void>>]
+    public static Task get_P1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return typed_instance.P1;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Promise<JSType.Void>>] Task value)
+    {
+        C1 typed_instance = (C1)instance;
+        typed_instance.P1 = value;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject jsObject)
+    {
+        return new C1()
+        {
+            P1 = (jsObject.GetPropertyAsVoidTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
+        };
+    }
+}
+
+""");
     }
 }

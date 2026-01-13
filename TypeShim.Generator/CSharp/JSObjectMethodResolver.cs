@@ -36,6 +36,7 @@ internal static class JSObjectMethodResolver
             },
             KnownManagedType.Task => typeInfo.TypeArgument switch
             {
+                null or { ManagedType: KnownManagedType.Void } => "GetPropertyAsVoidTask",
                 { ManagedType: KnownManagedType.Boolean } => "GetPropertyAsBooleanTask",
                 { ManagedType: KnownManagedType.Byte } => "GetPropertyAsByteTask",
                 { ManagedType: KnownManagedType.Char } => "GetPropertyAsCharTask",

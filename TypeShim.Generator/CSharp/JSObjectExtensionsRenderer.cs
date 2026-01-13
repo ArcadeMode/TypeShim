@@ -94,6 +94,11 @@ public static partial class JSObjectArrayExtensions
     private const string JSObjectTaskExtensionsClass = """
 public static partial class JSObjectTaskExtensions
 {
+    public static Task? GetPropertyAsVoidTask(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsVoidTask(value) : null;
+    }
+
     public static Task<bool>? GetPropertyAsBooleanTask(this JSObject jsObject, string propertyName)
     {
         return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsBooleanTask(value) : null;
@@ -169,6 +174,10 @@ public static partial class JSObjectTaskExtensions
         return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsObjectTask(value) : null;
     }
 
+    [JSImport("unwrap", "@typeshim")]
+    [return: JSMarshalAs<JSType.Promise<JSType.Void>>]
+    public static partial Task MarshallAsVoidTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
+    
     [JSImport("unwrap", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.Boolean>>]
     public static partial Task<bool> MarshallAsBooleanTask([JSMarshalAs<JSType.Object>] JSObject jsObject);

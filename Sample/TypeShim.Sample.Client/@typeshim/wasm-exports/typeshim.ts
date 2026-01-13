@@ -72,6 +72,40 @@ export interface AssemblyExports{
           set_StringProperty(instance: ManagedObject, value: string): void;
         };
       };
+      CompilationTestInterop: {
+        ctor(jsObject: object): ManagedObject;
+        VoidMethod(instance: ManagedObject): void;
+        IntMethod(instance: ManagedObject): number;
+        BoolMethod(instance: ManagedObject): boolean;
+        StringMethod(instance: ManagedObject): string;
+        DoubleMethod(instance: ManagedObject): number;
+        get_IntProperty(instance: ManagedObject): number;
+        set_IntProperty(instance: ManagedObject, value: number): void;
+        get_BoolProperty(instance: ManagedObject): boolean;
+        set_BoolProperty(instance: ManagedObject, value: boolean): void;
+        get_StringProperty(instance: ManagedObject): string;
+        set_StringProperty(instance: ManagedObject, value: string): void;
+        get_DoubleProperty(instance: ManagedObject): number;
+        set_DoubleProperty(instance: ManagedObject, value: number): void;
+        get_TaskProperty(instance: ManagedObject): Promise<void>;
+        set_TaskProperty(instance: ManagedObject, value: Promise<void>): void;
+        get_TaskOfIntProperty(instance: ManagedObject): Promise<number>;
+        set_TaskOfIntProperty(instance: ManagedObject, value: Promise<number>): void;
+        get_TaskOfBoolProperty(instance: ManagedObject): Promise<boolean>;
+        set_TaskOfBoolProperty(instance: ManagedObject, value: Promise<boolean>): void;
+        get_TaskOfStringProperty(instance: ManagedObject): Promise<string>;
+        set_TaskOfStringProperty(instance: ManagedObject, value: Promise<string>): void;
+        get_TaskOfDoubleProperty(instance: ManagedObject): Promise<number>;
+        set_TaskOfDoubleProperty(instance: ManagedObject, value: Promise<number>): void;
+        get_TaskOfFloatProperty(instance: ManagedObject): Promise<number>;
+        set_TaskOfFloatProperty(instance: ManagedObject, value: Promise<number>): void;
+        get_IntArrayProperty(instance: ManagedObject): Array<number>;
+        set_IntArrayProperty(instance: ManagedObject, value: Array<number>): void;
+        get_StringArrayProperty(instance: ManagedObject): Array<string>;
+        set_StringArrayProperty(instance: ManagedObject, value: Array<string>): void;
+        get_DoubleArrayProperty(instance: ManagedObject): Array<number>;
+        set_DoubleArrayProperty(instance: ManagedObject, value: Array<number>): void;
+      };
       PeopleInterop: {
         ctor(jsObject: object): ManagedObject;
         get_All(instance: ManagedObject): Array<ManagedObject>;
@@ -205,6 +239,185 @@ export namespace PrimitivesDemo {
     return {
       InitialStringProperty: proxy.InitialStringProperty,
       StringProperty: proxy.StringProperty,
+    };
+  }
+}
+
+// TypeShim generated TypeScript definitions for class: TypeShim.Sample.CompilationTest
+export class CompilationTest extends ProxyBase {
+  constructor(jsObject: CompilationTest.Initializer) {
+    super(TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.ctor(jsObject));
+  }
+
+  public VoidMethod(): void {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.VoidMethod(this.instance);
+  }
+
+  public IntMethod(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.IntMethod(this.instance);
+  }
+
+  public BoolMethod(): boolean {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.BoolMethod(this.instance);
+  }
+
+  public StringMethod(): string {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.StringMethod(this.instance);
+  }
+
+  public DoubleMethod(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.DoubleMethod(this.instance);
+  }
+  public get IntProperty(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_IntProperty(this.instance);
+  }
+
+  public set IntProperty(value: number) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_IntProperty(this.instance, value);
+  }
+
+  public get BoolProperty(): boolean {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_BoolProperty(this.instance);
+  }
+
+  public set BoolProperty(value: boolean) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_BoolProperty(this.instance, value);
+  }
+
+  public get StringProperty(): string {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_StringProperty(this.instance);
+  }
+
+  public set StringProperty(value: string) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_StringProperty(this.instance, value);
+  }
+
+  public get DoubleProperty(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_DoubleProperty(this.instance);
+  }
+
+  public set DoubleProperty(value: number) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_DoubleProperty(this.instance, value);
+  }
+
+  public get TaskProperty(): Promise<void> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskProperty(this.instance);
+  }
+
+  public set TaskProperty(value: Promise<void>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskProperty(this.instance, value);
+  }
+
+  public get TaskOfIntProperty(): Promise<number> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfIntProperty(this.instance);
+  }
+
+  public set TaskOfIntProperty(value: Promise<number>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfIntProperty(this.instance, value);
+  }
+
+  public get TaskOfBoolProperty(): Promise<boolean> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfBoolProperty(this.instance);
+  }
+
+  public set TaskOfBoolProperty(value: Promise<boolean>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfBoolProperty(this.instance, value);
+  }
+
+  public get TaskOfStringProperty(): Promise<string> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfStringProperty(this.instance);
+  }
+
+  public set TaskOfStringProperty(value: Promise<string>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfStringProperty(this.instance, value);
+  }
+
+  public get TaskOfDoubleProperty(): Promise<number> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfDoubleProperty(this.instance);
+  }
+
+  public set TaskOfDoubleProperty(value: Promise<number>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfDoubleProperty(this.instance, value);
+  }
+
+  public get TaskOfFloatProperty(): Promise<number> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfFloatProperty(this.instance);
+  }
+
+  public set TaskOfFloatProperty(value: Promise<number>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfFloatProperty(this.instance, value);
+  }
+
+  public get IntArrayProperty(): Array<number> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_IntArrayProperty(this.instance);
+  }
+
+  public set IntArrayProperty(value: Array<number>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_IntArrayProperty(this.instance, value);
+  }
+
+  public get StringArrayProperty(): Array<string> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_StringArrayProperty(this.instance);
+  }
+
+  public set StringArrayProperty(value: Array<string>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_StringArrayProperty(this.instance, value);
+  }
+
+  public get DoubleArrayProperty(): Array<number> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_DoubleArrayProperty(this.instance);
+  }
+
+  public set DoubleArrayProperty(value: Array<number>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_DoubleArrayProperty(this.instance, value);
+  }
+}
+export namespace CompilationTest {
+  export interface Initializer {
+    IntProperty: number;
+    BoolProperty: boolean;
+    StringProperty: string;
+    DoubleProperty: number;
+    TaskProperty: Promise<void>;
+    TaskOfIntProperty: Promise<number>;
+    TaskOfBoolProperty: Promise<boolean>;
+    TaskOfStringProperty: Promise<string>;
+    TaskOfDoubleProperty: Promise<number>;
+    TaskOfFloatProperty: Promise<number>;
+    IntArrayProperty: Array<number>;
+    StringArrayProperty: Array<string>;
+    DoubleArrayProperty: Array<number>;
+  }
+  export interface Snapshot {
+    IntProperty: number;
+    BoolProperty: boolean;
+    StringProperty: string;
+    DoubleProperty: number;
+    TaskProperty: Promise<void>;
+    TaskOfIntProperty: Promise<number>;
+    TaskOfBoolProperty: Promise<boolean>;
+    TaskOfStringProperty: Promise<string>;
+    TaskOfDoubleProperty: Promise<number>;
+    TaskOfFloatProperty: Promise<number>;
+    IntArrayProperty: Array<number>;
+    StringArrayProperty: Array<string>;
+    DoubleArrayProperty: Array<number>;
+  }
+  export function materialize(proxy: CompilationTest): CompilationTest.Snapshot {
+    return {
+      IntProperty: proxy.IntProperty,
+      BoolProperty: proxy.BoolProperty,
+      StringProperty: proxy.StringProperty,
+      DoubleProperty: proxy.DoubleProperty,
+      TaskProperty: proxy.TaskProperty,
+      TaskOfIntProperty: proxy.TaskOfIntProperty,
+      TaskOfBoolProperty: proxy.TaskOfBoolProperty,
+      TaskOfStringProperty: proxy.TaskOfStringProperty,
+      TaskOfDoubleProperty: proxy.TaskOfDoubleProperty,
+      TaskOfFloatProperty: proxy.TaskOfFloatProperty,
+      IntArrayProperty: proxy.IntArrayProperty,
+      StringArrayProperty: proxy.StringArrayProperty,
+      DoubleArrayProperty: proxy.DoubleArrayProperty,
     };
   }
 }
