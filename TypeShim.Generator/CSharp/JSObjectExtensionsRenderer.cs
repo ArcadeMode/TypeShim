@@ -46,6 +46,11 @@ public static class JSObjectIntExtensions
     {
         return jsObject.HasProperty(propertyName) ? jsObject.GetPropertyAsDouble(propertyName) : null;
     }
+
+    public static float? GetPropertyAsFloatNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? (float)jsObject.GetPropertyAsDouble(propertyName) : null;
+    }
 }
         
 """;

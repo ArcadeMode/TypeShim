@@ -10,8 +10,7 @@ public class CompilationTest
     public bool BoolProperty { get; set; }
     public string StringProperty { get; set; } = string.Empty;
     public double DoubleProperty { get; set; }
-    // FIX
-    //public float FloatProperty { get; set; }
+    public float FloatProperty { get; set; }
     public Task TaskProperty { get; set; } = Task.CompletedTask;
     public Task<int> TaskOfIntProperty { get; set; } = Task.FromResult(0);
     public Task<bool> TaskOfBoolProperty { get; set; } = Task.FromResult(false);

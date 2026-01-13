@@ -87,6 +87,8 @@ export interface AssemblyExports{
         set_StringProperty(instance: ManagedObject, value: string): void;
         get_DoubleProperty(instance: ManagedObject): number;
         set_DoubleProperty(instance: ManagedObject, value: number): void;
+        get_FloatProperty(instance: ManagedObject): number;
+        set_FloatProperty(instance: ManagedObject, value: number): void;
         get_TaskProperty(instance: ManagedObject): Promise<void>;
         set_TaskProperty(instance: ManagedObject, value: Promise<void>): void;
         get_TaskOfIntProperty(instance: ManagedObject): Promise<number>;
@@ -300,6 +302,14 @@ export class CompilationTest extends ProxyBase {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_DoubleProperty(this.instance, value);
   }
 
+  public get FloatProperty(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_FloatProperty(this.instance);
+  }
+
+  public set FloatProperty(value: number) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_FloatProperty(this.instance, value);
+  }
+
   public get TaskProperty(): Promise<void> {
     return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskProperty(this.instance);
   }
@@ -378,6 +388,7 @@ export namespace CompilationTest {
     BoolProperty: boolean;
     StringProperty: string;
     DoubleProperty: number;
+    FloatProperty: number;
     TaskProperty: Promise<void>;
     TaskOfIntProperty: Promise<number>;
     TaskOfBoolProperty: Promise<boolean>;
@@ -393,6 +404,7 @@ export namespace CompilationTest {
     BoolProperty: boolean;
     StringProperty: string;
     DoubleProperty: number;
+    FloatProperty: number;
     TaskProperty: Promise<void>;
     TaskOfIntProperty: Promise<number>;
     TaskOfBoolProperty: Promise<boolean>;
@@ -409,6 +421,7 @@ export namespace CompilationTest {
       BoolProperty: proxy.BoolProperty,
       StringProperty: proxy.StringProperty,
       DoubleProperty: proxy.DoubleProperty,
+      FloatProperty: proxy.FloatProperty,
       TaskProperty: proxy.TaskProperty,
       TaskOfIntProperty: proxy.TaskOfIntProperty,
       TaskOfBoolProperty: proxy.TaskOfBoolProperty,
