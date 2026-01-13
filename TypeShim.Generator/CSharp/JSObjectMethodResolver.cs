@@ -9,8 +9,8 @@ internal static class JSObjectMethodResolver
         return typeInfo.ManagedType switch
         {
             KnownManagedType.Nullable => ResolveJSObjectMethodName(typeInfo.TypeArgument!),
-            KnownManagedType.Boolean => "GetPropertyAsBoolean",
-            KnownManagedType.Double => "GetPropertyAsDouble",
+            KnownManagedType.Boolean => "GetPropertyAsBooleanNullable",
+            KnownManagedType.Double => "GetPropertyAsDoubleNullable",
             KnownManagedType.String => "GetPropertyAsString",
             KnownManagedType.Int32 => "GetPropertyAsInt32Nullable",
             KnownManagedType.JSObject => "GetPropertyAsJSObject",

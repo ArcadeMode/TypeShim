@@ -36,6 +36,16 @@ public static class JSObjectIntExtensions
     {
         return jsObject.HasProperty(propertyName) ? jsObject.GetPropertyAsInt32(propertyName) : null;
     }
+
+    public static bool? GetPropertyAsBooleanNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? jsObject.GetPropertyAsBoolean(propertyName) : null;
+    }
+
+    public static double? GetPropertyAsDoubleNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? jsObject.GetPropertyAsDouble(propertyName) : null;
+    }
 }
         
 """;

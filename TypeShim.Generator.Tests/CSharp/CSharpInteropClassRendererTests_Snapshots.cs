@@ -12,8 +12,8 @@ namespace TypeShim.Generator.Tests.CSharp;
 internal class CSharpInteropClassRendererTests_Snapshots
 {
     [TestCase("string", "string", "JSType.String", "GetPropertyAsString")]
-    [TestCase("double", "double", "JSType.Number", "GetPropertyAsDouble")]
-    [TestCase("bool", "bool", "JSType.Boolean", "GetPropertyAsBoolean")]
+    [TestCase("double", "double", "JSType.Number", "GetPropertyAsDoubleNullable")]
+    [TestCase("bool", "bool", "JSType.Boolean", "GetPropertyAsBooleanNullable")]
     public void CSharpInteropClass_SupportedPropertyType_GeneratesFromJSObjectMethod(string typeExpression, string interopTypeExpression, string jsType, string jsObjectMethod)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
