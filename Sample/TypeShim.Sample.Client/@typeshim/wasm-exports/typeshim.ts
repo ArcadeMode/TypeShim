@@ -89,6 +89,10 @@ export interface AssemblyExports{
         set_DoubleProperty(instance: ManagedObject, value: number): void;
         get_FloatProperty(instance: ManagedObject): number;
         set_FloatProperty(instance: ManagedObject, value: number): void;
+        get_ByteProperty(instance: ManagedObject): number;
+        set_ByteProperty(instance: ManagedObject, value: number): void;
+        get_CharProperty(instance: ManagedObject): string;
+        set_CharProperty(instance: ManagedObject, value: string): void;
         get_TaskProperty(instance: ManagedObject): Promise<void>;
         set_TaskProperty(instance: ManagedObject, value: Promise<void>): void;
         get_TaskOfIntProperty(instance: ManagedObject): Promise<number>;
@@ -310,6 +314,22 @@ export class CompilationTest extends ProxyBase {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_FloatProperty(this.instance, value);
   }
 
+  public get ByteProperty(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_ByteProperty(this.instance);
+  }
+
+  public set ByteProperty(value: number) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_ByteProperty(this.instance, value);
+  }
+
+  public get CharProperty(): string {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_CharProperty(this.instance);
+  }
+
+  public set CharProperty(value: string) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_CharProperty(this.instance, value);
+  }
+
   public get TaskProperty(): Promise<void> {
     return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskProperty(this.instance);
   }
@@ -389,6 +409,8 @@ export namespace CompilationTest {
     StringProperty: string;
     DoubleProperty: number;
     FloatProperty: number;
+    ByteProperty: number;
+    CharProperty: string;
     TaskProperty: Promise<void>;
     TaskOfIntProperty: Promise<number>;
     TaskOfBoolProperty: Promise<boolean>;
@@ -405,6 +427,8 @@ export namespace CompilationTest {
     StringProperty: string;
     DoubleProperty: number;
     FloatProperty: number;
+    ByteProperty: number;
+    CharProperty: string;
     TaskProperty: Promise<void>;
     TaskOfIntProperty: Promise<number>;
     TaskOfBoolProperty: Promise<boolean>;
@@ -422,6 +446,8 @@ export namespace CompilationTest {
       StringProperty: proxy.StringProperty,
       DoubleProperty: proxy.DoubleProperty,
       FloatProperty: proxy.FloatProperty,
+      ByteProperty: proxy.ByteProperty,
+      CharProperty: proxy.CharProperty,
       TaskProperty: proxy.TaskProperty,
       TaskOfIntProperty: proxy.TaskOfIntProperty,
       TaskOfBoolProperty: proxy.TaskOfBoolProperty,
