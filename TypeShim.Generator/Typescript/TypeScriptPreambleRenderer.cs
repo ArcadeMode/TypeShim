@@ -24,7 +24,10 @@ class TypeShimConfig {
     if (TypeShimConfig._exports){
       throw new Error("TypeShim has already been initialized.");
     }
-    options.setModuleImports("@typeshim", { unwrap: (obj: any) => obj });
+    options.setModuleImports("@typeshim", { 
+      unwrap: (obj: any) => obj, 
+      unwrapProperty: (obj: any, propertyName: string) => obj[propertyName] 
+    });
     TypeShimConfig._exports = options.assemblyExports;
   }
 }

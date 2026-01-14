@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -88,7 +89,7 @@ namespace TypeShim.Sample;
 //    public IReadOnlyList<string> E() { return []; }
 //    public Dictionary<int, Person> D() { return new Dictionary<int, Person>(); }
 //    public void DIn(Dictionary<int, Person> p) { }
-    
+
 //    public ArraySegment<string> W() { return new ArraySegment<string>(new string[] { "a", "b", "c" }); }
 
 //    public Func<int, string> F() { return (i) => i.ToString(); }
@@ -99,6 +100,6 @@ namespace TypeShim.Sample;
 //{
 //    public int PublicField;
 //    private int PrivateField;
-    
+
 //    public required int InternalRequiredField;   
 //}

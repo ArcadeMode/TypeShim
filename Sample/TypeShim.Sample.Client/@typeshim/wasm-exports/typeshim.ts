@@ -12,7 +12,10 @@ class TypeShimConfig {
     if (TypeShimConfig._exports){
       throw new Error("TypeShim has already been initialized.");
     }
-    options.setModuleImports("@typeshim", { unwrap: (obj: any) => obj });
+    options.setModuleImports("@typeshim", { 
+      unwrap: (obj: any) => obj, 
+      unwrapProperty: (obj: any, propertyName: string) => obj[propertyName] 
+    });
     TypeShimConfig._exports = options.assemblyExports;
   }
 }
@@ -79,32 +82,87 @@ export interface AssemblyExports{
         BoolMethod(instance: ManagedObject): boolean;
         StringMethod(instance: ManagedObject): string;
         DoubleMethod(instance: ManagedObject): number;
+        get_NIntProperty(instance: ManagedObject): number;
+        set_NIntProperty(instance: ManagedObject, value: number): void;
+        get_ByteProperty(instance: ManagedObject): number;
+        set_ByteProperty(instance: ManagedObject, value: number): void;
+        get_ShortProperty(instance: ManagedObject): number;
+        set_ShortProperty(instance: ManagedObject, value: number): void;
         get_IntProperty(instance: ManagedObject): number;
         set_IntProperty(instance: ManagedObject, value: number): void;
+        get_LongProperty(instance: ManagedObject): number;
+        set_LongProperty(instance: ManagedObject, value: number): void;
         get_BoolProperty(instance: ManagedObject): boolean;
         set_BoolProperty(instance: ManagedObject, value: boolean): void;
         get_StringProperty(instance: ManagedObject): string;
         set_StringProperty(instance: ManagedObject, value: string): void;
+        get_CharProperty(instance: ManagedObject): string;
+        set_CharProperty(instance: ManagedObject, value: string): void;
         get_DoubleProperty(instance: ManagedObject): number;
         set_DoubleProperty(instance: ManagedObject, value: number): void;
+        get_FloatProperty(instance: ManagedObject): number;
+        set_FloatProperty(instance: ManagedObject, value: number): void;
+        get_DateTimeProperty(instance: ManagedObject): Date;
+        set_DateTimeProperty(instance: ManagedObject, value: Date): void;
+        get_DateTimeOffsetProperty(instance: ManagedObject): Date;
+        set_DateTimeOffsetProperty(instance: ManagedObject, value: Date): void;
+        get_ObjectProperty(instance: ManagedObject): ManagedObject;
+        set_ObjectProperty(instance: ManagedObject, value: ManagedObject): void;
+        get_ExportedClassProperty(instance: ManagedObject): ManagedObject;
+        set_ExportedClassProperty(instance: ManagedObject, value: ManagedObject | object): void;
+        get_JSObjectProperty(instance: ManagedObject): object;
+        set_JSObjectProperty(instance: ManagedObject, value: object): void;
         get_TaskProperty(instance: ManagedObject): Promise<void>;
         set_TaskProperty(instance: ManagedObject, value: Promise<void>): void;
+        get_TaskOfNIntProperty(instance: ManagedObject): Promise<number>;
+        set_TaskOfNIntProperty(instance: ManagedObject, value: Promise<number>): void;
+        get_TaskOfShortProperty(instance: ManagedObject): Promise<number>;
+        set_TaskOfShortProperty(instance: ManagedObject, value: Promise<number>): void;
         get_TaskOfIntProperty(instance: ManagedObject): Promise<number>;
         set_TaskOfIntProperty(instance: ManagedObject, value: Promise<number>): void;
+        get_TaskOfLongProperty(instance: ManagedObject): Promise<number>;
+        set_TaskOfLongProperty(instance: ManagedObject, value: Promise<number>): void;
         get_TaskOfBoolProperty(instance: ManagedObject): Promise<boolean>;
         set_TaskOfBoolProperty(instance: ManagedObject, value: Promise<boolean>): void;
+        get_TaskOfByteProperty(instance: ManagedObject): Promise<number>;
+        set_TaskOfByteProperty(instance: ManagedObject, value: Promise<number>): void;
+        get_TaskOfCharProperty(instance: ManagedObject): Promise<string>;
+        set_TaskOfCharProperty(instance: ManagedObject, value: Promise<string>): void;
         get_TaskOfStringProperty(instance: ManagedObject): Promise<string>;
         set_TaskOfStringProperty(instance: ManagedObject, value: Promise<string>): void;
         get_TaskOfDoubleProperty(instance: ManagedObject): Promise<number>;
         set_TaskOfDoubleProperty(instance: ManagedObject, value: Promise<number>): void;
         get_TaskOfFloatProperty(instance: ManagedObject): Promise<number>;
         set_TaskOfFloatProperty(instance: ManagedObject, value: Promise<number>): void;
+        get_TaskOfDateTimeProperty(instance: ManagedObject): Promise<Date>;
+        set_TaskOfDateTimeProperty(instance: ManagedObject, value: Promise<Date>): void;
+        get_TaskOfDateTimeOffsetProperty(instance: ManagedObject): Promise<Date>;
+        set_TaskOfDateTimeOffsetProperty(instance: ManagedObject, value: Promise<Date>): void;
+        get_TaskOfObjectProperty(instance: ManagedObject): Promise<ManagedObject>;
+        set_TaskOfObjectProperty(instance: ManagedObject, value: Promise<ManagedObject>): void;
+        get_TaskOfExportedClassProperty(instance: ManagedObject): Promise<ManagedObject>;
+        set_TaskOfExportedClassProperty(instance: ManagedObject, value: Promise<ManagedObject | object>): void;
+        get_TaskOfJSObjectProperty(instance: ManagedObject): Promise<object>;
+        set_TaskOfJSObjectProperty(instance: ManagedObject, value: Promise<object>): void;
+        get_ByteArrayProperty(instance: ManagedObject): Array<number>;
+        set_ByteArrayProperty(instance: ManagedObject, value: Array<number>): void;
+        get_JSObjectArrayProperty(instance: ManagedObject): Array<object>;
+        set_JSObjectArrayProperty(instance: ManagedObject, value: Array<object>): void;
+        get_ObjectArrayProperty(instance: ManagedObject): Array<ManagedObject>;
+        set_ObjectArrayProperty(instance: ManagedObject, value: Array<ManagedObject>): void;
+        get_ExportedClassArrayProperty(instance: ManagedObject): Array<ManagedObject>;
+        set_ExportedClassArrayProperty(instance: ManagedObject, value: Array<ManagedObject | object>): void;
         get_IntArrayProperty(instance: ManagedObject): Array<number>;
         set_IntArrayProperty(instance: ManagedObject, value: Array<number>): void;
         get_StringArrayProperty(instance: ManagedObject): Array<string>;
         set_StringArrayProperty(instance: ManagedObject, value: Array<string>): void;
         get_DoubleArrayProperty(instance: ManagedObject): Array<number>;
         set_DoubleArrayProperty(instance: ManagedObject, value: Array<number>): void;
+      };
+      ExportedClassInterop: {
+        ctor(jsObject: object): ManagedObject;
+        get_Id(instance: ManagedObject): number;
+        set_Id(instance: ManagedObject, value: number): void;
       };
       PeopleInterop: {
         ctor(jsObject: object): ManagedObject;
@@ -268,12 +326,44 @@ export class CompilationTest extends ProxyBase {
   public DoubleMethod(): number {
     return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.DoubleMethod(this.instance);
   }
+  public get NIntProperty(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_NIntProperty(this.instance);
+  }
+
+  public set NIntProperty(value: number) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_NIntProperty(this.instance, value);
+  }
+
+  public get ByteProperty(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_ByteProperty(this.instance);
+  }
+
+  public set ByteProperty(value: number) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_ByteProperty(this.instance, value);
+  }
+
+  public get ShortProperty(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_ShortProperty(this.instance);
+  }
+
+  public set ShortProperty(value: number) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_ShortProperty(this.instance, value);
+  }
+
   public get IntProperty(): number {
     return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_IntProperty(this.instance);
   }
 
   public set IntProperty(value: number) {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_IntProperty(this.instance, value);
+  }
+
+  public get LongProperty(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_LongProperty(this.instance);
+  }
+
+  public set LongProperty(value: number) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_LongProperty(this.instance, value);
   }
 
   public get BoolProperty(): boolean {
@@ -292,12 +382,70 @@ export class CompilationTest extends ProxyBase {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_StringProperty(this.instance, value);
   }
 
+  public get CharProperty(): string {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_CharProperty(this.instance);
+  }
+
+  public set CharProperty(value: string) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_CharProperty(this.instance, value);
+  }
+
   public get DoubleProperty(): number {
     return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_DoubleProperty(this.instance);
   }
 
   public set DoubleProperty(value: number) {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_DoubleProperty(this.instance, value);
+  }
+
+  public get FloatProperty(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_FloatProperty(this.instance);
+  }
+
+  public set FloatProperty(value: number) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_FloatProperty(this.instance, value);
+  }
+
+  public get DateTimeProperty(): Date {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_DateTimeProperty(this.instance);
+  }
+
+  public set DateTimeProperty(value: Date) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_DateTimeProperty(this.instance, value);
+  }
+
+  public get DateTimeOffsetProperty(): Date {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_DateTimeOffsetProperty(this.instance);
+  }
+
+  public set DateTimeOffsetProperty(value: Date) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_DateTimeOffsetProperty(this.instance, value);
+  }
+
+  public get ObjectProperty(): ManagedObject {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_ObjectProperty(this.instance);
+  }
+
+  public set ObjectProperty(value: ManagedObject) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_ObjectProperty(this.instance, value);
+  }
+
+  public get ExportedClassProperty(): ExportedClass {
+    const res = TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_ExportedClassProperty(this.instance);
+    return ProxyBase.fromHandle(ExportedClass, res);
+  }
+
+  public set ExportedClassProperty(value: ExportedClass | ExportedClass.Initializer) {
+    const valueInstance = value instanceof ExportedClass ? value.instance : value;
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_ExportedClassProperty(this.instance, valueInstance);
+  }
+
+  public get JSObjectProperty(): object {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_JSObjectProperty(this.instance);
+  }
+
+  public set JSObjectProperty(value: object) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_JSObjectProperty(this.instance, value);
   }
 
   public get TaskProperty(): Promise<void> {
@@ -308,6 +456,22 @@ export class CompilationTest extends ProxyBase {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskProperty(this.instance, value);
   }
 
+  public get TaskOfNIntProperty(): Promise<number> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfNIntProperty(this.instance);
+  }
+
+  public set TaskOfNIntProperty(value: Promise<number>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfNIntProperty(this.instance, value);
+  }
+
+  public get TaskOfShortProperty(): Promise<number> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfShortProperty(this.instance);
+  }
+
+  public set TaskOfShortProperty(value: Promise<number>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfShortProperty(this.instance, value);
+  }
+
   public get TaskOfIntProperty(): Promise<number> {
     return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfIntProperty(this.instance);
   }
@@ -316,12 +480,36 @@ export class CompilationTest extends ProxyBase {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfIntProperty(this.instance, value);
   }
 
+  public get TaskOfLongProperty(): Promise<number> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfLongProperty(this.instance);
+  }
+
+  public set TaskOfLongProperty(value: Promise<number>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfLongProperty(this.instance, value);
+  }
+
   public get TaskOfBoolProperty(): Promise<boolean> {
     return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfBoolProperty(this.instance);
   }
 
   public set TaskOfBoolProperty(value: Promise<boolean>) {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfBoolProperty(this.instance, value);
+  }
+
+  public get TaskOfByteProperty(): Promise<number> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfByteProperty(this.instance);
+  }
+
+  public set TaskOfByteProperty(value: Promise<number>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfByteProperty(this.instance, value);
+  }
+
+  public get TaskOfCharProperty(): Promise<string> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfCharProperty(this.instance);
+  }
+
+  public set TaskOfCharProperty(value: Promise<string>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfCharProperty(this.instance, value);
   }
 
   public get TaskOfStringProperty(): Promise<string> {
@@ -346,6 +534,82 @@ export class CompilationTest extends ProxyBase {
 
   public set TaskOfFloatProperty(value: Promise<number>) {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfFloatProperty(this.instance, value);
+  }
+
+  public get TaskOfDateTimeProperty(): Promise<Date> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfDateTimeProperty(this.instance);
+  }
+
+  public set TaskOfDateTimeProperty(value: Promise<Date>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfDateTimeProperty(this.instance, value);
+  }
+
+  public get TaskOfDateTimeOffsetProperty(): Promise<Date> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfDateTimeOffsetProperty(this.instance);
+  }
+
+  public set TaskOfDateTimeOffsetProperty(value: Promise<Date>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfDateTimeOffsetProperty(this.instance, value);
+  }
+
+  public get TaskOfObjectProperty(): Promise<ManagedObject> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfObjectProperty(this.instance);
+  }
+
+  public set TaskOfObjectProperty(value: Promise<ManagedObject>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfObjectProperty(this.instance, value);
+  }
+
+  public get TaskOfExportedClassProperty(): Promise<ExportedClass> {
+    const res = TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfExportedClassProperty(this.instance);
+    return res.then(e => ProxyBase.fromHandle(ExportedClass, e));
+  }
+
+  public set TaskOfExportedClassProperty(value: Promise<ExportedClass | ExportedClass.Initializer>) {
+    const valueInstance = value.then(e => e instanceof ExportedClass ? e.instance : e);
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfExportedClassProperty(this.instance, valueInstance);
+  }
+
+  public get TaskOfJSObjectProperty(): Promise<object> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfJSObjectProperty(this.instance);
+  }
+
+  public set TaskOfJSObjectProperty(value: Promise<object>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfJSObjectProperty(this.instance, value);
+  }
+
+  public get ByteArrayProperty(): Array<number> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_ByteArrayProperty(this.instance);
+  }
+
+  public set ByteArrayProperty(value: Array<number>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_ByteArrayProperty(this.instance, value);
+  }
+
+  public get JSObjectArrayProperty(): Array<object> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_JSObjectArrayProperty(this.instance);
+  }
+
+  public set JSObjectArrayProperty(value: Array<object>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_JSObjectArrayProperty(this.instance, value);
+  }
+
+  public get ObjectArrayProperty(): Array<ManagedObject> {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_ObjectArrayProperty(this.instance);
+  }
+
+  public set ObjectArrayProperty(value: Array<ManagedObject>) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_ObjectArrayProperty(this.instance, value);
+  }
+
+  public get ExportedClassArrayProperty(): Array<ExportedClass> {
+    const res = TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_ExportedClassArrayProperty(this.instance);
+    return res.map(e => ProxyBase.fromHandle(ExportedClass, e));
+  }
+
+  public set ExportedClassArrayProperty(value: Array<ExportedClass | ExportedClass.Initializer>) {
+    const valueInstance = value.map(e => e instanceof ExportedClass ? e.instance : e);
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_ExportedClassArrayProperty(this.instance, valueInstance);
   }
 
   public get IntArrayProperty(): Array<number> {
@@ -374,50 +638,153 @@ export class CompilationTest extends ProxyBase {
 }
 export namespace CompilationTest {
   export interface Initializer {
+    NIntProperty: number;
+    ByteProperty: number;
+    ShortProperty: number;
     IntProperty: number;
+    LongProperty: number;
     BoolProperty: boolean;
     StringProperty: string;
+    CharProperty: string;
     DoubleProperty: number;
+    FloatProperty: number;
+    DateTimeProperty: Date;
+    DateTimeOffsetProperty: Date;
+    ObjectProperty: ManagedObject;
+    ExportedClassProperty: ExportedClass | ExportedClass.Initializer;
+    JSObjectProperty: object;
     TaskProperty: Promise<void>;
+    TaskOfNIntProperty: Promise<number>;
+    TaskOfShortProperty: Promise<number>;
     TaskOfIntProperty: Promise<number>;
+    TaskOfLongProperty: Promise<number>;
     TaskOfBoolProperty: Promise<boolean>;
+    TaskOfByteProperty: Promise<number>;
+    TaskOfCharProperty: Promise<string>;
     TaskOfStringProperty: Promise<string>;
     TaskOfDoubleProperty: Promise<number>;
     TaskOfFloatProperty: Promise<number>;
+    TaskOfDateTimeProperty: Promise<Date>;
+    TaskOfDateTimeOffsetProperty: Promise<Date>;
+    TaskOfObjectProperty: Promise<ManagedObject>;
+    TaskOfExportedClassProperty: Promise<ExportedClass | ExportedClass.Initializer>;
+    TaskOfJSObjectProperty: Promise<object>;
+    ByteArrayProperty: Array<number>;
+    JSObjectArrayProperty: Array<object>;
+    ObjectArrayProperty: Array<ManagedObject>;
+    ExportedClassArrayProperty: Array<ExportedClass | ExportedClass.Initializer>;
     IntArrayProperty: Array<number>;
     StringArrayProperty: Array<string>;
     DoubleArrayProperty: Array<number>;
   }
   export interface Snapshot {
+    NIntProperty: number;
+    ByteProperty: number;
+    ShortProperty: number;
     IntProperty: number;
+    LongProperty: number;
     BoolProperty: boolean;
     StringProperty: string;
+    CharProperty: string;
     DoubleProperty: number;
+    FloatProperty: number;
+    DateTimeProperty: Date;
+    DateTimeOffsetProperty: Date;
+    ObjectProperty: ManagedObject;
+    ExportedClassProperty: ExportedClass.Snapshot;
+    JSObjectProperty: object;
     TaskProperty: Promise<void>;
+    TaskOfNIntProperty: Promise<number>;
+    TaskOfShortProperty: Promise<number>;
     TaskOfIntProperty: Promise<number>;
+    TaskOfLongProperty: Promise<number>;
     TaskOfBoolProperty: Promise<boolean>;
+    TaskOfByteProperty: Promise<number>;
+    TaskOfCharProperty: Promise<string>;
     TaskOfStringProperty: Promise<string>;
     TaskOfDoubleProperty: Promise<number>;
     TaskOfFloatProperty: Promise<number>;
+    TaskOfDateTimeProperty: Promise<Date>;
+    TaskOfDateTimeOffsetProperty: Promise<Date>;
+    TaskOfObjectProperty: Promise<ManagedObject>;
+    TaskOfExportedClassProperty: Promise<ExportedClass.Snapshot>;
+    TaskOfJSObjectProperty: Promise<object>;
+    ByteArrayProperty: Array<number>;
+    JSObjectArrayProperty: Array<object>;
+    ObjectArrayProperty: Array<ManagedObject>;
+    ExportedClassArrayProperty: Array<ExportedClass.Snapshot>;
     IntArrayProperty: Array<number>;
     StringArrayProperty: Array<string>;
     DoubleArrayProperty: Array<number>;
   }
   export function materialize(proxy: CompilationTest): CompilationTest.Snapshot {
     return {
+      NIntProperty: proxy.NIntProperty,
+      ByteProperty: proxy.ByteProperty,
+      ShortProperty: proxy.ShortProperty,
       IntProperty: proxy.IntProperty,
+      LongProperty: proxy.LongProperty,
       BoolProperty: proxy.BoolProperty,
       StringProperty: proxy.StringProperty,
+      CharProperty: proxy.CharProperty,
       DoubleProperty: proxy.DoubleProperty,
+      FloatProperty: proxy.FloatProperty,
+      DateTimeProperty: proxy.DateTimeProperty,
+      DateTimeOffsetProperty: proxy.DateTimeOffsetProperty,
+      ObjectProperty: proxy.ObjectProperty,
+      ExportedClassProperty: ExportedClass.materialize(proxy.ExportedClassProperty),
+      JSObjectProperty: proxy.JSObjectProperty,
       TaskProperty: proxy.TaskProperty,
+      TaskOfNIntProperty: proxy.TaskOfNIntProperty,
+      TaskOfShortProperty: proxy.TaskOfShortProperty,
       TaskOfIntProperty: proxy.TaskOfIntProperty,
+      TaskOfLongProperty: proxy.TaskOfLongProperty,
       TaskOfBoolProperty: proxy.TaskOfBoolProperty,
+      TaskOfByteProperty: proxy.TaskOfByteProperty,
+      TaskOfCharProperty: proxy.TaskOfCharProperty,
       TaskOfStringProperty: proxy.TaskOfStringProperty,
       TaskOfDoubleProperty: proxy.TaskOfDoubleProperty,
       TaskOfFloatProperty: proxy.TaskOfFloatProperty,
+      TaskOfDateTimeProperty: proxy.TaskOfDateTimeProperty,
+      TaskOfDateTimeOffsetProperty: proxy.TaskOfDateTimeOffsetProperty,
+      TaskOfObjectProperty: proxy.TaskOfObjectProperty,
+      TaskOfExportedClassProperty: proxy.TaskOfExportedClassProperty.then(e => ExportedClass.materialize(e)),
+      TaskOfJSObjectProperty: proxy.TaskOfJSObjectProperty,
+      ByteArrayProperty: proxy.ByteArrayProperty,
+      JSObjectArrayProperty: proxy.JSObjectArrayProperty,
+      ObjectArrayProperty: proxy.ObjectArrayProperty,
+      ExportedClassArrayProperty: proxy.ExportedClassArrayProperty.map(e => ExportedClass.materialize(e)),
       IntArrayProperty: proxy.IntArrayProperty,
       StringArrayProperty: proxy.StringArrayProperty,
       DoubleArrayProperty: proxy.DoubleArrayProperty,
+    };
+  }
+}
+
+// TypeShim generated TypeScript definitions for class: TypeShim.Sample.ExportedClass
+export class ExportedClass extends ProxyBase {
+  constructor(jsObject: ExportedClass.Initializer) {
+    super(TypeShimConfig.exports.TypeShim.Sample.ExportedClassInterop.ctor(jsObject));
+  }
+
+  public get Id(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.ExportedClassInterop.get_Id(this.instance);
+  }
+
+  public set Id(value: number) {
+    TypeShimConfig.exports.TypeShim.Sample.ExportedClassInterop.set_Id(this.instance, value);
+  }
+}
+export namespace ExportedClass {
+  export interface Initializer {
+    Id: number;
+  }
+  export interface Snapshot {
+    Id: number;
+  }
+  export function materialize(proxy: ExportedClass): ExportedClass.Snapshot {
+    return {
+      Id: proxy.Id,
     };
   }
 }

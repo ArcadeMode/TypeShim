@@ -1,27 +1,164 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Runtime.InteropServices.JavaScript;
+using System.Text;
+using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.CSharp;
 
-internal sealed class JSObjectTaskExtensionsRenderer()
+internal sealed class JSObjectExtensionsRenderer()
 {
     private readonly StringBuilder sb = new();
     public string Render()
     {
+        sb.AppendLine("#nullable enable")
+          .AppendLine("// JSImports for the type marshalling process")
+          .AppendLine("using System;")
+          .AppendLine("using System.Runtime.InteropServices.JavaScript;")
+          .AppendLine("using System.Threading.Tasks;");
+
         // raison d'etre: type mapping limitations: https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mapping-limitations
         // 1. JSObject has no means to retrieve arrays beside ByteArray (automapping user classes with an array property type is therefore not possible by default)
         // 2. Nested types cannot be represented on the interop boundary (i.e. Task<int[]>
 
+        sb.AppendLine(JSObjectIntExtensionsClass);
+        sb.AppendLine(JSObjectArrayExtensionsClass);
         sb.AppendLine(JSObjectTaskExtensionsClass);
-        //TODO: reconsider targetting different moniker and provide this class through TypeShim nuget so the user can utilize these directly if they so wish.
+        //TODO: Consider targeting different moniker and provide this class through TypeShim nuget so the user can utilize these directly if they so wish.
         return sb.ToString();
     }
 
+    private const string JSObjectIntExtensionsClass = """
+public static partial class JSObjectIntExtensions
+{
+    public static byte? GetPropertyAsByteNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? (byte)jsObject.GetPropertyAsInt32(propertyName) : null;
+    }
 
+    public static short? GetPropertyAsInt16Nullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? (short)jsObject.GetPropertyAsInt32(propertyName) : null;
+    }
+
+    public static int? GetPropertyAsInt32Nullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? jsObject.GetPropertyAsInt32(propertyName) : null;
+    }
+
+    public static long? GetPropertyAsInt64Nullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? (long)jsObject.GetPropertyAsInt32(propertyName) : null;
+    }
+
+    public static nint? GetPropertyAsIntPtrNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? (nint)jsObject.GetPropertyAsInt32(propertyName) : null;
+    }
+
+    public static bool? GetPropertyAsBooleanNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? jsObject.GetPropertyAsBoolean(propertyName) : null;
+    }
+
+    public static double? GetPropertyAsDoubleNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? jsObject.GetPropertyAsDouble(propertyName) : null;
+    }
+
+    public static float? GetPropertyAsFloatNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? (float)jsObject.GetPropertyAsDouble(propertyName) : null;
+    }
+
+    public static char? GetPropertyAsCharNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? char.Parse(jsObject.GetPropertyAsString(propertyName)!) : null;
+    }
+
+    public static DateTime? GetPropertyAsDateTimeNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsDateTime(value) : null;
+    }
+
+    public static DateTimeOffset? GetPropertyAsDateTimeOffsetNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsDateTimeOffset(value) : null;
+    }
+
+    public static object? GetPropertyAsObject(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? MarshallPropertyAsObject(jsObject, propertyName) : null;
+    }
+
+    [JSImport("unwrap", "@typeshim")]
+    [return: JSMarshalAs<JSType.Date>]
+    public static partial DateTime MarshallAsDateTime([JSMarshalAs<JSType.Object>] JSObject jsObject);
+
+    [JSImport("unwrap", "@typeshim")]
+    [return: JSMarshalAs<JSType.Date>]
+    public static partial DateTimeOffset MarshallAsDateTimeOffset([JSMarshalAs<JSType.Object>] JSObject jsObject);
+
+    [JSImport("unwrapProperty", "@typeshim")]
+    [return: JSMarshalAs<JSType.Any>]
+    public static partial object MarshallPropertyAsObject([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+}
+        
+""";
+
+    private const string JSObjectArrayExtensionsClass = """
+public static partial class JSObjectArrayExtensions
+{
+    public static int[]? GetPropertyAsInt32Array(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsIntArray(value) : null;
+    }
+
+    public static double[]? GetPropertyAsDoubleArray(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsDoubleArray(value) : null;
+    }
+
+    public static string[]? GetPropertyAsStringArray(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsStringArray(value) : null;
+    }
+
+    public static JSObject[]? GetPropertyAsJSObjectArray(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsJSObjectArray(value) : null;
+    }
+
+    public static object[]? GetPropertyAsObjectArray(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsObjectArray(value) : null;
+    }
+
+    [JSImport("unwrap", "@typeshim")]
+    [return: JSMarshalAs<JSType.Array<JSType.Number>>]
+    public static partial int[] MarshallAsIntArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
+
+    [JSImport("unwrap", "@typeshim")]
+    [return: JSMarshalAs<JSType.Array<JSType.Number>>]
+    public static partial double[] MarshallAsDoubleArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
+
+    [JSImport("unwrap", "@typeshim")]
+    [return: JSMarshalAs<JSType.Array<JSType.String>>]
+    public static partial string[] MarshallAsStringArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
+
+    [JSImport("unwrap", "@typeshim")]
+    [return: JSMarshalAs<JSType.Array<JSType.Object>>]
+    public static partial JSObject[] MarshallAsJSObjectArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
+
+    [JSImport("unwrap", "@typeshim")]
+    [return: JSMarshalAs<JSType.Array<JSType.Any>>]
+    public static partial object[] MarshallAsObjectArray([JSMarshalAs<JSType.Object>] JSObject jsObject);
+}
+
+""";
+    
     private const string JSObjectTaskExtensionsClass = """
-#nullable enable
-using System;
-using System.Runtime.InteropServices.JavaScript;
-using System.Threading.Tasks;
 public static partial class JSObjectTaskExtensions
 {
     public static Task? GetPropertyAsVoidTask(this JSObject jsObject, string propertyName)
@@ -168,5 +305,6 @@ public static partial class JSObjectTaskExtensions
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
     public static partial Task<object> MarshallAsObjectTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 }
+
 """;
 }

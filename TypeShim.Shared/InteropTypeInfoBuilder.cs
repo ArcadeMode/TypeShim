@@ -328,7 +328,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             KnownManagedType.Object when requiresTypeConversion && !supportsTypeConversion
                 => TypeScriptSymbolNameTemplate.ForUserType("ManagedObject"),
             KnownManagedType.Object when !requiresTypeConversion
-                => TypeScriptSymbolNameTemplate.ForSimpleType("object"),
+                => TypeScriptSymbolNameTemplate.ForSimpleType("ManagedObject"),
 
             KnownManagedType.None => TypeScriptSymbolNameTemplate.ForSimpleType("undefined"),
             KnownManagedType.Void => TypeScriptSymbolNameTemplate.ForSimpleType("void"),

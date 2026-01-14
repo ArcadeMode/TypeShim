@@ -41,13 +41,9 @@ static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInf
         File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, outFileName), source.ToString());
     }
 
-    JSObjectArrayExtensionsRenderer jsObjectArrayExtensionsRenderer = new();
-    SourceText jsObjectArrayExtensionsSource = SourceText.From(jsObjectArrayExtensionsRenderer.Render(), Encoding.UTF8);
-    File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, "JSObjectArrayExtensions.g.cs"), jsObjectArrayExtensionsSource.ToString());
-
-    JSObjectTaskExtensionsRenderer jsObjectTaskExtensionsRenderer = new();
-    SourceText jsObjectTaskExtensionsSource = SourceText.From(jsObjectTaskExtensionsRenderer.Render(), Encoding.UTF8);
-    File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, "JSObjectTaskExtensions.g.cs"), jsObjectTaskExtensionsSource.ToString());
+    JSObjectExtensionsRenderer jsObjectExtensionsRenderer = new();
+    SourceText jsObjectExtensionsSource = SourceText.From(jsObjectExtensionsRenderer.Render(), Encoding.UTF8);
+    File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, "JSObjectExtensions.g.cs"), jsObjectExtensionsSource.ToString());
 }
 
 static void GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)
