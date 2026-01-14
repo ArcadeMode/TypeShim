@@ -89,7 +89,7 @@ function E2E() {
         TaskOfIntProperty: Promise.resolve(44),
         TaskOfLongProperty: Promise.resolve(45),
         TaskOfBoolProperty: Promise.resolve(true),
-        TaskOfCharProperty: Promise.resolve(1 as unknown as string),
+        TaskOfCharProperty: Promise.resolve('B'),
         TaskOfStringProperty: Promise.resolve("Task String"),
         TaskOfDoubleProperty: Promise.resolve(67.8),
         TaskOfFloatProperty: Promise.resolve(89.0),

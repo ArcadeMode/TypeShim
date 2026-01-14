@@ -172,7 +172,16 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             else
             {
                 ctx.Append(methodInfo.ReturnType.ManagedType == KnownManagedType.Void ? string.Empty : "return ");
+
+                // dotnet does not marshall chars as strings atm. We convert from/to numbers while this is the case.
+                if (methodInfo.ReturnType.ManagedType == KnownManagedType.Char) 
+                    ctx.Append("String.fromCharCode(");
                 RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
+                if (methodInfo.ReturnType.ManagedType == KnownManagedType.Char) 
+                    ctx.Append(")");
+                if (methodInfo.ReturnType is { ManagedType: KnownManagedType.Task, TypeArgument.ManagedType: KnownManagedType.Char }) 
+                    ctx.Append(".then(c => String.fromCharCode(c))");
+
                 ctx.AppendLine(";");
             }
         }
@@ -253,6 +262,10 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                 if (!isFirst) ctx.Append(", ");
                 
                 ctx.Append(parameter.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(parameter));
+                if (parameter.Type.ManagedType == KnownManagedType.Char) 
+                    ctx.Append(".charCodeAt(0)"); // dotnet does not marshall chars as strings atm. We convert from/to numbers while this is the case.
+                if (parameter.Type is { ManagedType: KnownManagedType.Task, TypeArgument.ManagedType: KnownManagedType.Char })
+                    ctx.Append(".then(c => c.charCodeAt(0))");
                 isFirst = false;
             }
             if (initializerObject == null) return;

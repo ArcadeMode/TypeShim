@@ -14,7 +14,8 @@ class TypeShimConfig {
     }
     options.setModuleImports("@typeshim", { 
       unwrap: (obj: any) => obj, 
-      unwrapProperty: (obj: any, propertyName: string) => obj[propertyName] 
+      unwrapProperty: (obj: any, propertyName: string) => obj[propertyName],
+      unwrapCharPromise: (promise: Promise<any>) => promise.then(c => c.charCodeAt(0))
     });
     TypeShimConfig._exports = options.assemblyExports;
   }
@@ -96,8 +97,8 @@ export interface AssemblyExports{
         set_BoolProperty(instance: ManagedObject, value: boolean): void;
         get_StringProperty(instance: ManagedObject): string;
         set_StringProperty(instance: ManagedObject, value: string): void;
-        get_CharProperty(instance: ManagedObject): string;
-        set_CharProperty(instance: ManagedObject, value: string): void;
+        get_CharProperty(instance: ManagedObject): number;
+        set_CharProperty(instance: ManagedObject, value: number): void;
         get_DoubleProperty(instance: ManagedObject): number;
         set_DoubleProperty(instance: ManagedObject, value: number): void;
         get_FloatProperty(instance: ManagedObject): number;
@@ -126,8 +127,8 @@ export interface AssemblyExports{
         set_TaskOfBoolProperty(instance: ManagedObject, value: Promise<boolean>): void;
         get_TaskOfByteProperty(instance: ManagedObject): Promise<number>;
         set_TaskOfByteProperty(instance: ManagedObject, value: Promise<number>): void;
-        get_TaskOfCharProperty(instance: ManagedObject): Promise<string>;
-        set_TaskOfCharProperty(instance: ManagedObject, value: Promise<string>): void;
+        get_TaskOfCharProperty(instance: ManagedObject): Promise<number>;
+        set_TaskOfCharProperty(instance: ManagedObject, value: Promise<number>): void;
         get_TaskOfStringProperty(instance: ManagedObject): Promise<string>;
         set_TaskOfStringProperty(instance: ManagedObject, value: Promise<string>): void;
         get_TaskOfDoubleProperty(instance: ManagedObject): Promise<number>;
@@ -383,11 +384,11 @@ export class CompilationTest extends ProxyBase {
   }
 
   public get CharProperty(): string {
-    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_CharProperty(this.instance);
+    return String.fromCharCode(TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_CharProperty(this.instance));
   }
 
   public set CharProperty(value: string) {
-    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_CharProperty(this.instance, value);
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_CharProperty(this.instance, value.charCodeAt(0));
   }
 
   public get DoubleProperty(): number {
@@ -505,11 +506,11 @@ export class CompilationTest extends ProxyBase {
   }
 
   public get TaskOfCharProperty(): Promise<string> {
-    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfCharProperty(this.instance);
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfCharProperty(this.instance).then(c => String.fromCharCode(c));
   }
 
   public set TaskOfCharProperty(value: Promise<string>) {
-    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfCharProperty(this.instance, value);
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfCharProperty(this.instance, value.then(c => c.charCodeAt(0)));
   }
 
   public get TaskOfStringProperty(): Promise<string> {

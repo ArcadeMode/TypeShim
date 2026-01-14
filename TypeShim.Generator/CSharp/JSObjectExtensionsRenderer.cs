@@ -253,7 +253,7 @@ public static partial class JSObjectTaskExtensions
     [return: JSMarshalAs<JSType.Promise<JSType.Number>>]
     public static partial Task<byte> MarshallAsByteTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("unwrap", "@typeshim")]
+    [JSImport("unwrapCharPromise", "@typeshim")]
     [return: JSMarshalAs<JSType.Promise<JSType.String>>]
     public static partial Task<char> MarshallAsCharTask([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
