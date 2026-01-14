@@ -12,7 +12,10 @@ class TypeShimConfig {
     if (TypeShimConfig._exports){
       throw new Error("TypeShim has already been initialized.");
     }
-    options.setModuleImports("@typeshim", { unwrap: (obj: any) => obj });
+    options.setModuleImports("@typeshim", { 
+      unwrap: (obj: any) => obj, 
+      unwrapProperty: (obj: any, propertyName: string) => obj[propertyName] 
+    });
     TypeShimConfig._exports = options.assemblyExports;
   }
 }
@@ -103,8 +106,8 @@ export interface AssemblyExports{
         set_DateTimeProperty(instance: ManagedObject, value: Date): void;
         get_DateTimeOffsetProperty(instance: ManagedObject): Date;
         set_DateTimeOffsetProperty(instance: ManagedObject, value: Date): void;
-        get_objectProperty(instance: ManagedObject): ManagedObject;
-        set_objectProperty(instance: ManagedObject, value: ManagedObject): void;
+        get_ObjectProperty(instance: ManagedObject): ManagedObject;
+        set_ObjectProperty(instance: ManagedObject, value: ManagedObject): void;
         get_ExportedClassProperty(instance: ManagedObject): ManagedObject;
         set_ExportedClassProperty(instance: ManagedObject, value: ManagedObject | object): void;
         get_JSObjectProperty(instance: ManagedObject): object;
@@ -419,12 +422,12 @@ export class CompilationTest extends ProxyBase {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_DateTimeOffsetProperty(this.instance, value);
   }
 
-  public get objectProperty(): object {
-    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_objectProperty(this.instance);
+  public get ObjectProperty(): ManagedObject {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_ObjectProperty(this.instance);
   }
 
-  public set objectProperty(value: object) {
-    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_objectProperty(this.instance, value);
+  public set ObjectProperty(value: ManagedObject) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_ObjectProperty(this.instance, value);
   }
 
   public get ExportedClassProperty(): ExportedClass {
@@ -549,11 +552,11 @@ export class CompilationTest extends ProxyBase {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfDateTimeOffsetProperty(this.instance, value);
   }
 
-  public get TaskOfObjectProperty(): Promise<object> {
+  public get TaskOfObjectProperty(): Promise<ManagedObject> {
     return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_TaskOfObjectProperty(this.instance);
   }
 
-  public set TaskOfObjectProperty(value: Promise<object>) {
+  public set TaskOfObjectProperty(value: Promise<ManagedObject>) {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_TaskOfObjectProperty(this.instance, value);
   }
 
@@ -591,11 +594,11 @@ export class CompilationTest extends ProxyBase {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_JSObjectArrayProperty(this.instance, value);
   }
 
-  public get ObjectArrayProperty(): Array<object> {
+  public get ObjectArrayProperty(): Array<ManagedObject> {
     return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_ObjectArrayProperty(this.instance);
   }
 
-  public set ObjectArrayProperty(value: Array<object>) {
+  public set ObjectArrayProperty(value: Array<ManagedObject>) {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_ObjectArrayProperty(this.instance, value);
   }
 
@@ -647,7 +650,7 @@ export namespace CompilationTest {
     FloatProperty: number;
     DateTimeProperty: Date;
     DateTimeOffsetProperty: Date;
-    objectProperty: object;
+    ObjectProperty: ManagedObject;
     ExportedClassProperty: ExportedClass | ExportedClass.Initializer;
     JSObjectProperty: object;
     TaskProperty: Promise<void>;
@@ -663,12 +666,12 @@ export namespace CompilationTest {
     TaskOfFloatProperty: Promise<number>;
     TaskOfDateTimeProperty: Promise<Date>;
     TaskOfDateTimeOffsetProperty: Promise<Date>;
-    TaskOfObjectProperty: Promise<object>;
+    TaskOfObjectProperty: Promise<ManagedObject>;
     TaskOfExportedClassProperty: Promise<ExportedClass | ExportedClass.Initializer>;
     TaskOfJSObjectProperty: Promise<object>;
     ByteArrayProperty: Array<number>;
     JSObjectArrayProperty: Array<object>;
-    ObjectArrayProperty: Array<object>;
+    ObjectArrayProperty: Array<ManagedObject>;
     ExportedClassArrayProperty: Array<ExportedClass | ExportedClass.Initializer>;
     IntArrayProperty: Array<number>;
     StringArrayProperty: Array<string>;
@@ -687,7 +690,7 @@ export namespace CompilationTest {
     FloatProperty: number;
     DateTimeProperty: Date;
     DateTimeOffsetProperty: Date;
-    objectProperty: object;
+    ObjectProperty: ManagedObject;
     ExportedClassProperty: ExportedClass.Snapshot;
     JSObjectProperty: object;
     TaskProperty: Promise<void>;
@@ -703,12 +706,12 @@ export namespace CompilationTest {
     TaskOfFloatProperty: Promise<number>;
     TaskOfDateTimeProperty: Promise<Date>;
     TaskOfDateTimeOffsetProperty: Promise<Date>;
-    TaskOfObjectProperty: Promise<object>;
+    TaskOfObjectProperty: Promise<ManagedObject>;
     TaskOfExportedClassProperty: Promise<ExportedClass.Snapshot>;
     TaskOfJSObjectProperty: Promise<object>;
     ByteArrayProperty: Array<number>;
     JSObjectArrayProperty: Array<object>;
-    ObjectArrayProperty: Array<object>;
+    ObjectArrayProperty: Array<ManagedObject>;
     ExportedClassArrayProperty: Array<ExportedClass.Snapshot>;
     IntArrayProperty: Array<number>;
     StringArrayProperty: Array<string>;
@@ -728,7 +731,7 @@ export namespace CompilationTest {
       FloatProperty: proxy.FloatProperty,
       DateTimeProperty: proxy.DateTimeProperty,
       DateTimeOffsetProperty: proxy.DateTimeOffsetProperty,
-      objectProperty: proxy.objectProperty,
+      ObjectProperty: proxy.ObjectProperty,
       ExportedClassProperty: ExportedClass.materialize(proxy.ExportedClassProperty),
       JSObjectProperty: proxy.JSObjectProperty,
       TaskProperty: proxy.TaskProperty,

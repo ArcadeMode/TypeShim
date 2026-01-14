@@ -19,7 +19,7 @@ public class CompilationTest
     public float FloatProperty { get; set; }
     public DateTime DateTimeProperty { get; set; }
     public DateTimeOffset DateTimeOffsetProperty { get; set; }
-    public object objectProperty { get; set; } = new object();
+    public object ObjectProperty { get; set; } = new object();
     public ExportedClass ExportedClassProperty { get; set; } = new ExportedClass();
     public JSObject JSObjectProperty { get; set; } = null!;
     public Task TaskProperty { get; set; } = Task.CompletedTask;

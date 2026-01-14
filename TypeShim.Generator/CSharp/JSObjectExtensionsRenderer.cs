@@ -89,7 +89,7 @@ public static partial class JSObjectIntExtensions
 
     public static object? GetPropertyAsObject(this JSObject jsObject, string propertyName)
     {
-        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsObject(value) : null;
+        return jsObject.HasProperty(propertyName) ? MarshallPropertyAsObject(jsObject, propertyName) : null;
     }
 
     [JSImport("unwrap", "@typeshim")]
@@ -100,9 +100,9 @@ public static partial class JSObjectIntExtensions
     [return: JSMarshalAs<JSType.Date>]
     public static partial DateTimeOffset MarshallAsDateTimeOffset([JSMarshalAs<JSType.Object>] JSObject jsObject);
 
-    [JSImport("unwrap", "@typeshim")]
+    [JSImport("unwrapProperty", "@typeshim")]
     [return: JSMarshalAs<JSType.Any>]
-    public static partial object MarshallAsObject([JSMarshalAs<JSType.Object>] JSObject jsObject);
+    public static partial object MarshallPropertyAsObject([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
 }
         
 """;
