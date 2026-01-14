@@ -32,9 +32,29 @@ internal sealed class JSObjectExtensionsRenderer()
     private const string JSObjectIntExtensionsClass = """
 public static class JSObjectIntExtensions
 {
+    public static byte? GetPropertyAsByteNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? (byte)jsObject.GetPropertyAsInt32(propertyName) : null;
+    }
+
+    public static short? GetPropertyAsInt16Nullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? (short)jsObject.GetPropertyAsInt32(propertyName) : null;
+    }
+
     public static int? GetPropertyAsInt32Nullable(this JSObject jsObject, string propertyName)
     {
         return jsObject.HasProperty(propertyName) ? jsObject.GetPropertyAsInt32(propertyName) : null;
+    }
+
+    public static long? GetPropertyAsInt64Nullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? (long)jsObject.GetPropertyAsInt32(propertyName) : null;
+    }
+
+    public static nint? GetPropertyAsIntPtrNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? (nint)jsObject.GetPropertyAsInt32(propertyName) : null;
     }
 
     public static bool? GetPropertyAsBooleanNullable(this JSObject jsObject, string propertyName)
@@ -50,6 +70,11 @@ public static class JSObjectIntExtensions
     public static float? GetPropertyAsFloatNullable(this JSObject jsObject, string propertyName)
     {
         return jsObject.HasProperty(propertyName) ? (float)jsObject.GetPropertyAsDouble(propertyName) : null;
+    }
+
+    public static char? GetPropertyAsCharNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.HasProperty(propertyName) ? char.Parse(jsObject.GetPropertyAsString(propertyName)!) : null;
     }
 }
         

@@ -207,8 +207,8 @@ public partial class C1Interop
     [TestCase("float", "float", "GetPropertyAsFloatNullable")]
     [TestCase("Double", "double", "GetPropertyAsDoubleNullable")]
     [TestCase("double", "double", "GetPropertyAsDoubleNullable")]
-    [TestCase("IntPtr", "nint", "GetPropertyAsNIntNullable")]
-    [TestCase("nint", "nint", "GetPropertyAsNIntNullable")]
+    [TestCase("IntPtr", "nint", "GetPropertyAsIntPtrNullable")]
+    [TestCase("nint", "nint", "GetPropertyAsIntPtrNullable")]
     public void CSharpInteropClass_InstanceProperty_WithSupportedNumericParameterType(string typeExpression, string interopTypeExpression, string jsObjectMethod)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""

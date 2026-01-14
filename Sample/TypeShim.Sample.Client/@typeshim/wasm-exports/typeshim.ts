@@ -79,20 +79,26 @@ export interface AssemblyExports{
         BoolMethod(instance: ManagedObject): boolean;
         StringMethod(instance: ManagedObject): string;
         DoubleMethod(instance: ManagedObject): number;
+        get_NIntProperty(instance: ManagedObject): number;
+        set_NIntProperty(instance: ManagedObject, value: number): void;
+        get_ByteProperty(instance: ManagedObject): number;
+        set_ByteProperty(instance: ManagedObject, value: number): void;
+        get_ShortProperty(instance: ManagedObject): number;
+        set_ShortProperty(instance: ManagedObject, value: number): void;
         get_IntProperty(instance: ManagedObject): number;
         set_IntProperty(instance: ManagedObject, value: number): void;
+        get_LongProperty(instance: ManagedObject): number;
+        set_LongProperty(instance: ManagedObject, value: number): void;
         get_BoolProperty(instance: ManagedObject): boolean;
         set_BoolProperty(instance: ManagedObject, value: boolean): void;
         get_StringProperty(instance: ManagedObject): string;
         set_StringProperty(instance: ManagedObject, value: string): void;
+        get_CharProperty(instance: ManagedObject): string;
+        set_CharProperty(instance: ManagedObject, value: string): void;
         get_DoubleProperty(instance: ManagedObject): number;
         set_DoubleProperty(instance: ManagedObject, value: number): void;
         get_FloatProperty(instance: ManagedObject): number;
         set_FloatProperty(instance: ManagedObject, value: number): void;
-        get_ByteProperty(instance: ManagedObject): number;
-        set_ByteProperty(instance: ManagedObject, value: number): void;
-        get_CharProperty(instance: ManagedObject): string;
-        set_CharProperty(instance: ManagedObject, value: string): void;
         get_TaskProperty(instance: ManagedObject): Promise<void>;
         set_TaskProperty(instance: ManagedObject, value: Promise<void>): void;
         get_TaskOfIntProperty(instance: ManagedObject): Promise<number>;
@@ -274,12 +280,44 @@ export class CompilationTest extends ProxyBase {
   public DoubleMethod(): number {
     return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.DoubleMethod(this.instance);
   }
+  public get NIntProperty(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_NIntProperty(this.instance);
+  }
+
+  public set NIntProperty(value: number) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_NIntProperty(this.instance, value);
+  }
+
+  public get ByteProperty(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_ByteProperty(this.instance);
+  }
+
+  public set ByteProperty(value: number) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_ByteProperty(this.instance, value);
+  }
+
+  public get ShortProperty(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_ShortProperty(this.instance);
+  }
+
+  public set ShortProperty(value: number) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_ShortProperty(this.instance, value);
+  }
+
   public get IntProperty(): number {
     return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_IntProperty(this.instance);
   }
 
   public set IntProperty(value: number) {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_IntProperty(this.instance, value);
+  }
+
+  public get LongProperty(): number {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_LongProperty(this.instance);
+  }
+
+  public set LongProperty(value: number) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_LongProperty(this.instance, value);
   }
 
   public get BoolProperty(): boolean {
@@ -298,6 +336,14 @@ export class CompilationTest extends ProxyBase {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_StringProperty(this.instance, value);
   }
 
+  public get CharProperty(): string {
+    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_CharProperty(this.instance);
+  }
+
+  public set CharProperty(value: string) {
+    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_CharProperty(this.instance, value);
+  }
+
   public get DoubleProperty(): number {
     return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_DoubleProperty(this.instance);
   }
@@ -312,22 +358,6 @@ export class CompilationTest extends ProxyBase {
 
   public set FloatProperty(value: number) {
     TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_FloatProperty(this.instance, value);
-  }
-
-  public get ByteProperty(): number {
-    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_ByteProperty(this.instance);
-  }
-
-  public set ByteProperty(value: number) {
-    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_ByteProperty(this.instance, value);
-  }
-
-  public get CharProperty(): string {
-    return TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.get_CharProperty(this.instance);
-  }
-
-  public set CharProperty(value: string) {
-    TypeShimConfig.exports.TypeShim.Sample.CompilationTestInterop.set_CharProperty(this.instance, value);
   }
 
   public get TaskProperty(): Promise<void> {
@@ -404,13 +434,16 @@ export class CompilationTest extends ProxyBase {
 }
 export namespace CompilationTest {
   export interface Initializer {
+    NIntProperty: number;
+    ByteProperty: number;
+    ShortProperty: number;
     IntProperty: number;
+    LongProperty: number;
     BoolProperty: boolean;
     StringProperty: string;
+    CharProperty: string;
     DoubleProperty: number;
     FloatProperty: number;
-    ByteProperty: number;
-    CharProperty: string;
     TaskProperty: Promise<void>;
     TaskOfIntProperty: Promise<number>;
     TaskOfBoolProperty: Promise<boolean>;
@@ -422,13 +455,16 @@ export namespace CompilationTest {
     DoubleArrayProperty: Array<number>;
   }
   export interface Snapshot {
+    NIntProperty: number;
+    ByteProperty: number;
+    ShortProperty: number;
     IntProperty: number;
+    LongProperty: number;
     BoolProperty: boolean;
     StringProperty: string;
+    CharProperty: string;
     DoubleProperty: number;
     FloatProperty: number;
-    ByteProperty: number;
-    CharProperty: string;
     TaskProperty: Promise<void>;
     TaskOfIntProperty: Promise<number>;
     TaskOfBoolProperty: Promise<boolean>;
@@ -441,13 +477,16 @@ export namespace CompilationTest {
   }
   export function materialize(proxy: CompilationTest): CompilationTest.Snapshot {
     return {
+      NIntProperty: proxy.NIntProperty,
+      ByteProperty: proxy.ByteProperty,
+      ShortProperty: proxy.ShortProperty,
       IntProperty: proxy.IntProperty,
+      LongProperty: proxy.LongProperty,
       BoolProperty: proxy.BoolProperty,
       StringProperty: proxy.StringProperty,
+      CharProperty: proxy.CharProperty,
       DoubleProperty: proxy.DoubleProperty,
       FloatProperty: proxy.FloatProperty,
-      ByteProperty: proxy.ByteProperty,
-      CharProperty: proxy.CharProperty,
       TaskProperty: proxy.TaskProperty,
       TaskOfIntProperty: proxy.TaskOfIntProperty,
       TaskOfBoolProperty: proxy.TaskOfBoolProperty,
