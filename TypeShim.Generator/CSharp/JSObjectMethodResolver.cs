@@ -19,6 +19,8 @@ internal static class JSObjectMethodResolver
             KnownManagedType.Int32 => "GetPropertyAsInt32Nullable",
             KnownManagedType.Int64 => "GetPropertyAsInt64Nullable",
             KnownManagedType.IntPtr => "GetPropertyAsIntPtrNullable",
+            KnownManagedType.DateTime => "GetPropertyAsDateTimeNullable",
+            KnownManagedType.DateTimeOffset => "GetPropertyAsDateTimeOffsetNullable",
             KnownManagedType.JSObject => "GetPropertyAsJSObject",
             KnownManagedType.Object when typeInfo.IsTSExport => "GetPropertyAsJSObject", // exported object types have a FromJSObject mapper
             KnownManagedType.Object when !typeInfo.IsTSExport => "GetPropertyAsObject", // non-exports are just casted to their original type.

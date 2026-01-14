@@ -30,7 +30,7 @@ internal sealed class JSObjectExtensionsRenderer()
     }
 
     private const string JSObjectIntExtensionsClass = """
-public static class JSObjectIntExtensions
+public static partial class JSObjectIntExtensions
 {
     public static byte? GetPropertyAsByteNullable(this JSObject jsObject, string propertyName)
     {
@@ -76,6 +76,33 @@ public static class JSObjectIntExtensions
     {
         return jsObject.HasProperty(propertyName) ? char.Parse(jsObject.GetPropertyAsString(propertyName)!) : null;
     }
+
+    public static DateTime? GetPropertyAsDateTimeNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsDateTime(value) : null;
+    }
+
+    public static DateTimeOffset? GetPropertyAsDateTimeOffsetNullable(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsDateTimeOffset(value) : null;
+    }
+
+    public static object? GetPropertyAsObject(this JSObject jsObject, string propertyName)
+    {
+        return jsObject.GetPropertyAsJSObject(propertyName) is JSObject value ? MarshallAsObject(value) : null;
+    }
+
+    [JSImport("unwrap", "@typeshim")]
+    [return: JSMarshalAs<JSType.Date>]
+    public static partial DateTime MarshallAsDateTime([JSMarshalAs<JSType.Object>] JSObject jsObject);
+
+    [JSImport("unwrap", "@typeshim")]
+    [return: JSMarshalAs<JSType.Date>]
+    public static partial DateTimeOffset MarshallAsDateTimeOffset([JSMarshalAs<JSType.Object>] JSObject jsObject);
+
+    [JSImport("unwrap", "@typeshim")]
+    [return: JSMarshalAs<JSType.Any>]
+    public static partial object MarshallAsObject([JSMarshalAs<JSType.Object>] JSObject jsObject);
 }
         
 """;
