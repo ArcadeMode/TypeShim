@@ -172,11 +172,30 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             else
             {
                 ctx.Append(methodInfo.ReturnType.ManagedType == KnownManagedType.Void ? string.Empty : "return ");
-                RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
+
+                RenderCharConversionIfNecessary(methodInfo.ReturnType, () =>
+                {
+                    RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
+                });
+
                 ctx.AppendLine(";");
             }
         }
         ctx.AppendLine("}");
+
+        void RenderCharConversionIfNecessary(InteropTypeInfo typeInfo, Action renderCharExpression)
+        {
+            // dotnet does not marshall chars as strings, instead as numbers. TypeShim converts to strings on the TS side.
+            if (methodInfo.ReturnType.ManagedType == KnownManagedType.Char)
+                ctx.Append("String.fromCharCode(");
+
+            renderCharExpression();
+            
+            if (methodInfo.ReturnType.ManagedType == KnownManagedType.Char)
+                ctx.Append(")");
+            if (methodInfo.ReturnType is { ManagedType: KnownManagedType.Task, TypeArgument.ManagedType: KnownManagedType.Char })
+                ctx.Append(".then(c => String.fromCharCode(c))");
+        }
 
         void RenderInlineProxyConstruction(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
         {
@@ -251,8 +270,9 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             foreach (MethodParameterInfo parameter in methodParameters)
             {
                 if (!isFirst) ctx.Append(", ");
-                
+
                 ctx.Append(parameter.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(parameter));
+                RenderCharConversionIfNecessary(parameter);
                 isFirst = false;
             }
             if (initializerObject == null) return;
@@ -264,6 +284,15 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         void RenderInteropMethodAccessor(string methodName)
         {
             ctx.Append(ctx.Class.Namespace).Append('.').Append(RenderConstants.InteropClassName(ctx.Class)).Append('.').Append(methodName);
+        }
+
+        void RenderCharConversionIfNecessary(MethodParameterInfo parameter)
+        {
+            // dotnet does not marshall chars as strings atm. We convert from/to numbers while this is the case.
+            if (parameter.Type.ManagedType == KnownManagedType.Char)
+                ctx.Append(".charCodeAt(0)");
+            if (parameter.Type is { ManagedType: KnownManagedType.Task, TypeArgument.ManagedType: KnownManagedType.Char })
+                ctx.Append(".then(c => c.charCodeAt(0))");
         }
     }
 
