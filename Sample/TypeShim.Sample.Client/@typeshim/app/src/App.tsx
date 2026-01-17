@@ -65,8 +65,9 @@ function App() {
 export default App;
 
 function E2E() {
+    console.log("Starting E2E CompilationTest...");
     const exportedClass = new ExportedClass({ Id: 1 });
-    const t = new CompilationTest({
+    const testObject = new CompilationTest({
         NIntProperty: 1,
         ByteProperty: 2,
         ShortProperty: 3,
@@ -107,5 +108,41 @@ function E2E() {
         ExportedClassArrayProperty: [exportedClass],
     });
 
-    console.log("E2E CompilationTest instance:", t, CompilationTest.materialize(t));
+    console.log("E2E CompilationTest instance:", testObject, CompilationTest.materialize(testObject));
+
+    testObject.CharProperty = 'Z';
+    if (testObject.CharProperty !== 'Z') {
+        console.error(`E2E CharProperty value mismatch. Expected 'Z', got '${testObject.CharProperty}'`);
+    }
+    testObject.TaskOfCharProperty = Promise.resolve('Y');
+    testObject.TaskOfCharProperty.then(value => {
+        if (value === 'Y') return;
+        console.error(`E2E TaskOfCharProperty value mismatch. Expected 'Y', got '${value}'`);
+    }).catch(err => {
+        console.error("E2E TaskOfCharProperty error:", err);
+    });
+
+    testObject.StringProperty = "Updated Test";
+    if (testObject.StringProperty !== "Updated Test") {
+        console.error(`E2E StringProperty value mismatch. Expected 'Updated Test', got '${testObject.StringProperty}'`);
+    }
+    testObject.TaskOfStringProperty = Promise.resolve("Updated Task String");
+    testObject.TaskOfStringProperty.then(value => {
+        if (value === "Updated Task String") return;
+        console.error(`E2E TaskOfStringProperty value mismatch. Expected 'Updated Task String', got '${value}'`);
+    }).catch(err => {
+        console.error("E2E TaskOfStringProperty error:", err);
+    });
+
+    testObject.ExportedClassProperty.Id = 99;
+    if (testObject.ExportedClassProperty.Id !== 99) {
+        console.error(`E2E ExportedClassProperty.Id value mismatch. Expected 99, got '${testObject.ExportedClassProperty.Id}'`);
+    }
+    const newExport = new ExportedClass({ Id: 100 });
+    testObject.ExportedClassProperty = newExport;
+    if (testObject.ExportedClassProperty.Id !== 100) {
+        console.error(`E2E ExportedClassProperty reassignment value mismatch. Expected 100, got '${testObject.ExportedClassProperty.Id}'`);
+    }
+
+    console.log("E2E CompilationTest completed.");
 }
