@@ -315,7 +315,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         {
             KnownManagedType.Object // objects are represented differently on the interop boundary
                 => TypeScriptSymbolNameTemplate.ForUserType("ManagedObject"),
-            KnownManagedType.Char // chars are represented as numbers on the interop boundary (likely a bug: https://github.com/dotnet/runtime/issues/123187)
+            KnownManagedType.Char // chars are represented as numbers on the interop boundary (is intended: https://github.com/dotnet/runtime/issues/123187)
                 => TypeScriptSymbolNameTemplate.ForSimpleType("number"),
             _ => GetSimpleTypeScriptSymbolTemplate(managedType, originalSyntax, true, false)
         };
