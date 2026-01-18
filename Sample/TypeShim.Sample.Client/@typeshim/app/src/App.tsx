@@ -144,5 +144,12 @@ function E2E() {
         console.error(`E2E ExportedClassProperty reassignment value mismatch. Expected 100, got '${testObject.ExportedClassProperty.Id}'`);
     }
 
+    testObject.TaskOfLongProperty.then(value => {
+        console.log("E2E TaskOfLongProperty value:", value);
+        if (value === 45) return;
+        console.error(`E2E TaskOfLongProperty value mismatch. Expected 45, got '${value}'`);
+    }).catch(err => {
+        console.error("E2E TaskOfLongProperty error:", err);
+    });
     console.log("E2E CompilationTest completed.");
 }

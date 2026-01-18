@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputType>Library</OutputType>
+    
+    <WasmBundlerFriendlyBootConfig>true</WasmBundlerFriendlyBootConfig>
+    <WasmFingerprintAssets>false</WasmFingerprintAssets>
+    <CompressionEnabled>false</CompressionEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <StaticWebAssetFingerprintPattern Include="JS" Pattern="*.js" Expression="#[.{fingerprint}]!" />
+  </ItemGroup>
+  
+  <PropertyGroup>
+    <PublishDir>../TypeShim.E2E/e2e-wasm-app</PublishDir>
+    <TypeShim_TypeScriptOutputDirectory>../../../../TypeShim.E2E/e2e-wasm-app</TypeShim_TypeScriptOutputDirectory>
+    <TypeShim_MSBuildMessagePriority>High</TypeShim_MSBuildMessagePriority>
+  </PropertyGroup>
+
+  <Import Project="../TypeShim/pack/TypeShim.targets" />
+  <ItemGroup>
+    <ProjectReference Include="../TypeShim/TypeShim.csproj" />
+    <ProjectReference Include="../TypeShim.Analyzers/TypeShim.Analyzers.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+  </ItemGroup>
+</Project>
