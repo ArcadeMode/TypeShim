@@ -1,10 +1,14 @@
 import { beforeAll } from 'vitest';
 import { dotnet } from '../e2e-wasm-app/wwwroot/_framework/dotnet.js';
 import { TypeShimInitializer } from '../e2e-wasm-app/typeshim';
-import { installVitestFetchShim } from './vitest.fetchShim';
+import { e2eConfig } from './e2e.config';
+
 
 beforeAll(async () => {
-  installVitestFetchShim();
+  if (!e2eConfig.browserMode) {
+    const { installVitestFetchShim } = await import('./vitest.fetchShim');
+    installVitestFetchShim();
+  }
   await initializeWASMRuntime();
 });
 

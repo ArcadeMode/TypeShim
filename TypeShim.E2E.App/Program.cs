@@ -5,7 +5,13 @@ using System.Threading.Tasks;
 namespace TypeShim.Sample;
 
 [TSExport]
-public class CompilationTest
+public class ExportedClass // for referencing an exported class
+{
+    public int Id { get; set; }
+}
+
+[TSExport]
+public class SimplePropertiesTest
 {
     public nint NIntProperty { get; set; }
     public byte ByteProperty { get; set; }
@@ -22,6 +28,13 @@ public class CompilationTest
     public object ObjectProperty { get; set; } = new object();
     public ExportedClass ExportedClassProperty { get; set; } = new ExportedClass();
     public JSObject JSObjectProperty { get; set; } = null!;
+}
+
+
+
+[TSExport]
+public class TaskPropertiesClass
+{
     public Task TaskProperty { get; set; } = Task.CompletedTask;
     public Task<nint> TaskOfNIntProperty { get; set; } = Task.FromResult((nint)0);
     public Task<short> TaskOfShortProperty { get; set; } = Task.FromResult((short)0);
@@ -38,7 +51,11 @@ public class CompilationTest
     public Task<object> TaskOfObjectProperty { get; set; } = Task.FromResult(new object());
     public Task<ExportedClass> TaskOfExportedClassProperty { get; set; } = Task.FromResult(new ExportedClass());
     public Task<JSObject> TaskOfJSObjectProperty { get; set; } = Task.FromException<JSObject>(new Exception("biem"));
-    //public Task<Exception> TaskOfExceptionProperty { get; set; } = Task.FromResult<Exception>(new Exception("biem"));
+}
+
+[TSExport]
+public class  ArrayPropertiesClass
+{
     public byte[] ByteArrayProperty { get; set; } = [];
     public JSObject[] JSObjectArrayProperty { get; set; } = [];
     public object[] ObjectArrayProperty { get; set; } = [];
@@ -46,16 +63,14 @@ public class CompilationTest
     public int[] IntArrayProperty { get; set; } = [];
     public string[] StringArrayProperty { get; set; } = [];
     public double[] DoubleArrayProperty { get; set; } = [];
+}
 
+[TSExport]
+public class SimpleReturnMethodsClass
+{
     public void VoidMethod() { }
     public int IntMethod() => 42;
     public bool BoolMethod() => true;
     public string StringMethod() => "Hello, TypeShim!";
     public double DoubleMethod() => 3.14;
-}
-
-[TSExport]
-public class ExportedClass
-{
-    public int Id { get; set; }
 }

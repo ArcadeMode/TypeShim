@@ -1,3 +1,4 @@
 e2e-wasm-app
 vitest/dist
 vitest/node_modules
+vitest/__screenshots__
