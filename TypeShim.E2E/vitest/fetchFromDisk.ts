@@ -1,6 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+// utility to handle fetch requests when running in node so wasm/dat files can be loaded from disk
+
 type FetchInput = string | URL | Request;
 
 function toUrlString(input: FetchInput): string {
@@ -28,35 +30,28 @@ function contentTypeForFile(filePath: string): string {
 }
 
 function tryMapToFilePath(urlString: string): string | undefined {
-  // Handle absolute http(s) URLs by taking just the pathname.
   let pathname = urlString;
   if (/^https?:\/\//i.test(urlString)) {
     try {
       pathname = new URL(urlString).pathname;
-    } catch {
-      // Fall through.
-    }
+    } catch { }
   }
-
   // Vite filesystem URLs look like: /@fs/C:/path/to/file
   if (pathname.startsWith('/@fs/')) {
     let fsPath = pathname.slice('/@fs/'.length);
-    // Convert URL-style slashes to Windows path, then normalize.
     fsPath = fsPath.replace(/\//g, path.sep);
     return path.normalize(fsPath);
   }
-
   // When dotnet runtime uses its normal URLs, they look like /_framework/<asset>
   if (pathname.startsWith('/_framework/')) {
     const wasmWwwroot = path.resolve(__dirname, '../e2e-wasm-app/wwwroot');
     const rel = pathname.replace(/^\//, '');
     return path.join(wasmWwwroot, rel);
   }
-
   return undefined;
 }
 
-export function installVitestFetchShim(): void {
+export function serveFetchRequestsFromDisk(): void {
   const originalFetch = globalThis.fetch?.bind(globalThis);
   if (!originalFetch) {
     throw new Error('globalThis.fetch is not available; Vitest must run on a Node version with fetch');

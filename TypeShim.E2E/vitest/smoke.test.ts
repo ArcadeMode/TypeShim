@@ -55,6 +55,13 @@ describe('wasm runtime bootstrap', () => {
         expect(testObject.DateTimeOffsetProperty).not.toBe(dateNow);
         expect(testObject.DateTimeOffsetProperty).toEqual(dateNow); 
     });
+    it('Returns Long property by value', () => {
+        expect(testObject.LongProperty).toBe(5);
+    });
+    it('Mutates Long property', () => {
+        testObject.LongProperty = 50;
+        expect(testObject.LongProperty).toBe(50);
+    });
 });
 
 describe('Task tests', () => {
@@ -162,5 +169,11 @@ describe('Array tests', () => {
         const original = testObject.ByteArrayProperty.slice();
         testObject.ByteArrayProperty[0] = 42;
         expect(testObject.ByteArrayProperty).toStrictEqual(original);
+    });
+
+    it('Does not mutate Int array property', () => {
+        const original = testObject.IntArrayProperty.slice();
+        testObject.IntArrayProperty[0] = 42;
+        expect(testObject.IntArrayProperty).toStrictEqual(original);
     });
 });

@@ -3,11 +3,10 @@ import { dotnet } from '../e2e-wasm-app/wwwroot/_framework/dotnet.js';
 import { TypeShimInitializer } from '../e2e-wasm-app/typeshim';
 import { e2eConfig } from './e2e.config';
 
-
 beforeAll(async () => {
   if (!e2eConfig.browserMode) {
-    const { installVitestFetchShim } = await import('./vitest.fetchShim');
-    installVitestFetchShim();
+    const { serveFetchRequestsFromDisk } = await import('./fetchFromDisk.js');
+    serveFetchRequestsFromDisk();
   }
   await initializeWASMRuntime();
 });
