@@ -45,10 +45,10 @@ jobs:
         run: npm run initialize
       - name: Run E2E (Node)
         working-directory: TypeShim.E2E/vitest
-        run: npm test:node
+        run: npm run test:node
       - name: Run E2E (Browser)
         working-directory: TypeShim.E2E/vitest
-        run: npm test:browser
+        run: npm run test:browser
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
