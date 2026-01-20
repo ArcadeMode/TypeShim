@@ -1,7 +1,7 @@
 import { beforeAll } from 'vitest';
-import { dotnet } from '../e2e-wasm-app/wwwroot/_framework/dotnet.js';
-import { TypeShimInitializer } from '../e2e-wasm-app/typeshim';
-import { e2eConfig } from './e2e.config';
+import { dotnet } from '@typeshim/e2e-wasm-lib/dotnet';
+import { TypeShimInitializer } from '@typeshim/e2e-wasm-lib';
+import { e2eConfig } from '../e2e.config';
 
 beforeAll(async () => {
   if (!e2eConfig.browserMode) {

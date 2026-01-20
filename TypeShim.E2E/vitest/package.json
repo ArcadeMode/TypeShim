@@ -1,12 +1,16 @@
 {
-  "name": "typeshim-e2e-vitest",
+  "name": "@typeshim/e2e-vitest",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "build": "vite build",
+    "init": "dotnet publish ../TypeShim.E2E.Wasm -c Release && node ./scripts/empty-map.mjs && npm install",
+    "build": "dotnet publish ../TypeShim.E2E.Wasm -c Release && node ./scripts/empty-map.mjs",
     "dev": "vite"
+  },
+  "dependencies": {
+    "@typeshim/e2e-wasm-lib": "file:../wasm-lib-publish/wwwroot"
   },
   "devDependencies": {
     "@vitest/browser": "^2.1.9",

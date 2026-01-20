@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+    
+    <WasmBundlerFriendlyBootConfig>true</WasmBundlerFriendlyBootConfig>
+    <WasmFingerprintAssets>false</WasmFingerprintAssets>
+    <CompressionEnabled>false</CompressionEnabled>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PublishDir>../wasm-lib-publish</PublishDir>
+    <TypeShim_TypeScriptOutputDirectory>wwwroot</TypeShim_TypeScriptOutputDirectory>
+    <TypeShim_MSBuildMessagePriority>High</TypeShim_MSBuildMessagePriority>
+  </PropertyGroup>
+
+  <Import Project="../../TypeShim/pack/TypeShim.targets" />
+  <ItemGroup>
+    <ProjectReference Include="../../TypeShim/TypeShim.csproj" />
+    <ProjectReference Include="../../TypeShim.Analyzers/TypeShim.Analyzers.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+  </ItemGroup>
+</Project>
