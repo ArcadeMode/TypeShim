@@ -39,7 +39,13 @@ function tryMapToFilePath(urlString: string): string | undefined {
   // Vite filesystem URLs look like: /@fs/C:/path/to/file
   if (pathname.startsWith('/@fs/')) {
     let fsPath = pathname.slice('/@fs/'.length);
+    const isWindowsDrivePath = /^[a-zA-Z]:\//.test(fsPath);
     fsPath = fsPath.replace(/\//g, path.sep);
+
+    if (!isWindowsDrivePath && !path.isAbsolute(fsPath)) {
+      fsPath = path.sep + fsPath;
+    }
+
     return path.normalize(fsPath);
   }
   // When dotnet runtime uses its normal URLs, they look like /_framework/<asset>

@@ -5,7 +5,7 @@ import { e2eConfig } from '../e2e.config';
 
 beforeAll(async () => {
   if (!e2eConfig.browserMode) {
-    const { serveFetchRequestsFromDisk } = await import('./fetchFromDisk.js');
+    const { serveFetchRequestsFromDisk } = await import('./fetch-from-disk.js');
     serveFetchRequestsFromDisk();
   }
   await initializeWASMRuntime();
