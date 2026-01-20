@@ -20,17 +20,5 @@ export default defineConfig({
       provider: "playwright",
       headless: true,
     },
-  },
-
-  // server: {
-  //   fs: {
-  //     // Permit serving files from the wasm app root.
-  //     allow: [
-  //       path.resolve(__dirname, '../e2e-wasm-app'),
-  //       path.resolve(__dirname),
-  //     ],
-  //   },
-  // },
-
-  
+  }
 });
