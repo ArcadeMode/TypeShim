@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 
 const isBrowserMode = ((process.env.VITE_BROWSER_MODE ?? '').toLowerCase() === 'true');
+const isCI = ((process.env.CI ?? '').toLowerCase() === 'true');
 
 export default defineConfig({
   define: { __BROWSER_MODE__: isBrowserMode },
@@ -20,12 +21,7 @@ export default defineConfig({
       headless: true,
       screenshotFailures: false
     },
-    reporters: [
-      'default',
-      ['junit', {
-        suiteName: isBrowserMode ? 'E2E (Browser)' : 'E2E (Node)'
-      }]
-    ],
+    reporters: isCI ? [['junit', { suiteName: isBrowserMode ? 'E2E (Browser)' : 'E2E (Node)' }]] : ['default'],
     outputFile: {
        junit: isBrowserMode ? '../e2e-report-browser.xml' : '../e2e-report-node.xml' 
     }
