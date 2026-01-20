@@ -42,7 +42,7 @@ jobs:
           cache-dependency-path: TypeShim.E2E/vitest/package-lock.json
       - name: Init E2E (Node)
         working-directory: TypeShim.E2E/vitest
-        run: npm run init
+        run: npm run initialize
       - name: Run E2E (Node)
         working-directory: TypeShim.E2E/vitest
         run: npm test -- --reporter=junit --outputFile=e2e-results.xml
