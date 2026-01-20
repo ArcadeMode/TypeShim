@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ArrayPropertiesClass, ExportedClass, SimplePropertiesTest, TaskPropertiesClass } from '@typeshim/e2e-wasm-lib';
-import { delay } from './utils';
+import { ExportedClass, SimplePropertiesTest, TaskPropertiesClass } from '@typeshim/e2e-wasm-lib';
 
 describe('Simple Properties Test', () => {
     let exportedClass: ExportedClass;

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { ArrayPropertiesClass, ExportedClass } from "@typeshim/e2e-wasm-lib";
 
 describe('Array Properties Test', () => {

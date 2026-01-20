@@ -5,7 +5,7 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "init": "dotnet publish ../TypeShim.E2E.Wasm -c Release && node ./scripts/empty-map.mjs && npm install",
+    "init": "dotnet publish ../TypeShim.E2E.Wasm -c Release && node ./scripts/empty-map.mjs && npm ci",
     "build": "dotnet publish ../TypeShim.E2E.Wasm -c Release && node ./scripts/empty-map.mjs",
     "dev": "vite"
   },
