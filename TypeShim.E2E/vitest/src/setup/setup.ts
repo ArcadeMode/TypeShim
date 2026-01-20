@@ -4,7 +4,7 @@ import { TypeShimInitializer } from '@typeshim/e2e-wasm-lib';
 import { isBrowserMode } from '../../suite';
 
 beforeAll(async () => {
-  if (!isBrowserMode()) {
+  if (!isBrowserMode) {
     const { serveFetchRequestsFromDisk } = await import('./fetch-from-disk.js');
     serveFetchRequestsFromDisk();
   }

@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, test, expect, beforeEach } from 'vitest';
 import { ExportedClass, TaskPropertiesClass } from "@typeshim/e2e-wasm-lib";
 import { delay } from "./async";
+import { isCI } from '../suite';
 
 describe('Task Properties Test', () => {
     let exportedClass: ExportedClass;
@@ -28,76 +29,77 @@ describe('Task Properties Test', () => {
             });
     });
 
-    it('Resolves void Task', async () => {
+    test('Resolves void Task', async () => {
         await expect(testObject.TaskProperty).resolves.toBeUndefined();
     });
-    it('Resolves Byte Task', async () => {
+    test('Resolves Byte Task', async () => {
         await expect(testObject.TaskOfByteProperty).resolves.toBe(22);
     });
-    it('Resolves NInt Task', async () => {
+    test('Resolves NInt Task', async () => {
         await expect(testObject.TaskOfNIntProperty).resolves.toBe(42);
     });
-    it('Resolves Short Task', async () => {
+    test('Resolves Short Task', async () => {
         await expect(testObject.TaskOfShortProperty).resolves.toBe(43);
     });
-    it('Resolves Int Task immediately', async () => {
+    test('Resolves Int Task immediately', async () => {
         await expect(testObject.TaskOfIntProperty).resolves.toBe(44);
     });
-    it('Resolves Int Task immediately from completed state', async () => {
-        await expect(testObject.TaskOfIntProperty).resolves.toBe(44);
-        await delay(100); // Ensure task is completed
-        await expect(testObject.TaskOfIntProperty).resolves.toBe(44);
-    });
-    it('Resolves Int Task after 100ms', async () => {
+    test('Resolves Int Task', async () => {
         testObject.TaskOfIntProperty = delay(100).then(() => 440);
         await expect(testObject.TaskOfIntProperty).resolves.toBe(440);
     });
-    it('Resolves Int Task immediately after 100ms', async () => {
+    test('Resolves completed Int Task', async () => {
         testObject.TaskOfIntProperty = delay(100).then(() => 440);
         await delay(200); // wait longer than the task delay so its in completed state
         await expect(testObject.TaskOfIntProperty).resolves.toBe(440);
     });
-    it('Resolves Long Task', async () => {
-        testObject.TaskOfLongProperty.then(value => {
-           console.log("Long task resolved to:", value);
-        });
-        await expect(testObject.TaskOfLongProperty).resolves.toBe(45);
-        await new Promise(resolve => setTimeout(resolve, 1100)); // ensure the timeout in the Task has completed
-        await expect(testObject.TaskOfLongProperty).resolves.toBe(45);
+
+    test('Resolves Long Task', async () => {
+        testObject.TaskOfLongProperty = delay(100).then(() => 450);
+        await expect(testObject.TaskOfLongProperty).resolves.toBe(450);
     });
-    it('Resolves Bool Task', async () => {
+
+    // Completed task of long fails to marshall, skip in CI, keep active locally for visibility
+    // https://github.com/dotnet/runtime/pull/123366
+    test.skipIf(isCI)('Resolves completed Long Task', async () => {
+        testObject.TaskOfLongProperty = delay(100).then(() => 450);
+        await delay(200); // wait longer than the task delay so its in completed state
+        await expect(testObject.TaskOfLongProperty).resolves.toBe(450);
+    });
+    
+    test('Resolves Bool Task', async () => {
         await expect(testObject.TaskOfBoolProperty).resolves.toBe(true);
     });
-    it('Resolves Char Task', async () => {
+    test('Resolves Char Task', async () => {
         await expect(testObject.TaskOfCharProperty).resolves.toBe('B');
     });
-    it('Resolves String Task', async () => {
+    test('Resolves String Task', async () => {
         await expect(testObject.TaskOfStringProperty).resolves.toBe("Task String");
     });
-    it('Resolves Double Task', async () => {
+    test('Resolves Double Task', async () => {
         await expect(testObject.TaskOfDoubleProperty).resolves.toBe(67.8);
     });
-    it('Resolves Float Task', async () => {
+    test('Resolves Float Task', async () => {
         await expect(testObject.TaskOfFloatProperty).resolves.toBe(89.0);
     });
-    it('Resolves DateTime Task', async () => {
+    test('Resolves DateTime Task', async () => {
         const result = await testObject.TaskOfDateTimeProperty;
         expect(result).toBeInstanceOf(Date);
     });
-    it('Resolves DateTimeOffset Task', async () => {
+    test('Resolves DateTimeOffset Task', async () => {
         const result = await testObject.TaskOfDateTimeOffsetProperty;
         expect(result).toBeInstanceOf(Date);
     }); 
-    it('Resolves Object Task', async () => {
+    test('Resolves Object Task', async () => {
         const result = await testObject.TaskOfObjectProperty;
         expect(result).toEqual(exportedClass.instance);
     });
-    it('Resolves ExportedClass Task', async () => {
+    test('Resolves ExportedClass Task', async () => {
         const result = await testObject.TaskOfExportedClassProperty;
         expect(result).toBeInstanceOf(ExportedClass);
         expect(result.Id).toBe(2);
     });
-    it('Resolves JSObject Task', async () => {
+    test('Resolves JSObject Task', async () => {
         const result = await testObject.TaskOfJSObjectProperty;
         expect(result).toBe(jsObject);
     });

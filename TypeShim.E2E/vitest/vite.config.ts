@@ -4,7 +4,7 @@ const isBrowserMode = ((process.env.VITE_BROWSER_MODE ?? '').toLowerCase() === '
 const isCI = ((process.env.CI ?? '').toLowerCase() === 'true');
 
 export default defineConfig({
-  define: { __BROWSER_MODE__: isBrowserMode },
+  define: { __BROWSER_MODE__: isBrowserMode, __IS_CI__: isCI },
   root: '.',
   assetsInclude: ['**/*.wasm', '**/*.dat'],
   test: {
