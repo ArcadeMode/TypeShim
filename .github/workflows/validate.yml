@@ -53,4 +53,4 @@ jobs:
         with:
           files: |
             **/*.trx
-            **/e2e-results.xml
+            **/e2e-report-*.xml

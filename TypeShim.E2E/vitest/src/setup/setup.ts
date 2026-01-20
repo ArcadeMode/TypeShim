@@ -1,10 +1,10 @@
 import { beforeAll } from 'vitest';
 import { dotnet } from '@typeshim/e2e-wasm-lib/dotnet';
 import { TypeShimInitializer } from '@typeshim/e2e-wasm-lib';
-import { e2eConfig } from '../e2e.config';
+import { isBrowserMode } from '../../vite.config.js';
 
 beforeAll(async () => {
-  if (!e2eConfig.browserMode) {
+  if (!isBrowserMode()) {
     const { serveFetchRequestsFromDisk } = await import('./fetch-from-disk.js');
     serveFetchRequestsFromDisk();
   }
