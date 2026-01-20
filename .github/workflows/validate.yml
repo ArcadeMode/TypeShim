@@ -40,12 +40,15 @@ jobs:
           node-version: '20'
           cache: npm
           cache-dependency-path: TypeShim.E2E/vitest/package-lock.json
-      - name: Init E2E (Node)
+      - name: Initialize E2E
         working-directory: TypeShim.E2E/vitest
         run: npm run initialize
       - name: Run E2E (Node)
         working-directory: TypeShim.E2E/vitest
-        run: npm test -- --reporter=junit --outputFile=e2e-results.xml
+        run: npm test:node
+      - name: Run E2E (Browser)
+        working-directory: TypeShim.E2E/vitest
+        run: npm test:browser
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2

@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:node": "cross-env BROWSER_MODE=false vitest run",
-    "test:browser": "cross-env BROWSER_MODE=true vitest run",
-    "initialize": "dotnet publish ../TypeShim.E2E.Wasm -c Release && node ./scripts/empty-map.mjs && npm ci",
+    "test:node": "cross-env VITE_BROWSER_MODE=false vitest run",
+    "test:browser": "cross-env VITE_BROWSER_MODE=true vitest run",
+    "initialize": "dotnet publish ../TypeShim.E2E.Wasm -c Release && node ./scripts/empty-map.mjs && npm ci && npx playwright install chromium --with-deps",
     "build": "dotnet publish ../TypeShim.E2E.Wasm -c Release && node ./scripts/empty-map.mjs"
   },
   "dependencies": {

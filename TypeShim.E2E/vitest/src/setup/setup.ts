@@ -1,7 +1,7 @@
 import { beforeAll } from 'vitest';
 import { dotnet } from '@typeshim/e2e-wasm-lib/dotnet';
 import { TypeShimInitializer } from '@typeshim/e2e-wasm-lib';
-import { isBrowserMode } from '../../vite.config.js';
+import { isBrowserMode } from '../../suite';
 
 beforeAll(async () => {
   if (!isBrowserMode()) {
