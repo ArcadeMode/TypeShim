@@ -1,6 +1,7 @@
 import { describe, test, expect, beforeEach } from 'vitest';
 import { ExportedClass, TaskPropertiesClass } from "@typeshim/e2e-wasm-lib";
 import { delay } from "./async";
+import { dateOnly, dateOffsetHour } from './date';
 import { isCI } from '../suite';
 
 describe('Task Properties Test', () => {
@@ -66,7 +67,7 @@ describe('Task Properties Test', () => {
         await delay(200); // wait longer than the task delay so its in completed state
         await expect(testObject.TaskOfLongProperty).resolves.toBe(450);
     });
-    
+
     test('Resolves Bool Task', async () => {
         await expect(testObject.TaskOfBoolProperty).resolves.toBe(true);
     });
@@ -85,10 +86,19 @@ describe('Task Properties Test', () => {
     test('Resolves DateTime Task', async () => {
         const result = await testObject.TaskOfDateTimeProperty;
         expect(result).toBeInstanceOf(Date);
+        console.log("DateTime result:", await testObject.TaskOfDateTimeProperty);
+        await delay(1000);
+        console.log("DateTime result:", await testObject.TaskOfDateTimeProperty);
+        await delay(1000);
+        console.log("DateTime result:", await testObject.TaskOfDateTimeProperty);
+        expect(result).toEqual(dateOnly(new Date(Date.now())));
+
     });
     test('Resolves DateTimeOffset Task', async () => {
         const result = await testObject.TaskOfDateTimeOffsetProperty;
         expect(result).toBeInstanceOf(Date);
+        console.log("DateTimeOffset result:", result);
+        expect(result).toEqual(dateOffsetHour(dateOnly(new Date(Date.now())), 1));
     }); 
     test('Resolves Object Task', async () => {
         const result = await testObject.TaskOfObjectProperty;
