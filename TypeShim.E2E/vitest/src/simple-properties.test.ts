@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, test, expect, beforeEach } from 'vitest';
 import { ExportedClass, SimplePropertiesTest, TaskPropertiesClass } from '@typeshim/e2e-wasm-lib';
 
 describe('Simple Properties Test', () => {
@@ -27,38 +27,38 @@ describe('Simple Properties Test', () => {
         });
     });
 
-    it('Snapshot has property-value equality', async () => {
+    test('Snapshot has property-value equality', async () => {
         expect(testObject).toBeDefined();
         const snapshot = SimplePropertiesTest.materialize(testObject);
         expect(testObject).toMatchObject(snapshot); // each property in snapshot should have a matching value in testObject
     });
-    it('Returns ExportedClass property correctly', () => {
+    test('Returns ExportedClass property correctly', () => {
         expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
         expect(testObject.ExportedClassProperty.Id).toBe(2);
     });
-    it('Returns JSObject property by reference', () => {
+    test('Returns JSObject property by reference', () => {
         expect(testObject.JSObjectProperty).toBe(jsObject);
         const obj = testObject.JSObjectProperty as any;
         obj.bar = 123;
         expect(testObject.JSObjectProperty).toHaveProperty("bar", 123);
         expect(testObject.JSObjectProperty).toHaveProperty("foo", "bar");
     });
-    it('Returns DateTime property as new instance', () => {
+    test('Returns DateTime property as new instance', () => {
         // dates are value object in dotnet, hence the new instance
         expect(testObject.DateTimeProperty).toBeInstanceOf(Date);
         expect(testObject.DateTimeProperty).not.toBe(dateNow);
         expect(testObject.DateTimeProperty).toEqual(dateNow);
     });
-    it('Returns DateTimeOffset property as new instance', () => {
+    test('Returns DateTimeOffset property as new instance', () => {
         // dates are value object in dotnet, hence the new instance
         expect(testObject.DateTimeOffsetProperty).toBeInstanceOf(Date);
         expect(testObject.DateTimeOffsetProperty).not.toBe(dateNow);
         expect(testObject.DateTimeOffsetProperty).toEqual(dateNow); 
     });
-    it('Returns Long property by value', () => {
+    test('Returns Long property by value', () => {
         expect(testObject.LongProperty).toBe(5);
     });
-    it('Mutates Long property', () => {
+    test('Mutates Long property', () => {
         testObject.LongProperty = 50;
         expect(testObject.LongProperty).toBe(50);
     });

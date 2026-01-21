@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, test, expect, beforeEach } from 'vitest';
 import { ArrayPropertiesClass, ExportedClass } from "@typeshim/e2e-wasm-lib";
 
 describe('Array Properties Test', () => {
@@ -17,13 +17,13 @@ describe('Array Properties Test', () => {
         });
     });
 
-    it('Does not mutate Byte array property', () => {
+    test('Byte array property', () => {
         const original = testObject.ByteArrayProperty.slice();
         testObject.ByteArrayProperty[0] = 42;
         expect(testObject.ByteArrayProperty).toStrictEqual(original);
     });
 
-    it('Does not mutate Int array property', () => {
+    test('Does not mutate Int array property', () => {
         const original = testObject.IntArrayProperty.slice();
         testObject.IntArrayProperty[0] = 42;
         expect(testObject.IntArrayProperty).toStrictEqual(original);
