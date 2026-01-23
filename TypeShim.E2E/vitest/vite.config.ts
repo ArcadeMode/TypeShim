@@ -18,7 +18,7 @@ export default defineConfig({
       enabled: isBrowserMode,
       name: 'chromium',
       provider: 'playwright',
-      headless: true,
+      headless: isCI,
       screenshotFailures: false
     },
     reporters: isCI ? [['junit', { suiteName: isBrowserMode ? 'E2E (Browser)' : 'E2E (Node)' }]] : ['default'],
