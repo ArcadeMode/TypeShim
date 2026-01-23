@@ -18,12 +18,8 @@ public class TaskPropertiesClass
     public Task<string> TaskOfStringProperty { get; set; } = Task.FromResult(string.Empty);
     public Task<double> TaskOfDoubleProperty { get; set; } = Task.FromResult(0.0);
     public Task<float> TaskOfFloatProperty { get; set; } = Task.FromResult(0.0f);
-    public Task<DateTime> TaskOfDateTimeProperty { get; set; } = Task.FromResult(new DateTime(DateTime.Now.Year-1, DateTime.Now.Month, DateTime.Now.Day)).ContinueWith(t =>
-    {
-        Console.WriteLine(t.Result);
-        return t.Result;
-    });
-    public Task<DateTimeOffset> TaskOfDateTimeOffsetProperty { get; set; } = Task.FromResult(new DateTimeOffset(new DateTime(DateTime.Now.Year+1, DateTime.Now.Month, DateTime.Now.Day), TimeSpan.FromHours(1)));
+    public Task<DateTime> TaskOfDateTimeProperty { get; set; } = Task.FromResult(DateTime.MinValue);
+    public Task<DateTimeOffset> TaskOfDateTimeOffsetProperty { get; set; } = Task.FromResult(DateTimeOffset.MinValue);
     public Task<object> TaskOfObjectProperty { get; set; } = Task.FromResult(new object());
     public Task<ExportedClass> TaskOfExportedClassProperty { get; set; } = Task.FromResult(new ExportedClass());
     public Task<JSObject> TaskOfJSObjectProperty { get; set; } = Task.FromException<JSObject>(new Exception("biem"));
