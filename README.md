@@ -4,9 +4,7 @@
 </p>
 
 ## Why TypeShim
-The [JSImport/JSExport API](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0), the backbone of [.NET Webassembly applications](https://github.com/dotnet/runtime/blob/74cf618d63c3d092eb91a9bb00ba8152cc2dfc76/src/mono/wasm/features.md), while powerful, is somewhat cumbersome to use. It requires repetitive code patterns and quite some boilerplate to use. The lack of class support mean that many method annotations have to be written for a lot of use cases. Finally there is no type information available to use in your TypeScript project.
-
-Enter: _TypeShim_. Drop one `[TSExport]` on your C# class(es) and _voilà_, TypeShim generates the necessary JSExport methods that perform repetitive type transformations and even class instantiations for you. The void that JSExport leaves on the JS side is filled with a rich TypeScript client that enables you to use your .NET classes as if they were truly exported to TypeScript. 
+Install TypeShim's NuGet package in your .NET WASM project, drop one `[TSExport]` on your C# class(es) and _voilà_, TypeShim generates your .NET-JS interop including rich TypeScript client. The TypeScript client enables you to use your .NET classes as if they were truly exported to TypeScript. Repetitive type transformations are automated, type safety is provided and you are free to continue on your awesome project.
 
 ## Features at a glance
 
