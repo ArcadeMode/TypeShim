@@ -46,7 +46,10 @@ describe('Simple Functions Test', () => {
     test('DateTimeOffset returning parameterless method', () => {
         const result = testObject.DateTimeOffsetMethod();
         expect(result).toBeInstanceOf(Date);
-        expect(result).toEqual(dateOffsetHour(new Date(1995, 3, 1), 1));
+
+        var expectedUtcMillis = Date.UTC(1998, 3, 20);
+        const dateWithTimezoneOffset = dateOffsetHour(new Date(expectedUtcMillis), -3);
+        expect(result).toEqual(dateWithTimezoneOffset);
     });
 
     test('ExportedClass returning parameterless method', () => {
