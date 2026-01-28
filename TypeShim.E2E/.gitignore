@@ -1,0 +1,7 @@
+TypeShim.E2E.Wasm/bin
+TypeShim.E2E.Wasm/obj
+wasm-lib-publish
+vitest/dist
+vitest/node_modules
+vitest/__screenshots__
+e2e-report-*.xml

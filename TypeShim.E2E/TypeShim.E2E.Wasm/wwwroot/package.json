@@ -1,0 +1,10 @@
+{
+  "name": "@typeshim/e2e-wasm-lib",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./typeshim.ts",
+    "./dotnet": "./main.js"
+  }
+}
