@@ -1,7 +1,16 @@
 ﻿
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace TypeShim.Shared;
+
+internal sealed record TypeScriptFunctionParameterTemplate(string name, TypeScriptSymbolNameTemplate typeTemplate)
+{
+    internal string Render(string suffix = "")
+    {
+        return $"{name}: {typeTemplate.Render(suffix)}";
+    }
+}
 
 internal sealed class TypeScriptSymbolNameTemplate
 {
@@ -65,6 +74,16 @@ internal sealed class TypeScriptSymbolNameTemplate
         {
             Template = $"{InnerPlaceholder} | null",
             InnerTemplate = innerTemplate
+        };
+    }
+    
+    internal static TypeScriptSymbolNameTemplate ForDelegateType(TypeScriptFunctionParameterTemplate[] parameterTemplates, TypeScriptSymbolNameTemplate returnTypeTemplate)
+    {
+        return new TypeScriptSymbolNameTemplate
+        {
+            // TODO: restructure class to support function types better (now cannot render suffixes for parameter types)
+            Template = $"({string.Join(",", parameterTemplates.Select(t => t.Render()))}): {returnTypeTemplate.Render()}",
+            InnerTemplate = null
         };
     }
 }

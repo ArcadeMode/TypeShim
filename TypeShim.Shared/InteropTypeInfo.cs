@@ -1,10 +1,16 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace TypeShim.Shared;
 
+internal sealed class DelegateArgumentInfo
+{
+    public required InteropTypeInfo ReturnType { get; init; }
+    public required InteropTypeInfo[] ParameterTypes { get; init; }
+}
 internal sealed class InteropTypeInfo
 {
     public required KnownManagedType ManagedType { get; init; }
@@ -29,13 +35,18 @@ internal sealed class InteropTypeInfo
     public required TypeScriptSymbolNameTemplate TypeScriptInteropTypeSyntax { get; init; }
 
     /// <summary>
-    /// Tasks and Arrays _may_ have type arguments
+    /// Tasks and Arrays _may_ have type arguments. Nullables always do.
     /// </summary>
     public required InteropTypeInfo? TypeArgument { get; init; }
 
-    public required bool IsTaskType { get; init; }
-    public required bool IsArrayType { get; init; }
-    public required bool IsNullableType { get; init; }
+    /// <summary>
+    /// For delegates
+    /// </summary>
+    public required DelegateArgumentInfo? ArgumentInfo { get; init; }
+
+    public required bool IsTaskType { get; init; } // TODO: swap out for KnownManagedType check?
+    public required bool IsArrayType { get; init; } // TODO: swap out for KnownManagedType check?
+    public required bool IsNullableType { get; init; } // TODO: swap out for KnownManagedType check?
 
     public required bool IsTSExport { get; init; }
     public required bool RequiresTypeConversion { get; init; }
@@ -72,6 +83,11 @@ internal sealed class InteropTypeInfo
             IsArrayType = this.IsArrayType,
             IsNullableType = this.IsNullableType,
             TypeArgument = TypeArgument?.AsInteropTypeInfo(),
+            ArgumentInfo = this.ArgumentInfo is null ? null : new DelegateArgumentInfo() 
+            {
+                ParameterTypes = [.. this.ArgumentInfo.ParameterTypes.Select(argType => argType.AsInteropTypeInfo())],
+                ReturnType = this.ArgumentInfo.ReturnType.AsInteropTypeInfo()
+            },
             RequiresTypeConversion = false,
             SupportsTypeConversion = false,
         };
@@ -91,6 +107,7 @@ internal sealed class InteropTypeInfo
         IsNullableType = false,
         RequiresTypeConversion = false,
         TypeArgument = null,
+        ArgumentInfo = null,
         SupportsTypeConversion = false,
     };
 }
