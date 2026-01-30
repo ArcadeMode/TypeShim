@@ -93,4 +93,14 @@ describe('Delegates Test', () => {
         });
         expect(result).toBe(true);
     });
+
+    test('ExportedClass Action', async () => {
+        let receivedInstance: ExportedClass = null as any;
+        testObject.InvokeExportedClassAction((arg0: ExportedClass) => {
+            receivedInstance = arg0;
+        });
+        expect(receivedInstance).not.toBeNull();
+        expect(receivedInstance).toBeInstanceOf(ExportedClass);
+        expect(receivedInstance.Id).toBe(100);
+    });
 });

@@ -48,6 +48,8 @@ internal sealed class InteropTypeInfo
     public required bool IsArrayType { get; init; } // TODO: swap out for KnownManagedType check?
     public required bool IsNullableType { get; init; } // TODO: swap out for KnownManagedType check?
 
+    public bool IsDelegateType() => ManagedType is KnownManagedType.Function or KnownManagedType.Action;
+
     public required bool IsTSExport { get; init; }
     public required bool RequiresTypeConversion { get; init; }
     public required bool SupportsTypeConversion { get; init; }

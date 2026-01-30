@@ -71,16 +71,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                .Append('(');
             RenderParameterList(methodInfo.Parameters);
             ctx.Append("): ");
-
-            if (methodInfo.ReturnType is { RequiresTypeConversion: true, SupportsTypeConversion: true })
-            {
-                string returnTypeAsProxy = ctx.SymbolMap.GetUserClassSymbolName(methodInfo.ReturnType, TypeShimSymbolType.Proxy);
-                ctx.Append(returnTypeAsProxy);
-            }
-            else
-            {
-                ctx.Append(methodInfo.ReturnType.TypeScriptTypeSyntax.Render());
-            }
+            RenderReturnType(methodInfo);
         }
     }
 
@@ -102,16 +93,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             ctx.Append($"public ");
             if (methodInfo.IsStatic) ctx.Append("static ");
             ctx.Append("get ").Append(propertyInfo.Name).Append("(): ");
-
-            if (methodInfo.ReturnType is { RequiresTypeConversion: true, SupportsTypeConversion: true })
-            {
-                string returnTypeAsProxy = ctx.SymbolMap.GetUserClassSymbolName(methodInfo.ReturnType, TypeShimSymbolType.Proxy);
-                ctx.Append(returnTypeAsProxy);
-            }
-            else
-            {
-                ctx.Append(methodInfo.ReturnType.TypeScriptTypeSyntax.Render());
-            }
+            RenderReturnType(methodInfo);
         }
 
         void RenderProxyPropertySetterSignature(MethodInfo methodInfo)
@@ -131,14 +113,25 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         {
             if (!isFirst) ctx.Append(", ");
 
-            ctx.Append(parameterInfo.Name).Append(": ").Append(ResolveReturnType(parameterInfo.Type));
+            ctx.Append(parameterInfo.Name).Append(": ").Append(ResolveParameterType(parameterInfo.Type));
             isFirst = false;
         }
 
-        string ResolveReturnType(InteropTypeInfo typeInfo)
+        string ResolveParameterType(InteropTypeInfo typeInfo)
         {
             if (!typeInfo.RequiresTypeConversion || !typeInfo.SupportsTypeConversion)
             {
+                return typeInfo.TypeScriptTypeSyntax.Render();
+            }
+
+            if (typeInfo.IsDelegateType())
+            {
+                // delegate parameters, are not to be invoked from JS.
+                // Thus,
+                // return types are always proxies
+                // parameters are always proxies
+
+                // TODO: implement delegate parameter type rendering properly
                 return typeInfo.TypeScriptTypeSyntax.Render();
             }
 
@@ -148,6 +141,31 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                 : TypeShimSymbolType.Proxy;
 
             return ctx.SymbolMap.GetUserClassSymbolName(classInfo, typeInfo, symbolName);
+        }
+    }
+
+    private void RenderReturnType(MethodInfo methodInfo)
+    {
+        if (methodInfo.ReturnType is not { RequiresTypeConversion: true, SupportsTypeConversion: true })
+        {
+            ctx.Append(methodInfo.ReturnType.TypeScriptTypeSyntax.Render());
+            return;
+        }
+
+        if (methodInfo.ReturnType.IsDelegateType())
+        {
+            // delegate return types are to be invoked from JS (or passed back as a parameter elsewhere??)
+            // thus,
+            // return types are always proxies
+            // arguments are either proxies or initializers
+
+            // TODO: implement delegate return type rendering properly
+            ctx.Append(methodInfo.ReturnType.TypeScriptTypeSyntax.Render());
+        }
+        else
+        {
+            string returnTypeAsProxy = ctx.SymbolMap.GetUserClassSymbolName(methodInfo.ReturnType, TypeShimSymbolType.Proxy);
+            ctx.Append(returnTypeAsProxy);
         }
     }
 
@@ -248,6 +266,12 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                 ctx.Append(sourceVarName).Append('.').Append(transformFunction).Append("(e => ");
                 RenderInlineHandleExtraction(typeInfo.TypeArgument!, proxyClassName, "e");
                 ctx.Append(')');
+            }
+            else if (typeInfo.IsDelegateType())
+            {
+                // delegate parameters need to be wrapped in another delegate that extracts the handle
+                //ctx.Append($"(e => ProxyBase.fromHandle({proxyClassName}, e))");
+                // TODO: implement delegate parameter handle extraction properly
             }
             else
             {

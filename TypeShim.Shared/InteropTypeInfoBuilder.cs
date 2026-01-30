@@ -38,6 +38,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
     private InteropTypeInfo BuildFunctionTypeInfo(JSFunctionTypeInfo functionTypeInfo, TypeSyntax clrTypeSyntax)
     {
         (InteropTypeInfo[] argTypeInfos, InteropTypeInfo returnTypeInfo) = GetArgumentTypeInfos(typeSymbol);
+        InteropTypeInfo[] allArgTypeInfos = [.. argTypeInfos, returnTypeInfo];
         TypeScriptFunctionParameterTemplate[] tsParameterTemplates = [.. argTypeInfos.Select((InteropTypeInfo typeInfo, int i) =>
             new TypeScriptFunctionParameterTemplate($"arg{i}", GetSimpleTypeScriptSymbolTemplate(typeInfo.ManagedType, typeInfo.CSharpTypeSyntax, typeInfo.RequiresTypeConversion, typeInfo.SupportsTypeConversion))
         )];
@@ -65,8 +66,8 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             IsArrayType = false,
             IsNullableType = false,
             IsTSExport = IsTSExport,
-            RequiresTypeConversion = false,
-            SupportsTypeConversion = false
+            RequiresTypeConversion = allArgTypeInfos.Any(info => info.RequiresTypeConversion),
+            SupportsTypeConversion = allArgTypeInfos.Any(info => info.RequiresTypeConversion && info.SupportsTypeConversion)
         };
     }
 

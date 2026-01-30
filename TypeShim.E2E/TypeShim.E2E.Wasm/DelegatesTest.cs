@@ -56,4 +56,8 @@ public class DelegatesTest
         return func(true);
     }
 
+    public void InvokeExportedClassAction(Action<ExportedClass> action)
+    {
+        action(new ExportedClass { Id = 100 });
+    }
 }
