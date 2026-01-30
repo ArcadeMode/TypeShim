@@ -82,7 +82,7 @@ internal sealed class TypeScriptSymbolNameTemplate
         return new TypeScriptSymbolNameTemplate
         {
             // TODO: restructure class to support function types better (now cannot render suffixes for parameter types)
-            Template = $"({string.Join(",", parameterTemplates.Select(t => t.Render()))}): {returnTypeTemplate.Render()}",
+            Template = $"({string.Join(",", parameterTemplates.Select(t => t.Render()))}) => {returnTypeTemplate.Render()}",
             InnerTemplate = null
         };
     }
