@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace TypeShim.Shared;
 
@@ -14,8 +15,9 @@ internal sealed record TypeScriptFunctionParameterTemplate(string name, TypeScri
 
 internal sealed class TypeScriptSymbolNameTemplate
 {
-    internal required string Template { get; init; }
-    internal required TypeScriptSymbolNameTemplate? InnerTemplate { get; init; }
+    private string Template { get; init; } = null!;
+    //private TypeScriptSymbolNameTemplate? InnerTemplate { get; init; }
+    private Dictionary<string, TypeScriptSymbolNameTemplate> InnerTemplates { get; init; } = []; 
     
     private const string InnerPlaceholder = "{INNER_PLACEHOLDER}";
     private const string SuffixPlaceholder = "{SUFFIX_PLACEHOLDER}";
@@ -23,10 +25,10 @@ internal sealed class TypeScriptSymbolNameTemplate
     internal string Render(string suffix = "")
     {
         string template = Template;
-        if (InnerTemplate is not null)
+
+        foreach (KeyValuePair<string, TypeScriptSymbolNameTemplate> kvp in InnerTemplates)
         {
-            string inner = InnerTemplate.Render(suffix);
-            template = template.Replace(InnerPlaceholder, inner);
+            template = template.Replace(kvp.Key, kvp.Value.Render(suffix));
         }
 
         return template.Replace(SuffixPlaceholder, suffix);
@@ -37,7 +39,6 @@ internal sealed class TypeScriptSymbolNameTemplate
         return new TypeScriptSymbolNameTemplate
         {
             Template = $"{originalTypeSyntax}{SuffixPlaceholder}",
-            InnerTemplate = null
         };
     }
 
@@ -46,7 +47,6 @@ internal sealed class TypeScriptSymbolNameTemplate
         return new TypeScriptSymbolNameTemplate
         {
             Template = typeName,
-            InnerTemplate = null
         };
     }
 
@@ -54,17 +54,25 @@ internal sealed class TypeScriptSymbolNameTemplate
     {
         return new TypeScriptSymbolNameTemplate
         {
-            Template = $"Array<{InnerPlaceholder}>",
-            InnerTemplate = innerTemplate
+            Template = "Array<{TElement}>",
+            InnerTemplates = { { "{TElement}", innerTemplate } }
         };
     }
 
     internal static TypeScriptSymbolNameTemplate ForPromiseType(TypeScriptSymbolNameTemplate? innerTemplate)
     {
+        if (innerTemplate == null)
+        {
+            return new TypeScriptSymbolNameTemplate
+            {
+                Template = "Promise<void>",
+                InnerTemplates = []
+            };
+        }
         return new TypeScriptSymbolNameTemplate
         {
-            Template = innerTemplate != null ? $"Promise<{InnerPlaceholder}>" : "Promise<void>",
-            InnerTemplate = innerTemplate
+            Template = "Promise<{TValue}>",
+            InnerTemplates = { { "{TValue}", innerTemplate } }
         };
     }
 
@@ -72,8 +80,8 @@ internal sealed class TypeScriptSymbolNameTemplate
     {
         return new TypeScriptSymbolNameTemplate
         {
-            Template = $"{InnerPlaceholder} | null",
-            InnerTemplate = innerTemplate
+            Template = "{TNullableValue} | null",
+            InnerTemplates = { { "{TNullableValue}", innerTemplate } }
         };
     }
     
@@ -83,7 +91,7 @@ internal sealed class TypeScriptSymbolNameTemplate
         {
             // TODO: restructure class to support function types better (now cannot render suffixes for parameter types)
             Template = $"({string.Join(", ", parameterTemplates.Select(t => t.Render()))}) => {returnTypeTemplate.Render()}",
-            InnerTemplate = null
+            InnerTemplates = []
         };
     }
 }
