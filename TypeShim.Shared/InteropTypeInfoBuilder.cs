@@ -39,12 +39,12 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
     {
         (InteropTypeInfo[] argTypeInfos, InteropTypeInfo returnTypeInfo) = GetArgumentTypeInfos(typeSymbol);
         TypeScriptFunctionParameterTemplate[] tsParameterTemplates = [.. argTypeInfos.Select((InteropTypeInfo typeInfo, int i) =>
-            new TypeScriptFunctionParameterTemplate($"a{i}", GetSimpleTypeScriptSymbolTemplate(typeInfo.ManagedType, typeInfo.CSharpTypeSyntax, typeInfo.RequiresTypeConversion, typeInfo.SupportsTypeConversion))
+            new TypeScriptFunctionParameterTemplate($"arg{i}", GetSimpleTypeScriptSymbolTemplate(typeInfo.ManagedType, typeInfo.CSharpTypeSyntax, typeInfo.RequiresTypeConversion, typeInfo.SupportsTypeConversion))
         )];
         TypeScriptSymbolNameTemplate tsSyntax = TypeScriptSymbolNameTemplate.ForDelegateType(tsParameterTemplates, GetSimpleTypeScriptSymbolTemplate(returnTypeInfo.ManagedType, returnTypeInfo.CSharpTypeSyntax, returnTypeInfo.RequiresTypeConversion, returnTypeInfo.SupportsTypeConversion));
         
         TypeScriptFunctionParameterTemplate[] tsInteropParameterTemplates = [.. argTypeInfos.Select((InteropTypeInfo typeInfo, int i) =>
-            new TypeScriptFunctionParameterTemplate($"a{i}", GetSimpleTypeScriptSymbolTemplate(typeInfo.ManagedType, typeInfo.CSharpTypeSyntax, typeInfo.RequiresTypeConversion, typeInfo.SupportsTypeConversion))
+            new TypeScriptFunctionParameterTemplate($"arg{i}", GetSimpleTypeScriptSymbolTemplate(typeInfo.ManagedType, typeInfo.CSharpTypeSyntax, typeInfo.RequiresTypeConversion, typeInfo.SupportsTypeConversion))
         )];
         TypeScriptSymbolNameTemplate tsInteropSyntax = TypeScriptSymbolNameTemplate.ForDelegateType(tsInteropParameterTemplates, GetInteropSimpleTypeScriptSymbolTemplate(returnTypeInfo.ManagedType, returnTypeInfo.CSharpTypeSyntax));
         return new InteropTypeInfo
