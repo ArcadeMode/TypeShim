@@ -12,7 +12,7 @@ using System.Linq;
 
 internal abstract record JSTypeInfo(KnownManagedType KnownType)
 {
-    public TypeSyntax? GetTypeSyntax()
+    public TypeSyntax GetTypeSyntax()
     {
         return this switch
         {
@@ -42,9 +42,29 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
                         tti.ResultTypeInfo.GetTypeSyntax() ?? SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword))))),
             JSNullableTypeInfo nti => SyntaxFactory.NullableType(
                 nti.ResultTypeInfo.GetTypeSyntax() ?? SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword))),
-            JSFunctionTypeInfo fti => throw new NotImplementedException("Function syntax not implemented"),
-            _ => null,
+            JSFunctionTypeInfo fti => GetFunctionTypeSyntax(fti),
+            _ => throw new NotSupportedTypeException($"JS type '{this.GetType()}' with KnownManagedType '{KnownType}' is not supported for type syntax generation"),
         };
+    }
+
+    private static TypeSyntax GetFunctionTypeSyntax(JSFunctionTypeInfo fti)
+    {
+        // - Action: 0 args => Action
+        // - Action<T1..Tn>: n args => Action<T1..Tn>
+        // - Func<T1..Tn, TReturn>: args + return => Func<T1..Tn, TReturn>
+        string identifier = fti.IsAction ? "Action" : "Func";
+
+        if (fti.ArgsTypeInfo.Length == 0)
+        {
+            return SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(identifier));
+        }
+
+        SeparatedSyntaxList<TypeSyntax> typeArgs = SyntaxFactory.SeparatedList<TypeSyntax>(
+            fti.ArgsTypeInfo.Select(x => x.Syntax));
+
+        return SyntaxFactory.GenericName(
+            SyntaxFactory.Identifier(identifier),
+            SyntaxFactory.TypeArgumentList(typeArgs));
     }
 
     public static JSTypeInfo CreateJSTypeInfoForTypeSymbol(ITypeSymbol type)

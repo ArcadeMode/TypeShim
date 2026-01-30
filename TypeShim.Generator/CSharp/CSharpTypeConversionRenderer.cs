@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.CodeAnalysis;
+using System.Diagnostics;
 using TypeShim.Generator.Parsing;
 using TypeShim.Shared;
 

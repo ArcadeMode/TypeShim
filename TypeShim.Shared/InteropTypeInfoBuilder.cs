@@ -51,7 +51,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         {
             ManagedType = functionTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(functionTypeInfo, clrTypeSyntax),
-            CSharpInteropTypeSyntax = GetInteropTypeSyntax(functionTypeInfo),
+            CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(functionTypeInfo),
             CSharpTypeSyntax = clrTypeSyntax,
             TypeScriptTypeSyntax = tsSyntax,
             TypeScriptInteropTypeSyntax = tsInteropSyntax,
@@ -107,7 +107,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         {
             ManagedType = simpleTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(simpleTypeInfo, clrTypeSyntax),
-            CSharpInteropTypeSyntax = GetInteropTypeSyntax(simpleTypeInfo),
+            CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(simpleTypeInfo),
             CSharpTypeSyntax = clrTypeSyntax,
             TypeScriptTypeSyntax = GetSimpleTypeScriptSymbolTemplate(simpleTypeInfo.KnownType, clrTypeSyntax, requiresTypeConversion, supportsTypeConversion),
             TypeScriptInteropTypeSyntax = GetInteropSimpleTypeScriptSymbolTemplate(simpleTypeInfo.KnownType, clrTypeSyntax),
@@ -148,7 +148,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         {
             ManagedType = arrayTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(arrayTypeInfo, clrTypeSyntax),
-            CSharpInteropTypeSyntax = GetInteropTypeSyntax(arrayTypeInfo),
+            CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(arrayTypeInfo),
             CSharpTypeSyntax = clrTypeSyntax,
             TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForArrayType(elementTypeInfo.TypeScriptTypeSyntax),
             TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForArrayType(elementTypeInfo.TypeScriptInteropTypeSyntax),
@@ -181,7 +181,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         {
             ManagedType = taskTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(taskTypeInfo, clrTypeSyntax),
-            CSharpInteropTypeSyntax = GetInteropTypeSyntax(taskTypeInfo),
+            CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(taskTypeInfo),
             CSharpTypeSyntax = clrTypeSyntax,
             TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForPromiseType(taskReturnTypeInfo?.TypeScriptTypeSyntax),
             TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForPromiseType(taskReturnTypeInfo?.TypeScriptInteropTypeSyntax),
@@ -217,7 +217,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         {
             ManagedType = nullableTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(nullableTypeInfo, clrTypeSyntax),
-            CSharpInteropTypeSyntax = GetInteropTypeSyntax(nullableTypeInfo),
+            CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(nullableTypeInfo),
             CSharpTypeSyntax = clrTypeSyntax,
             TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForNullableType(innerTypeInfo.TypeScriptTypeSyntax),
             TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForNullableType(innerTypeInfo.TypeScriptInteropTypeSyntax),
@@ -248,14 +248,15 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         }
     }
 
-    private static TypeSyntax GetInteropTypeSyntax(JSTypeInfo jsTypeInfo)
+    private static TypeSyntax GetCSInteropTypeSyntax(JSTypeInfo jsTypeInfo)
     {
         return jsTypeInfo switch
         {
             JSSimpleTypeInfo simpleTypeInfo => simpleTypeInfo.Syntax,
             JSArrayTypeInfo arrayTypeInfo => arrayTypeInfo.GetTypeSyntax(),
             JSTaskTypeInfo taskTypeInfo => taskTypeInfo.GetTypeSyntax(),
-            JSNullableTypeInfo nullableTypeInfo => SyntaxFactory.NullableType(GetInteropTypeSyntax(nullableTypeInfo.ResultTypeInfo)),
+            JSNullableTypeInfo nullableTypeInfo => SyntaxFactory.NullableType(GetCSInteropTypeSyntax(nullableTypeInfo.ResultTypeInfo)),
+            JSFunctionTypeInfo functionTypeInfo => functionTypeInfo.GetTypeSyntax().NormalizeWhitespace(),
             _ => throw new NotSupportedTypeException("Unsupported JSTypeInfo for interop type syntax generation"),
         } ?? throw new ArgumentException($"Invalid JSTypeInfo of known type '{jsTypeInfo.KnownType}' yielded no syntax");
     }
