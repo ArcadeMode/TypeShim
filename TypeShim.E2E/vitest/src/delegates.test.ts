@@ -9,7 +9,7 @@ describe('Delegates Test', () => {
         testObject = new DelegatesTest();
     });
 
-    test('Void Action', async () => {
+    test('Invoke Void Action', async () => {
         let isInvoked = false;
         testObject.InvokeVoidAction(() => {
             isInvoked = true;
@@ -17,7 +17,7 @@ describe('Delegates Test', () => {
         expect(isInvoked).toBe(true);
     });
 
-    test('String Action', async () => {
+    test('Invoke String Action', async () => {
         let receivedString = "";
         testObject.InvokeStringAction((arg0: string) => {
             receivedString = arg0;
@@ -25,7 +25,7 @@ describe('Delegates Test', () => {
         expect(receivedString).toBe("Hello");
     });
     
-    test('Int32 Action', async () => {
+    test('Invoke Int32 Action', async () => {
         let receivedInt = 0;
         testObject.InvokeInt32Action((arg0: number) => {
             receivedInt = arg0;
@@ -33,7 +33,7 @@ describe('Delegates Test', () => {
         expect(receivedInt).toBe(42);
     });
 
-    test('Bool Action', async () => {
+    test('Invoke Bool Action', async () => {
         let receivedBool = false;
         testObject.InvokeBoolAction((arg0: boolean) => {
             receivedBool = arg0;
@@ -41,7 +41,7 @@ describe('Delegates Test', () => {
         expect(receivedBool).toBe(true);
     });
 
-    test('Bool2 Action', async () => {
+    test('Invoke Bool2 Action', async () => {
         let receivedBool1 = false;
         let receivedBool2 = false;
         testObject.InvokeBool2Action((arg0: boolean, arg1: boolean) => {
@@ -52,7 +52,7 @@ describe('Delegates Test', () => {
         expect(receivedBool2).toBe(false);
     });
 
-    test('Bool3 Action', async () => {
+    test('Invoke Bool3 Action', async () => {
         let receivedBool1 = false;
         let receivedBool2 = false;
         let receivedBool3 = false;
@@ -66,35 +66,35 @@ describe('Delegates Test', () => {
         expect(receivedBool3).toBe(true);
     });
 
-    test('String Func', async () => {
+    test('Invoke String Func', async () => {
         const result = testObject.InvokeStringFunc(() => {
             return "Hello World";
         });
         expect(result).toBe("Hello World");
     }); 
 
-    test('Int32 Func', async () => {
+    test('Invoke Int32 Func', async () => {
         const result = testObject.InvokeInt32Func(() => {
             return 12345;
         });
         expect(result).toBe(12345);
     });
 
-    test('Bool Func', async () => {
+    test('Invoke Bool Func', async () => {
         const result = testObject.InvokeBoolFunc(() => {
             return true;
         });
         expect(result).toBe(true);
     });
 
-    test('Bool2 Func', async () => {
+    test('Invoke Bool2 Func', async () => {
         const result = testObject.InvokeBool2Func((arg0: boolean) => {
             return arg0;
         });
         expect(result).toBe(true);
     });
 
-    test('ExportedClass Action', async () => {
+    test('Invoke ExportedClass Action', async () => {
         let receivedInstance: ExportedClass = null as any;
         testObject.InvokeExportedClassAction((arg0: ExportedClass) => {
             receivedInstance = arg0;
@@ -102,5 +102,13 @@ describe('Delegates Test', () => {
         expect(receivedInstance).not.toBeNull();
         expect(receivedInstance).toBeInstanceOf(ExportedClass);
         expect(receivedInstance.Id).toBe(100);
+    });
+
+    test('Get ExportedClass Func', async () => {
+        const fn = testObject.GetExportedClassFunc();
+        const exportedInstance = fn();
+        expect(exportedInstance).not.toBeNull();
+        expect(exportedInstance).toBeInstanceOf(ExportedClass);
+        expect(exportedInstance.Id).toBe(200);
     });
 });

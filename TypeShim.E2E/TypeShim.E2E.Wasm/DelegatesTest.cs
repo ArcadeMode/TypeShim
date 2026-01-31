@@ -60,4 +60,8 @@ public class DelegatesTest
     {
         action(new ExportedClass { Id = 100 });
     }
+
+    public Func<ExportedClass> GetExportedClassFunc() {
+        return () => new ExportedClass { Id = 200 };
+    }
 }
