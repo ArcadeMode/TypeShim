@@ -1,36 +1,18 @@
-﻿
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text;
 
 namespace TypeShim.Shared;
 
-internal sealed record TypeScriptFunctionParameterTemplate(string Name, TypeScriptSymbolNameTemplate TypeTemplate)
-{
-    internal string Render(string suffix = "")
-    {
-        return $"{Name}: {TypeTemplate.Render(suffix)}";
-    }
-}
+internal sealed record TypeScriptFunctionParameterTemplate(string Name, TypeScriptSymbolNameTemplate TypeTemplate);
 
 internal sealed class TypeScriptSymbolNameTemplate
 {
-    private string Template { get; init; } = null!;
-    private Dictionary<string, InteropTypeInfo> InnerTypes { get; init; } = []; 
+    internal string Template { get; init; } = null!;
+    internal Dictionary<string, InteropTypeInfo> InnerTypes { get; init; } = []; 
     
-    private const string SuffixPlaceholder = "{SUFFIX_PLACEHOLDER}";
-
-    internal string Render(string suffix = "") // PUT SYMBOLTYPE HERE
-    {
-        string template = Template;
-
-        foreach (KeyValuePair<string, InteropTypeInfo> kvp in InnerTypes)
-        {
-            template = template.Replace(kvp.Key, kvp.Value.TypeScriptInteropTypeSyntax.Render(suffix));
-        }
-
-        return template.Replace(SuffixPlaceholder, suffix);
-    }
+    internal const string SuffixPlaceholder = "{SUFFIX_PLACEHOLDER}";
 
     internal static TypeScriptSymbolNameTemplate ForUserType(string originalTypeSyntax)
     {
@@ -82,14 +64,25 @@ internal sealed class TypeScriptSymbolNameTemplate
         };
     }
     
-    internal static TypeScriptSymbolNameTemplate ForDelegateType(TypeScriptFunctionParameterTemplate[] parameterTemplates, TypeScriptSymbolNameTemplate returnTypeTemplate)
+    internal static TypeScriptSymbolNameTemplate ForDelegateType(DelegateArgumentInfo argumentInfo)
     {
-        Dictionary<string, TypeScriptSymbolNameTemplate> paramTypeDict = parameterTemplates.ToDictionary(pt => $"{{T{pt.Name}}}", pt => pt.TypeTemplate);
-        KeyValuePair<string, TypeScriptSymbolNameTemplate> returnTypeKvp = new("{TReturn}", returnTypeTemplate);
+        Dictionary<string, InteropTypeInfo> paramTypeDict = [.. argumentInfo.ParameterTypes.Select((typeInfo, i) => new KeyValuePair<string, InteropTypeInfo>($"{{TArg{i}}}", typeInfo))];
+        KeyValuePair<string, InteropTypeInfo> returnTypeKvp = new("{TReturn}", argumentInfo.ReturnType);
+
+        StringBuilder templateBuilder = new();
+        templateBuilder.Append('(');
+        int i = 0;
+        foreach (KeyValuePair<string, InteropTypeInfo> typeInfo in paramTypeDict)
+        {
+            if (i > 0) templateBuilder.Append(", ");
+            templateBuilder.Append(typeInfo.Key).Append(": ").Append(typeInfo.Value);
+            i++;
+        }
+        templateBuilder.Append(") => ").Append(returnTypeKvp.Key);
         return new TypeScriptSymbolNameTemplate
         {
-            Template = $"({string.Join(", ", paramTypeDict.Keys)}) => {returnTypeKvp.Key}",
-            InnerTemplates = [..paramTypeDict, returnTypeKvp]
+            Template = templateBuilder.ToString(),
+            InnerTypes = [..paramTypeDict, returnTypeKvp]
         };
     }
 }
