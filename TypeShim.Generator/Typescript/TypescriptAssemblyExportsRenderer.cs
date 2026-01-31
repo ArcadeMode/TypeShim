@@ -64,21 +64,15 @@ internal sealed class TypescriptAssemblyExportsRenderer(
             if (!isFirst) ctx.Append(", ");
 
             ctx.Append(parameterInfo.Name).Append(": ");
-            if (!parameterInfo.IsInjectedInstanceParameter // TODO: remove IsInjectedInstanceParameter property and split into separate methodInfo property
-                && parameterInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true } 
-                && ctx.SymbolMap.GetClassInfo(parameterInfo.Type.GetInnermostType()) is { Constructor: { IsParameterless: true, AcceptsInitializer: true } })
-            {
-                // parameter's type can be constructed from an initializer object
-                ctx.Append(parameterInfo.Type.TypeScriptInteropTypeSyntax.Render(suffix: " | object"));
-            }
-            else
-            {
-                ctx.Append(parameterInfo.Type.TypeScriptInteropTypeSyntax.Render());
-            }
-            
+
+            // TODO: remove IsInjectedInstanceParameter property and split into separate methodInfo property
+            TypeShimSymbolType symbolType = parameterInfo.IsInjectedInstanceParameter ? TypeShimSymbolType.Proxy : TypeShimSymbolType.ProxyInitializerUnion;
+            string typeName = TypeScriptSymbolNameRenderer.Render(parameterInfo.Type, ctx, symbolType, interop: true);
+            ctx.Append(typeName);
             isFirst = false;
         }
-        ctx.Append("): ").Append(returnType.TypeScriptInteropTypeSyntax.Render()).AppendLine(";");
+        string returnTypeName = TypeScriptSymbolNameRenderer.Render(returnType, ctx, TypeShimSymbolType.Proxy, interop: true);
+        ctx.Append("): ").Append(returnTypeName).AppendLine(";");
     }
 
     private static IEnumerable<MethodInfo> GetAllMethods(ClassInfo classInfo)
