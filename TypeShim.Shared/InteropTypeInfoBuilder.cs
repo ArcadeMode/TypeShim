@@ -39,15 +39,18 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
     {
         (InteropTypeInfo[] argTypeInfos, InteropTypeInfo returnTypeInfo) = GetArgumentTypeInfos(typeSymbol);
         InteropTypeInfo[] allArgTypeInfos = [.. argTypeInfos, returnTypeInfo];
+
+        DelegateArgumentInfo argumentInfo = new()
+        {
+            ParameterTypes = argTypeInfos,
+            ReturnType = returnTypeInfo
+        };
+
         TypeScriptFunctionParameterTemplate[] tsParameterTemplates = [.. argTypeInfos.Select((InteropTypeInfo typeInfo, int i) =>
             new TypeScriptFunctionParameterTemplate($"arg{i}", GetSimpleTypeScriptSymbolTemplate(typeInfo.ManagedType, typeInfo.CSharpTypeSyntax, typeInfo.RequiresTypeConversion, typeInfo.SupportsTypeConversion))
         )];
-        TypeScriptSymbolNameTemplate tsSyntax = TypeScriptSymbolNameTemplate.ForDelegateType(tsParameterTemplates, GetSimpleTypeScriptSymbolTemplate(returnTypeInfo.ManagedType, returnTypeInfo.CSharpTypeSyntax, returnTypeInfo.RequiresTypeConversion, returnTypeInfo.SupportsTypeConversion));
+        TypeScriptSymbolNameTemplate tsSyntax = TypeScriptSymbolNameTemplate.ForDelegateType(argumentInfo);
         
-        TypeScriptFunctionParameterTemplate[] tsInteropParameterTemplates = [.. argTypeInfos.Select((InteropTypeInfo typeInfo, int i) =>
-            new TypeScriptFunctionParameterTemplate($"arg{i}", GetSimpleTypeScriptSymbolTemplate(typeInfo.ManagedType, typeInfo.CSharpTypeSyntax, typeInfo.RequiresTypeConversion, typeInfo.SupportsTypeConversion))
-        )];
-        TypeScriptSymbolNameTemplate tsInteropSyntax = TypeScriptSymbolNameTemplate.ForDelegateType(tsInteropParameterTemplates, GetInteropSimpleTypeScriptSymbolTemplate(returnTypeInfo.ManagedType, returnTypeInfo.CSharpTypeSyntax));
         return new InteropTypeInfo
         {
             ManagedType = functionTypeInfo.KnownType,
@@ -55,13 +58,9 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(functionTypeInfo),
             CSharpTypeSyntax = clrTypeSyntax,
             TypeScriptTypeSyntax = tsSyntax,
-            TypeScriptInteropTypeSyntax = tsInteropSyntax,
+            TypeScriptInteropTypeSyntax = tsSyntax,
             TypeArgument = null,
-            ArgumentInfo = new DelegateArgumentInfo()
-            {
-                ParameterTypes = argTypeInfos,
-                ReturnType = returnTypeInfo
-            },
+            ArgumentInfo = argumentInfo,
             IsTaskType = false,
             IsArrayType = false,
             IsNullableType = false,
@@ -151,8 +150,8 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSTypeSyntax = GetJSTypeSyntax(arrayTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(arrayTypeInfo),
             CSharpTypeSyntax = clrTypeSyntax,
-            TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForArrayType(elementTypeInfo.TypeScriptTypeSyntax),
-            TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForArrayType(elementTypeInfo.TypeScriptInteropTypeSyntax),
+            TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForArrayType(elementTypeInfo),
+            TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForArrayType(elementTypeInfo),
             TypeArgument = elementTypeInfo,
             ArgumentInfo = null,
             IsTaskType = false,
@@ -184,8 +183,8 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSTypeSyntax = GetJSTypeSyntax(taskTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(taskTypeInfo),
             CSharpTypeSyntax = clrTypeSyntax,
-            TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForPromiseType(taskReturnTypeInfo?.TypeScriptTypeSyntax),
-            TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForPromiseType(taskReturnTypeInfo?.TypeScriptInteropTypeSyntax),
+            TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForPromiseType(taskReturnTypeInfo),
+            TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForPromiseType(taskReturnTypeInfo),
             TypeArgument = taskReturnTypeInfo,
             ArgumentInfo = null,
             IsTaskType = true,
@@ -220,8 +219,8 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSTypeSyntax = GetJSTypeSyntax(nullableTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(nullableTypeInfo),
             CSharpTypeSyntax = clrTypeSyntax,
-            TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForNullableType(innerTypeInfo.TypeScriptTypeSyntax),
-            TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForNullableType(innerTypeInfo.TypeScriptInteropTypeSyntax),
+            TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForNullableType(innerTypeInfo),
+            TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForNullableType(innerTypeInfo),
             TypeArgument = innerTypeInfo,
             ArgumentInfo = null,
             IsTaskType = false,
