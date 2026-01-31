@@ -45,10 +45,6 @@ internal class TypeScriptSymbolNameRenderer(InteropTypeInfo typeInfo, RenderCont
             return string.Empty;
         }
 
-        if (ctx.SymbolMap.GetClassInfo(innerMostTSExport) is not { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
-        {
-            return string.Empty;
-        }
 
         return (symbolType) switch
         {
@@ -56,8 +52,18 @@ internal class TypeScriptSymbolNameRenderer(InteropTypeInfo typeInfo, RenderCont
             TypeShimSymbolType.Namespace => string.Empty,
             TypeShimSymbolType.Snapshot => $".{RenderConstants.Properties}",
             TypeShimSymbolType.Initializer => $".{RenderConstants.Initializer}",
-            TypeShimSymbolType.ProxyInitializerUnion => interop ? " | object" : $" | {Render(innerMostTSExport, ctx, TypeShimSymbolType.Initializer, interop)}",
+            TypeShimSymbolType.ProxyInitializerUnion => GetProxyInitializerSuffix(interop, innerMostTSExport),
             _ => throw new NotImplementedException(),
         };
+
+        string GetProxyInitializerSuffix(bool interop, InteropTypeInfo innerMostTSExport)
+        {
+            if (ctx.SymbolMap.GetClassInfo(innerMostTSExport) is not { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
+            {
+                return ResolveSuffix(TypeShimSymbolType.Proxy, interop); // initializer not supported, fall back to proxy only.
+            }
+
+            return interop ? " | object" : $" | {Render(innerMostTSExport, ctx, TypeShimSymbolType.Initializer, interop)}";
+        }
     }
 }

@@ -122,7 +122,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         {
             if (!typeInfo.RequiresTypeConversion || !typeInfo.SupportsTypeConversion)
             {
-                return TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx);
+                return TypeScriptSymbolNameRenderer.Render(typeInfo, ctx);
             }
 
             if (typeInfo.IsDelegateType())
@@ -136,11 +136,6 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                 return TypeScriptSymbolNameRenderer.Render(typeInfo, ctx, TypeShimSymbolType.Proxy, interop: false);
             }
 
-            //ClassInfo classInfo = ctx.SymbolMap.GetClassInfo(typeInfo.GetInnermostType());
-            //TypeShimSymbolType symbolType = classInfo is { Constructor: { IsParameterless: true, AcceptsInitializer: true } } 
-            //    ? TypeShimSymbolType.ProxyInitializerUnion // initializer also accepted
-            //    : TypeShimSymbolType.Proxy;
-
             return TypeScriptSymbolNameRenderer.Render(typeInfo, ctx, TypeShimSymbolType.ProxyInitializerUnion, interop: false);
         }
     }
@@ -149,24 +144,22 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
     {
         if (methodInfo.ReturnType is not { RequiresTypeConversion: true, SupportsTypeConversion: true })
         {
-            ctx.Append(TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx));
+            ctx.Append(TypeScriptSymbolNameRenderer.Render(methodInfo.ReturnType, ctx));
             return;
         }
 
         if (methodInfo.ReturnType.IsDelegateType())
         {
-            // delegate return types are to be invoked from JS (or passed back as a parameter elsewhere??)
-            // thus,
+            // delegate return types are to be invoked from JS (or passed back as a parameter elsewhere??) thus,
             // return types are always proxies
             // arguments are either proxies or initializers
-
             // TODO: implement delegate return type rendering with initializer option for arguments
-            string returnTypeAsProxy = TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Proxy, interop: false);
+            string returnTypeAsProxy = TypeScriptSymbolNameRenderer.Render(methodInfo.ReturnType, ctx, TypeShimSymbolType.Proxy, interop: false);
             ctx.Append(returnTypeAsProxy);
         }
         else
         {
-            string returnTypeAsProxy = TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Proxy, interop: false);
+            string returnTypeAsProxy = TypeScriptSymbolNameRenderer.Render(methodInfo.ReturnType, ctx, TypeShimSymbolType.Proxy, interop: false);
             ctx.Append(returnTypeAsProxy);
         }
     }
@@ -180,13 +173,13 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
 
             if (methodInfo.ReturnType is { RequiresTypeConversion: true, SupportsTypeConversion: true } && !methodInfo.ReturnType.IsDelegateType())
             {
-                string proxyClassName = TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Proxy, interop: false);
                 // user class return type, wrap in proxy
                 ctx.Append("const res = ");
                 RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
                 ctx.AppendLine(";");
                 ctx.Append($"return ");
-                RenderInlineProxyConstruction(methodInfo.ReturnType, proxyClassName, "res");
+                string returnTypeProxyClassName = TypeScriptSymbolNameRenderer.Render(methodInfo.ReturnType.GetInnermostType(), ctx, TypeShimSymbolType.Proxy, interop: false);
+                RenderInlineProxyConstruction(methodInfo.ReturnType, returnTypeProxyClassName, "res");
                 ctx.AppendLine(";");
             }
             else
@@ -254,6 +247,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                 // delegate parameters need to be wrapped in another delegate that extracts the handle
                 //ctx.Append($"(e => ProxyBase.fromHandle({proxyClassName}, e))");
                 // TODO: implement delegate parameter handle extraction properly
+                RenderInlineDelegateHandleExtraction(parameterInfo.Type.ArgumentInfo!, parameterInfo.Name);
             }
             else
             {
@@ -278,10 +272,32 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                 RenderInlineHandleExtraction(typeInfo.TypeArgument!, proxyClassName, "e");
                 ctx.Append(')');
             }
-            else
+            else if (ctx.SymbolMap.GetClassInfo(typeInfo) is { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
             {
+                // accepts initializer or proxy, if proxy, extract handle, if init, pass as is
                 ctx.Append(sourceVarName).Append(" instanceof ").Append(proxyClassName).Append(" ? ").Append(sourceVarName).Append(".instance : ").Append(sourceVarName);
             }
+            else // simple proxy
+            {
+                ctx.Append(sourceVarName).Append(".instance");
+            }
+        }
+
+        void RenderInlineDelegateHandleExtraction(DelegateArgumentInfo delegateInfo, string sourceVarName)
+        {
+            ctx.Append("(");
+            foreach (var param in delegateInfo.ParameterTypes.Select((t, i) => new { Type = t, Index = i }))
+            {
+                if (param.Index > 0) ctx.Append(", ");
+                ctx.Append("arg").Append(param.Index).Append(": ").Append(TypeScriptSymbolNameRenderer.Render(param.Type, ctx, TypeShimSymbolType.Proxy, interop: true));
+            }
+            ctx.Append(") => ").Append(sourceVarName).Append("(");
+            foreach (var param in delegateInfo.ParameterTypes.Select((t, i) => new { Type = t, Index = i }))
+            {
+                if (param.Index > 0) ctx.Append(", ");
+                RenderInlineHandleExtraction(param.Type, TypeScriptSymbolNameRenderer.Render(param.Type.GetInnermostType(), ctx, TypeShimSymbolType.Proxy, interop: false), "arg" + param.Index);
+            }
+            ctx.Append(")");
         }
     }
 

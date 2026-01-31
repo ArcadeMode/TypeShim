@@ -19,12 +19,12 @@ internal sealed class TypeScriptUserClassShapesRenderer(RenderContext ctx)
                 ctx.Append(propertyInfo.Name).Append(": ");
                 if (propertyInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true })
                 {
-                    string snapshotSymbolName = ctx.SymbolMap.GetUserClassSymbolName(propertyInfo.Type, TypeShimSymbolType.Snapshot);
+                    string snapshotSymbolName = TypeScriptSymbolNameRenderer.Render(propertyInfo.Type, ctx, TypeShimSymbolType.Snapshot, interop: false);
                     ctx.Append(snapshotSymbolName);
                 }
                 else
                 {
-                    ctx.Append(propertyInfo.Type.TypeScriptTypeSyntax.Render());
+                    ctx.Append(TypeScriptSymbolNameRenderer.Render(propertyInfo.Type, ctx));
                 }
                 ctx.AppendLine(";");
             }
@@ -46,11 +46,12 @@ internal sealed class TypeScriptUserClassShapesRenderer(RenderContext ctx)
                     TypeShimSymbolType symbolType = classInfo is { Constructor: { IsParameterless: true, AcceptsInitializer: true } }
                         ? TypeShimSymbolType.ProxyInitializerUnion
                         : TypeShimSymbolType.Proxy;
-                    ctx.Append(ctx.SymbolMap.GetUserClassSymbolName(classInfo, propertyInfo.Type, symbolType));
+                    string symbolName = TypeScriptSymbolNameRenderer.Render(propertyInfo.Type, ctx, TypeShimSymbolType.ProxyInitializerUnion, interop: false);
+                    ctx.Append(symbolName);
                 }
                 else
                 {
-                    ctx.Append(propertyInfo.Type.TypeScriptTypeSyntax.Render());
+                    ctx.Append(TypeScriptSymbolNameRenderer.Render(propertyInfo.Type, ctx));
                 }
                 ctx.AppendLine(";");
             }
@@ -60,8 +61,8 @@ internal sealed class TypeScriptUserClassShapesRenderer(RenderContext ctx)
 
     internal void RenderPropertiesFunction(string proxyParamName)
     {
-        string paramType = ctx.SymbolMap.GetUserClassSymbolName(ctx.Class, TypeShimSymbolType.Proxy);
-        string returnType = ctx.SymbolMap.GetUserClassSymbolName(ctx.Class, TypeShimSymbolType.Snapshot);
+        string paramType = TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Proxy, interop: false);// ctx.SymbolMap.GetUserClassSymbolName(ctx.Class, TypeShimSymbolType.Proxy);
+        string returnType = TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Snapshot, interop: false); //ctx.SymbolMap.GetUserClassSymbolName(ctx.Class, TypeShimSymbolType.Snapshot);
         ctx.Append($"export function ").Append(RenderConstants.ProxyMaterializeFunction).Append('(').Append(proxyParamName).Append(": ").Append(paramType).Append("): ").Append(returnType).AppendLine(" {");
         using (ctx.Indent())
         {
@@ -102,7 +103,7 @@ internal sealed class TypeScriptUserClassShapesRenderer(RenderContext ctx)
                 }
                 else // exported user type
                 {
-                    string tsNamespace = ctx.SymbolMap.GetUserClassSymbolName(typeInfo, TypeShimSymbolType.Namespace);
+                    string tsNamespace = TypeScriptSymbolNameRenderer.Render(typeInfo, ctx, TypeShimSymbolType.Namespace, interop: false);// ctx.SymbolMap.GetUserClassSymbolName(typeInfo, TypeShimSymbolType.Namespace);
                     return $"{tsNamespace}.{RenderConstants.ProxyMaterializeFunction}({propertyAccessorExpression})";
                 }
             }

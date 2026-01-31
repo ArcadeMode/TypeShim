@@ -50,7 +50,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_MethodWithUserClassParameterType()
+    public void TypeScriptUserClassProxy_MethodWithUserClassParameterType_NonInitializable()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
         using System;
@@ -59,6 +59,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         [TSExport]
         public class UserClass
         {
+            private UserClass() {}
             public int Id { get; set; }
         }
         """);

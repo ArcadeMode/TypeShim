@@ -19,6 +19,7 @@ internal sealed class TypeScriptSymbolNameTemplate
         return new TypeScriptSymbolNameTemplate
         {
             Template = $"{originalTypeSyntax}{SuffixPlaceholder}",
+            //InnerTypes = { { SuffixPlaceholder }, null! }
         };
     }
 
@@ -75,7 +76,7 @@ internal sealed class TypeScriptSymbolNameTemplate
         foreach (KeyValuePair<string, InteropTypeInfo> typeInfo in paramTypeDict)
         {
             if (i > 0) templateBuilder.Append(", ");
-            templateBuilder.Append(typeInfo.Key).Append(": ").Append(typeInfo.Value);
+            templateBuilder.Append("arg").Append(i).Append(": ").Append(typeInfo.Key);
             i++;
         }
         templateBuilder.Append(") => ").Append(returnTypeKvp.Key);
