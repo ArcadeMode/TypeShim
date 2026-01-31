@@ -416,4 +416,74 @@ public partial class C1Interop
 
 """);
     }
+
+    [Test]
+    public void CSharpInteropClass_Method_ActionUserClassParameterType()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class MyClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public void M1(Action<MyClass> callback) => callback(new MyClass() { Id = 1 });
+            }
+        """);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+
+        AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
+// TypeShim generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor()
+    {
+        return new C1();
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Any>>] Action<object> callback)
+    {
+        C1 typed_instance = (C1)instance;
+        Action<MyClass> typed_callback = (MyClass arg0) => callback(arg0);
+        typed_instance.M1(typed_callback);
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+}
+
+""");
+    }
 }

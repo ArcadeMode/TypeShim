@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Diagnostics;
+using System.Reflection;
 using TypeShim.Generator.Parsing;
 using TypeShim.Shared;
 
@@ -32,7 +33,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
             _ctx.AppendLine(";");
         }
 
-        _ctx.LocalScope.UpdateAccessorExpression(parameterInfo, newVarName); // TODO: let methodctx decide naming
+        _ctx.LocalScope.UpdateAccessorExpression(parameterInfo, newVarName);
     }
 
     internal void RenderInlineTypeConversion(InteropTypeInfo typeInfo, string varName, bool forceCovariantConversion = false)
@@ -53,15 +54,55 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         {
             RenderInlineObjectTypeConversion(typeInfo, varName);
         }
+        else if (typeInfo.IsDelegateType() && typeInfo.ArgumentInfo is DelegateArgumentInfo argumentInfo) // Action/Action<T1...Tn>/Func<T1...Tn>
+        {
+            RenderInlineDelegateTypeUpConversion(typeInfo, varName, argumentInfo);
+        }
         else // Tests guard against this case. Anyway, here is a state-of-the-art regression detector.
         {
             throw new NotImplementedException($"Type conversion not implemented for type: {typeInfo.CSharpTypeSyntax}. Please file an issue at https://github.com/ArcadeMode/TypeShim");
         }
     }
 
+    private void RenderInlineDelegateTypeDownConversion(InteropTypeInfo typeInfo, string varName, DelegateArgumentInfo argumentInfo)
+    {
+        _ctx.Append('(');
+        for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
+        {
+            if (i > 0)
+                _ctx.Append(", ");
+            _ctx.Append(argumentInfo.ParameterTypes[i].CSharpInteropTypeSyntax).Append(' ').Append("arg").Append(i);
+        }
+        _ctx.Append(") => ").Append(varName).Append('(');
+        for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
+        {
+            if (i > 0)
+                _ctx.Append(", ");
+            RenderInlineTypeConversion(argumentInfo.ParameterTypes[i], $"arg{i}");
+        }
+        _ctx.Append(')');
+    }
+    
+    private void RenderInlineDelegateTypeUpConversion(InteropTypeInfo typeInfo, string varName, DelegateArgumentInfo argumentInfo)
+    {
+        _ctx.Append('(');
+        for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
+        {
+            if (i > 0) _ctx.Append(", ");
+            _ctx.Append(argumentInfo.ParameterTypes[i].CSharpTypeSyntax).Append(' ').Append("arg").Append(i);
+        }
+        _ctx.Append(") => ").Append(varName).Append('(');
+        for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
+        {
+            if (i > 0) _ctx.Append(", ");
+            _ctx.Append("arg").Append(i); // simply pass to upcast the type
+        }
+        _ctx.Append(')');
+    }
+
     private void RenderInlineCovariantTypeConversion(InteropTypeInfo typeInfo, string parameterName)
     {
-        Debug.Assert(typeInfo.ManagedType is KnownManagedType.Object or KnownManagedType.Array, "Unexpected non-object or non-array type with required type conversion");
+        Debug.Assert(typeInfo.ManagedType is KnownManagedType.Object or KnownManagedType.Array, "Unexpected non-covariant type in cast conversion");
         _ctx.Append($"({typeInfo.CSharpTypeSyntax}){parameterName}");
     }
 
