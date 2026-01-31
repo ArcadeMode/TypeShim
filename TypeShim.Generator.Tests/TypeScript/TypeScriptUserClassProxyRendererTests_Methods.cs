@@ -297,6 +297,59 @@ export class C1 extends ProxyBase {
   }
 
   public DoStuff(u: UserClass): void {
+    const uInstance = u.instance;
+    TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, uInstance);
+  }
+}
+
+""");
+    }
+    [Test, Ignore("It shouldnt be necessary to create consts and instead just inline the expressions in the interop invocations (ts side). This tests shows desired end result.")]
+    public void TypeScriptUserClassProxy_InstanceMethod_WithNonInitializableUserClassParameterType_ExtractsInstancePropertyInline()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                private UserClass() {} // Non-initializable
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public void DoStuff(UserClass u) {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public DoStuff(u: UserClass): void {
     TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, u.instance);
   }
 }

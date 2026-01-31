@@ -178,8 +178,16 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                 RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
                 ctx.AppendLine(";");
                 ctx.Append($"return ");
-                string returnTypeProxyClassName = TypeScriptSymbolNameRenderer.Render(methodInfo.ReturnType.GetInnermostType(), ctx, TypeShimSymbolType.Proxy, interop: false);
-                RenderInlineProxyConstruction(methodInfo.ReturnType, returnTypeProxyClassName, "res");
+                
+                if (methodInfo.ReturnType.IsDelegateType())
+                {
+                    RenderInlineDelegateHandleExtraction(methodInfo.ReturnType.ArgumentInfo!, "res");
+                }
+                else
+                {
+                    string returnTypeProxyClassName = TypeScriptSymbolNameRenderer.Render(methodInfo.ReturnType.GetInnermostType(), ctx, TypeShimSymbolType.Proxy, interop: false);
+                    RenderInlineProxyConstruction(methodInfo.ReturnType, returnTypeProxyClassName, "res");
+                }
                 ctx.AppendLine(";");
             }
             else
@@ -210,26 +218,52 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                 ctx.Append(".then(c => String.fromCharCode(c))");
         }
 
-        void RenderInlineProxyConstruction(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
+    }
+    private void RenderInlineProxyConstruction(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
+    {
+        if (typeInfo is { IsNullableType: true })
         {
-            if (typeInfo is { IsNullableType: true })
+            ctx.Append(sourceVarName).Append(" ? ");
+            RenderInlineProxyConstruction(typeInfo.TypeArgument!, proxyClassName, sourceVarName);
+            ctx.Append(" : null");
+        }
+        else if (typeInfo is { IsArrayType: true } or { IsTaskType: true })
+        {
+            string transformFunction = typeInfo.IsArrayType ? "map" : "then";
+            ctx.Append(sourceVarName).Append('.').Append(transformFunction).Append("(e => ");
+            RenderInlineProxyConstruction(typeInfo.TypeArgument!, proxyClassName, "e");
+            ctx.Append(')');
+        }
+        else
+        {
+            ctx.Append($"ProxyBase.fromHandle({proxyClassName}, {sourceVarName})");
+        }
+    }
+
+    private void RenderInlineDelegateProxyConstruction(DelegateArgumentInfo delegateInfo, string targetDelegateExpression)
+    {
+        ctx.Append("(");
+        foreach (var param in delegateInfo.ParameterTypes.Select((t, i) => new { Type = t, Index = i }))
+        {
+            if (param.Index > 0) ctx.Append(", ");
+            string paramTypeName = TypeScriptSymbolNameRenderer.Render(param.Type, ctx, TypeShimSymbolType.Proxy, interop: true);
+            ctx.Append("arg").Append(param.Index).Append(": ").Append(paramTypeName);
+        }
+        ctx.Append(") => ").Append(targetDelegateExpression).Append("(");
+        foreach (var param in delegateInfo.ParameterTypes.Select((t, i) => new { Type = t, Index = i }))
+        {
+            if (param.Index > 0) ctx.Append(", ");
+
+            if (param.Type.RequiresTypeConversion && param.Type.SupportsTypeConversion)
             {
-                ctx.Append(sourceVarName).Append(" ? ");
-                RenderInlineProxyConstruction(typeInfo.TypeArgument!, proxyClassName, sourceVarName);
-                ctx.Append(" : null");
-            }
-            else if (typeInfo is { IsArrayType: true } or { IsTaskType: true })
-            {
-                string transformFunction = typeInfo.IsArrayType ? "map" : "then";
-                ctx.Append(sourceVarName).Append('.').Append(transformFunction).Append("(e => ");
-                RenderInlineProxyConstruction(typeInfo.TypeArgument!, proxyClassName, "e");
-                ctx.Append(')');
+                RenderInlineProxyConstruction(param.Type, TypeScriptSymbolNameRenderer.Render(param.Type.GetInnermostType(), ctx, TypeShimSymbolType.Proxy, interop: false), "arg" + param.Index);
             }
             else
             {
-                ctx.Append($"ProxyBase.fromHandle({proxyClassName}, {sourceVarName})");
+                ctx.Append("arg").Append(param.Index);
             }
         }
+        ctx.Append(")");
     }
 
     private void RenderHandleExtractionToConsts(IEnumerable<MethodParameterInfo> parameterInfos)
@@ -244,10 +278,8 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             ctx.Append(" = ");
             if (parameterInfo.Type.IsDelegateType())
             {
-                // delegate parameters need to be wrapped in another delegate that extracts the handle
-                //ctx.Append($"(e => ProxyBase.fromHandle({proxyClassName}, e))");
-                // TODO: implement delegate parameter handle extraction properly
-                RenderInlineDelegateHandleExtraction(parameterInfo.Type.ArgumentInfo!, parameterInfo.Name);
+                // delegate parameters need to be wrapped in another delegate that wraps the handle in a proxy
+                RenderInlineDelegateProxyConstruction(parameterInfo.Type.ArgumentInfo!, parameterInfo.Name);
             }
             else
             {
@@ -257,48 +289,65 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             ctx.AppendLine(";");
         }
 
-        void RenderInlineHandleExtraction(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
+    }
+    private void RenderInlineHandleExtraction(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
+    {
+        if (typeInfo is { IsNullableType: true })
         {
-            if (typeInfo is { IsNullableType: true })
-            {
-                ctx.Append(sourceVarName).Append(" ? ");
-                RenderInlineHandleExtraction(typeInfo.TypeArgument!, proxyClassName, sourceVarName);
-                ctx.Append(" : null");
-            }
-            else if (typeInfo is { IsArrayType: true } or { IsTaskType: true })
-            {
-                string transformFunction = typeInfo.IsArrayType ? "map" : "then";
-                ctx.Append(sourceVarName).Append('.').Append(transformFunction).Append("(e => ");
-                RenderInlineHandleExtraction(typeInfo.TypeArgument!, proxyClassName, "e");
-                ctx.Append(')');
-            }
-            else if (ctx.SymbolMap.GetClassInfo(typeInfo) is { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
-            {
-                // accepts initializer or proxy, if proxy, extract handle, if init, pass as is
-                ctx.Append(sourceVarName).Append(" instanceof ").Append(proxyClassName).Append(" ? ").Append(sourceVarName).Append(".instance : ").Append(sourceVarName);
-            }
-            else // simple proxy
-            {
-                ctx.Append(sourceVarName).Append(".instance");
-            }
+            ctx.Append(sourceVarName).Append(" ? ");
+            RenderInlineHandleExtraction(typeInfo.TypeArgument!, proxyClassName, sourceVarName);
+            ctx.Append(" : null");
         }
+        else if (typeInfo is { IsArrayType: true } or { IsTaskType: true })
+        {
+            string transformFunction = typeInfo.IsArrayType ? "map" : "then";
+            ctx.Append(sourceVarName).Append('.').Append(transformFunction).Append("(e => ");
+            RenderInlineHandleExtraction(typeInfo.TypeArgument!, proxyClassName, "e");
+            ctx.Append(')');
+        }
+        else if (ctx.SymbolMap.GetClassInfo(typeInfo) is { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
+        {
+            // accepts initializer or proxy, if proxy, extract handle, if init, pass as is
+            ctx.Append(sourceVarName).Append(" instanceof ").Append(proxyClassName).Append(" ? ").Append(sourceVarName).Append(".instance : ").Append(sourceVarName);
+        }
+        else // simple proxy
+        {
+            ctx.Append(sourceVarName).Append(".instance");
+        }
+    }
 
-        void RenderInlineDelegateHandleExtraction(DelegateArgumentInfo delegateInfo, string sourceVarName)
+    /// <summary>
+    /// Renders the delegate that wraps the user delegate to extract handles from proxies before invoking the target delegate.
+    /// Used when passing a delegate from TS to .NET. 
+    /// </summary>
+    /// <param name="delegateInfo"></param>
+    /// <param name="targetDelegateExpression"></param>
+    private void RenderInlineDelegateHandleExtraction(DelegateArgumentInfo delegateInfo, string targetDelegateExpression)
+    {
+        // Build signature
+        ctx.Append("(");
+        foreach (var param in delegateInfo.ParameterTypes.Select((t, i) => new { Type = t, Index = i }))
         {
-            ctx.Append("(");
-            foreach (var param in delegateInfo.ParameterTypes.Select((t, i) => new { Type = t, Index = i }))
-            {
-                if (param.Index > 0) ctx.Append(", ");
-                ctx.Append("arg").Append(param.Index).Append(": ").Append(TypeScriptSymbolNameRenderer.Render(param.Type, ctx, TypeShimSymbolType.Proxy, interop: true));
-            }
-            ctx.Append(") => ").Append(sourceVarName).Append("(");
-            foreach (var param in delegateInfo.ParameterTypes.Select((t, i) => new { Type = t, Index = i }))
-            {
-                if (param.Index > 0) ctx.Append(", ");
-                RenderInlineHandleExtraction(param.Type, TypeScriptSymbolNameRenderer.Render(param.Type.GetInnermostType(), ctx, TypeShimSymbolType.Proxy, interop: false), "arg" + param.Index);
-            }
-            ctx.Append(")");
+            if (param.Index > 0) ctx.Append(", ");
+            ctx.Append("arg").Append(param.Index).Append(": ").Append(TypeScriptSymbolNameRenderer.Render(param.Type, ctx, TypeShimSymbolType.ProxyInitializerUnion, interop: true));
         }
+        ctx.Append(") => ");
+        // Invoke target delegate 
+        // TODO: handle return type conversion where necessary (wrap stuff after =>)
+        ctx.Append(targetDelegateExpression).Append("(");
+        foreach (var param in delegateInfo.ParameterTypes.Select((t, i) => new { Type = t, Index = i }))
+        {
+            if (param.Index > 0) ctx.Append(", ");
+            if (param.Type.RequiresTypeConversion && param.Type.SupportsTypeConversion)
+            {
+               RenderInlineHandleExtraction(param.Type, TypeScriptSymbolNameRenderer.Render(param.Type.GetInnermostType(), ctx, TypeShimSymbolType.ProxyInitializerUnion, interop: false), "arg" + param.Index);
+            }
+            else
+            {
+                ctx.Append("arg").Append(param.Index);
+            }
+        }
+        ctx.Append(")");
     }
 
     private void RenderInteropInvocation(string methodName, IEnumerable<MethodParameterInfo> methodParameters, MethodParameterInfo? initializerObject = null)
