@@ -136,11 +136,11 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             }
 
             ClassInfo classInfo = ctx.SymbolMap.GetClassInfo(typeInfo.GetInnermostType());
-            TypeShimSymbolType symbolName = classInfo is { Constructor: { IsParameterless: true, AcceptsInitializer: true } } 
+            TypeShimSymbolType symbolType = classInfo is { Constructor: { IsParameterless: true, AcceptsInitializer: true } } 
                 ? TypeShimSymbolType.ProxyInitializerUnion // initializer also accepted
                 : TypeShimSymbolType.Proxy;
 
-            return ctx.SymbolMap.GetUserClassSymbolName(classInfo, typeInfo, symbolName);
+            return ctx.SymbolMap.GetUserClassSymbolName(classInfo, typeInfo, symbolType);
         }
     }
 

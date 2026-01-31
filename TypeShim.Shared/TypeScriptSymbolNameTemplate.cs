@@ -5,30 +5,28 @@ using System.Collections.Generic;
 
 namespace TypeShim.Shared;
 
-internal sealed record TypeScriptFunctionParameterTemplate(string name, TypeScriptSymbolNameTemplate typeTemplate)
+internal sealed record TypeScriptFunctionParameterTemplate(string Name, TypeScriptSymbolNameTemplate TypeTemplate)
 {
     internal string Render(string suffix = "")
     {
-        return $"{name}: {typeTemplate.Render(suffix)}";
+        return $"{Name}: {TypeTemplate.Render(suffix)}";
     }
 }
 
 internal sealed class TypeScriptSymbolNameTemplate
 {
     private string Template { get; init; } = null!;
-    //private TypeScriptSymbolNameTemplate? InnerTemplate { get; init; }
-    private Dictionary<string, TypeScriptSymbolNameTemplate> InnerTemplates { get; init; } = []; 
+    private Dictionary<string, InteropTypeInfo> InnerTypes { get; init; } = []; 
     
-    private const string InnerPlaceholder = "{INNER_PLACEHOLDER}";
     private const string SuffixPlaceholder = "{SUFFIX_PLACEHOLDER}";
 
-    internal string Render(string suffix = "")
+    internal string Render(string suffix = "") // PUT SYMBOLTYPE HERE
     {
         string template = Template;
 
-        foreach (KeyValuePair<string, TypeScriptSymbolNameTemplate> kvp in InnerTemplates)
+        foreach (KeyValuePair<string, InteropTypeInfo> kvp in InnerTypes)
         {
-            template = template.Replace(kvp.Key, kvp.Value.Render(suffix));
+            template = template.Replace(kvp.Key, kvp.Value.TypeScriptInteropTypeSyntax.Render(suffix));
         }
 
         return template.Replace(SuffixPlaceholder, suffix);
@@ -50,48 +48,58 @@ internal sealed class TypeScriptSymbolNameTemplate
         };
     }
 
-    internal static TypeScriptSymbolNameTemplate ForArrayType(TypeScriptSymbolNameTemplate innerTemplate)
+    internal static TypeScriptSymbolNameTemplate ForArrayType(InteropTypeInfo innerType)
     {
         return new TypeScriptSymbolNameTemplate
         {
             Template = "Array<{TElement}>",
-            InnerTemplates = { { "{TElement}", innerTemplate } }
+            InnerTypes = { { "{TElement}", innerType } }
         };
     }
 
-    internal static TypeScriptSymbolNameTemplate ForPromiseType(TypeScriptSymbolNameTemplate? innerTemplate)
+    internal static TypeScriptSymbolNameTemplate ForPromiseType(InteropTypeInfo? innerType)
     {
-        if (innerTemplate == null)
+        if (innerType == null)
         {
             return new TypeScriptSymbolNameTemplate
             {
                 Template = "Promise<void>",
-                InnerTemplates = []
             };
         }
         return new TypeScriptSymbolNameTemplate
         {
             Template = "Promise<{TValue}>",
-            InnerTemplates = { { "{TValue}", innerTemplate } }
+            InnerTypes = { { "{TValue}", innerType } }
         };
     }
 
-    internal static TypeScriptSymbolNameTemplate ForNullableType(TypeScriptSymbolNameTemplate innerTemplate)
+    internal static TypeScriptSymbolNameTemplate ForNullableType(InteropTypeInfo innerType)
     {
         return new TypeScriptSymbolNameTemplate
         {
             Template = "{TNullableValue} | null",
-            InnerTemplates = { { "{TNullableValue}", innerTemplate } }
+            InnerTypes = { { "{TNullableValue}", innerType } }
         };
     }
     
     internal static TypeScriptSymbolNameTemplate ForDelegateType(TypeScriptFunctionParameterTemplate[] parameterTemplates, TypeScriptSymbolNameTemplate returnTypeTemplate)
     {
+        Dictionary<string, TypeScriptSymbolNameTemplate> paramTypeDict = parameterTemplates.ToDictionary(pt => $"{{T{pt.Name}}}", pt => pt.TypeTemplate);
+        KeyValuePair<string, TypeScriptSymbolNameTemplate> returnTypeKvp = new("{TReturn}", returnTypeTemplate);
         return new TypeScriptSymbolNameTemplate
         {
-            // TODO: restructure class to support function types better (now cannot render suffixes for parameter types)
-            Template = $"({string.Join(", ", parameterTemplates.Select(t => t.Render()))}) => {returnTypeTemplate.Render()}",
-            InnerTemplates = []
+            Template = $"({string.Join(", ", paramTypeDict.Keys)}) => {returnTypeKvp.Key}",
+            InnerTemplates = [..paramTypeDict, returnTypeKvp]
         };
+    }
+}
+
+public static class DictionaryExtensions
+{
+    // Enables collection expressions for Dictionary<TKey, TValue> like newdict = [..dict, kvp]
+    public static Dictionary<TKey, TValue> Add<TKey, TValue>(this Dictionary<TKey, TValue> dict, KeyValuePair<TKey, TValue> keyValuePair) where TKey : notnull
+    {
+        dict[keyValuePair.Key] = keyValuePair.Value;
+        return dict;
     }
 }
