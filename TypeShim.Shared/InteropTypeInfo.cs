@@ -85,10 +85,10 @@ internal sealed class InteropTypeInfo
             IsArrayType = this.IsArrayType,
             IsNullableType = this.IsNullableType,
             TypeArgument = TypeArgument?.AsInteropTypeInfo(),
-            ArgumentInfo = this.ArgumentInfo is null ? null : new DelegateArgumentInfo() 
+            ArgumentInfo = this.ArgumentInfo is not DelegateArgumentInfo argInfo ? null : new DelegateArgumentInfo() 
             {
-                ParameterTypes = [.. this.ArgumentInfo.ParameterTypes.Select(argType => argType.AsInteropTypeInfo())],
-                ReturnType = this.ArgumentInfo.ReturnType.AsInteropTypeInfo()
+                ParameterTypes = [.. argInfo.ParameterTypes.Select(argType => argType.AsInteropTypeInfo())],
+                ReturnType = argInfo.ReturnType.AsInteropTypeInfo()
             },
             RequiresTypeConversion = false,
             SupportsTypeConversion = false,
