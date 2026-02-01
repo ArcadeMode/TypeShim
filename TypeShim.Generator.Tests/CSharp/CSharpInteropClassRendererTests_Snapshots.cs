@@ -142,7 +142,7 @@ public partial class C1Interop
     public static object get_P2([JSMarshalAs<JSType.Any>] object instance)
     {
         C1 typed_instance = (C1)instance;
-        return typed_instance.P2;
+        return (object)typed_instance.P2;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
@@ -223,7 +223,7 @@ public partial class C1Interop
     public static object[] get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
         C1 typed_instance = (C1)instance;
-        return typed_instance.P1;
+        return (object[])typed_instance.P1;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]

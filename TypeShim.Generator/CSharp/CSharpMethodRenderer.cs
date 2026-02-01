@@ -82,47 +82,16 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                 _conversionRenderer.RenderParameterTypeConversion(originalParamInfo);
             }
 
-            if (methodInfo.ReturnType.IsDelegateType())
-            {
-                _ctx.Append(methodInfo.ReturnType.CSharpTypeSyntax).Append(" retVal = ");
-            }
-            else if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void)
-            {
-                _ctx.Append("return ");
-            }
+            DeferredExpressionRenderer returnValueExpression = _conversionRenderer.RenderReturnTypeConversion(methodInfo.ReturnType, GetInvocationExpression());
 
-            RenderUserMethodInvocation(methodInfo);
+            if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void) _ctx.Append("return ");
+            returnValueExpression.Render();
             _ctx.AppendLine(";");
-            if (methodInfo.ReturnType.IsDelegateType())
-            {
-                _ctx.Append("return ");
-                _conversionRenderer.RenderReturnTypeConversion(methodInfo.ReturnType, "retVal");
-                _ctx.AppendLine(";");
-            }
         }
 
         _ctx.AppendLine("}");
 
-        void RenderUserMethodInvocation(MethodInfo methodInfo)
-        {
-            // Handle Task<T> return conversion for conversion requiring types
-            if (methodInfo.ReturnType is { IsNullableType: true, TypeArgument.IsTaskType: true, TypeArgument.RequiresTypeConversion: true })
-            {
-                string convertedTaskExpression = _conversionRenderer.RenderNullableTaskTypeConversion(methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", GetInvocationExpression());
-                _ctx.Append(convertedTaskExpression);
-            }
-            else if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresTypeConversion: true })
-            {
-                string convertedTaskExpression = _conversionRenderer.RenderTaskTypeConversion(methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", GetInvocationExpression());
-                _ctx.Append(convertedTaskExpression);
-            }
-            else // direct return handling or void invocations
-            {
-                _ctx.Append(GetInvocationExpression());
-            }
-        }
-
-        string GetInvocationExpression()
+        string GetInvocationExpression() // TODO: use ctx to render
         {
             if (!methodInfo.IsStatic)
             {
@@ -144,7 +113,6 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         _ctx.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
 
         RenderMethodSignature(methodInfo.Name, methodInfo.ReturnType, methodInfo.Parameters);
-
         _ctx.AppendLine("{");
 
         using (_ctx.Indent())
@@ -155,31 +123,18 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             }
 
             string accessedObject = methodInfo.IsStatic ? _ctx.Class.Name : _ctx.LocalScope.GetAccessorExpression(methodInfo.Parameters.ElementAt(0));
-            string accessorExpression = $"{accessedObject}.{propertyInfo.Name}";
-
-            if (methodInfo.ReturnType is { IsNullableType: true, TypeArgument.IsTaskType: true })
-            {
-                // Handle Task<T>? property conversion to interop type Task<object>?
-                string convertedTaskExpression = _conversionRenderer.RenderNullableTaskTypeConversion(methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", accessorExpression);
-                accessorExpression = convertedTaskExpression; // continue with the converted expression
-            }
-            else if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresTypeConversion: true })
-            {
-                // Handle Task<T> property conversion to interop type Task<object>
-                string convertedTaskExpression = _conversionRenderer.RenderTaskTypeConversion(methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", accessorExpression);
-                accessorExpression = convertedTaskExpression; // continue with the converted expression
-            }
-
-            //TODO: move task conversion above to conversion renderer and use RenderReturnTypeConversion (extend localscope with method for return value)
-
+            DeferredExpressionRenderer typedValueExpressionRenderer = _conversionRenderer.RenderReturnTypeConversion(methodInfo.ReturnType, valueExpression: $"{accessedObject}.{propertyInfo.Name}");
             if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void) // getter
             {
-                _ctx.AppendLine($"return {accessorExpression};");
+                _ctx.Append($"return ");
+                typedValueExpressionRenderer.Render();
+                _ctx.AppendLine(";");
             }
             else // setter
             {
-                string valueVarName = _ctx.LocalScope.GetAccessorExpression(methodInfo.Parameters.First(p => !p.IsInjectedInstanceParameter));
-                _ctx.AppendLine($"{accessorExpression} = {valueVarName};");
+                string valueVarName = _ctx.LocalScope.GetAccessorExpression(methodInfo.Parameters.First(p => !p.IsInjectedInstanceParameter)); // TODO: get rid of IsInjectedInstanceParameter
+                typedValueExpressionRenderer.Render();
+                _ctx.Append(" = ").Append(valueVarName).AppendLine(";");                
             }
         }
 
@@ -254,7 +209,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
     private void RenderConstructorInvocation(ConstructorInfo constructorInfo)
     {
         PropertyInfo[] propertiesInMapper = [.. constructorInfo.MemberInitializers];
-        Dictionary<PropertyInfo, TypeConversionExpressionRenderDelegate> propertyToConvertedVarDict = RenderNonInlinableTypeConversions(propertiesInMapper);
+        Dictionary<PropertyInfo, DeferredExpressionRenderer> propertyToConvertedVarDict = RenderNonInlinableTypeConversions(propertiesInMapper);
 
         _ctx.Append("return new ").Append(constructorInfo.Type.CSharpTypeSyntax).Append('(');
         bool isFirst = true;
@@ -277,7 +232,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         {
             foreach (PropertyInfo propertyInfo in propertiesInMapper)
             {
-                if (propertyToConvertedVarDict.TryGetValue(propertyInfo, out TypeConversionExpressionRenderDelegate? expressionRenderer))
+                if (propertyToConvertedVarDict.TryGetValue(propertyInfo, out DeferredExpressionRenderer? expressionRenderer))
                 {
                     _ctx.Append($"{propertyInfo.Name} = ");
                     expressionRenderer.Render();
@@ -292,7 +247,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                     }
 
                     if (propertyInfo.Type.RequiresTypeConversion)
-                        _conversionRenderer.RenderInlineTypeConversion(propertyInfo.Type, propertyRetrievalExpression);
+                        _conversionRenderer.RenderInlineTypeDownConversion(propertyInfo.Type, propertyRetrievalExpression);
                     else
                         _ctx.Append(propertyRetrievalExpression);
                 }
@@ -301,9 +256,9 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         }
         _ctx.AppendLine("};");
 
-        Dictionary<PropertyInfo, TypeConversionExpressionRenderDelegate> RenderNonInlinableTypeConversions(PropertyInfo[] properties)
+        Dictionary<PropertyInfo, DeferredExpressionRenderer> RenderNonInlinableTypeConversions(PropertyInfo[] properties)
         {
-            Dictionary<PropertyInfo, TypeConversionExpressionRenderDelegate> convertedTaskExpressionDict = [];
+            Dictionary<PropertyInfo, DeferredExpressionRenderer> convertedTaskExpressionDict = [];
             foreach (PropertyInfo propertyInfo in properties)
             {
                 if (propertyInfo.Type is { IsNullableType: true, TypeArgument.IsTaskType: true })
@@ -311,7 +266,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                     string tmpVarName = $"{propertyInfo.Name}Tmp";
                     _ctx.AppendLine($"var {tmpVarName} = jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\");");
                     string convertedTaskExpression = _conversionRenderer.RenderNullableTaskTypeConversion(propertyInfo.Type, propertyInfo.Name, tmpVarName);
-                    convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => _ctx.Append(convertedTaskExpression)));
+                    convertedTaskExpressionDict.Add(propertyInfo, new DeferredExpressionRenderer(() => _ctx.Append(convertedTaskExpression)));
                 }
                 else if (propertyInfo.Type is { IsTaskType: true, RequiresTypeConversion: true })
                 {
@@ -320,27 +275,17 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                         .Append($" ?? throw new ArgumentException(\"Non-nullable property '{propertyInfo.Name}' missing or of invalid type\", nameof(jsObject))")
                         .AppendLine(";");
                     string convertedTaskExpression = _conversionRenderer.RenderTaskTypeConversion(propertyInfo.Type, propertyInfo.Name, tmpVarName);
-                    convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => _ctx.Append(convertedTaskExpression)));
+                    convertedTaskExpressionDict.Add(propertyInfo, new DeferredExpressionRenderer(() => _ctx.Append(convertedTaskExpression)));
                 }
                 else if (propertyInfo.Type is { IsNullableType: true, RequiresTypeConversion: true })
                 {
                     string tmpVarName = $"{propertyInfo.Name}Tmp";
                     _ctx.AppendLine($"var {tmpVarName} = jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\");");
-                    convertedTaskExpressionDict.Add(propertyInfo, new TypeConversionExpressionRenderDelegate(() => _conversionRenderer.RenderInlineTypeConversion(propertyInfo.Type, tmpVarName)));
+                    convertedTaskExpressionDict.Add(propertyInfo, new DeferredExpressionRenderer(() => _conversionRenderer.RenderInlineTypeDownConversion(propertyInfo.Type, tmpVarName)));
                 }
             }
 
             return convertedTaskExpressionDict;
-        }
-    }
-
-    private class TypeConversionExpressionRenderDelegate(Action renderAction)
-    {
-        internal void Render() => renderAction();
-
-        public static implicit operator TypeConversionExpressionRenderDelegate(Action renderAction)
-        {
-            return new TypeConversionExpressionRenderDelegate(renderAction);
         }
     }
 }

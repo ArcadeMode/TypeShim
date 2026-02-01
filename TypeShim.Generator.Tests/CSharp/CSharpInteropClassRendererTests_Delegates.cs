@@ -556,6 +556,7 @@ public partial class C1Interop
 
 """);
     }
+
     [Test]
     public void CSharpInteropClass_Method_FunctionUserClassUserClassReturnType()
     {

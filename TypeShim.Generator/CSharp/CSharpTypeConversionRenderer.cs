@@ -29,100 +29,87 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         else
         {
             _ctx.Append($"{parameterInfo.Type.CSharpTypeSyntax} {newVarName} = ");
-            RenderInlineTypeConversion(parameterInfo.Type, varName, forceCovariantConversion: parameterInfo.IsInjectedInstanceParameter);
+            RenderInlineTypeDownConversion(parameterInfo.Type, varName, forceCovariantConversion: parameterInfo.IsInjectedInstanceParameter);
             _ctx.AppendLine(";");
         }
 
         _ctx.LocalScope.UpdateAccessorExpression(parameterInfo, newVarName);
     }
 
-    internal void RenderReturnTypeConversion(InteropTypeInfo returnType, string varName)
+    /// <summary>
+    /// Renders any lines that may be required to convert the return type from interop to managed. Then returns a delegate to render the expression to access the converted value.
+    /// </summary>
+    /// <param name="returnType"></param>
+    /// <param name="valueExpression"></param>
+    /// <returns></returns>
+    internal DeferredExpressionRenderer RenderReturnTypeConversion(InteropTypeInfo returnType, string valueExpression)
     {
         if (!returnType.RequiresTypeConversion)
-            return;
+            return DeferredExpressionRenderer.From(() => _ctx.Append(valueExpression));
         
-        if (returnType.IsDelegateType() && returnType.ArgumentInfo is DelegateArgumentInfo argumentInfo) // Action/Action<T1...Tn>/Func<T1...Tn>
+        if (returnType is { IsTaskType: true, TypeArgument.RequiresTypeConversion: true }) // Handle Task<T>
         {
-            RenderInlineDelegateTypeDownConversion(returnType, varName, argumentInfo);
+            string convertedValueExpression = RenderTaskTypeConversion(returnType.AsInteropTypeInfo(), "retVal", valueExpression);
+            return DeferredExpressionRenderer.From(() => _ctx.Append(convertedValueExpression));
+        }
+        else if (returnType is { IsNullableType: true, TypeArgument.IsTaskType: true, TypeArgument.RequiresTypeConversion: true }) // Handle Task<T>?
+        {
+            string convertedValueExpression = RenderNullableTaskTypeConversion(returnType.AsInteropTypeInfo(), "retVal", valueExpression);
+            return DeferredExpressionRenderer.From(() => _ctx.Append(convertedValueExpression));
+
+        }
+        else if (returnType.IsDelegateType() && returnType.ArgumentInfo is DelegateArgumentInfo argumentInfo) // Action/Action<T1...Tn>/Func<T1...Tn>
+        {
+            // Note: its important that we store retVal first, to avoid multiple evaluations of valueExpression, as it can be a method call
+            _ctx.Append(returnType.CSharpTypeSyntax).Append(" retVal = ").Append(valueExpression).AppendLine(";");
+            return DeferredExpressionRenderer.From(() => RenderInlineDelegateTypeUpConversion(returnType, "retVal", argumentInfo));
         }
         else
         {
-            RenderInlineTypeConversion(returnType, varName);
+            return DeferredExpressionRenderer.From(() => RenderInlineCovariantTypeUpConversion(returnType, valueExpression));
         }
-        
     }
 
-    internal void RenderInlineTypeConversion(InteropTypeInfo typeInfo, string varName, bool forceCovariantConversion = false)
+    internal void RenderInlineTypeDownConversion(InteropTypeInfo typeInfo, string varName, bool forceCovariantConversion = false)
     {
+        ArgumentNullException.ThrowIfNull(typeInfo, nameof(typeInfo));
         if (forceCovariantConversion)
         {
-            RenderInlineCovariantTypeConversion(typeInfo, varName);
+            RenderInlineCovariantTypeDownConversion(typeInfo, varName);
         }
         else if (typeInfo.IsArrayType)
         {
-            RenderInlineArrayTypeConversion(typeInfo, varName);
+            RenderInlineArrayTypeDownConversion(typeInfo, varName);
         }
         else if (typeInfo.IsNullableType)
         {
-            RenderInlineNullableTypeConversion(typeInfo, varName);
+            RenderInlineNullableTypeDownConversion(typeInfo, varName);
         }
         else if (typeInfo.ManagedType is KnownManagedType.Object)
         {
-            RenderInlineObjectTypeConversion(typeInfo, varName);
+            RenderInlineObjectTypeDownConversion(typeInfo, varName);
         }
         else if (typeInfo.IsDelegateType() && typeInfo.ArgumentInfo is DelegateArgumentInfo argumentInfo) // Action/Action<T1...Tn>/Func<T1...Tn>
         {
-            RenderInlineDelegateTypeUpConversion(typeInfo, varName, argumentInfo);
+            RenderInlineDelegateTypeDownConversion(typeInfo, varName, argumentInfo);
         }
-        else // Tests guard against this case. Anyway, here is a state-of-the-art regression detector.
+        else
         {
             throw new NotImplementedException($"Type conversion not implemented for type: {typeInfo.CSharpTypeSyntax}. Please file an issue at https://github.com/ArcadeMode/TypeShim");
         }
     }
 
-    private void RenderInlineDelegateTypeDownConversion(InteropTypeInfo typeInfo, string varName, DelegateArgumentInfo argumentInfo)
+    private void RenderInlineCovariantTypeDownConversion(InteropTypeInfo typeInfo, string parameterName)
     {
-        _ctx.Append('(');
-        for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
-        {
-            if (i > 0)
-                _ctx.Append(", ");
-            _ctx.Append(argumentInfo.ParameterTypes[i].CSharpInteropTypeSyntax).Append(' ').Append("arg").Append(i);
-        }
-        _ctx.Append(") => ").Append(varName).Append('(');
-        for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
-        {
-            if (i > 0)
-                _ctx.Append(", ");
-            RenderInlineTypeConversion(argumentInfo.ParameterTypes[i], $"arg{i}");
-        }
-        _ctx.Append(')');
-    }
-    
-    private void RenderInlineDelegateTypeUpConversion(InteropTypeInfo typeInfo, string varName, DelegateArgumentInfo argumentInfo)
-    {
-        _ctx.Append('(');
-        for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
-        {
-            if (i > 0) _ctx.Append(", ");
-            _ctx.Append(argumentInfo.ParameterTypes[i].CSharpTypeSyntax).Append(' ').Append("arg").Append(i);
-        }
-        _ctx.Append(") => ").Append(varName).Append('(');
-        for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
-        {
-            if (i > 0) _ctx.Append(", ");
-            _ctx.Append("arg").Append(i); // simply pass to upcast the type
-        }
-        _ctx.Append(')');
-    }
-
-    private void RenderInlineCovariantTypeConversion(InteropTypeInfo typeInfo, string parameterName)
-    {
-        Debug.Assert(typeInfo.ManagedType is KnownManagedType.Object or KnownManagedType.Array, "Unexpected non-covariant type in cast conversion");
         _ctx.Append($"({typeInfo.CSharpTypeSyntax}){parameterName}");
     }
+    
+    private void RenderInlineCovariantTypeUpConversion(InteropTypeInfo typeInfo, string parameterName)
+    {
+        _ctx.Append($"({typeInfo.CSharpInteropTypeSyntax}){parameterName}");
+    }
 
-    private void RenderInlineObjectTypeConversion(InteropTypeInfo typeInfo, string parameterName)
+    private void RenderInlineObjectTypeDownConversion(InteropTypeInfo typeInfo, string parameterName)
     {
         Debug.Assert(typeInfo.ManagedType == KnownManagedType.Object, "Attempting object type conversion with non-object");
 
@@ -134,33 +121,32 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         }
         else
         {
-            RenderInlineCovariantTypeConversion(typeInfo, parameterName);
+            RenderInlineCovariantTypeDownConversion(typeInfo, parameterName);
         }
     }
 
-    private void RenderInlineNullableTypeConversion(InteropTypeInfo typeInfo, string parameterName)
+    private void RenderInlineNullableTypeDownConversion(InteropTypeInfo typeInfo, string parameterName)
     {
         Debug.Assert(typeInfo.IsNullableType, "Type must be nullable for nullable type conversion.");
         Debug.Assert(typeInfo.TypeArgument != null, "Nullable type must have a type argument.");
 
         _ctx.Append($"{parameterName} != null ? ");
-        RenderInlineTypeConversion(typeInfo.TypeArgument, parameterName);
+        RenderInlineTypeDownConversion(typeInfo.TypeArgument, parameterName);
         _ctx.Append(" : null");
     }
 
-    private void RenderInlineArrayTypeConversion(InteropTypeInfo typeInfo, string parameterName)
+    private void RenderInlineArrayTypeDownConversion(InteropTypeInfo typeInfo, string parameterName)
     {
         Debug.Assert(typeInfo.TypeArgument != null, "Array type must have a type argument.");
-        InteropTypeInfo elementTypeInfo = typeInfo.TypeArgument ?? throw new InvalidOperationException("Array type must have a type argument for conversion.");
         if (typeInfo.TypeArgument.IsTSExport == false)
         {
-            RenderInlineCovariantTypeConversion(typeInfo, parameterName);
+            RenderInlineCovariantTypeDownConversion(typeInfo, parameterName);
             // no special conversion possible for non-exported types
         }
         else
         {
             _ctx.Append($"Array.ConvertAll({parameterName}, e => ");
-            RenderInlineTypeConversion(typeInfo.TypeArgument, "e");
+            RenderInlineTypeDownConversion(typeInfo.TypeArgument, "e");
             _ctx.Append(')');
         }
     }
@@ -180,7 +166,29 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
             _ctx.AppendLine($"if (t.IsFaulted) {tcsVarName}.SetException(t.Exception.InnerExceptions);");
             _ctx.AppendLine($"else if (t.IsCanceled) {tcsVarName}.SetCanceled();");
             _ctx.Append($"else {tcsVarName}.SetResult(");
-            RenderInlineTypeConversion(taskTypeParamInfo, "t.Result");
+            RenderInlineTypeDownConversion(taskTypeParamInfo, "t.Result");
+            _ctx.AppendLine(");");
+        }
+        _ctx.AppendLine("}, TaskContinuationOptions.ExecuteSynchronously);");
+        return $"{tcsVarName}.Task";
+    }
+    
+    /// <summary>
+    /// returns an expression to access the converted task with.
+    /// </summary>
+    /// <exception cref="InvalidOperationException"></exception>
+    private string RenderTaskTypeConversionCore(InteropTypeInfo targetTaskType, string sourceVarName, string sourceTaskExpression)
+    {
+        InteropTypeInfo taskTypeParamInfo = targetTaskType.TypeArgument ?? throw new InvalidOperationException("Task type must have a type argument for conversion.");
+        string tcsVarName = $"{sourceVarName}Tcs";
+        _ctx.AppendLine($"TaskCompletionSource<{taskTypeParamInfo.CSharpTypeSyntax}> {tcsVarName} = new();")
+            .AppendLine($"{sourceTaskExpression}.ContinueWith(t => {{");
+        using (_ctx.Indent())
+        {
+            _ctx.AppendLine($"if (t.IsFaulted) {tcsVarName}.SetException(t.Exception.InnerExceptions);");
+            _ctx.AppendLine($"else if (t.IsCanceled) {tcsVarName}.SetCanceled();");
+            _ctx.Append($"else {tcsVarName}.SetResult(");
+            RenderInlineTypeDownConversion(taskTypeParamInfo, "t.Result");
             _ctx.AppendLine(");");
         }
         _ctx.AppendLine("}, TaskContinuationOptions.ExecuteSynchronously);");
@@ -200,11 +208,51 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
                 .AppendLine($"else if (t.IsCanceled) {tcsVarName}!.SetCanceled();");
 
             _ctx.Append($"else {tcsVarName}!.SetResult(");
-            RenderInlineTypeConversion(taskReturnTypeParamInfo, "t.Result");
+            RenderInlineTypeDownConversion(taskReturnTypeParamInfo, "t.Result");
             _ctx.AppendLine(");");
 
         }
         _ctx.AppendLine("}, TaskContinuationOptions.ExecuteSynchronously);");
         return $"{tcsVarName}?.Task";
+    }
+
+    private void RenderInlineDelegateTypeDownConversion(InteropTypeInfo typeInfo, string varName, DelegateArgumentInfo argumentInfo)
+    {
+        _ctx.Append('(');
+        for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
+        {
+            if (i > 0) _ctx.Append(", ");
+            _ctx.Append(argumentInfo.ParameterTypes[i].CSharpTypeSyntax).Append(' ').Append("arg").Append(i);
+        }
+        // TODO: render conversion of return type
+        _ctx.Append(") => ").Append(varName).Append('(');
+        for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
+        {
+            if (i > 0) _ctx.Append(", ");
+            // in body of upcasted delegate, to invoke original delegate we simply pass to downcast the parameter types
+            _ctx.Append("arg").Append(i);
+        }
+        _ctx.Append(')');
+    }
+
+    private void RenderInlineDelegateTypeUpConversion(InteropTypeInfo typeInfo, string varName, DelegateArgumentInfo argumentInfo)
+    {
+        _ctx.Append('(');
+        for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
+        {
+            if (i > 0)
+                _ctx.Append(", ");
+            _ctx.Append(argumentInfo.ParameterTypes[i].CSharpInteropTypeSyntax).Append(' ').Append("arg").Append(i);
+        }
+        // TODO: render conversion of return type
+        _ctx.Append(") => ").Append(varName).Append('(');
+        for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
+        {
+            if (i > 0)
+                _ctx.Append(", ");
+            // in body of downcasted delegate, to invoke original delegate we must upcast the types again
+            RenderInlineTypeDownConversion(argumentInfo.ParameterTypes[i], $"arg{i}");
+        }
+        _ctx.Append(')');
     }
 }
