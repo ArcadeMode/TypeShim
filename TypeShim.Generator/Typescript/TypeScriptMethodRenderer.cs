@@ -118,7 +118,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             ctx.Append(parameterInfo.Name).Append(": ");
             if (parameterInfo.Type.IsDelegateType())
             {
-                TypeScriptSymbolNameRenderer.RenderDelegate(parameterInfo.Type, ctx, parameterSymbolType: TypeShimSymbolType.Proxy, returnSymbolType: TypeShimSymbolType.Proxy);
+                TypeScriptSymbolNameRenderer.RenderDelegate(parameterInfo.Type, ctx, parameterSymbolType: TypeShimSymbolType.Proxy, returnSymbolType: TypeShimSymbolType.Proxy, interop: false);
             }
             else
             {
@@ -139,7 +139,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         }
         else if (methodInfo.ReturnType.IsDelegateType())
         {
-            TypeScriptSymbolNameRenderer.RenderDelegate(methodInfo.ReturnType, ctx, parameterSymbolType: TypeShimSymbolType.ProxyInitializerUnion, returnSymbolType: TypeShimSymbolType.Proxy);
+            TypeScriptSymbolNameRenderer.RenderDelegate(methodInfo.ReturnType, ctx, parameterSymbolType: TypeShimSymbolType.ProxyInitializerUnion, returnSymbolType: TypeShimSymbolType.Proxy, interop: false);
         }
         else
         {

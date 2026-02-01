@@ -20,11 +20,11 @@ internal class TypeScriptSymbolNameRenderer(InteropTypeInfo typeInfo, RenderCont
         return renderer.RenderCore(symbolType, interop);
     }
 
-    internal static void RenderDelegate(InteropTypeInfo typeInfo, RenderContext ctx, TypeShimSymbolType parameterSymbolType, TypeShimSymbolType returnSymbolType)
+    internal static void RenderDelegate(InteropTypeInfo typeInfo, RenderContext ctx, TypeShimSymbolType parameterSymbolType, TypeShimSymbolType returnSymbolType, bool interop)
     {
         _ = typeInfo.ArgumentInfo ?? throw new ArgumentException("InteropTypeInfo does not represent a delegate type.", nameof(typeInfo));
         TypeScriptSymbolNameRenderer renderer = new(typeInfo, ctx);
-        renderer.RenderDelegateCore(typeInfo.ArgumentInfo, parameterSymbolType, returnSymbolType);
+        renderer.RenderDelegateCore(typeInfo.ArgumentInfo, parameterSymbolType, returnSymbolType, interop);
     }
     
     public string Render() => RenderCore(TypeShimSymbolType.Proxy, interop: false);
@@ -43,15 +43,15 @@ internal class TypeScriptSymbolNameRenderer(InteropTypeInfo typeInfo, RenderCont
         return template.Replace(TypeScriptSymbolNameTemplate.SuffixPlaceholder, ResolveSuffix(symbolType, interop));
     }
 
-    private void RenderDelegateCore(DelegateArgumentInfo delegateInfo, TypeShimSymbolType parameterSymbolType, TypeShimSymbolType returnSymbolType)
+    private void RenderDelegateCore(DelegateArgumentInfo delegateInfo, TypeShimSymbolType parameterSymbolType, TypeShimSymbolType returnSymbolType, bool interop)
     {
         ctx.Append("(");
         foreach (var param in delegateInfo.ParameterTypes.Select((t, i) => new { Type = t, Index = i }))
         {
             if (param.Index > 0) ctx.Append(", ");
-            ctx.Append("arg").Append(param.Index).Append(": ").Append(TypeScriptSymbolNameRenderer.Render(param.Type, ctx, parameterSymbolType, interop: false));
+            ctx.Append("arg").Append(param.Index).Append(": ").Append(TypeScriptSymbolNameRenderer.Render(param.Type, ctx, parameterSymbolType, interop));
         }
-        ctx.Append(") => ").Append(TypeScriptSymbolNameRenderer.Render(delegateInfo.ReturnType, ctx, returnSymbolType, interop: false));
+        ctx.Append(") => ").Append(TypeScriptSymbolNameRenderer.Render(delegateInfo.ReturnType, ctx, returnSymbolType, interop));
     }
 
     private TypeScriptSymbolNameTemplate GetSymbolNameTemplate(bool interop) => interop ? typeInfo.TypeScriptInteropTypeSyntax : typeInfo.TypeScriptTypeSyntax;

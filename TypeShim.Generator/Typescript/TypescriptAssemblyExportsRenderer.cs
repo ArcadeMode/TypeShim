@@ -64,15 +64,31 @@ internal sealed class TypescriptAssemblyExportsRenderer(
             if (!isFirst) ctx.Append(", ");
 
             ctx.Append(parameterInfo.Name).Append(": ");
-
-            // TODO: remove IsInjectedInstanceParameter property and split into separate methodInfo property
-            TypeShimSymbolType symbolType = parameterInfo.IsInjectedInstanceParameter ? TypeShimSymbolType.Proxy : TypeShimSymbolType.ProxyInitializerUnion;
-            string typeName = TypeScriptSymbolNameRenderer.Render(parameterInfo.Type, ctx, symbolType, interop: true);
-            ctx.Append(typeName);
+            if (parameterInfo.Type.IsDelegateType())
+            {
+                TypeScriptSymbolNameRenderer.RenderDelegate(parameterInfo.Type, ctx, parameterSymbolType: TypeShimSymbolType.Proxy, returnSymbolType: TypeShimSymbolType.Proxy, interop: true);
+            }
+            else
+            {
+                // TODO: remove IsInjectedInstanceParameter property and split into separate methodInfo property
+                TypeShimSymbolType symbolType = parameterInfo.IsInjectedInstanceParameter ? TypeShimSymbolType.Proxy : TypeShimSymbolType.ProxyInitializerUnion;
+                string typeName = TypeScriptSymbolNameRenderer.Render(parameterInfo.Type, ctx, symbolType, interop: true);
+                ctx.Append(typeName);
+            }
             isFirst = false;
         }
-        string returnTypeName = TypeScriptSymbolNameRenderer.Render(returnType, ctx, TypeShimSymbolType.Proxy, interop: true);
-        ctx.Append("): ").Append(returnTypeName).AppendLine(";");
+        ctx.Append("): ");
+
+        if (returnType.IsDelegateType())
+        {
+            TypeScriptSymbolNameRenderer.RenderDelegate(returnType, ctx, parameterSymbolType: TypeShimSymbolType.ProxyInitializerUnion, returnSymbolType: TypeShimSymbolType.Proxy, interop: true);
+        }
+        else
+        {
+            string returnTypeName = TypeScriptSymbolNameRenderer.Render(returnType, ctx, TypeShimSymbolType.Proxy, interop: true);
+            ctx.Append(returnTypeName);
+        }
+        ctx.AppendLine(";");
     }
 
     private static IEnumerable<MethodInfo> GetAllMethods(ClassInfo classInfo)
