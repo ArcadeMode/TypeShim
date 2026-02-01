@@ -1,4 +1,4 @@
-namespace TypeShim.Sample;
+namespace TypeShim.E2E.Wasm;
 
 [TSExport]
 public class ExportedClass // for referencing an exported class

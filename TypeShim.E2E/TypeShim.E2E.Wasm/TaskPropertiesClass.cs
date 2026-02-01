@@ -2,7 +2,7 @@ using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 
-namespace TypeShim.Sample;
+namespace TypeShim.E2E.Wasm;
 
 [TSExport]
 public class TaskPropertiesClass
