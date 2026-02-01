@@ -20,6 +20,13 @@ internal class TypeScriptSymbolNameRenderer(InteropTypeInfo typeInfo, RenderCont
         return renderer.RenderCore(symbolType, interop);
     }
 
+    internal static void RenderDelegate(InteropTypeInfo typeInfo, RenderContext ctx, TypeShimSymbolType parameterSymbolType, TypeShimSymbolType returnSymbolType)
+    {
+        _ = typeInfo.ArgumentInfo ?? throw new ArgumentException("InteropTypeInfo does not represent a delegate type.", nameof(typeInfo));
+        TypeScriptSymbolNameRenderer renderer = new(typeInfo, ctx);
+        renderer.RenderDelegateCore(typeInfo.ArgumentInfo, parameterSymbolType, returnSymbolType);
+    }
+    
     public string Render() => RenderCore(TypeShimSymbolType.Proxy, interop: false);
 
     private string RenderCore(TypeShimSymbolType symbolType, bool interop)
@@ -34,6 +41,17 @@ internal class TypeScriptSymbolNameRenderer(InteropTypeInfo typeInfo, RenderCont
         }
 
         return template.Replace(TypeScriptSymbolNameTemplate.SuffixPlaceholder, ResolveSuffix(symbolType, interop));
+    }
+
+    private void RenderDelegateCore(DelegateArgumentInfo delegateInfo, TypeShimSymbolType parameterSymbolType, TypeShimSymbolType returnSymbolType)
+    {
+        ctx.Append("(");
+        foreach (var param in delegateInfo.ParameterTypes.Select((t, i) => new { Type = t, Index = i }))
+        {
+            if (param.Index > 0) ctx.Append(", ");
+            ctx.Append("arg").Append(param.Index).Append(": ").Append(TypeScriptSymbolNameRenderer.Render(param.Type, ctx, parameterSymbolType, interop: false));
+        }
+        ctx.Append(") => ").Append(TypeScriptSymbolNameRenderer.Render(delegateInfo.ReturnType, ctx, returnSymbolType, interop: false));
     }
 
     private TypeScriptSymbolNameTemplate GetSymbolNameTemplate(bool interop) => interop ? typeInfo.TypeScriptInteropTypeSyntax : typeInfo.TypeScriptTypeSyntax;
@@ -66,4 +84,5 @@ internal class TypeScriptSymbolNameRenderer(InteropTypeInfo typeInfo, RenderCont
             return interop ? " | object" : $" | {Render(innerMostTSExport, ctx, TypeShimSymbolType.Initializer, interop)}";
         }
     }
+
 }

@@ -27,6 +27,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         else
         {
             RenderConstructorSignature();
+            ctx.Append(' ');
             RenderConstructorBody();
         }
 
@@ -37,16 +38,15 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             if (constructorInfo.InitializerObject != null)
             {
                 if (constructorInfo.Parameters.Length != 0) ctx.Append(", ");
-
-                string returnType = TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Initializer, interop: false);
-                ctx.Append(constructorInfo.InitializerObject.Name).Append(": ").Append(returnType);
+                string initializerType = TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Initializer, interop: false);
+                ctx.Append(constructorInfo.InitializerObject.Name).Append(": ").Append(initializerType);
             }
             ctx.Append(")");
         }
 
         void RenderConstructorBody()
         {
-            ctx.AppendLine(" {");
+            ctx.AppendLine("{");
             using (ctx.Indent())
             {
                 RenderHandleExtractionToConsts(constructorInfo.Parameters);
@@ -115,23 +115,19 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         {
             if (!isFirst) ctx.Append(", ");
 
-            ctx.Append(parameterInfo.Name).Append(": ").Append(ResolveParameterType(parameterInfo.Type));
+            ctx.Append(parameterInfo.Name).Append(": ");
+            if (parameterInfo.Type.IsDelegateType())
+            {
+                TypeScriptSymbolNameRenderer.RenderDelegate(parameterInfo.Type, ctx, parameterSymbolType: TypeShimSymbolType.Proxy, returnSymbolType: TypeShimSymbolType.Proxy);
+            }
+            else
+            {
+                TypeShimSymbolType symbolType = parameterInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true }
+                    ? TypeShimSymbolType.ProxyInitializerUnion
+                    : TypeShimSymbolType.None;
+                ctx.Append(TypeScriptSymbolNameRenderer.Render(parameterInfo.Type, ctx, symbolType, interop: false));
+            }
             isFirst = false;
-        }
-
-        string ResolveParameterType(InteropTypeInfo typeInfo)
-        {
-            if (!typeInfo.RequiresTypeConversion || !typeInfo.SupportsTypeConversion)
-            {
-                return TypeScriptSymbolNameRenderer.Render(typeInfo, ctx);
-            }
-
-            if (typeInfo.IsDelegateType())
-            {
-                return TypeScriptSymbolNameRenderer.Render(typeInfo, ctx, TypeShimSymbolType.Proxy, interop: false);
-            }
-
-            return TypeScriptSymbolNameRenderer.Render(typeInfo, ctx, TypeShimSymbolType.ProxyInitializerUnion, interop: false);
         }
     }
 
@@ -140,11 +136,16 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         if (methodInfo.ReturnType is not { RequiresTypeConversion: true, SupportsTypeConversion: true })
         {
             ctx.Append(TypeScriptSymbolNameRenderer.Render(methodInfo.ReturnType, ctx));
-            return;
         }
-
-        string returnTypeAsProxy = TypeScriptSymbolNameRenderer.Render(methodInfo.ReturnType, ctx, TypeShimSymbolType.Proxy, interop: false);
-        ctx.Append(returnTypeAsProxy);
+        else if (methodInfo.ReturnType.IsDelegateType())
+        {
+            TypeScriptSymbolNameRenderer.RenderDelegate(methodInfo.ReturnType, ctx, parameterSymbolType: TypeShimSymbolType.ProxyInitializerUnion, returnSymbolType: TypeShimSymbolType.Proxy);
+        }
+        else
+        {
+            string returnTypeAsProxy = TypeScriptSymbolNameRenderer.Render(methodInfo.ReturnType, ctx, TypeShimSymbolType.Proxy, interop: false);
+            ctx.Append(returnTypeAsProxy);
+        }
     }
 
     private void RenderMethodBody(MethodInfo methodInfo)
