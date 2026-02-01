@@ -81,10 +81,60 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             {
                 _conversionRenderer.RenderParameterTypeConversion(originalParamInfo);
             }
+
+            if (methodInfo.ReturnType.IsDelegateType())
+            {
+                _ctx.Append(methodInfo.ReturnType.CSharpTypeSyntax).Append(" retVal = ");
+            }
+            else if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void)
+            {
+                _ctx.Append("return ");
+            }
+
             RenderUserMethodInvocation(methodInfo);
+            _ctx.AppendLine(";");
+            if (methodInfo.ReturnType.IsDelegateType())
+            {
+                _ctx.Append("return ");
+                _conversionRenderer.RenderReturnTypeConversion(methodInfo.ReturnType, "retVal");
+                _ctx.AppendLine(";");
+            }
         }
 
         _ctx.AppendLine("}");
+
+        void RenderUserMethodInvocation(MethodInfo methodInfo)
+        {
+            // Handle Task<T> return conversion for conversion requiring types
+            if (methodInfo.ReturnType is { IsNullableType: true, TypeArgument.IsTaskType: true, TypeArgument.RequiresTypeConversion: true })
+            {
+                string convertedTaskExpression = _conversionRenderer.RenderNullableTaskTypeConversion(methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", GetInvocationExpression());
+                _ctx.Append(convertedTaskExpression);
+            }
+            else if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresTypeConversion: true })
+            {
+                string convertedTaskExpression = _conversionRenderer.RenderTaskTypeConversion(methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", GetInvocationExpression());
+                _ctx.Append(convertedTaskExpression);
+            }
+            else // direct return handling or void invocations
+            {
+                _ctx.Append(GetInvocationExpression());
+            }
+        }
+
+        string GetInvocationExpression()
+        {
+            if (!methodInfo.IsStatic)
+            {
+                MethodParameterInfo instanceParam = methodInfo.Parameters.ElementAt(0);
+                List<MethodParameterInfo> memberParams = [.. methodInfo.Parameters.Skip(1)];
+                return $"{_ctx.LocalScope.GetAccessorExpression(instanceParam)}.{methodInfo.Name}({string.Join(", ", memberParams.Select(_ctx.LocalScope.GetAccessorExpression))})";
+            }
+            else
+            {
+                return $"{_ctx.Class.Name}.{methodInfo.Name}({string.Join(", ", methodInfo.Parameters.Select(_ctx.LocalScope.GetAccessorExpression))})";
+            }
+        }
     }
 
     private void RenderPropertyMethodCore(PropertyInfo propertyInfo, MethodInfo methodInfo)
@@ -119,6 +169,8 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                 string convertedTaskExpression = _conversionRenderer.RenderTaskTypeConversion(methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", accessorExpression);
                 accessorExpression = convertedTaskExpression; // continue with the converted expression
             }
+
+            //TODO: move task conversion above to conversion renderer and use RenderReturnTypeConversion (extend localscope with method for return value)
 
             if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void) // getter
             {
@@ -161,44 +213,6 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                     .Append(' ')
                     .Append(parameterInfo.Name);
                 isFirst = false;
-            }
-        }
-    }
-
-    private void RenderUserMethodInvocation(MethodInfo methodInfo)
-    {
-        // Handle Task<T> return conversion for conversion requiring types
-        if (methodInfo.ReturnType is { IsNullableType: true, TypeArgument.IsTaskType: true, TypeArgument.RequiresTypeConversion: true })
-        {
-            string convertedTaskExpression = _conversionRenderer.RenderNullableTaskTypeConversion(methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", GetInvocationExpression());
-            _ctx.Append("return ").Append(convertedTaskExpression).AppendLine(";");
-        }
-        else if (methodInfo.ReturnType is { IsTaskType: true, TypeArgument.RequiresTypeConversion: true })
-        {
-            string convertedTaskExpression = _conversionRenderer.RenderTaskTypeConversion(methodInfo.ReturnType.AsInteropTypeInfo(), "retVal", GetInvocationExpression());
-            _ctx.Append("return ").Append(convertedTaskExpression).AppendLine(";");
-        }
-        else // direct return handling or void invocations
-        {
-            if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void)
-            {
-                _ctx.Append("return ");
-            }
-            _ctx.Append(GetInvocationExpression())
-                .AppendLine(";");
-        }
-
-        string GetInvocationExpression()
-        {
-            if (!methodInfo.IsStatic)
-            {
-                MethodParameterInfo instanceParam = methodInfo.Parameters.ElementAt(0);
-                List<MethodParameterInfo> memberParams = [.. methodInfo.Parameters.Skip(1)];
-                return $"{_ctx.LocalScope.GetAccessorExpression(instanceParam)}.{methodInfo.Name}({string.Join(", ", memberParams.Select(_ctx.LocalScope.GetAccessorExpression))})";
-            }
-            else
-            {
-                return $"{_ctx.Class.Name}.{methodInfo.Name}({string.Join(", ", methodInfo.Parameters.Select(_ctx.LocalScope.GetAccessorExpression))})";
             }
         }
     }

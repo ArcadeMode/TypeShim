@@ -36,6 +36,22 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         _ctx.LocalScope.UpdateAccessorExpression(parameterInfo, newVarName);
     }
 
+    internal void RenderReturnTypeConversion(InteropTypeInfo returnType, string varName)
+    {
+        if (!returnType.RequiresTypeConversion)
+            return;
+        
+        if (returnType.IsDelegateType() && returnType.ArgumentInfo is DelegateArgumentInfo argumentInfo) // Action/Action<T1...Tn>/Func<T1...Tn>
+        {
+            RenderInlineDelegateTypeDownConversion(returnType, varName, argumentInfo);
+        }
+        else
+        {
+            RenderInlineTypeConversion(returnType, varName);
+        }
+        
+    }
+
     internal void RenderInlineTypeConversion(InteropTypeInfo typeInfo, string varName, bool forceCovariantConversion = false)
     {
         if (forceCovariantConversion)

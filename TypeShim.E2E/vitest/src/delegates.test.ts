@@ -111,4 +111,22 @@ describe('Delegates Test', () => {
         expect(exportedInstance).toBeInstanceOf(ExportedClass);
         expect(exportedInstance.Id).toBe(200);
     });
+
+    test('Get ExportedClassExportedClassFunc Proxy', async () => {
+        const instance = new ExportedClass({ Id: 300 });
+        const fn = testObject.GetExportedClassExportedClassFunc();
+        const retVal = fn(instance);
+        expect(retVal).not.toBeNull();
+        expect(retVal).toBeInstanceOf(ExportedClass);
+        expect(retVal.Id).toBe(300);
+    });
+
+    test('Get ExportedClassExportedClassFunc Initializer', async () => {
+        const instance = { Id: 250 };
+        const fn = testObject.GetExportedClassExportedClassFunc();
+        const retVal = fn(instance);
+        expect(retVal).not.toBeNull();
+        expect(retVal).toBeInstanceOf(ExportedClass);
+        expect(retVal.Id).toBe(250);
+    });
 });

@@ -64,4 +64,8 @@ public class DelegatesTest
     public Func<ExportedClass> GetExportedClassFunc() {
         return () => new ExportedClass { Id = 200 };
     }
+
+    public Func<ExportedClass, ExportedClass> GetExportedClassExportedClassFunc() {
+        return (ExportedClass classIn) => classIn;
+    }
 }
