@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Data;
+using System.Diagnostics;
 using System.Reflection;
 using TypeShim.Shared;
 
@@ -218,7 +219,8 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
     private void RenderConstructorInvocation(ConstructorInfo constructorInfo)
     {
         PropertyInfo[] propertiesInMapper = [.. constructorInfo.MemberInitializers];
-        Dictionary<PropertyInfo, DeferredExpressionRenderer> propertyToConvertedVarDict = RenderNonInlinableTypeConversions(propertiesInMapper);
+        Dictionary<PropertyInfo, DeferredExpressionRenderer> propertyToAccessorDict = RenderJSObjectPropertyRetrievalWithTypeConversions(propertiesInMapper);
+        Debug.Assert(propertyToAccessorDict.Count == propertiesInMapper.Length, "Property count differs from renderer count");
 
         _ctx.Append("return new ").Append(constructorInfo.Type.CSharpTypeSyntax).Append('(');
         bool isFirst = true;
@@ -239,32 +241,16 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         _ctx.AppendLine("{");
         using (_ctx.Indent())
         {
-            foreach (PropertyInfo propertyInfo in propertiesInMapper)
+            foreach ((PropertyInfo propertyInfo, DeferredExpressionRenderer expressionRenderer) in propertyToAccessorDict)
             {
                 _ctx.Append(propertyInfo.Name).Append(" = ");
-                if (propertyToConvertedVarDict.TryGetValue(propertyInfo, out DeferredExpressionRenderer? expressionRenderer))
-                {
-                    expressionRenderer.Render();
-                }
-                else
-                {
-                    string propertyRetrievalExpression = $"jsObject.{JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type)}(\"{propertyInfo.Name}\")";
-                    if (propertyInfo.Type is { IsNullableType: false })
-                    {
-                        propertyRetrievalExpression = $"({propertyRetrievalExpression} ?? throw new ArgumentException(\"Non-nullable property '{propertyInfo.Name}' missing or of invalid type\", nameof(jsObject)))";
-                    }
-
-                    if (propertyInfo.Type.RequiresTypeConversion)
-                        _conversionRenderer.RenderInlineTypeDownConversion(propertyInfo.Type, propertyRetrievalExpression);
-                    else
-                        _ctx.Append(propertyRetrievalExpression);
-                }
+                expressionRenderer.Render();
                 _ctx.AppendLine(",");
             }
         }
         _ctx.AppendLine("};");
 
-        Dictionary<PropertyInfo, DeferredExpressionRenderer> RenderNonInlinableTypeConversions(PropertyInfo[] properties)
+        Dictionary<PropertyInfo, DeferredExpressionRenderer> RenderJSObjectPropertyRetrievalWithTypeConversions(PropertyInfo[] properties)
         {
             Dictionary<PropertyInfo, DeferredExpressionRenderer> convertedTaskExpressionDict = [];
             foreach (PropertyInfo propertyInfo in properties)
@@ -285,23 +271,14 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                     convertedTaskExpressionDict.Add(propertyInfo, valueRetrievalExpressionRenderer);
 
                 } 
-                //else if (propertyInfo.Type is { IsTaskType: true })
-                //{
-                //    //DeferredExpressionRenderer valueRetrievalExpressionRenderer = DeferredExpressionRenderer.From(() => _ctx.Append("jsObject.")
-                //    //    .Append(JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type)).Append("(\"").Append(propertyInfo.Name)
-                //    //    .Append("\") ?? throw new ArgumentException(\"Non-nullable property '").Append(propertyInfo.Name).Append("' missing or of invalid type\", nameof(jsObject))"));
-                    
-                //    //DeferredExpressionRenderer convertedValueAccessorRenderer = _conversionRenderer.RenderVarTypeConversion(propertyInfo.Type, propertyInfo.Name, valueRetrievalExpressionRenderer);
-                //    //convertedTaskExpressionDict.Add(propertyInfo, convertedValueAccessorRenderer);
-                //}
                 else if (propertyInfo.Type is { IsNullableType: true })
                 {
+                    // TODO: if nullable type conversion can be done without a temp variable, this if statement can be removed
                     string tmpVarName = $"{propertyInfo.Name}Tmp";
                     _ctx.Append("var ").Append(tmpVarName).Append(" = ");
                     valueRetrievalExpressionRenderer.Render();
-                    //.Append("jsObject.").Append(JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type))
-                    //.Append("(\"").Append(propertyInfo.Name).Append("\")")
-                    //.AppendLine(";");
+                    _ctx.AppendLine(";");
+
                     valueRetrievalExpressionRenderer = DeferredExpressionRenderer.From(() => _ctx.Append(tmpVarName));
                     DeferredExpressionRenderer convertedValueAccessorRenderer = _conversionRenderer.RenderVarTypeConversion(propertyInfo.Type, tmpVarName, valueRetrievalExpressionRenderer);
                     convertedTaskExpressionDict.Add(propertyInfo, convertedValueAccessorRenderer);

@@ -53,7 +53,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = (jsObject.{{jsObjectMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
+            P1 = jsObject.{{jsObjectMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
         };
     }
     [JSExport]
@@ -83,7 +83,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = (jsObject.{{jsObjectMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
+            P1 = jsObject.{{jsObjectMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
         };
     }
 }
@@ -135,7 +135,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P2 = (List<{{typeExpression}}>)(jsObject.GetPropertyAsObject("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject))),
+            P2 = (List<{{typeExpression}}>)jsObject.GetPropertyAsObject("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
         };
     }
     [JSExport]
@@ -166,7 +166,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P2 = (List<{{typeExpression}}>)(jsObject.GetPropertyAsObject("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject))),
+            P2 = (List<{{typeExpression}}>)jsObject.GetPropertyAsObject("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
         };
     }
 }
@@ -215,8 +215,8 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = ({{typeName}}[])(jsObject.GetPropertyAsObjectArray("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
-            P2 = (jsObject.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject))),
+            P1 = ({{typeName}}[])jsObject.GetPropertyAsObjectArray("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
+            P2 = jsObject.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
         };
     }
     [JSExport]
@@ -261,8 +261,8 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = ({{typeName}}[])(jsObject.GetPropertyAsObjectArray("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
-            P2 = (jsObject.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject))),
+            P1 = ({{typeName}}[])jsObject.GetPropertyAsObjectArray("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
+            P2 = jsObject.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
         };
     }
 }
@@ -317,7 +317,7 @@ public partial class C1Interop
         return new C1()
         {
             P1 = P1Tcs.Task,
-            P2 = (jsObject.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject))),
+            P2 = jsObject.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
         };
     }
     [JSExport]
@@ -381,7 +381,7 @@ public partial class C1Interop
         return new C1()
         {
             P1 = P1Tcs.Task,
-            P2 = (jsObject.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject))),
+            P2 = jsObject.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
         };
     }
 }

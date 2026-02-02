@@ -8,6 +8,6 @@ internal class DeferredExpressionRenderer(Action renderAction)
     {
         return new DeferredExpressionRenderer(renderAction);
     }
+    
     public static DeferredExpressionRenderer From(Action renderAction) => new(renderAction);
-
 }

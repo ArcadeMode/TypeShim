@@ -393,7 +393,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = (jsObject.GetPropertyAsVoidTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
+            P1 = jsObject.GetPropertyAsVoidTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
         };
     }
     [JSExport]
@@ -423,7 +423,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = (jsObject.GetPropertyAsVoidTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
+            P1 = jsObject.GetPropertyAsVoidTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
         };
     }
 }
