@@ -826,9 +826,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
     {
-        var P1Tmp = jsObject.GetPropertyAsJSObjectTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject));
         TaskCompletionSource<MyClass> P1Tcs = new();
-        P1Tmp.ContinueWith(t => {
+        (jsObject.GetPropertyAsJSObjectTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
             if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(MyClassInterop.FromObject(t.Result));
@@ -844,7 +843,7 @@ public partial class C1Interop
     {
         C1 typed_instance = (C1)instance;
         TaskCompletionSource<object> retValTcs = new();
-        typed_instance.P1.ContinueWith(t => {
+        (typed_instance.P1).ContinueWith(t => {
             if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) retValTcs.SetCanceled();
             else retValTcs.SetResult((object)t.Result);
@@ -857,7 +856,7 @@ public partial class C1Interop
     {
         C1 typed_instance = (C1)instance;
         TaskCompletionSource<MyClass> valueTcs = new();
-        value.ContinueWith(t => {
+        (value).ContinueWith(t => {
             if (t.IsFaulted) valueTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) valueTcs.SetCanceled();
             else valueTcs.SetResult(MyClassInterop.FromObject(t.Result));
@@ -876,9 +875,8 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        var P1Tmp = jsObject.GetPropertyAsJSObjectTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject));
         TaskCompletionSource<MyClass> P1Tcs = new();
-        P1Tmp.ContinueWith(t => {
+        (jsObject.GetPropertyAsJSObjectTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
             if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(MyClassInterop.FromObject(t.Result));
@@ -943,9 +941,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
     {
-        var P1Tmp = jsObject.GetPropertyAsJSObjectTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject));
         TaskCompletionSource<MyClass?> P1Tcs = new();
-        P1Tmp.ContinueWith(t => {
+        (jsObject.GetPropertyAsJSObjectTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
             if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);
@@ -961,7 +958,7 @@ public partial class C1Interop
     {
         C1 typed_instance = (C1)instance;
         TaskCompletionSource<object?> retValTcs = new();
-        typed_instance.P1.ContinueWith(t => {
+        (typed_instance.P1).ContinueWith(t => {
             if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) retValTcs.SetCanceled();
             else retValTcs.SetResult(t.Result != null ? (object)t.Result : null);
@@ -974,7 +971,7 @@ public partial class C1Interop
     {
         C1 typed_instance = (C1)instance;
         TaskCompletionSource<MyClass?> valueTcs = new();
-        value.ContinueWith(t => {
+        (value).ContinueWith(t => {
             if (t.IsFaulted) valueTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) valueTcs.SetCanceled();
             else valueTcs.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);
@@ -993,9 +990,8 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
-        var P1Tmp = jsObject.GetPropertyAsJSObjectTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject));
         TaskCompletionSource<MyClass?> P1Tcs = new();
-        P1Tmp.ContinueWith(t => {
+        (jsObject.GetPropertyAsJSObjectTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
             if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);
@@ -1061,15 +1057,15 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
     {
         var P1Tmp = jsObject.GetPropertyAsJSObjectTask("P1");
-        TaskCompletionSource<MyClass?>? P1Tcs = P1Tmp != null ? new() : null;
+        TaskCompletionSource<MyClass?>? P1TmpTcs = P1Tmp != null ? new() : null;
         P1Tmp?.ContinueWith(t => {
-            if (t.IsFaulted) P1Tcs!.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) P1Tcs!.SetCanceled();
-            else P1Tcs!.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);
+            if (t.IsFaulted) P1TmpTcs!.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) P1TmpTcs!.SetCanceled();
+            else P1TmpTcs!.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);
         }, TaskContinuationOptions.ExecuteSynchronously);
         return new C1()
         {
-            P1 = P1Tcs?.Task,
+            P1 = P1TmpTcs?.Task,
         };
     }
     [JSExport]
@@ -1111,15 +1107,15 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject jsObject)
     {
         var P1Tmp = jsObject.GetPropertyAsJSObjectTask("P1");
-        TaskCompletionSource<MyClass?>? P1Tcs = P1Tmp != null ? new() : null;
+        TaskCompletionSource<MyClass?>? P1TmpTcs = P1Tmp != null ? new() : null;
         P1Tmp?.ContinueWith(t => {
-            if (t.IsFaulted) P1Tcs!.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) P1Tcs!.SetCanceled();
-            else P1Tcs!.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);
+            if (t.IsFaulted) P1TmpTcs!.SetException(t.Exception.InnerExceptions);
+            else if (t.IsCanceled) P1TmpTcs!.SetCanceled();
+            else P1TmpTcs!.SetResult(t.Result != null ? MyClassInterop.FromObject(t.Result) : null);
         }, TaskContinuationOptions.ExecuteSynchronously);
         return new C1()
         {
-            P1 = P1Tcs?.Task,
+            P1 = P1TmpTcs?.Task,
         };
     }
 }

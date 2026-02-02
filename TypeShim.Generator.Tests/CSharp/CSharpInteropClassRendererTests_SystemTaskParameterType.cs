@@ -122,7 +122,7 @@ public partial class C1Interop
 
         // Important assertion here, Task<object> required for interop, cannot be simply casted to Task<MyClass>
         // the return type is void so we cannot await either, hence the TaskCompletionSource-based conversion.
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
@@ -136,7 +136,7 @@ public partial class C1Interop
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
     {
         TaskCompletionSource<MyClass> taskTcs = new();
-        task.ContinueWith(t => {
+        (task).ContinueWith(t => {
             if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) taskTcs.SetCanceled();
             else taskTcs.SetResult(MyClassInterop.FromObject(t.Result));
@@ -154,7 +154,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -212,7 +212,7 @@ public partial class C1Interop
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
     {
         TaskCompletionSource<MyClass> taskTcs = new();
-        task.ContinueWith(t => {
+        (task).ContinueWith(t => {
             if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) taskTcs.SetCanceled();
             else taskTcs.SetResult(MyClassInterop.FromObject(t.Result));
@@ -277,7 +277,7 @@ public partial class C1Interop
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
     {
         TaskCompletionSource<{{typeName}}> taskTcs = new();
-        task.ContinueWith(t => {
+        (task).ContinueWith(t => {
             if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) taskTcs.SetCanceled();
             else taskTcs.SetResult(({{typeName}})t.Result);

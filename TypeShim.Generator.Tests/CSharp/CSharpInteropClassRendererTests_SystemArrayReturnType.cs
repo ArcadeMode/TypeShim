@@ -197,7 +197,7 @@ public partial class C1Interop
     {
         C1 typed_instance = (C1)instance;
         TaskCompletionSource<object> retValTcs = new();
-        typed_instance.M1().ContinueWith(t => {
+        (typed_instance.M1()).ContinueWith(t => {
             if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) retValTcs.SetCanceled();
             else retValTcs.SetResult((object)t.Result);

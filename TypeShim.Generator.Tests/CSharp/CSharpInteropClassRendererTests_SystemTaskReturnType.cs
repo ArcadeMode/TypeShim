@@ -133,7 +133,7 @@ public partial class C1Interop
     public static Task<object> M1()
     {
         TaskCompletionSource<object> retValTcs = new();
-        C1.M1().ContinueWith(t => {
+        (C1.M1()).ContinueWith(t => {
             if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) retValTcs.SetCanceled();
             else retValTcs.SetResult((object)t.Result);
@@ -210,7 +210,7 @@ public partial class C1Interop
     {
         C1 typed_instance = (C1)instance;
         TaskCompletionSource<object> retValTcs = new();
-        typed_instance.M1().ContinueWith(t => {
+        (typed_instance.M1()).ContinueWith(t => {
             if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) retValTcs.SetCanceled();
             else retValTcs.SetResult((object)t.Result);
@@ -272,7 +272,7 @@ public partial class C1Interop
     public static Task<object> M1()
     {
         TaskCompletionSource<object> retValTcs = new();
-        C1.M1().ContinueWith(t => {
+        (C1.M1()).ContinueWith(t => {
             if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) retValTcs.SetCanceled();
             else retValTcs.SetResult((object)t.Result);

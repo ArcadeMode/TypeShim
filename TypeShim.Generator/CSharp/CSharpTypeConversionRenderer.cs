@@ -15,25 +15,38 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
 
         string varName = _ctx.LocalScope.GetAccessorExpression(parameterInfo);
         string newVarName = $"typed_{_ctx.LocalScope.GetAccessorExpression(parameterInfo)}";
-        // task pattern differs from other conversions, hence their fully separated rendering.
-        if (parameterInfo.Type is { IsNullableType: true, TypeArgument.IsTaskType: true }) // Task<T>?
+
+        DeferredExpressionRenderer convertedValueAccessor = RenderTypeDownConversion(parameterInfo.Type, varName, DeferredExpressionRenderer.From(() => _ctx.Append(varName)), parameterInfo.IsInjectedInstanceParameter);
+        _ctx.Append($"{parameterInfo.Type.CSharpTypeSyntax} {newVarName} = ");
+        convertedValueAccessor.Render();
+        _ctx.AppendLine(";");
+        _ctx.LocalScope.UpdateAccessorExpression(parameterInfo, newVarName);
+    }
+
+    internal DeferredExpressionRenderer RenderVarTypeConversion(InteropTypeInfo typeInfo, string varName, DeferredExpressionRenderer valueExpressionRenderer)
+    {
+        return RenderTypeDownConversion(typeInfo, varName, valueExpressionRenderer, false);
+    }
+
+    private DeferredExpressionRenderer RenderTypeDownConversion(InteropTypeInfo typeInfo, string accessorName, DeferredExpressionRenderer accessorExpressionRenderer, bool isInstanceParameter)
+    {
+        if (!typeInfo.RequiresTypeConversion)
+            return accessorExpressionRenderer;
+
+        if (typeInfo is { IsNullableType: true, TypeArgument.IsTaskType: true }) // Task<T>?
         {
-            string convertedTaskExpression = RenderNullableTaskTypeConversion(parameterInfo.Type, varName, varName);
-            _ctx.AppendLine($"{parameterInfo.Type.CSharpTypeSyntax} {newVarName} = {convertedTaskExpression};");
+            string convertedTaskExpression = RenderNullableTaskTypeConversion(typeInfo, accessorName, accessorExpressionRenderer);
+            return DeferredExpressionRenderer.From(() => _ctx.Append(convertedTaskExpression));
         }
-        else if (parameterInfo.Type.IsTaskType) // Task<T>
+        else if (typeInfo.IsTaskType) // Task<T>
         {
-            string convertedTaskExpression = RenderTaskTypeConversion(parameterInfo.Type, varName, varName);
-            _ctx.AppendLine($"{parameterInfo.Type.CSharpTypeSyntax} {newVarName} = {convertedTaskExpression};");
+            string convertedTaskExpression = RenderTaskTypeConversion(typeInfo, accessorName, accessorExpressionRenderer);
+            return DeferredExpressionRenderer.From(() => _ctx.Append(convertedTaskExpression));
         }
         else
         {
-            _ctx.Append($"{parameterInfo.Type.CSharpTypeSyntax} {newVarName} = ");
-            RenderInlineTypeDownConversion(parameterInfo.Type, varName, forceCovariantConversion: parameterInfo.IsInjectedInstanceParameter);
-            _ctx.AppendLine(";");
+            return DeferredExpressionRenderer.From(() => RenderInlineTypeDownConversion(typeInfo, accessorName, forceCovariantConversion: isInstanceParameter));
         }
-
-        _ctx.LocalScope.UpdateAccessorExpression(parameterInfo, newVarName);
     }
 
     /// <summary>
@@ -42,31 +55,33 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
     /// <param name="returnType"></param>
     /// <param name="valueExpression"></param>
     /// <returns></returns>
-    internal DeferredExpressionRenderer RenderReturnTypeConversion(InteropTypeInfo returnType, string valueExpression)
+    internal DeferredExpressionRenderer RenderReturnTypeConversion(InteropTypeInfo returnType, DeferredExpressionRenderer valueExpressionRenderer)
     {
         if (!returnType.RequiresTypeConversion)
-            return DeferredExpressionRenderer.From(() => _ctx.Append(valueExpression));
+            return valueExpressionRenderer; // DeferredExpressionRenderer.From(() => _ctx.Append(valueExpression));
         
         if (returnType is { IsTaskType: true, TypeArgument.RequiresTypeConversion: true }) // Handle Task<T>
         {
-            string convertedValueExpression = RenderTaskTypeConversion(returnType.AsInteropTypeInfo(), "retVal", valueExpression);
+            string convertedValueExpression = RenderTaskTypeConversion(returnType.AsInteropTypeInfo(), "retVal", valueExpressionRenderer);
             return DeferredExpressionRenderer.From(() => _ctx.Append(convertedValueExpression));
         }
         else if (returnType is { IsNullableType: true, TypeArgument.IsTaskType: true, TypeArgument.RequiresTypeConversion: true }) // Handle Task<T>?
         {
-            string convertedValueExpression = RenderNullableTaskTypeConversion(returnType.AsInteropTypeInfo(), "retVal", valueExpression);
+            string convertedValueExpression = RenderNullableTaskTypeConversion(returnType.AsInteropTypeInfo(), "retVal", valueExpressionRenderer);
             return DeferredExpressionRenderer.From(() => _ctx.Append(convertedValueExpression));
 
         }
         else if (returnType.IsDelegateType() && returnType.ArgumentInfo is DelegateArgumentInfo argumentInfo) // Action/Action<T1...Tn>/Func<T1...Tn>
         {
             // Note: its important that we store retVal first, to avoid multiple evaluations of valueExpression, as it can be a method call
-            _ctx.Append(returnType.CSharpTypeSyntax).Append(" retVal = ").Append(valueExpression).AppendLine(";");
+            _ctx.Append(returnType.CSharpTypeSyntax).Append(" retVal = ");
+            valueExpressionRenderer.Render();
+            _ctx.AppendLine(";");
             return DeferredExpressionRenderer.From(() => RenderInlineDelegateTypeUpConversion(returnType, "retVal", argumentInfo));
         }
         else
         {
-            return DeferredExpressionRenderer.From(() => RenderInlineCovariantTypeUpConversion(returnType, valueExpression));
+            return DeferredExpressionRenderer.From(() => RenderInlineCovariantTypeUpConversion(returnType, valueExpressionRenderer));
         }
     }
 
@@ -104,9 +119,10 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         _ctx.Append($"({typeInfo.CSharpTypeSyntax}){parameterName}");
     }
     
-    private void RenderInlineCovariantTypeUpConversion(InteropTypeInfo typeInfo, string parameterName)
+    private void RenderInlineCovariantTypeUpConversion(InteropTypeInfo typeInfo, DeferredExpressionRenderer valueExpressionRenderer)
     {
-        _ctx.Append($"({typeInfo.CSharpInteropTypeSyntax}){parameterName}");
+        _ctx.Append($"({typeInfo.CSharpInteropTypeSyntax})");
+        valueExpressionRenderer.Render();
     }
 
     private void RenderInlineObjectTypeDownConversion(InteropTypeInfo typeInfo, string parameterName)
@@ -155,34 +171,16 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
     /// returns an expression to access the converted task with.
     /// </summary>
     /// <exception cref="InvalidOperationException"></exception>
-    internal string RenderTaskTypeConversion(InteropTypeInfo targetTaskType, string sourceVarName, string sourceTaskExpression)
+    private string RenderTaskTypeConversion(InteropTypeInfo targetTaskType, string sourceVarName, DeferredExpressionRenderer sourceTaskExpressionRenderer)
     {
         InteropTypeInfo taskTypeParamInfo = targetTaskType.TypeArgument ?? throw new InvalidOperationException("Task type must have a type argument for conversion.");
         string tcsVarName = $"{sourceVarName}Tcs";
-        _ctx.AppendLine($"TaskCompletionSource<{taskTypeParamInfo.CSharpTypeSyntax}> {tcsVarName} = new();")
-            .AppendLine($"{sourceTaskExpression}.ContinueWith(t => {{");
-        using (_ctx.Indent())
-        {
-            _ctx.AppendLine($"if (t.IsFaulted) {tcsVarName}.SetException(t.Exception.InnerExceptions);");
-            _ctx.AppendLine($"else if (t.IsCanceled) {tcsVarName}.SetCanceled();");
-            _ctx.Append($"else {tcsVarName}.SetResult(");
-            RenderInlineTypeDownConversion(taskTypeParamInfo, "t.Result");
-            _ctx.AppendLine(");");
-        }
-        _ctx.AppendLine("}, TaskContinuationOptions.ExecuteSynchronously);");
-        return $"{tcsVarName}.Task";
-    }
-    
-    /// <summary>
-    /// returns an expression to access the converted task with.
-    /// </summary>
-    /// <exception cref="InvalidOperationException"></exception>
-    private string RenderTaskTypeConversionCore(InteropTypeInfo targetTaskType, string sourceVarName, string sourceTaskExpression)
-    {
-        InteropTypeInfo taskTypeParamInfo = targetTaskType.TypeArgument ?? throw new InvalidOperationException("Task type must have a type argument for conversion.");
-        string tcsVarName = $"{sourceVarName}Tcs";
-        _ctx.AppendLine($"TaskCompletionSource<{taskTypeParamInfo.CSharpTypeSyntax}> {tcsVarName} = new();")
-            .AppendLine($"{sourceTaskExpression}.ContinueWith(t => {{");
+        _ctx.AppendLine($"TaskCompletionSource<{taskTypeParamInfo.CSharpTypeSyntax}> {tcsVarName} = new();");
+
+        _ctx.Append('(');
+        sourceTaskExpressionRenderer.Render();
+        _ctx.AppendLine(").ContinueWith(t => {");
+        
         using (_ctx.Indent())
         {
             _ctx.AppendLine($"if (t.IsFaulted) {tcsVarName}.SetException(t.Exception.InnerExceptions);");
@@ -195,13 +193,20 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         return $"{tcsVarName}.Task";
     }
 
-    internal string RenderNullableTaskTypeConversion(InteropTypeInfo targetNullableTaskType, string sourceVarName, string sourceTaskExpression)
+    private string RenderNullableTaskTypeConversion(InteropTypeInfo targetNullableTaskType, string sourceVarName, DeferredExpressionRenderer sourceTaskExpressionRenderer)
     {
         InteropTypeInfo taskTypeParamInfo = targetNullableTaskType.TypeArgument ?? throw new InvalidOperationException("Nullable type must have a type argument for conversion.");
         InteropTypeInfo taskReturnTypeParamInfo = taskTypeParamInfo.TypeArgument ?? throw new InvalidOperationException("Task type must have a type argument for conversion.");
+        
+        //_ctx.Append(targetNullableTaskType.CSharpInteropTypeSyntax.ToString()).Append(' ').Append(sourceVarName).Append("Tsk = ");
+        //sourceTaskExpressionRenderer.Render();
+
         string tcsVarName = $"{sourceVarName}Tcs";
-        _ctx.AppendLine($"TaskCompletionSource<{taskReturnTypeParamInfo.CSharpTypeSyntax}>? {tcsVarName} = {sourceTaskExpression} != null ? new() : null;");
-        _ctx.AppendLine($"{sourceTaskExpression}?.ContinueWith(t => {{");
+        _ctx.Append("TaskCompletionSource<").Append(taskReturnTypeParamInfo.CSharpTypeSyntax.ToString()).Append(">? ").Append(tcsVarName).Append(" = ");
+        sourceTaskExpressionRenderer.Render();
+        _ctx.AppendLine(" != null ? new() : null;");
+        sourceTaskExpressionRenderer.Render();
+        _ctx.AppendLine("?.ContinueWith(t => {");
         using (_ctx.Indent())
         {
             _ctx.AppendLine($"if (t.IsFaulted) {tcsVarName}!.SetException(t.Exception.InnerExceptions);")
