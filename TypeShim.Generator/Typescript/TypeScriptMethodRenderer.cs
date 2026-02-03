@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Metadata;
@@ -361,8 +362,15 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             {
                 if (!isFirst) ctx.Append(", ");
 
-                ctx.Append(parameter.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(parameter));
-                if(RequiresCharConversion(parameter.Type)) RenderCharToNumberConversion(parameter.Type);
+                Action renderParameter = () => ctx.Append(parameter.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(parameter));
+                if (RequiresCharConversion(parameter.Type))
+                {
+                    RenderCharToNumberConversion(parameter.Type, renderParameter);
+                }
+                else
+                {
+                    renderParameter();
+                }
                 isFirst = false;
             }
             if (initializerObject == null) return;
@@ -374,10 +382,12 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             foreach (PropertyInfo propertyInfo in ctx.Class.Properties)
             {
                 if (!RequiresCharConversion(propertyInfo.Type)) continue;
-                ctx.Append(", ").Append(propertyInfo.Name).Append(": ").Append(initializerObject.Name).Append('.').Append(propertyInfo.Name);
-                RenderCharToNumberConversion(propertyInfo.Type);
+
+                Action renderPropertyAccessorExpression = () => ctx.Append(initializerObject.Name).Append('.').Append(propertyInfo.Name);
+                ctx.Append(", ").Append(propertyInfo.Name).Append(": ");
+                RenderCharToNumberConversion(propertyInfo.Type, renderPropertyAccessorExpression);
             }
-            ctx.Append('}');
+            ctx.Append(" }");
         }
 
         void RenderInteropMethodAccessor(string methodName)
@@ -402,25 +412,27 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
     /// Assumes type requires char conversion, may behave unexpectedly otherwise
     /// </summary>
     /// <param name="typeInfo"></param>
-    void RenderCharToNumberConversion(InteropTypeInfo typeInfo)
+    void RenderCharToNumberConversion(InteropTypeInfo typeInfo, Action renderStringExpression)
     {
+        if (typeInfo is { ManagedType: KnownManagedType.Nullable })
+        {
+            renderStringExpression();
+            ctx.Append(" ? ");
+            RenderCharToNumberConversion(typeInfo.TypeArgument!, renderStringExpression);
+            ctx.Append(" : null");
+            return;
+        }
+
+        renderStringExpression();
         if (typeInfo.ManagedType == KnownManagedType.Char)
         {
             ctx.Append(".charCodeAt(0)");
         }
-        else if (typeInfo is { ManagedType: KnownManagedType.Nullable })
-        {
-            ctx.Append('?');
-            RenderCharToNumberConversion(typeInfo.TypeArgument!);
-        }
         else if (typeInfo is { ManagedType: KnownManagedType.Task })
         {
-            ctx.Append(".then(c => c");
-            if (typeInfo.TypeArgument is { ManagedType: KnownManagedType.Nullable })
-            {
-                ctx.Append('?');
-            }
-            RenderCharToNumberConversion(typeInfo.TypeArgument!);
+            ctx.Append(".then(c => ");
+            RenderCharToNumberConversion(typeInfo.TypeArgument!, () => ctx.Append("c"));
+            ctx.Append(")");
         }
     }
 
@@ -428,14 +440,14 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
     /// Assumes type requires char conversion, may behave unexpectedly otherwise
     /// </summary>
     /// <param name="typeInfo"></param>
-    /// <param name="renderCharExpression"></param>
-    void RenderNumberToCharConversion(InteropTypeInfo typeInfo, Action renderCharExpression)
+    /// <param name="renderNumberExpression"></param>
+    void RenderNumberToCharConversion(InteropTypeInfo typeInfo, Action renderNumberExpression)
     {
         if (typeInfo.ManagedType == KnownManagedType.Nullable)
         {
-            renderCharExpression();
+            renderNumberExpression();
             ctx.Append(" ? ");
-            RenderNumberToCharConversion(typeInfo.TypeArgument!, renderCharExpression);
+            RenderNumberToCharConversion(typeInfo.TypeArgument!, renderNumberExpression);
             ctx.Append(" : null");
             return;
         } 
@@ -444,7 +456,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             ctx.Append("String.fromCharCode(");
         }
 
-        renderCharExpression();
+        renderNumberExpression();
 
         if (typeInfo.ManagedType == KnownManagedType.Char)
         {
@@ -454,6 +466,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         {
             ctx.Append(".then(c => ");
             RenderNumberToCharConversion(typeInfo.TypeArgument!, () => ctx.Append("c"));
+            ctx.Append(")");
         }
     }
 

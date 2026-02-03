@@ -158,7 +158,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export class C1 extends ProxyBase {
           constructor(jsObject: C1.Initializer) {
-            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.charCodeAt(0)}));
+            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.charCodeAt(0) }));
           }
 
           public get P1(): string {
@@ -202,7 +202,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export class C1 extends ProxyBase {
           constructor(jsObject: C1.Initializer) {
-            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1?.charCodeAt(0)}));
+            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 ? jsObject.P1.charCodeAt(0) : null }));
           }
 
           public get P1(): string | null {
@@ -211,7 +211,7 @@ export class C1 extends ProxyBase {
           }
 
           public set P1(value: string | null) {
-            TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value?.charCodeAt(0));
+            TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value ? value.charCodeAt(0) : null);
           }
         }
 
@@ -246,7 +246,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export class C1 extends ProxyBase {
           constructor(jsObject: C1.Initializer) {
-            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.then(c => c.charCodeAt(0)}));
+            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.then(c => c.charCodeAt(0)) }));
           }
 
           public get P1(): Promise<string> {
@@ -255,7 +255,7 @@ export class C1 extends ProxyBase {
           }
 
           public set P1(value: Promise<string>) {
-            TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value.then(c => c.charCodeAt(0));
+            TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value.then(c => c.charCodeAt(0)));
           }
         }
         
@@ -290,7 +290,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export class C1 extends ProxyBase {
           constructor(jsObject: C1.Initializer) {
-            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1?.then(c => c.charCodeAt(0)}));
+            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 ? jsObject.P1.then(c => c.charCodeAt(0)) : null }));
           }
 
           public get P1(): Promise<string> | null {
@@ -299,7 +299,7 @@ export class C1 extends ProxyBase {
           }
 
           public set P1(value: Promise<string> | null) {
-            TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value?.then(c => c.charCodeAt(0));
+            TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value ? value.then(c => c.charCodeAt(0)) : null);
           }
         }
         
