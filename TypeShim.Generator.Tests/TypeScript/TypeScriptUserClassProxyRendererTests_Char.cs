@@ -251,7 +251,7 @@ export class C1 extends ProxyBase {
 
           public get P1(): Promise<string> {
             const retVal = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-            return retVal.then(c => String.fromCharCode(c);
+            return retVal.then(c => String.fromCharCode(c));
           }
 
           public set P1(value: Promise<string>) {
@@ -295,7 +295,7 @@ export class C1 extends ProxyBase {
 
           public get P1(): Promise<string> | null {
             const retVal = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-            return retVal ? retVal.then(c => String.fromCharCode(c) : null;
+            return retVal ? retVal.then(c => String.fromCharCode(c)) : null;
           }
 
           public set P1(value: Promise<string> | null) {
