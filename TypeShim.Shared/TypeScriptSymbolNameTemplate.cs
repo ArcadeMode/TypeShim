@@ -58,9 +58,10 @@ internal sealed class TypeScriptSymbolNameTemplate
 
     internal static TypeScriptSymbolNameTemplate ForNullableType(InteropTypeInfo innerType)
     {
+        string template = innerType.IsDelegateType() ? "({TNullableValue}) | null" : "{TNullableValue} | null";
         return new TypeScriptSymbolNameTemplate
         {
-            Template = "{TNullableValue} | null",
+            Template = template,
             InnerTypes = { { "{TNullableValue}", innerType } }
         };
     }
