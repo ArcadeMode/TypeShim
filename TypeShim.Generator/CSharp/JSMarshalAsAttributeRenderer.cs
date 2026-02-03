@@ -17,6 +17,25 @@ internal sealed class JSMarshalAsAttributeRenderer(InteropTypeInfo interopTypeIn
             )
         );
     }
+    
+    internal AttributeListSyntax RenderJSImportAttribute(string method)
+    {
+        return SyntaxFactory.AttributeList(
+            SyntaxFactory.SingletonSeparatedList(
+                SyntaxFactory.Attribute(
+                    SyntaxFactory.IdentifierName("JSImport"),
+                    SyntaxFactory.AttributeArgumentList([
+                        SyntaxFactory.AttributeArgument(
+                            SyntaxFactory.ParseExpression($"\"{method}\"")
+                        ),
+                        SyntaxFactory.AttributeArgument(
+                            SyntaxFactory.ParseExpression("\"@typeshim\"")
+                        )
+                    ])
+                )
+            )
+        );
+    }
 
     internal AttributeListSyntax RenderReturnAttribute()
     {

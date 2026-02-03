@@ -4,12 +4,12 @@ using System.Reflection;
 using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using TypeShim.Generator.Parsing;
+using TypeShim.Shared;
 
 namespace TypeShim.Generator.CSharp;
 
 internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, JSObjectMethodResolver methodResolver)
 {
-    private readonly StringBuilder sb = new();
     public string Render()
     {
         _ctx.AppendLine("#nullable enable")
@@ -22,13 +22,66 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, JSObjectMet
         // 1. JSObject has no means to retrieve arrays beside ByteArray (automapping user classes with an array property type is therefore not possible by default)
         // 2. Nested types cannot be represented on the interop boundary (i.e. Task<int[]>
         // 3. Not all type mappings can be predefined: mostly multi-generics like func/action types, as they will have huge numbers of type param permutations, i.e. 3 param funcs (with simple types only) permute to ~3375 type configurations)
-        _ctx.AppendLine(JSObjectIntExtensionsClass);
-        _ctx.AppendLine(JSObjectArrayExtensionsClass);
-        _ctx.AppendLine(JSObjectTaskExtensionsClass);
+        //_ctx.AppendLine(JSObjectIntExtensionsClass);
+        //_ctx.AppendLine(JSObjectArrayExtensionsClass);
+        //_ctx.AppendLine(JSObjectTaskExtensionsClass);
+
+        _ctx.AppendLine("public static partial class JSObjectExtensions")
+            .AppendLine("{");
+        using (_ctx.Indent())
+        {
+            foreach (InteropTypeInfo typeInfo in methodResolver.GetResolvedTypes())
+            {
+                RenderExtensionMethodForType(typeInfo);
+            }
+        }
+        _ctx.AppendLine("}");
+        return _ctx.ToString(); // TODO: remove and read ctx from caller.
+    }
+
+    private void RenderExtensionMethodForType(InteropTypeInfo typeInfo)
+    {
+        JSMarshalAsAttributeRenderer attributeRenderer = new(typeInfo);
         
+        DeferredExpressionRenderer marshalAsMethodNameRenderer = DeferredExpressionRenderer.From(() =>
+        {
+            _ctx.Append("MarshalAs");
+            RenderResolverMethodNameSuffix(typeInfo);
+        });
 
+        _ctx.Append("public static ").Append(typeInfo.CSharpInteropTypeSyntax.ToFullString()).Append(" ").Append(methodResolver.ResolveJSObjectMethodName(typeInfo)).AppendLine("(this JSObject jsObject, string propertyName)");
+        _ctx.AppendLine("{");
+        using (_ctx.Indent())
+        {
+            InteropTypeInfo targetType = typeInfo.IsNullableType ? typeInfo.TypeArgument! : typeInfo;
+            _ctx.Append("return jsObject.HasProperty(propertyName) ? (").Append(targetType.CSharpInteropTypeSyntax.ToFullString()).Append(')');
+            marshalAsMethodNameRenderer.Render();
+            _ctx.AppendLine("(propertyName) : null;");
+        }
+        _ctx.AppendLine("}");
 
-        return sb.ToString();
+        _ctx.AppendLine(attributeRenderer.RenderJSImportAttribute("unwrap").ToString());
+        _ctx.AppendLine(attributeRenderer.RenderReturnAttribute().ToString());
+        _ctx.Append("public static partial ").Append(typeInfo.CSharpInteropTypeSyntax.ToFullString()).Append(' ');
+        marshalAsMethodNameRenderer.Render();
+        _ctx.AppendLine("(this JSObject jsObject, string propertyName);");
+    }
+
+    private void RenderResolverMethodNameSuffix(InteropTypeInfo typeInfo)
+    {
+        _ctx.Append(typeInfo.ManagedType);
+        if (typeInfo.IsDelegateType() && typeInfo.ArgumentInfo is DelegateArgumentInfo delegateArgInfo)
+        {
+            foreach (InteropTypeInfo paramType in delegateArgInfo.ParameterTypes)
+            {
+                _ctx.Append(paramType.ManagedType);
+            }
+            _ctx.AppendLine(delegateArgInfo.ReturnType.ManagedType.ToString());
+        }
+        else if (typeInfo.TypeArgument != null)
+        {
+            RenderResolverMethodNameSuffix(typeInfo.TypeArgument);
+        }
     }
 
     private const string JSObjectIntExtensionsClass = """
