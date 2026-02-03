@@ -33,7 +33,8 @@ catch (TypeShimException ex) // known exceptions warrant only an error message
 
 static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)
 {
-    JSObjectMethodResolver methodResolver = new();
+    List<InteropTypeInfo> resolvedTypes = [];
+    JSObjectMethodResolver methodResolver = new(resolvedTypes);
 
     foreach (ClassInfo classInfo in classInfos)
     {
@@ -42,14 +43,11 @@ static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInf
         string outFileName = $"{classInfo.Name}.Interop.g.cs";
         File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, outFileName), source.ToString());
     }
+
     RenderContext jsObjRenderCtx = new(null, classInfos, RenderOptions.CSharp);
-    new JSObjectExtensionsRenderer(jsObjRenderCtx, methodResolver).Render();
+    new JSObjectExtensionsRenderer(jsObjRenderCtx, resolvedTypes).Render();
     SourceText jsObjectExtensionsSource = SourceText.From(jsObjRenderCtx.ToString(), Encoding.UTF8);
     File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, "JSObjectExtensions.g.cs"), jsObjectExtensionsSource.ToString());
-
-    var usedTypes = methodResolver.GetResolvedTypes();
-    // TODO: add renderer for jsobject extension methods _that were used_.
-
 }
 
 static void GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)

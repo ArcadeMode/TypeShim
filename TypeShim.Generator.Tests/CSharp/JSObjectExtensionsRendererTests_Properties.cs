@@ -43,15 +43,15 @@ internal class JSObjectExtensionsRendererTests_Properties
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
-        JSObjectMethodResolver jSObjectMethodResolver = new();
-        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
-        _ = new CSharpInteropClassRenderer(classInfo, renderContext, jSObjectMethodResolver).Render();
+
+        List<InteropTypeInfo> types = [classInfo.Properties.First().Type];
         RenderContext extensionsRenderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
-        new JSObjectExtensionsRenderer(extensionsRenderContext, jSObjectMethodResolver).Render();
+        new JSObjectExtensionsRenderer(extensionsRenderContext, types).Render();
         AssertEx.EqualOrDiff(extensionsRenderContext.ToString(), """    
 
-""");
+        """);
     }
+
     [Test]
     public void JSObjectExtensionsRendererTests_InstanceProperty_WithUserClassArrayType()
     {
@@ -86,13 +86,27 @@ internal class JSObjectExtensionsRendererTests_Properties
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
-        JSObjectMethodResolver jSObjectMethodResolver = new();
-        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
-        _ = new CSharpInteropClassRenderer(classInfo, renderContext, jSObjectMethodResolver).Render();
-        RenderContext extensionsRenderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
-        new JSObjectExtensionsRenderer(extensionsRenderContext, jSObjectMethodResolver).Render();
-        AssertEx.EqualOrDiff(extensionsRenderContext.ToString(), """    
 
-""");
+        List<InteropTypeInfo> types = [classInfo.Properties.First().Type];
+        RenderContext extensionsRenderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
+        new JSObjectExtensionsRenderer(extensionsRenderContext, types).Render();
+        AssertEx.EqualOrDiff(extensionsRenderContext.ToString(), """    
+        #nullable enable
+        // JSImports for the type marshalling process
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        public static partial class JSObjectExtensions
+        {
+            public static JSObject[]? GetPropertyAsJSObjectArrayNullable(this JSObject jsObject, string propertyName)
+            {
+                return jsObject.HasProperty(propertyName) ? MarshalAsJSObjectArray(jsObject, propertyName) : null;
+            }
+            [JSImport("unwrapProperty", "@typeshim")]
+            [return: JSMarshalAs<JSType.Array<JSType.Any>>]
+            public static partial JSObject[] MarshalAsJSObjectArray([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+        }
+        
+        """);
     }
 }

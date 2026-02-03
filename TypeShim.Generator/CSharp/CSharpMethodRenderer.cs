@@ -49,9 +49,9 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     private void RenderConstructorMethodCore(ConstructorInfo constructorInfo)
     {
-        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(constructorInfo.Type);
+        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new();
         _ctx.AppendLine(marshalAsAttributeRenderer.RenderJSExportAttribute().NormalizeWhitespace().ToFullString())
-            .AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
+            .AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute(constructorInfo.Type.JSTypeSyntax).NormalizeWhitespace().ToFullString());
 
         MethodParameterInfo[] allParameters = constructorInfo.GetParametersIncludingInitializerObject();
         RenderMethodSignature(constructorInfo.Name, constructorInfo.Type, allParameters);
@@ -70,9 +70,9 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     private void RenderMethodCore(MethodInfo methodInfo)
     {
-        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(methodInfo.ReturnType);
+        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new();
         _ctx.AppendLine(marshalAsAttributeRenderer.RenderJSExportAttribute().NormalizeWhitespace().ToFullString())
-            .AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
+            .AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute(methodInfo.ReturnType.JSTypeSyntax).NormalizeWhitespace().ToFullString());
 
         RenderMethodSignature(methodInfo.Name, methodInfo.ReturnType, methodInfo.Parameters);
         _ctx.AppendLine("{");
@@ -117,9 +117,9 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     private void RenderPropertyMethodCore(PropertyInfo propertyInfo, MethodInfo methodInfo)
     {
-        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(methodInfo.ReturnType);
+        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new();
         _ctx.AppendLine(marshalAsAttributeRenderer.RenderJSExportAttribute().NormalizeWhitespace().ToFullString());
-        _ctx.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute().NormalizeWhitespace().ToFullString());
+        _ctx.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute(methodInfo.ReturnType.JSTypeSyntax).NormalizeWhitespace().ToFullString());
 
         RenderMethodSignature(methodInfo.Name, methodInfo.ReturnType, methodInfo.Parameters);
         _ctx.AppendLine("{");
@@ -171,8 +171,8 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             {
                 if (!isFirst) _ctx.Append(", ");
 
-                JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(parameterInfo.Type);
-                _ctx.Append(marshalAsAttributeRenderer.RenderParameterAttribute().NormalizeWhitespace().ToFullString())
+                JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new();
+                _ctx.Append(marshalAsAttributeRenderer.RenderParameterAttribute(parameterInfo.Type.JSTypeSyntax).NormalizeWhitespace().ToFullString())
                     .Append(' ')
                     .Append(parameterInfo.Type.CSharpInteropTypeSyntax)
                     .Append(' ')

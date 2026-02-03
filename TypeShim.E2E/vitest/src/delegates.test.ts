@@ -6,7 +6,30 @@ describe('Delegates Test', () => {
     let testObject: DelegatesTest;
     beforeEach(() => {
         exportedClass = new ExportedClass({ Id: 2 });
-        testObject = new DelegatesTest();
+        testObject = new DelegatesTest({ FuncBoolIntProperty: null });
+    });
+
+    test('Set and Get FuncBoolIntProperty', async () => {
+        const func = (arg0: boolean) => {
+            return arg0 ? 1 : 0;
+        };
+        testObject.FuncBoolIntProperty = func;
+        const retrievedFunc = testObject.FuncBoolIntProperty;
+        expect(retrievedFunc).not.toBeNull();
+        expect(retrievedFunc!(true)).toBe(1);
+        expect(retrievedFunc!(false)).toBe(0);
+    });
+
+    test('Initialize FuncBoolIntProperty', async () => {
+        testObject = new DelegatesTest({ 
+            FuncBoolIntProperty: (arg0: boolean) => {
+                return arg0 ? 1 : 0;
+            } 
+        });
+        const retrievedFunc = testObject.FuncBoolIntProperty;
+        expect(retrievedFunc).not.toBeNull();
+        expect(retrievedFunc!(true)).toBe(1);
+        expect(retrievedFunc!(false)).toBe(0);
     });
 
     test('Invoke Void Action', async () => {

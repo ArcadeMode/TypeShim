@@ -33,15 +33,11 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
                 SyntaxFactory.TypeArgumentList(
                     SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
                         asti.ElementTypeInfo.Syntax))),
-            JSTaskTypeInfo { ResultTypeInfo.KnownType: KnownManagedType.Void } => SyntaxFactory.IdentifierName(
-                SyntaxFactory.Identifier("Task")),
+            JSTaskTypeInfo { ResultTypeInfo.KnownType: KnownManagedType.Void } => SyntaxFactory.IdentifierName(SyntaxFactory.Identifier("Task")),
             JSTaskTypeInfo { ResultTypeInfo.KnownType: not KnownManagedType.Void }  tti => SyntaxFactory.GenericName(
                 SyntaxFactory.Identifier("Task"),
-                SyntaxFactory.TypeArgumentList(
-                    SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
-                        tti.ResultTypeInfo.GetTypeSyntax() ?? SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword))))),
-            JSNullableTypeInfo nti => SyntaxFactory.NullableType(
-                nti.ResultTypeInfo.GetTypeSyntax() ?? SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword))),
+                SyntaxFactory.TypeArgumentList(SyntaxFactory.SingletonSeparatedList<TypeSyntax>(tti.ResultTypeInfo.GetTypeSyntax()))),
+            JSNullableTypeInfo nti => SyntaxFactory.NullableType(nti.ResultTypeInfo.GetTypeSyntax()),
             JSFunctionTypeInfo fti => GetFunctionTypeSyntax(fti),
             _ => throw new NotSupportedTypeException($"JS type '{this.GetType()}' with KnownManagedType '{KnownType}' is not supported for type syntax generation"),
         };

@@ -6,6 +6,8 @@ namespace TypeShim.E2E.Wasm;
 [TSExport]
 public class DelegatesTest
 {
+    public Func<bool, int>? FuncBoolIntProperty { get; set; }
+
     public void InvokeVoidAction(Action action)
     {
         action();
