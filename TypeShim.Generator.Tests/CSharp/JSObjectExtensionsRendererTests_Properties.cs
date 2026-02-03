@@ -48,7 +48,22 @@ internal class JSObjectExtensionsRendererTests_Properties
         RenderContext extensionsRenderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
         new JSObjectExtensionsRenderer(extensionsRenderContext, types).Render();
         AssertEx.EqualOrDiff(extensionsRenderContext.ToString(), """    
-
+        #nullable enable
+        // JSImports for the type marshalling process
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        public static partial class JSObjectExtensions
+        {
+            public static JSObject? GetPropertyAsJSObjectNullable(this JSObject jsObject, string propertyName)
+            {
+                return jsObject.HasProperty(propertyName) ? MarshalAsJSObject(jsObject, propertyName) : null;
+            }
+            [JSImport("unwrapProperty", "@typeshim")]
+            [return: JSMarshalAs<JSType.Object>]
+            public static partial JSObject MarshalAsJSObject([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+        }
+        
         """);
     }
 
@@ -103,7 +118,7 @@ internal class JSObjectExtensionsRendererTests_Properties
                 return jsObject.HasProperty(propertyName) ? MarshalAsJSObjectArray(jsObject, propertyName) : null;
             }
             [JSImport("unwrapProperty", "@typeshim")]
-            [return: JSMarshalAs<JSType.Array<JSType.Any>>]
+            [return: JSMarshalAs<JSType.Array<JSType.Object>>]
             public static partial JSObject[] MarshalAsJSObjectArray([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
         

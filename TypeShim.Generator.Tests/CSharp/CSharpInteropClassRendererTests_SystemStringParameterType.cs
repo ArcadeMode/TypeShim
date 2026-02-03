@@ -113,8 +113,8 @@ public partial class C1Interop
 """);
     }
 
-    [TestCase("string", "string", "GetPropertyAsString")]
-    [TestCase("String", "string", "GetPropertyAsString")]
+    [TestCase("string", "string", "GetPropertyAsStringNullable")]
+    [TestCase("String", "string", "GetPropertyAsStringNullable")]
     [TestCase("char", "char", "GetPropertyAsCharNullable")]
     [TestCase("Char", "char", "GetPropertyAsCharNullable")]
     public void CSharpInteropClass_InstanceProperty_WithStringParameterType(string typeName, string interopTypeExpression, string jsObjectMethod)

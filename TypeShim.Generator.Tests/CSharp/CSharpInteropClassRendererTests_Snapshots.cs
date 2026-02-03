@@ -12,7 +12,7 @@ namespace TypeShim.Generator.Tests.CSharp;
 
 internal class CSharpInteropClassRendererTests_Snapshots
 {
-    [TestCase("string", "string", "JSType.String", "GetPropertyAsString")]
+    [TestCase("string", "string", "JSType.String", "GetPropertyAsStringNullable")]
     [TestCase("double", "double", "JSType.Number", "GetPropertyAsDoubleNullable")]
     [TestCase("bool", "bool", "JSType.Boolean", "GetPropertyAsBooleanNullable")]
     public void CSharpInteropClass_SupportedPropertyType_GeneratesFromJSObjectMethod(string typeExpression, string interopTypeExpression, string jsType, string jsObjectMethod)
@@ -135,7 +135,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P2 = (List<{{typeExpression}}>)jsObject.GetPropertyAsObject("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
+            P2 = (List<{{typeExpression}}>)jsObject.GetPropertyAsObjectNullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
         };
     }
     [JSExport]
@@ -166,7 +166,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P2 = (List<{{typeExpression}}>)jsObject.GetPropertyAsObject("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
+            P2 = (List<{{typeExpression}}>)jsObject.GetPropertyAsObjectNullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
         };
     }
 }
@@ -215,7 +215,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = ({{typeName}}[])jsObject.GetPropertyAsObjectArray("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
+            P1 = ({{typeName}}[])jsObject.GetPropertyAsObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
             P2 = jsObject.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
         };
     }
@@ -261,7 +261,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = ({{typeName}}[])jsObject.GetPropertyAsObjectArray("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
+            P1 = ({{typeName}}[])jsObject.GetPropertyAsObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
             P2 = jsObject.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
         };
     }
@@ -309,7 +309,7 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
     {
         TaskCompletionSource<{{typeName}}> P1Tcs = new();
-        (jsObject.GetPropertyAsObjectTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
+        (jsObject.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
             if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(({{typeName}})t.Result);
@@ -373,7 +373,7 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject jsObject)
     {
         TaskCompletionSource<{{typeName}}> P1Tcs = new();
-        (jsObject.GetPropertyAsObjectTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
+        (jsObject.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
             if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(({{typeName}})t.Result);
