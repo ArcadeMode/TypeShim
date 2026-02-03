@@ -41,7 +41,7 @@ internal class TypeScriptUserClassProxyRendererTests_Properties
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject}));
   }
 
   public get P1(): {{typeScriptType}} {
@@ -86,7 +86,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject}));
   }
 
   public get P1(): {{typeScriptType}} {
@@ -127,7 +127,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject}));
   }
 
   public static get P1(): {{typeScriptType}} {
@@ -245,7 +245,7 @@ export class C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject}));
   }
 
   public get P1(): UserClass {
@@ -359,7 +359,7 @@ export class C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject}));
   }
 
   public get P1(): UserClass | null {
@@ -417,7 +417,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject}));
   }
 
   public get P1(): Promise<UserClass> {
@@ -475,7 +475,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject}));
   }
 
   public get P1(): Promise<void> {
@@ -531,7 +531,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject}));
   }
 
   public get P1(): Array<UserClass> {
@@ -589,7 +589,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject}));
   }
 
   public get P1(): Array<UserClass | null> {
@@ -647,7 +647,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject}));
   }
 
   public get P1(): Array<UserClass> | null {
@@ -705,7 +705,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject}));
   }
 
   public get P1(): Array<UserClass | null> | null {
@@ -763,7 +763,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject}));
   }
 
   public get P1(): Promise<UserClass | null> {
@@ -821,7 +821,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject}));
   }
 
   public get P1(): Promise<UserClass | null> | null {

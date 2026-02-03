@@ -14,6 +14,7 @@ public class SimplePropertiesTest
     public bool BoolProperty { get; set; }
     public string StringProperty { get; set; } = string.Empty;
     public char CharProperty { get; set; }
+    public char? CharNullableProperty { get; set; }
     public double DoubleProperty { get; set; }
     public float FloatProperty { get; set; }
     public DateTime DateTimeProperty { get; set; }

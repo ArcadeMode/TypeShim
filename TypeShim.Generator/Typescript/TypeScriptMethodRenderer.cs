@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text;
 using TypeShim.Generator.Parsing;
 using TypeShim.Shared;
@@ -174,34 +175,24 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                 }
                 ctx.AppendLine(";");
             }
+            else if (RequiresCharConversion(methodInfo.ReturnType))
+            {
+                ctx.Append("const retVal = ");
+                RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
+                ctx.AppendLine(";");
+
+                ctx.Append("return ");
+                RenderNumberToCharConversion(methodInfo.ReturnType, () => ctx.Append("retVal"));
+                ctx.AppendLine(";");
+            }
             else
             {
                 ctx.Append(methodInfo.ReturnType.ManagedType == KnownManagedType.Void ? string.Empty : "return ");
-
-                RenderCharConversionIfNecessary(methodInfo.ReturnType, () =>
-                {
-                    RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
-                });
-
+                RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
                 ctx.AppendLine(";");
             }
         }
         ctx.AppendLine("}");
-
-        void RenderCharConversionIfNecessary(InteropTypeInfo typeInfo, Action renderCharExpression)
-        {
-            // dotnet does not marshall chars as strings, instead as numbers. TypeShim converts to strings on the TS side.
-            if (methodInfo.ReturnType.ManagedType == KnownManagedType.Char)
-                ctx.Append("String.fromCharCode(");
-
-            renderCharExpression();
-            
-            if (methodInfo.ReturnType.ManagedType == KnownManagedType.Char)
-                ctx.Append(")");
-            if (methodInfo.ReturnType is { ManagedType: KnownManagedType.Task, TypeArgument.ManagedType: KnownManagedType.Char })
-                ctx.Append(".then(c => String.fromCharCode(c))");
-        }
-
     }
     private void RenderInlineProxyConstruction(InteropTypeInfo typeInfo, string proxyClassName, string sourceVarName)
     {
@@ -371,27 +362,98 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                 if (!isFirst) ctx.Append(", ");
 
                 ctx.Append(parameter.IsInjectedInstanceParameter ? instanceParameterExpression : GetInteropInvocationVariable(parameter));
-                RenderCharConversionIfNecessary(parameter);
+                if(RequiresCharConversion(parameter.Type)) RenderCharToNumberConversion(parameter.Type);
                 isFirst = false;
             }
             if (initializerObject == null) return;
 
             if (!isFirst) ctx.Append(", ");
-            ctx.Append(initializerObject.Name);
+
+            ctx.Append("{ ...").Append(initializerObject.Name);
+
+            foreach (PropertyInfo propertyInfo in ctx.Class.Properties)
+            {
+                if (!RequiresCharConversion(propertyInfo.Type)) continue;
+                ctx.Append(", ").Append(propertyInfo.Name).Append(": ").Append(initializerObject.Name).Append('.').Append(propertyInfo.Name);
+                RenderCharToNumberConversion(propertyInfo.Type);
+            }
+            ctx.Append('}');
         }
 
         void RenderInteropMethodAccessor(string methodName)
         {
             ctx.Append(ctx.Class.Namespace).Append('.').Append(RenderConstants.InteropClassName(ctx.Class)).Append('.').Append(methodName);
         }
+    }
 
-        void RenderCharConversionIfNecessary(MethodParameterInfo parameter)
+    private static bool RequiresCharConversion(InteropTypeInfo typeInfo)
+    {
+        // dotnet does not marshall chars as strings atm. TypeShim converts from/to numbers while crossing the boundary.
+        return typeInfo switch
         {
-            // dotnet does not marshall chars as strings atm. We convert from/to numbers while this is the case.
-            if (parameter.Type.ManagedType == KnownManagedType.Char)
-                ctx.Append(".charCodeAt(0)");
-            if (parameter.Type is { ManagedType: KnownManagedType.Task, TypeArgument.ManagedType: KnownManagedType.Char })
-                ctx.Append(".then(c => c.charCodeAt(0))");
+            { ManagedType: KnownManagedType.Nullable } => RequiresCharConversion(typeInfo.TypeArgument!),
+            { ManagedType: KnownManagedType.Task } => RequiresCharConversion(typeInfo.TypeArgument!),
+            { ManagedType: KnownManagedType.Char } => true,
+            _ => false
+        };
+    }
+
+    /// <summary>
+    /// Assumes type requires char conversion, may behave unexpectedly otherwise
+    /// </summary>
+    /// <param name="typeInfo"></param>
+    void RenderCharToNumberConversion(InteropTypeInfo typeInfo)
+    {
+        if (typeInfo.ManagedType == KnownManagedType.Char)
+        {
+            ctx.Append(".charCodeAt(0)");
+        }
+        else if (typeInfo is { ManagedType: KnownManagedType.Nullable })
+        {
+            ctx.Append('?');
+            RenderCharToNumberConversion(typeInfo.TypeArgument!);
+        }
+        else if (typeInfo is { ManagedType: KnownManagedType.Task })
+        {
+            ctx.Append(".then(c => c");
+            if (typeInfo.TypeArgument is { ManagedType: KnownManagedType.Nullable })
+            {
+                ctx.Append('?');
+            }
+            RenderCharToNumberConversion(typeInfo.TypeArgument!);
+        }
+    }
+
+    /// <summary>
+    /// Assumes type requires char conversion, may behave unexpectedly otherwise
+    /// </summary>
+    /// <param name="typeInfo"></param>
+    /// <param name="renderCharExpression"></param>
+    void RenderNumberToCharConversion(InteropTypeInfo typeInfo, Action renderCharExpression)
+    {
+        if (typeInfo.ManagedType == KnownManagedType.Nullable)
+        {
+            renderCharExpression();
+            ctx.Append(" ? ");
+            RenderNumberToCharConversion(typeInfo.TypeArgument!, renderCharExpression);
+            ctx.Append(" : null");
+            return;
+        } 
+        else if (typeInfo.ManagedType == KnownManagedType.Char)
+        {
+            ctx.Append("String.fromCharCode(");
+        }
+
+        renderCharExpression();
+
+        if (typeInfo.ManagedType == KnownManagedType.Char)
+        {
+            ctx.Append(")");
+        }
+        else if (typeInfo is { ManagedType: KnownManagedType.Task })
+        {
+            ctx.Append(".then(c => ");
+            RenderNumberToCharConversion(typeInfo.TypeArgument!, () => ctx.Append("c"));
         }
     }
 
