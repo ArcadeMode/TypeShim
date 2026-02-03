@@ -22,7 +22,7 @@ try
     Task generateCS = Task.Run(() => GenerateCSharpInteropCode(parsedArgs, classInfos));
 
     await Task.WhenAll(generateTS, generateCS);
-} 
+}
 catch (TypeShimException ex) // known exceptions warrant only an error message
 {
     Console.Error.WriteLine($"TypeShim received invalid input, no code was generated. {ex.GetType().Name} {ex.Message}");
@@ -33,10 +33,12 @@ catch (TypeShimException ex) // known exceptions warrant only an error message
 
 static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)
 {
+    JSObjectMethodResolver methodResolver = new();
+
     foreach (ClassInfo classInfo in classInfos)
     {
         RenderContext renderContext = new(classInfo, classInfos, RenderOptions.CSharp);
-        SourceText source = SourceText.From(new CSharpInteropClassRenderer(classInfo, renderContext).Render(), Encoding.UTF8);
+        SourceText source = SourceText.From(new CSharpInteropClassRenderer(classInfo, renderContext, methodResolver).Render(), Encoding.UTF8);
         string outFileName = $"{classInfo.Name}.Interop.g.cs";
         File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, outFileName), source.ToString());
     }
@@ -44,6 +46,10 @@ static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInf
     JSObjectExtensionsRenderer jsObjectExtensionsRenderer = new();
     SourceText jsObjectExtensionsSource = SourceText.From(jsObjectExtensionsRenderer.Render(), Encoding.UTF8);
     File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, "JSObjectExtensions.g.cs"), jsObjectExtensionsSource.ToString());
+
+    var usedTypes = methodResolver.GetResolvedTypes();
+    // TODO: add renderer for jsobject extension methods _that were used_.
+
 }
 
 static void GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)

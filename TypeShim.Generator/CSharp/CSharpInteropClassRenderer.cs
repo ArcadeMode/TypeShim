@@ -12,7 +12,7 @@ internal sealed class CSharpInteropClassRenderer
     private readonly CSharpTypeConversionRenderer _conversionRenderer;
     private readonly CSharpMethodRenderer _methodRenderer;
 
-    public CSharpInteropClassRenderer(ClassInfo classInfo, RenderContext context)
+    public CSharpInteropClassRenderer(ClassInfo classInfo, RenderContext context, JSObjectMethodResolver methodResolver)
     {
         ArgumentNullException.ThrowIfNull(classInfo);
         ArgumentNullException.ThrowIfNull(context);
@@ -23,7 +23,7 @@ internal sealed class CSharpInteropClassRenderer
         _classInfo = classInfo;
         _ctx = context;
         _conversionRenderer = new CSharpTypeConversionRenderer(context);
-        _methodRenderer = new CSharpMethodRenderer(context, _conversionRenderer);
+        _methodRenderer = new CSharpMethodRenderer(context, _conversionRenderer, methodResolver);
     }
 
     internal string Render()

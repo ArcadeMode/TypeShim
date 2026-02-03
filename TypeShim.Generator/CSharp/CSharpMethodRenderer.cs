@@ -6,7 +6,7 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator.CSharp;
 
-internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConversionRenderer _conversionRenderer)
+internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConversionRenderer _conversionRenderer, JSObjectMethodResolver _methodResolver)
 {
     internal void RenderConstructorMethod(ConstructorInfo constructorInfo)
     {
@@ -256,7 +256,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             foreach (PropertyInfo propertyInfo in properties)
             {
                 DeferredExpressionRenderer valueRetrievalExpressionRenderer = DeferredExpressionRenderer.From(() => {
-                    _ctx.Append("jsObject.").Append(JSObjectMethodResolver.ResolveJSObjectMethodName(propertyInfo.Type))
+                    _ctx.Append("jsObject.").Append(_methodResolver.ResolveJSObjectMethodName(propertyInfo.Type))
                         .Append("(\"").Append(propertyInfo.Name).Append("\")");
                     if (!propertyInfo.Type.IsNullableType)
                     {

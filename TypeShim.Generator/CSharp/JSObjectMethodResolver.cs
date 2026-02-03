@@ -2,13 +2,31 @@
 
 namespace TypeShim.Generator.CSharp;
 
-internal static class JSObjectMethodResolver
+internal class JSObjectMethodResolver
 {
-    internal static string ResolveJSObjectMethodName(InteropTypeInfo typeInfo)
+    private HashSet<InteropTypeInfo> _resolvedTypes = [];
+
+    internal string ResolveJSObjectMethodName(InteropTypeInfo typeInfo)
+    {
+        if (typeInfo.ManagedType is KnownManagedType.Nullable)
+        {
+            return ResolveJSObjectMethodName(typeInfo.TypeArgument!);
+        }
+
+        string extensionMethodName = ResolveJSObjectMethodNameInternal(typeInfo);
+        _resolvedTypes.Add(typeInfo);
+        return extensionMethodName;
+    }
+
+    internal IEnumerable<InteropTypeInfo> GetResolvedTypes()
+    {
+        return _resolvedTypes;
+    }
+
+    private static string ResolveJSObjectMethodNameInternal(InteropTypeInfo typeInfo)
     {
         return typeInfo.ManagedType switch
         {
-            KnownManagedType.Nullable => ResolveJSObjectMethodName(typeInfo.TypeArgument!),
             KnownManagedType.Boolean => "GetPropertyAsBooleanNullable",
             KnownManagedType.Double => "GetPropertyAsDoubleNullable",
             KnownManagedType.Single => "GetPropertyAsFloatNullable",
