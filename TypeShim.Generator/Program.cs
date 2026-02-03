@@ -42,9 +42,9 @@ static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInf
         string outFileName = $"{classInfo.Name}.Interop.g.cs";
         File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, outFileName), source.ToString());
     }
-
-    JSObjectExtensionsRenderer jsObjectExtensionsRenderer = new();
-    SourceText jsObjectExtensionsSource = SourceText.From(jsObjectExtensionsRenderer.Render(), Encoding.UTF8);
+    RenderContext jsObjRenderCtx = new(null, classInfos, RenderOptions.CSharp);
+    new JSObjectExtensionsRenderer(jsObjRenderCtx, methodResolver).Render();
+    SourceText jsObjectExtensionsSource = SourceText.From(jsObjRenderCtx.ToString(), Encoding.UTF8);
     File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, "JSObjectExtensions.g.cs"), jsObjectExtensionsSource.ToString());
 
     var usedTypes = methodResolver.GetResolvedTypes();

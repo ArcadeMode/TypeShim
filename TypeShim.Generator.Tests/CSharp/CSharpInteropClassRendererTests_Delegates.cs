@@ -32,7 +32,7 @@ internal class CSharpInteropClassRendererTests_Delegates
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver()).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -90,7 +90,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver()).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -148,7 +148,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver()).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -206,7 +206,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver()).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -264,7 +264,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver()).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -322,7 +322,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver()).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -380,7 +380,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver()).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -449,7 +449,7 @@ public partial class C1Interop
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver()).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -519,7 +519,7 @@ public partial class C1Interop
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver()).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -589,7 +589,7 @@ public partial class C1Interop
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver()).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -660,7 +660,7 @@ public partial class C1Interop
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver()).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 // TODO
