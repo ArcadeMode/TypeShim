@@ -609,7 +609,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject}));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
   }
 
   public get P1(): ManagedObject {
@@ -652,7 +652,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
   constructor(i: number, jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(i, { ...jsObject}));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(i, { ...jsObject }));
   }
 
   public get P1(): ManagedObject {
