@@ -17,6 +17,7 @@ describe('Simple Properties Test', () => {
             BoolProperty: true,
             StringProperty: "Test",
             CharProperty: 'A',
+            CharNullableProperty: null,
             DoubleProperty: 6.7,
             FloatProperty: 8.9,
             DateTimeProperty: dateNow,

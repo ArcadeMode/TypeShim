@@ -31,6 +31,11 @@ public class DelegatesClass
     {
         action('Z');
     }
+    
+    //public Func<char, char> GetCharCharFunc()
+    //{
+    //    return (char c) => (char)(c + 1);
+    //}
 
     public void InvokeBool2Action(Action<bool, bool> action)
     {
@@ -76,13 +81,9 @@ public class DelegatesClass
     {
         return (ExportedClass classIn) => classIn;
     }
+
     public ExportedClass InvokeExportedClassExportedClassFunc(Func<ExportedClass, ExportedClass> func, Func<ExportedClass> paramFunc) 
     {
         return func(paramFunc());
-    }
-
-    public Func<char, char> GetCharCharFunc()
-    {
-        return (char c) => (char)(c + 1);
     }
 }

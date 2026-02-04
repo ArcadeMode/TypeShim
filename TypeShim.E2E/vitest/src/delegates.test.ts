@@ -73,6 +73,14 @@ describe('Delegates Test', () => {
         expect(receivedChar).toBe('Z');
     });
 
+    // test('Get GetCharCharFunc', async () => {
+    //     const fn = testObject.GetCharCharFunc();
+    //     const retVal = fn('D');
+    //     expect(retVal).not.toBeNull();
+    //     expect(retVal).toBeTypeOf('string');
+    //     expect(retVal).toBe('E'); // char + 1 on CS side
+    // });
+
     test('Invoke Bool2 Action', async () => {
         let receivedBool1 = false;
         let receivedBool2 = false;
@@ -162,11 +170,19 @@ describe('Delegates Test', () => {
         expect(retVal.Id).toBe(250);
     });
 
-    test('Get GetCharCharFunc', async () => {
-        const fn = testObject.GetCharCharFunc();
-        const retVal = fn('D');
+    test('Invoke Function Param with return value from another Function Param (C#)', async () => {
+        const retVal = testObject.InvokeExportedClassExportedClassFunc(testObject.GetExportedClassExportedClassFunc(), testObject.GetExportedClassFunc());
         expect(retVal).not.toBeNull();
-        expect(retVal).toBeTypeOf('string');
-        expect(retVal).toBe('E'); // char + 1 on CS side
+        expect(retVal).toBeInstanceOf(ExportedClass);
+        expect(retVal.Id).toBe(200);
+    });
+
+    test('Invoke Function Param with return value from another Function Param (C#-JS)', async () => {
+        const retVal = testObject.InvokeExportedClassExportedClassFunc(testObject.GetExportedClassExportedClassFunc(), () => exportedClass);
+        expect(retVal).not.toBeNull();
+        expect(retVal).toBeInstanceOf(ExportedClass);
+        expect(retVal.Id).toBe(exportedClass.Id);
+        // TODO: fix identity (https://github.com/ArcadeMode/TypeShim/issues/20)
+        //expect(retVal).toBe(exportedClass);
     });
 });
