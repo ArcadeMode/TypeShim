@@ -204,9 +204,6 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         InteropTypeInfo taskTypeParamInfo = targetNullableTaskType.TypeArgument ?? throw new InvalidOperationException("Nullable type must have a type argument for conversion.");
         InteropTypeInfo taskReturnTypeParamInfo = taskTypeParamInfo.TypeArgument ?? throw new InvalidOperationException("Task type must have a type argument for conversion.");
         
-        //_ctx.Append(targetNullableTaskType.CSharpInteropTypeSyntax.ToString()).Append(' ').Append(sourceVarName).Append("Tsk = ");
-        //sourceTaskExpressionRenderer.Render();
-
         string tcsVarName = $"{sourceVarName}Tcs";
         _ctx.Append("TaskCompletionSource<").Append(taskReturnTypeParamInfo.CSharpTypeSyntax.ToString()).Append(">? ").Append(tcsVarName).Append(" = ");
         sourceTaskExpressionRenderer.Render();
@@ -235,17 +232,29 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
             if (i > 0) _ctx.Append(", ");
             _ctx.Append(argumentInfo.ParameterTypes[i].CSharpTypeSyntax).Append(' ').Append("arg").Append(i);
         }
-        // TODO: render conversion of return type
         _ctx.Append(") => ");
-        accessorExpressionRenderer.Render();
-        _ctx.Append('(');
-        for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
+
+        DeferredExpressionRenderer invocationExpressionRenderer = DeferredExpressionRenderer.From(() =>
         {
-            if (i > 0) _ctx.Append(", ");
-            // in body of upcasted delegate, to invoke original delegate we simply pass to downcast the parameter types
-            _ctx.Append("arg").Append(i);
+            accessorExpressionRenderer.Render();
+            _ctx.Append('(');
+            for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
+            {
+                if (i > 0) _ctx.Append(", ");
+                // in body of upcasted delegate, to invoke original delegate we simply pass to downcast the parameter types
+                _ctx.Append("arg").Append(i);
+            }
+            _ctx.Append(')');
+        });
+
+        if (argumentInfo.ReturnType.RequiresTypeConversion)
+        {
+            RenderInlineTypeDownConversion(argumentInfo.ReturnType, invocationExpressionRenderer);
         }
-        _ctx.Append(')');
+        else
+        {
+            invocationExpressionRenderer.Render();
+        }
     }
 
     private void RenderInlineDelegateTypeUpConversion(InteropTypeInfo typeInfo, string varName, DelegateArgumentInfo argumentInfo)
@@ -257,15 +266,28 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
                 _ctx.Append(", ");
             _ctx.Append(argumentInfo.ParameterTypes[i].CSharpInteropTypeSyntax).Append(' ').Append("arg").Append(i);
         }
-        // TODO: render conversion of return type
-        _ctx.Append(") => ").Append(varName).Append('(');
-        for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
+        _ctx.Append(") => ");
+
+        DeferredExpressionRenderer invocationExpressionRenderer = DeferredExpressionRenderer.From(() =>
         {
-            if (i > 0)
-                _ctx.Append(", ");
-            // in body of downcasted delegate, to invoke original delegate we must upcast the types again
-            RenderInlineTypeDownConversion(argumentInfo.ParameterTypes[i], DeferredExpressionRenderer.From(() => _ctx.Append("arg").Append(i)));
+            _ctx.Append(varName).Append('(');
+            for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
+            {
+                if (i > 0)
+                    _ctx.Append(", ");
+                // in body of downcasted delegate, to invoke original delegate we must upcast the types again
+                RenderInlineTypeDownConversion(argumentInfo.ParameterTypes[i], DeferredExpressionRenderer.From(() => _ctx.Append("arg").Append(i)));
+            }
+            _ctx.Append(')');
+        });
+
+        if (argumentInfo.ReturnType.RequiresTypeConversion)
+        {
+            RenderInlineCovariantTypeUpConversion(argumentInfo.ReturnType, invocationExpressionRenderer);
         }
-        _ctx.Append(')');
+        else
+        {
+            invocationExpressionRenderer.Render();
+        }
     }
 }

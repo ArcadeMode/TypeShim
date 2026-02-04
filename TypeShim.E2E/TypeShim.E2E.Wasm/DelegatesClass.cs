@@ -67,12 +67,18 @@ public class DelegatesClass
         action(new ExportedClass { Id = 100 });
     }
 
-    public Func<ExportedClass> GetExportedClassFunc() {
+    public Func<ExportedClass> GetExportedClassFunc() 
+    {
         return () => new ExportedClass { Id = 200 };
     }
 
-    public Func<ExportedClass, ExportedClass> GetExportedClassExportedClassFunc() {
+    public Func<ExportedClass, ExportedClass> GetExportedClassExportedClassFunc() 
+    {
         return (ExportedClass classIn) => classIn;
+    }
+    public ExportedClass InvokeExportedClassExportedClassFunc(Func<ExportedClass, ExportedClass> func, Func<ExportedClass> paramFunc) 
+    {
+        return func(paramFunc());
     }
 
     public Func<char, char> GetCharCharFunc()
