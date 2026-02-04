@@ -273,10 +273,18 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
             _ctx.Append(varName).Append('(');
             for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
             {
-                if (i > 0)
-                    _ctx.Append(", ");
+                if (i > 0) _ctx.Append(", ");
+
                 // in body of downcasted delegate, to invoke original delegate we must upcast the types again
-                RenderInlineTypeDownConversion(argumentInfo.ParameterTypes[i], DeferredExpressionRenderer.From(() => _ctx.Append("arg").Append(i)));
+                DeferredExpressionRenderer argNameRenderer = DeferredExpressionRenderer.From(() => _ctx.Append("arg").Append(i));
+                if (argumentInfo.ParameterTypes[i].RequiresTypeConversion)
+                {
+                    RenderInlineTypeDownConversion(argumentInfo.ParameterTypes[i], argNameRenderer);
+                }
+                else
+                {
+                    argNameRenderer.Render();
+                }
             }
             _ctx.Append(')');
         });
