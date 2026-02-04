@@ -478,6 +478,108 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
     }
     
     [Test]
+    public void TypeScriptUserClassProxy_MethodWithFuncUserClassUserClassParameterType()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Threading.Tasks;
+        namespace N1;
+        [TSExport]
+        public class UserClass
+        {
+            public int Id { get; set; }
+        }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Threading.Tasks;
+        namespace N1;
+        [TSExport]
+        public class C1
+        {
+            public void M1(Func<UserClass, UserClass> func) {}
+        }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses[0], typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses[1], typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+        export class C1 extends ProxyBase {
+          constructor() {
+            super(TypeShimConfig.exports.N1.C1Interop.ctor());
+          }
+
+          public M1(func: (arg0: UserClass) => UserClass): void {
+            const funcInstance = (arg0: ManagedObject) => { const retVal = func(ProxyBase.fromHandle(UserClass, arg0)); return retVal instanceof UserClass ? retVal.instance : retVal };
+            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, funcInstance);
+          }
+        }
+        
+        """);
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_MethodWithFuncUserClassNullableUserClassParameterType()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Threading.Tasks;
+        namespace N1;
+        [TSExport]
+        public class UserClass
+        {
+            public int Id { get; set; }
+        }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Threading.Tasks;
+        namespace N1;
+        [TSExport]
+        public class C1
+        {
+            public void M1(Func<UserClass, UserClass?> func) {}
+        }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses[0], typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses[1], typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+        export class C1 extends ProxyBase {
+          constructor() {
+            super(TypeShimConfig.exports.N1.C1Interop.ctor());
+          }
+
+          public M1(func: (arg0: UserClass) => UserClass | null): void {
+            const funcInstance = (arg0: ManagedObject) => { const retVal = func(ProxyBase.fromHandle(UserClass, arg0)); return retVal ? retVal instanceof UserClass ? retVal.instance : retVal : null };
+            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, funcInstance);
+          }
+        }
+        
+        """);
+    }
+    
+    [Test]
     public void TypeScriptUserClassProxy_MethodWithPrimitiveDelegateReturnType()
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""

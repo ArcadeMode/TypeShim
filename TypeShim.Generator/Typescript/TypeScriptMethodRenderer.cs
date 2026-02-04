@@ -225,23 +225,43 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             string paramTypeName = TypeScriptSymbolNameRenderer.Render(param.Type, ctx, TypeShimSymbolType.Proxy, interop: true);
             ctx.Append("arg").Append(param.Index).Append(": ").Append(paramTypeName);
         }
-        ctx.Append(") => ").Append(targetDelegateExpression).Append("(");
-        // TODO: handle return type conversion (CHECK IF NEEDED?)
-        // (param Func<string, MyClass> --> (arg0: string) => return new MyClassProxy(delegate(arg0)))
-        foreach (var param in delegateInfo.ParameterTypes.Select((t, i) => new { Type = t, Index = i }))
+        ctx.Append(") => ");
+        // Invoke target delegate (with optional return type conversion)
+        if (delegateInfo.ReturnType.RequiresTypeConversion && delegateInfo.ReturnType.SupportsTypeConversion)
         {
-            if (param.Index > 0) ctx.Append(", ");
-
-            if (param.Type.RequiresTypeConversion && param.Type.SupportsTypeConversion)
-            {
-                RenderInlineProxyConstruction(param.Type, TypeScriptSymbolNameRenderer.Render(param.Type.GetInnermostType(), ctx, TypeShimSymbolType.Proxy, interop: false), "arg" + param.Index);
-            }
-            else
-            {
-                ctx.Append("arg").Append(param.Index);
-            }
+            ctx.Append("{ const retVal = ");
         }
-        ctx.Append(")");
+
+        RenderTargetDelegateInvocation(delegateInfo, targetDelegateExpression);
+
+        if (delegateInfo.ReturnType.RequiresTypeConversion && delegateInfo.ReturnType.SupportsTypeConversion)
+        {
+            ctx.Append("; return ");
+            string returnTypeProxyClassName = TypeScriptSymbolNameRenderer.Render(delegateInfo.ReturnType.GetInnermostType(), ctx, TypeShimSymbolType.Proxy, interop: false);
+            RenderInlineHandleExtraction(delegateInfo.ReturnType, returnTypeProxyClassName, "retVal");
+            ctx.Append(" }");
+        }
+
+        void RenderTargetDelegateInvocation(DelegateArgumentInfo delegateInfo, string targetDelegateExpression)
+        {
+            ctx.Append(targetDelegateExpression).Append("(");
+            foreach (var param in delegateInfo.ParameterTypes.Select((t, i) => new { Type = t, Index = i }))
+            {
+                if (param.Index > 0) ctx.Append(", ");
+
+                if (param.Type.RequiresTypeConversion && param.Type.SupportsTypeConversion)
+                {
+                    RenderInlineProxyConstruction(param.Type, TypeScriptSymbolNameRenderer.Render(param.Type.GetInnermostType(), ctx, TypeShimSymbolType.Proxy, interop: false), "arg" + param.Index);
+                }
+                else
+                {
+                    ctx.Append("arg").Append(param.Index);
+                }
+            }
+            ctx.Append(")");
+        }
+
+            
     }
 
     private void RenderHandleExtractionToConsts(IEnumerable<MethodParameterInfo> parameterInfos)
