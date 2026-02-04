@@ -27,9 +27,9 @@ internal class JSObjectExtensionsRendererTests_Properties
             [TSExport]
             public class C1
             {
-                public __TYPE__ P1 { get; set; }
+                public {{type}} P1 { get; set; }
             }
-        """.Replace("__TYPE__", csTypeName);
+        """.Replace("{{type}}", csTypeName);
 
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
 
@@ -53,19 +53,19 @@ internal class JSObjectExtensionsRendererTests_Properties
         using System.Threading.Tasks;
         public static partial class JSObjectExtensions
         {
-            public static __TYPE__? GetPropertyAs__MANAGED__Nullable(this JSObject jsObject, string propertyName)
+            public static {{type}}? GetPropertyAs{{managed}}Nullable(this JSObject jsObject, string propertyName)
             {
-                return jsObject.HasProperty(propertyName) ? MarshalAs__MANAGED__(jsObject, propertyName) : null;
+                return jsObject.HasProperty(propertyName) ? MarshalAs{{managed}}(jsObject, propertyName) : null;
             }
             [JSImport("unwrapProperty", "@typeshim")]
-            [return: JSMarshalAs<__JSTYPE__>]
-            public static partial __TYPE__ MarshalAs__MANAGED__([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+            [return: JSMarshalAs<{{jstype}}>]
+            public static partial {{type}} MarshalAs{{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
         
         """
-        .Replace("__TYPE__", csTypeName)
-        .Replace("__MANAGED__", managedSuffix)
-        .Replace("__JSTYPE__", jsType);
+        .Replace("{{type}}", csTypeName)
+        .Replace("{{managed}}", managedSuffix)
+        .Replace("{{jstype}}", jsType);
 
         AssertEx.EqualOrDiff(extensionsRenderContext.ToString(), expected);
     }
@@ -99,10 +99,9 @@ internal class JSObjectExtensionsRendererTests_Properties
         SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
-        INamedTypeSymbol classSymbol = exportedClasses.First();
 
         InteropTypeInfoCache typeCache = new();
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
 
         List<InteropTypeInfo> types = [classInfo.Properties.First().Type];
@@ -184,5 +183,111 @@ internal class JSObjectExtensionsRendererTests_Properties
         }
         
         """);
+    }
+
+    [Test]
+    public void JSObjectExtensionsRendererTests_InstanceProperty_WithActionType()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public Action P1 { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        List<InteropTypeInfo> types = [classInfo.Properties.First().Type];
+        RenderContext extensionsRenderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        new JSObjectExtensionsRenderer(extensionsRenderContext, types).Render();
+
+        AssertEx.EqualOrDiff(extensionsRenderContext.ToString(), """    
+        #nullable enable
+        // JSImports for the type marshalling process
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        public static partial class JSObjectExtensions
+        {
+            public static Action? GetPropertyAsVoidActionNullable(this JSObject jsObject, string propertyName)
+            {
+                return jsObject.HasProperty(propertyName) ? MarshalAsVoidAction(jsObject, propertyName) : null;
+            }
+            [JSImport("unwrapProperty", "@typeshim")]
+            [return: JSMarshalAs<JSType.Function>]
+            public static partial Action MarshalAsVoidAction([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+        }
+        
+        """);
+    }
+
+    [TestCase("Action<int>", "Int32VoidAction", "JSType.Function<JSType.Number>")]
+    [TestCase("Action<bool>", "BooleanVoidAction", "JSType.Function<JSType.Boolean>")]
+    [TestCase("Action<string>", "StringVoidAction", "JSType.Function<JSType.String>")]
+    [TestCase("Func<int>", "Int32Function", "JSType.Function<JSType.Number>")]
+    [TestCase("Func<bool>", "BooleanFunction", "JSType.Function<JSType.Boolean>")]
+    [TestCase("Func<string>", "StringFunction", "JSType.Function<JSType.String>")]
+    [TestCase("Func<string, string>", "StringStringFunction", "JSType.Function<JSType.String, JSType.String>")]
+    [TestCase("Func<string, bool, int>", "StringBooleanInt32Function", "JSType.Function<JSType.String, JSType.Boolean, JSType.Number>")]
+    public void JSObjectExtensionsRendererTests_InstanceProperty_WithDelegateGenericType(string csTypeName, string managedSuffix, string jsType)
+    {
+        string source = """
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public {{type}} P1 { get; set; }
+            }
+        """.Replace("{{type}}", csTypeName);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        List<InteropTypeInfo> types = [classInfo.Properties.First().Type];
+        RenderContext extensionsRenderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        new JSObjectExtensionsRenderer(extensionsRenderContext, types).Render();
+
+        string expected = """    
+        #nullable enable
+        // JSImports for the type marshalling process
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        public static partial class JSObjectExtensions
+        {
+            public static {{type}}? GetPropertyAs{{managed}}Nullable(this JSObject jsObject, string propertyName)
+            {
+                return jsObject.HasProperty(propertyName) ? MarshalAs{{managed}}(jsObject, propertyName) : null;
+            }
+            [JSImport("unwrapProperty", "@typeshim")]
+            [return: JSMarshalAs<{{jstype}}>]
+            public static partial {{type}} MarshalAs{{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+        }
+        
+        """
+        .Replace("{{type}}", csTypeName)
+        .Replace("{{managed}}", managedSuffix)
+        .Replace("{{jstype}}", jsType);
+
+        AssertEx.EqualOrDiff(extensionsRenderContext.ToString(), expected);
     }
 }
