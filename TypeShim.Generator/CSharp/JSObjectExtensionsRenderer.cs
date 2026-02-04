@@ -61,14 +61,8 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, IEnumerable
             .AppendLine("// JSImports for the type marshalling process")
             .AppendLine("using System;")
             .AppendLine("using System.Runtime.InteropServices.JavaScript;")
-            .AppendLine("using System.Threading.Tasks;");
-
-        // raison d'etre: type mapping limitations: https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mapping-limitations
-        // 1. JSObject has no means to retrieve arrays beside ByteArray (automapping user classes with an array property type is therefore not possible by default)
-        // 2. Nested types cannot be represented on the interop boundary (i.e. Task<int[]>
-        // 3. Not all type mappings can be predefined: mostly multi-generics like func/action types, as they will have huge numbers of type param permutations, i.e. 3 param funcs (with simple types only) permute to ~3375 type configurations)
-
-        _ctx.AppendLine("public static partial class JSObjectExtensions")
+            .AppendLine("using System.Threading.Tasks;")
+            .AppendLine("public static partial class JSObjectExtensions")
             .AppendLine("{");
         using (_ctx.Indent())
         {
