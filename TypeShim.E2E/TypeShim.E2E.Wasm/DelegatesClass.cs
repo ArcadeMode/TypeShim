@@ -4,7 +4,7 @@ using System.Runtime.InteropServices.JavaScript;
 namespace TypeShim.E2E.Wasm;
 
 [TSExport]
-public class DelegatesTest
+public class DelegatesClass
 {
     public Func<bool, int>? FuncBoolIntProperty { get; set; }
 
@@ -26,6 +26,10 @@ public class DelegatesTest
     public void InvokeBoolAction(Action<bool> action)
     {
         action(true);
+    }
+    public void InvokeCharAction(Action<char> action)
+    {
+        action('Z');
     }
 
     public void InvokeBool2Action(Action<bool, bool> action)
@@ -69,5 +73,10 @@ public class DelegatesTest
 
     public Func<ExportedClass, ExportedClass> GetExportedClassExportedClassFunc() {
         return (ExportedClass classIn) => classIn;
+    }
+
+    public Func<char, char> GetCharCharFunc()
+    {
+        return (char c) => (char)(c + 1);
     }
 }

@@ -1,12 +1,12 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { DelegatesTest, ExportedClass } from '@typeshim/e2e-wasm-lib';
+import { DelegatesClass, ExportedClass } from '@typeshim/e2e-wasm-lib';
 
 describe('Delegates Test', () => {
     let exportedClass: ExportedClass;
-    let testObject: DelegatesTest;
+    let testObject: DelegatesClass;
     beforeEach(() => {
         exportedClass = new ExportedClass({ Id: 2 });
-        testObject = new DelegatesTest({ FuncBoolIntProperty: null });
+        testObject = new DelegatesClass({ FuncBoolIntProperty: null });
     });
 
     test('Set and Get FuncBoolIntProperty', async () => {
@@ -21,7 +21,7 @@ describe('Delegates Test', () => {
     });
 
     test('Initialize FuncBoolIntProperty', async () => {
-        testObject = new DelegatesTest({ 
+        testObject = new DelegatesClass({ 
             FuncBoolIntProperty: (arg0: boolean) => {
                 return arg0 ? 1 : 0;
             } 
@@ -62,6 +62,15 @@ describe('Delegates Test', () => {
             receivedBool = arg0;
         });
         expect(receivedBool).toBe(true);
+    });
+
+    test('Invoke Char Action', async () => {
+        let receivedChar = '';
+        testObject.InvokeCharAction((arg0: string) => {
+            receivedChar = arg0;
+        });
+        expect(receivedChar).toBeTypeOf('string');
+        expect(receivedChar).toBe('Z');
     });
 
     test('Invoke Bool2 Action', async () => {
@@ -151,5 +160,13 @@ describe('Delegates Test', () => {
         expect(retVal).not.toBeNull();
         expect(retVal).toBeInstanceOf(ExportedClass);
         expect(retVal.Id).toBe(250);
+    });
+
+    test('Get ExportedClassExportedClassFunc Initializer', async () => {
+        const fn = testObject.GetCharCharFunc();
+        const retVal = fn('D');
+        expect(retVal).not.toBeNull();
+        expect(retVal).toBeTypeOf('string');
+        expect(retVal).toBe('E'); // char + 1 on CS side
     });
 });
