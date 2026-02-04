@@ -162,7 +162,7 @@ describe('Delegates Test', () => {
         expect(retVal.Id).toBe(250);
     });
 
-    test('Get ExportedClassExportedClassFunc Initializer', async () => {
+    test('Get GetCharCharFunc', async () => {
         const fn = testObject.GetCharCharFunc();
         const retVal = fn('D');
         expect(retVal).not.toBeNull();
