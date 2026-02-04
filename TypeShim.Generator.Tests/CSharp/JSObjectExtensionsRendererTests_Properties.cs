@@ -9,12 +9,16 @@ namespace TypeShim.Generator.Tests.CSharp;
 
 internal class JSObjectExtensionsRendererTests_Properties
 {
-    [TestCase("short", "Int16")]
-    [TestCase("int", "Int32")]
-    [TestCase("long", "Int64")]
-    [TestCase("float", "Single")]
-    [TestCase("double", "Double")]
-    public void JSObjectExtensionsRendererTests_InstanceProperty_WithNumberType(string csTypeName, string managedSuffix)
+    [TestCase("bool", "Boolean", "JSType.Boolean")]
+    [TestCase("string", "String", "JSType.String")]
+    [TestCase("char", "Char", "JSType.Number", Ignore = ".NET currently wrongly expects JSType.String for char, which indeed is marshalled as JSType.Number at runtime")]
+    [TestCase("char", "Char", "JSType.String")]
+    [TestCase("short", "Int16", "JSType.Number")]
+    [TestCase("int", "Int32", "JSType.Number")]
+    [TestCase("long", "Int64", "JSType.Number")]
+    [TestCase("float", "Single", "JSType.Number")]
+    [TestCase("double", "Double", "JSType.Number")]
+    public void JSObjectExtensionsRendererTests_InstanceProperty_WithBooleanType(string csTypeName, string managedSuffix, string jsType)
     {
         string source = """
             using System;
@@ -54,13 +58,14 @@ internal class JSObjectExtensionsRendererTests_Properties
                 return jsObject.HasProperty(propertyName) ? MarshalAs__MANAGED__(jsObject, propertyName) : null;
             }
             [JSImport("unwrapProperty", "@typeshim")]
-            [return: JSMarshalAs<JSType.Number>]
+            [return: JSMarshalAs<__JSTYPE__>]
             public static partial __TYPE__ MarshalAs__MANAGED__([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
         
         """
         .Replace("__TYPE__", csTypeName)
-        .Replace("__MANAGED__", managedSuffix);
+        .Replace("__MANAGED__", managedSuffix)
+        .Replace("__JSTYPE__", jsType);
 
         AssertEx.EqualOrDiff(extensionsRenderContext.ToString(), expected);
     }
