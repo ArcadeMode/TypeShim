@@ -439,39 +439,39 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         AssertEx.EqualOrDiff(interopClass, """
-#nullable enable
-// TypeShim generated TypeScript interop definitions
-using System;
-using System.Runtime.InteropServices.JavaScript;
-using System.Threading.Tasks;
-namespace N1;
-public partial class C1Interop
-{
-    [JSExport]
-    [return: JSMarshalAs<JSType.Any>]
-    public static object ctor([JSMarshalAs<JSType.Any>] object? p1)
-    {
-        MyClass? typed_p1 = p1 != null ? MyClassInterop.FromObject(p1) : null;
-        return new C1(typed_p1);
-    }
-    [JSExport]
-    [return: JSMarshalAs<JSType.Number>]
-    public static int get_P1([JSMarshalAs<JSType.Any>] object instance)
-    {
-        C1 typed_instance = (C1)instance;
-        return typed_instance.P1;
-    }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
+        #nullable enable
+        // TypeShim generated TypeScript interop definitions
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        namespace N1;
+        public partial class C1Interop
         {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
-    }
-}
+            [JSExport]
+            [return: JSMarshalAs<JSType.Any>]
+            public static object ctor([JSMarshalAs<JSType.Any>] object? p1)
+            {
+                MyClass? typed_p1 = p1 is { } p1Val ? MyClassInterop.FromObject(p1Val) : null;
+                return new C1(typed_p1);
+            }
+            [JSExport]
+            [return: JSMarshalAs<JSType.Number>]
+            public static int get_P1([JSMarshalAs<JSType.Any>] object instance)
+            {
+                C1 typed_instance = (C1)instance;
+                return typed_instance.P1;
+            }
+            public static C1 FromObject(object obj)
+            {
+                return obj switch
+                {
+                    C1 instance => instance,
+                    _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+                };
+            }
+        }
 
-""");
+        """);
     }
 
     [Test]

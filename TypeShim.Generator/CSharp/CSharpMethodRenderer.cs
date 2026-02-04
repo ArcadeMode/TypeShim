@@ -271,18 +271,6 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                     convertedTaskExpressionDict.Add(propertyInfo, valueRetrievalExpressionRenderer);
 
                 } 
-                else if (propertyInfo.Type is { IsNullableType: true })
-                {
-                    // TODO: if nullable type conversion can be done without a temp variable, this if statement can be removed
-                    string tmpVarName = $"{propertyInfo.Name}Tmp";
-                    _ctx.Append("var ").Append(tmpVarName).Append(" = ");
-                    valueRetrievalExpressionRenderer.Render();
-                    _ctx.AppendLine(";");
-
-                    valueRetrievalExpressionRenderer = DeferredExpressionRenderer.From(() => _ctx.Append(tmpVarName));
-                    DeferredExpressionRenderer convertedValueAccessorRenderer = _conversionRenderer.RenderVarTypeConversion(propertyInfo.Type, tmpVarName, valueRetrievalExpressionRenderer);
-                    convertedTaskExpressionDict.Add(propertyInfo, convertedValueAccessorRenderer);
-                }
                 else
                 {
                     DeferredExpressionRenderer convertedValueAccessorRenderer = _conversionRenderer.RenderVarTypeConversion(propertyInfo.Type, propertyInfo.Name, valueRetrievalExpressionRenderer);

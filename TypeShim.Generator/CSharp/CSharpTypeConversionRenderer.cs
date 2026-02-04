@@ -45,7 +45,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         }
         else
         {
-            return DeferredExpressionRenderer.From(() => RenderInlineTypeDownConversion(typeInfo, accessorExpressionRenderer, forceCovariantConversion: isInstanceParameter));
+            return DeferredExpressionRenderer.From(() => RenderInlineTypeDownConversion(typeInfo, accessorName, accessorExpressionRenderer, forceCovariantConversion: isInstanceParameter));
         }
     }
 
@@ -85,7 +85,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         }
     }
 
-    private void RenderInlineTypeDownConversion(InteropTypeInfo typeInfo, DeferredExpressionRenderer accessorExpressionRenderer, bool forceCovariantConversion = false)
+    private void RenderInlineTypeDownConversion(InteropTypeInfo typeInfo, string accessorName, DeferredExpressionRenderer accessorExpressionRenderer, bool forceCovariantConversion = false)
     {
         ArgumentNullException.ThrowIfNull(typeInfo, nameof(typeInfo));
         if (forceCovariantConversion)
@@ -98,7 +98,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         }
         else if (typeInfo.IsNullableType)
         {
-            RenderInlineNullableTypeDownConversion(typeInfo, accessorExpressionRenderer);
+            RenderInlineNullableTypeDownConversion(typeInfo, accessorName, accessorExpressionRenderer);
         }
         else if (typeInfo.ManagedType is KnownManagedType.Object)
         {
@@ -106,7 +106,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         }
         else if (typeInfo.IsDelegateType() && typeInfo.ArgumentInfo is DelegateArgumentInfo argumentInfo) // Action/Action<T1...Tn>/Func<T1...Tn>
         {
-            RenderInlineDelegateTypeDownConversion(typeInfo, accessorExpressionRenderer, argumentInfo);
+            RenderInlineDelegateTypeDownConversion(argumentInfo, accessorName, accessorExpressionRenderer);
         }
         else
         {
@@ -144,14 +144,16 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         }
     }
 
-    private void RenderInlineNullableTypeDownConversion(InteropTypeInfo typeInfo, DeferredExpressionRenderer accessorExpressionRenderer)
+    private void RenderInlineNullableTypeDownConversion(InteropTypeInfo typeInfo, string accessorName, DeferredExpressionRenderer accessorExpressionRenderer)
     {
         Debug.Assert(typeInfo.IsNullableType, "Type must be nullable for nullable type conversion.");
         Debug.Assert(typeInfo.TypeArgument != null, "Nullable type must have a type argument.");
 
         accessorExpressionRenderer.Render();
-        _ctx.Append(" != null ? ");
-        RenderInlineTypeDownConversion(typeInfo.TypeArgument, accessorExpressionRenderer); // TODO: consider pattern expression? expression is { } notNullVar, and pass deferred renderer that appends notNullVar
+        _ctx.Append(" is { } ")
+            .Append(accessorName).Append("Val")
+            .Append(" ? ");
+        RenderInlineTypeDownConversion(typeInfo.TypeArgument, accessorName, DeferredExpressionRenderer.From(() => _ctx.Append(accessorName).Append("Val")));
         _ctx.Append(" : null");
     }
 
@@ -168,7 +170,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
             _ctx.Append("Array.ConvertAll(");
             accessorExpressionRenderer.Render();
             _ctx.Append(", e => ");
-            RenderInlineTypeDownConversion(typeInfo.TypeArgument, DeferredExpressionRenderer.From(() => _ctx.Append("e")));
+            RenderInlineTypeDownConversion(typeInfo.TypeArgument, "e", DeferredExpressionRenderer.From(() => _ctx.Append("e")));
             _ctx.Append(')');
         }
     }
@@ -192,7 +194,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
             _ctx.AppendLine($"if (t.IsFaulted) {tcsVarName}.SetException(t.Exception.InnerExceptions);");
             _ctx.AppendLine($"else if (t.IsCanceled) {tcsVarName}.SetCanceled();");
             _ctx.Append($"else {tcsVarName}.SetResult(");
-            RenderInlineTypeDownConversion(taskTypeParamInfo, DeferredExpressionRenderer.From(() => _ctx.Append("t.Result")));
+            RenderInlineTypeDownConversion(taskTypeParamInfo, tcsVarName, DeferredExpressionRenderer.From(() => _ctx.Append("t.Result")));
             _ctx.AppendLine(");");
         }
         _ctx.AppendLine("}, TaskContinuationOptions.ExecuteSynchronously);");
@@ -216,7 +218,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
                 .AppendLine($"else if (t.IsCanceled) {tcsVarName}!.SetCanceled();");
 
             _ctx.Append($"else {tcsVarName}!.SetResult(");
-            RenderInlineTypeDownConversion(taskReturnTypeParamInfo, DeferredExpressionRenderer.From(() => _ctx.Append("t.Result")));
+            RenderInlineTypeDownConversion(taskReturnTypeParamInfo, tcsVarName, DeferredExpressionRenderer.From(() => _ctx.Append("t.Result")));
             _ctx.AppendLine(");");
 
         }
@@ -224,7 +226,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         return $"{tcsVarName}?.Task";
     }
 
-    private void RenderInlineDelegateTypeDownConversion(InteropTypeInfo typeInfo, DeferredExpressionRenderer accessorExpressionRenderer, DelegateArgumentInfo argumentInfo)
+    private void RenderInlineDelegateTypeDownConversion(DelegateArgumentInfo argumentInfo, string accessorName, DeferredExpressionRenderer accessorExpressionRenderer)
     {
         _ctx.Append('(');
         for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
@@ -249,7 +251,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
 
         if (argumentInfo.ReturnType.RequiresTypeConversion)
         {
-            RenderInlineTypeDownConversion(argumentInfo.ReturnType, invocationExpressionRenderer);
+            RenderInlineTypeDownConversion(argumentInfo.ReturnType, accessorName, invocationExpressionRenderer);
         }
         else
         {
@@ -279,7 +281,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
                 DeferredExpressionRenderer argNameRenderer = DeferredExpressionRenderer.From(() => _ctx.Append("arg").Append(i));
                 if (argumentInfo.ParameterTypes[i].RequiresTypeConversion)
                 {
-                    RenderInlineTypeDownConversion(argumentInfo.ParameterTypes[i], argNameRenderer);
+                    RenderInlineTypeDownConversion(argumentInfo.ParameterTypes[i], $"arg{i}", argNameRenderer); // TODO: refactor delegatearginfo to contain methodparameterinfo for names
                 }
                 else
                 {

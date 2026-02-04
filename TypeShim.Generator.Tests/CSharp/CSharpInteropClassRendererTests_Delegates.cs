@@ -802,39 +802,39 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
-    #nullable enable
-// TypeShim generated TypeScript interop definitions
-using System;
-using System.Runtime.InteropServices.JavaScript;
-using System.Threading.Tasks;
-namespace N1;
-public partial class C1Interop
-{
-    [JSExport]
-    [return: JSMarshalAs<JSType.Any>]
-    public static object ctor()
-    {
-        return new C1();
-    }
-    [JSExport]
-    [return: JSMarshalAs<JSType.Void>]
-    public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Number, JSType.Any>>] Func<int, object?> func)
-    {
-        C1 typed_instance = (C1)instance;
-        Func<int, MyClass?> typed_func = (int arg0) => func(arg0) is { } funcRetVal ? MyClassInterop.FromObject(funcRetVal) : null;
-        typed_instance.M1(typed_func);
-    }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
+        #nullable enable
+        // TypeShim generated TypeScript interop definitions
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        namespace N1;
+        public partial class C1Interop
         {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
-    }
-}
+            [JSExport]
+            [return: JSMarshalAs<JSType.Any>]
+            public static object ctor()
+            {
+                return new C1();
+            }
+            [JSExport]
+            [return: JSMarshalAs<JSType.Void>]
+            public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Number, JSType.Any>>] Func<int, object?> func)
+            {
+                C1 typed_instance = (C1)instance;
+                Func<int, MyClass?> typed_func = (int arg0) => func(arg0) is { } funcVal ? MyClassInterop.FromObject(funcVal) : null;
+                typed_instance.M1(typed_func);
+            }
+            public static C1 FromObject(object obj)
+            {
+                return obj switch
+                {
+                    C1 instance => instance,
+                    _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+                };
+            }
+        }
 
-""");
+        """);
     }
 
     [Test]
@@ -872,39 +872,39 @@ public partial class C1Interop
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
-    #nullable enable
-// TypeShim generated TypeScript interop definitions
-using System;
-using System.Runtime.InteropServices.JavaScript;
-using System.Threading.Tasks;
-namespace N1;
-public partial class C1Interop
-{
-    [JSExport]
-    [return: JSMarshalAs<JSType.Any>]
-    public static object ctor()
-    {
-        return new C1();
-    }
-    [JSExport]
-    [return: JSMarshalAs<JSType.Void>]
-    public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Any>>] Func<object?> func)
-    {
-        C1 typed_instance = (C1)instance;
-        Func<MyClass?> typed_func = () => func() is { } funcRetVal ? MyClassInterop.FromObject(funcRetVal) : null;
-        typed_instance.M1(typed_func);
-    }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
+        #nullable enable
+        // TypeShim generated TypeScript interop definitions
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        namespace N1;
+        public partial class C1Interop
         {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
-    }
-}
+            [JSExport]
+            [return: JSMarshalAs<JSType.Any>]
+            public static object ctor()
+            {
+                return new C1();
+            }
+            [JSExport]
+            [return: JSMarshalAs<JSType.Void>]
+            public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Any>>] Func<object?> func)
+            {
+                C1 typed_instance = (C1)instance;
+                Func<MyClass?> typed_func = () => func() is { } funcVal ? MyClassInterop.FromObject(funcVal) : null;
+                typed_instance.M1(typed_func);
+            }
+            public static C1 FromObject(object obj)
+            {
+                return obj switch
+                {
+                    C1 instance => instance,
+                    _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+                };
+            }
+        }
 
-""");
+        """);
     }
     
     [Test]
