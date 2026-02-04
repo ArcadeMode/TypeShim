@@ -43,8 +43,8 @@ export class C1 extends ProxyBase {
   }
 
   public M1(): string {
-    const retVal = TypeShimConfig.exports.N1.C1Interop.M1(this.instance);
-    return String.fromCharCode(retVal);
+    const res = TypeShimConfig.exports.N1.C1Interop.M1(this.instance);
+    return String.fromCharCode(res);
   }
 }
 
@@ -122,8 +122,8 @@ export class C1 extends ProxyBase {
   }
 
   public M1(p1: string): string {
-    const retVal = TypeShimConfig.exports.N1.C1Interop.M1(this.instance, p1.charCodeAt(0));
-    return String.fromCharCode(retVal);
+    const res = TypeShimConfig.exports.N1.C1Interop.M1(this.instance, p1.charCodeAt(0));
+    return String.fromCharCode(res);
   }
 }
 
@@ -162,8 +162,8 @@ export class C1 extends ProxyBase {
           }
 
           public get P1(): string {
-            const retVal = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-            return String.fromCharCode(retVal);
+            const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+            return String.fromCharCode(res);
           }
 
           public set P1(value: string) {
@@ -206,8 +206,8 @@ export class C1 extends ProxyBase {
           }
 
           public get P1(): string | null {
-            const retVal = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-            return retVal ? String.fromCharCode(retVal) : null;
+            const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+            return res ? String.fromCharCode(res) : null;
           }
 
           public set P1(value: string | null) {
@@ -250,8 +250,8 @@ export class C1 extends ProxyBase {
           }
 
           public get P1(): Promise<string> {
-            const retVal = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-            return retVal.then(c => String.fromCharCode(c));
+            const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+            return res.then(c => String.fromCharCode(c));
           }
 
           public set P1(value: Promise<string>) {
@@ -294,8 +294,8 @@ export class C1 extends ProxyBase {
           }
 
           public get P1(): Promise<string> | null {
-            const retVal = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-            return retVal ? retVal.then(c => String.fromCharCode(c)) : null;
+            const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+            return res ? res.then(c => String.fromCharCode(c)) : null;
           }
 
           public set P1(value: Promise<string> | null) {

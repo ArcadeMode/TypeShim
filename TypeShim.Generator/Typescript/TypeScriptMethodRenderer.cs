@@ -178,12 +178,12 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             }
             else if (RequiresCharConversion(methodInfo.ReturnType))
             {
-                ctx.Append("const retVal = ");
+                ctx.Append("const res = ");
                 RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
                 ctx.AppendLine(";");
 
                 ctx.Append("return ");
-                RenderNumberToCharConversion(methodInfo.ReturnType, () => ctx.Append("retVal"));
+                RenderNumberToCharConversion(methodInfo.ReturnType, () => ctx.Append("res"));
                 ctx.AppendLine(";");
             }
             else
@@ -403,7 +403,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             {
                 if (!RequiresCharConversion(propertyInfo.Type)) continue;
 
-                Action renderPropertyAccessorExpression = () => ctx.Append(initializerObject.Name).Append('.').Append(propertyInfo.Name);
+                void renderPropertyAccessorExpression() => ctx.Append(initializerObject.Name).Append('.').Append(propertyInfo.Name);
                 ctx.Append(", ").Append(propertyInfo.Name).Append(": ");
                 RenderCharToNumberConversion(propertyInfo.Type, renderPropertyAccessorExpression);
             }
@@ -424,6 +424,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             { ManagedType: KnownManagedType.Nullable } => RequiresCharConversion(typeInfo.TypeArgument!),
             { ManagedType: KnownManagedType.Task } => RequiresCharConversion(typeInfo.TypeArgument!),
             { ManagedType: KnownManagedType.Char } => true,
+            { ArgumentInfo: DelegateArgumentInfo argumentInfo } when (typeInfo.IsDelegateType()) => RequiresCharConversion(argumentInfo.ReturnType) || argumentInfo.ParameterTypes.Any(RequiresCharConversion),
             _ => false
         };
     }
