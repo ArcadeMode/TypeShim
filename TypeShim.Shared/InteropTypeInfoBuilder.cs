@@ -282,7 +282,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             {
                 return $"JSType.Function";
             }
-            string[] genericArguments = [.. functionTypeInfo.ArgsTypeInfo.Select(typeInfo => GetJSTypeSyntax(typeInfo, typeInfo.Syntax).ToString())];
+            string[] genericArguments = [.. functionTypeInfo.ArgsTypeInfo.Select(typeInfo => GetJSTypeSyntax(typeInfo, typeInfo.GetTypeSyntax()).ToString())];
             return $"JSType.Function<{string.Join(", ", genericArguments)}>";
         }
 

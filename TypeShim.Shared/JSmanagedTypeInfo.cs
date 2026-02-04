@@ -56,7 +56,7 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
         }
 
         SeparatedSyntaxList<TypeSyntax> typeArgs = SyntaxFactory.SeparatedList<TypeSyntax>(
-            fti.ArgsTypeInfo.Select(x => x.Syntax));
+            fti.ArgsTypeInfo.Select(x => x.GetTypeSyntax()));
 
         return SyntaxFactory.GenericName(
             SyntaxFactory.Identifier(identifier),
@@ -208,8 +208,8 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
             case ITypeSymbol when fullTypeName == Constants.ActionGlobal:
                 return new JSFunctionTypeInfo(true, Array.Empty<JSSimpleTypeInfo>());
             case INamedTypeSymbol actionType when fullTypeName.StartsWith(Constants.ActionGlobal, StringComparison.Ordinal):
-                JSSimpleTypeInfo?[] argumentTypes = [.. actionType.TypeArguments.Select(arg => CreateJSTypeInfoForTypeSymbol(arg) as JSSimpleTypeInfo)];
-                if (argumentTypes.Any(x => x is null))
+                JSTypeInfo?[] argumentTypes = [.. actionType.TypeArguments.Select(CreateJSTypeInfoForTypeSymbol)];
+                if (argumentTypes.Any(x => x is not JSSimpleTypeInfo and not JSNullableTypeInfo { IsValueType: false, ResultTypeInfo: JSSimpleTypeInfo }))
                 {
                     return new JSInvalidTypeInfo();
                 }
@@ -217,8 +217,8 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
 
             // function
             case INamedTypeSymbol funcType when fullTypeName.StartsWith(Constants.FuncGlobal, StringComparison.Ordinal):
-                JSSimpleTypeInfo?[] signatureTypes = [.. funcType.TypeArguments.Select(argName => CreateJSTypeInfoForTypeSymbol(argName) as JSSimpleTypeInfo)];
-                if (signatureTypes.Any(x => x is null))
+                JSTypeInfo?[] signatureTypes = [.. funcType.TypeArguments.Select(CreateJSTypeInfoForTypeSymbol)];
+                if (signatureTypes.Any(x => x is not JSSimpleTypeInfo and not JSNullableTypeInfo { IsValueType: false, ResultTypeInfo: JSSimpleTypeInfo }))
                 {
                     return new JSInvalidTypeInfo();
                 }
@@ -256,7 +256,7 @@ internal sealed record JSTaskTypeInfo(JSTypeInfo ResultTypeInfo) : JSTypeInfo(Kn
 
 internal sealed record JSNullableTypeInfo(JSTypeInfo ResultTypeInfo, bool IsValueType) : JSTypeInfo(KnownManagedType.Nullable);
 
-internal sealed record JSFunctionTypeInfo(bool IsAction, JSSimpleTypeInfo[] ArgsTypeInfo) : JSTypeInfo(IsAction ? KnownManagedType.Action : KnownManagedType.Function);
+internal sealed record JSFunctionTypeInfo(bool IsAction, JSTypeInfo[] ArgsTypeInfo) : JSTypeInfo(IsAction ? KnownManagedType.Action : KnownManagedType.Function);
 
 
 internal enum KnownManagedType : int
