@@ -194,8 +194,7 @@ describe('Delegates Test', () => {
             },
             FuncBoolIntProperty: null
          });
-        const fn = testObject2.FuncCharProperty;
-        const retVal = fn();
+        const retVal = testObject2.FuncCharProperty();
         expect(retVal).not.toBeNull();
         expect(retVal).toBeTypeOf('string');
         expect(retVal).toBe('X');
