@@ -245,7 +245,7 @@ export class C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 instanceof UserClass ? jsObject.P1.instance : jsObject.P1 }));
   }
 
   public get P1(): UserClass {
@@ -357,7 +357,7 @@ export class C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 ? jsObject.P1 instanceof UserClass ? jsObject.P1.instance : jsObject.P1 : null }));
   }
 
   public get P1(): UserClass | null {
@@ -414,7 +414,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.then(e => e instanceof UserClass ? e.instance : e) }));
   }
 
   public get P1(): Promise<UserClass> {
@@ -527,7 +527,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.map(e => e instanceof UserClass ? e.instance : e) }));
   }
 
   public get P1(): Array<UserClass> {
@@ -584,7 +584,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.map(e => e ? e instanceof UserClass ? e.instance : e : null) }));
   }
 
   public get P1(): Array<UserClass | null> {
@@ -641,7 +641,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 ? jsObject.P1.map(e => e instanceof UserClass ? e.instance : e) : null }));
   }
 
   public get P1(): Array<UserClass> | null {
@@ -698,7 +698,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 ? jsObject.P1.map(e => e ? e instanceof UserClass ? e.instance : e : null) : null }));
   }
 
   public get P1(): Array<UserClass | null> | null {
@@ -755,7 +755,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.then(e => e ? e instanceof UserClass ? e.instance : e : null) }));
   }
 
   public get P1(): Promise<UserClass | null> {
@@ -812,7 +812,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 ? jsObject.P1.then(e => e ? e instanceof UserClass ? e.instance : e : null) : null }));
   }
 
   public get P1(): Promise<UserClass | null> | null {

@@ -1030,7 +1030,7 @@ public partial class C1Interop
             {
                 return new C1()
                 {
-                    P1 = (MyClass arg0) => MyClassInterop.FromObject(jsObject.GetPropertyAsJSObjectJSObjectFunctionNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))(arg0)),
+                    P1 = (MyClass arg0) => MyClassInterop.FromObject(jsObject.GetPropertyAsObjectObjectFunctionNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))(arg0)),
                 };
             }
             [JSExport]
@@ -1062,7 +1062,7 @@ public partial class C1Interop
             {
                 return new C1()
                 {
-                    P1 = (MyClass arg0) => MyClassInterop.FromObject(jsObject.GetPropertyAsJSObjectJSObjectFunctionNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))(arg0)),
+                    P1 = (MyClass arg0) => MyClassInterop.FromObject(jsObject.GetPropertyAsObjectObjectFunctionNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))(arg0)),
                 };
             }
         }

@@ -61,7 +61,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = MyClassInterop.FromObject(jsObject.GetPropertyAsJSObjectNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
+            P1 = MyClassInterop.FromObject(jsObject.GetPropertyAsObjectNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
         };
     }
     [JSExport]
@@ -92,7 +92,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = MyClassInterop.FromObject(jsObject.GetPropertyAsJSObjectNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
+            P1 = MyClassInterop.FromObject(jsObject.GetPropertyAsObjectNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
         };
     }
 }
@@ -216,7 +216,7 @@ public partial class C1Interop
             {
                 return new C1()
                 {
-                    P1 = jsObject.GetPropertyAsJSObjectNullable("P1") is { } P1Val ? MyClassInterop.FromObject(P1Val) : null,
+                    P1 = jsObject.GetPropertyAsObjectNullable("P1") is { } P1Val ? MyClassInterop.FromObject(P1Val) : null,
                 };
             }
             [JSExport]
@@ -247,7 +247,7 @@ public partial class C1Interop
             {
                 return new C1()
                 {
-                    P1 = jsObject.GetPropertyAsJSObjectNullable("P1") is { } P1Val ? MyClassInterop.FromObject(P1Val) : null,
+                    P1 = jsObject.GetPropertyAsObjectNullable("P1") is { } P1Val ? MyClassInterop.FromObject(P1Val) : null,
                 };
             }
         }
@@ -459,7 +459,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)), e => MyClassInterop.FromObject(e)),
+            P1 = Array.ConvertAll(jsObject.GetPropertyAsObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)), e => MyClassInterop.FromObject(e)),
         };
     }
     [JSExport]
@@ -490,7 +490,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)), e => MyClassInterop.FromObject(e)),
+            P1 = Array.ConvertAll(jsObject.GetPropertyAsObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)), e => MyClassInterop.FromObject(e)),
         };
     }
 }
@@ -550,7 +550,7 @@ public partial class C1Interop
             {
                 return new C1()
                 {
-                    P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectNullableArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)), e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null),
+                    P1 = Array.ConvertAll(jsObject.GetPropertyAsObjectNullableArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)), e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null),
                 };
             }
             [JSExport]
@@ -581,7 +581,7 @@ public partial class C1Interop
             {
                 return new C1()
                 {
-                    P1 = Array.ConvertAll(jsObject.GetPropertyAsJSObjectNullableArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)), e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null),
+                    P1 = Array.ConvertAll(jsObject.GetPropertyAsObjectNullableArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)), e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null),
                 };
             }
         }
@@ -640,7 +640,7 @@ public partial class C1Interop
             {
                 return new C1()
                 {
-                    P1 = jsObject.GetPropertyAsJSObjectArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => MyClassInterop.FromObject(e)) : null,
+                    P1 = jsObject.GetPropertyAsObjectArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => MyClassInterop.FromObject(e)) : null,
                 };
             }
             [JSExport]
@@ -671,7 +671,7 @@ public partial class C1Interop
             {
                 return new C1()
                 {
-                    P1 = jsObject.GetPropertyAsJSObjectArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => MyClassInterop.FromObject(e)) : null,
+                    P1 = jsObject.GetPropertyAsObjectArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => MyClassInterop.FromObject(e)) : null,
                 };
             }
         }
@@ -731,7 +731,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = jsObject.GetPropertyAsJSObjectNullableArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null) : null,
+            P1 = jsObject.GetPropertyAsObjectNullableArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null) : null,
         };
     }
     [JSExport]
@@ -762,7 +762,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = jsObject.GetPropertyAsJSObjectNullableArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null) : null,
+            P1 = jsObject.GetPropertyAsObjectNullableArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null) : null,
         };
     }
 }
@@ -821,7 +821,7 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
     {
         TaskCompletionSource<MyClass> P1Tcs = new();
-        (jsObject.GetPropertyAsJSObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
+        (jsObject.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
             if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(MyClassInterop.FromObject(t.Result));
@@ -870,7 +870,7 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject jsObject)
     {
         TaskCompletionSource<MyClass> P1Tcs = new();
-        (jsObject.GetPropertyAsJSObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
+        (jsObject.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
             if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) P1Tcs.SetCanceled();
             else P1Tcs.SetResult(MyClassInterop.FromObject(t.Result));
@@ -936,7 +936,7 @@ public partial class C1Interop
             public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
             {
                 TaskCompletionSource<MyClass?> P1Tcs = new();
-                (jsObject.GetPropertyAsJSObjectNullableTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
+                (jsObject.GetPropertyAsObjectNullableTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
                     if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
                     else if (t.IsCanceled) P1Tcs.SetCanceled();
                     else P1Tcs.SetResult(t.Result is { } P1TcsVal ? MyClassInterop.FromObject(P1TcsVal) : null);
@@ -985,7 +985,7 @@ public partial class C1Interop
             public static C1 FromJSObject(JSObject jsObject)
             {
                 TaskCompletionSource<MyClass?> P1Tcs = new();
-                (jsObject.GetPropertyAsJSObjectNullableTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
+                (jsObject.GetPropertyAsObjectNullableTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
                     if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
                     else if (t.IsCanceled) P1Tcs.SetCanceled();
                     else P1Tcs.SetResult(t.Result is { } P1TcsVal ? MyClassInterop.FromObject(P1TcsVal) : null);
@@ -1050,8 +1050,8 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Any>]
             public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
             {
-                TaskCompletionSource<MyClass?>? P1Tcs = jsObject.GetPropertyAsJSObjectNullableTaskNullable("P1") != null ? new() : null;
-                jsObject.GetPropertyAsJSObjectNullableTaskNullable("P1")?.ContinueWith(t => {
+                TaskCompletionSource<MyClass?>? P1Tcs = jsObject.GetPropertyAsObjectNullableTaskNullable("P1") != null ? new() : null;
+                jsObject.GetPropertyAsObjectNullableTaskNullable("P1")?.ContinueWith(t => {
                     if (t.IsFaulted) P1Tcs!.SetException(t.Exception.InnerExceptions);
                     else if (t.IsCanceled) P1Tcs!.SetCanceled();
                     else P1Tcs!.SetResult(t.Result is { } P1TcsVal ? MyClassInterop.FromObject(P1TcsVal) : null);
@@ -1099,8 +1099,8 @@ public partial class C1Interop
             }
             public static C1 FromJSObject(JSObject jsObject)
             {
-                TaskCompletionSource<MyClass?>? P1Tcs = jsObject.GetPropertyAsJSObjectNullableTaskNullable("P1") != null ? new() : null;
-                jsObject.GetPropertyAsJSObjectNullableTaskNullable("P1")?.ContinueWith(t => {
+                TaskCompletionSource<MyClass?>? P1Tcs = jsObject.GetPropertyAsObjectNullableTaskNullable("P1") != null ? new() : null;
+                jsObject.GetPropertyAsObjectNullableTaskNullable("P1")?.ContinueWith(t => {
                     if (t.IsFaulted) P1Tcs!.SetException(t.Exception.InnerExceptions);
                     else if (t.IsCanceled) P1Tcs!.SetCanceled();
                     else P1Tcs!.SetResult(t.Result is { } P1TcsVal ? MyClassInterop.FromObject(P1TcsVal) : null);
