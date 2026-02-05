@@ -254,8 +254,7 @@ export class C1 extends ProxyBase {
   }
 
   public set P1(value: UserClass | UserClass.Initializer) {
-    const valueInstance = value instanceof UserClass ? value.instance : value;
-    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value instanceof UserClass ? value.instance : value);
   }
 }
 
@@ -310,8 +309,7 @@ export class C1 {
   }
 
   public static set P1(value: UserClass | UserClass.Initializer) {
-    const valueInstance = value instanceof UserClass ? value.instance : value;
-    TypeShimConfig.exports.N1.C1Interop.set_P1(valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(value instanceof UserClass ? value.instance : value);
   }
 }
 
@@ -368,8 +366,7 @@ export class C1 extends ProxyBase {
   }
 
   public set P1(value: UserClass | UserClass.Initializer | null) {
-    const valueInstance = value ? value instanceof UserClass ? value.instance : value : null;
-    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value ? value instanceof UserClass ? value.instance : value : null);
   }
 }
 
@@ -426,8 +423,7 @@ export class C1 extends ProxyBase {
   }
 
   public set P1(value: Promise<UserClass | UserClass.Initializer>) {
-    const valueInstance = value.then(e => e instanceof UserClass ? e.instance : e);
-    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value.then(e => e instanceof UserClass ? e.instance : e));
   }
 }
 
@@ -540,8 +536,7 @@ export class C1 extends ProxyBase {
   }
 
   public set P1(value: Array<UserClass | UserClass.Initializer>) {
-    const valueInstance = value.map(e => e instanceof UserClass ? e.instance : e);
-    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value.map(e => e instanceof UserClass ? e.instance : e));
   }
 }
 
@@ -598,8 +593,7 @@ export class C1 extends ProxyBase {
   }
 
   public set P1(value: Array<UserClass | UserClass.Initializer | null>) {
-    const valueInstance = value.map(e => e ? e instanceof UserClass ? e.instance : e : null);
-    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value.map(e => e ? e instanceof UserClass ? e.instance : e : null));
   }
 }
 
@@ -656,8 +650,7 @@ export class C1 extends ProxyBase {
   }
 
   public set P1(value: Array<UserClass | UserClass.Initializer> | null) {
-    const valueInstance = value ? value.map(e => e instanceof UserClass ? e.instance : e) : null;
-    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value ? value.map(e => e instanceof UserClass ? e.instance : e) : null);
   }
 }
 
@@ -714,8 +707,7 @@ export class C1 extends ProxyBase {
   }
 
   public set P1(value: Array<UserClass | UserClass.Initializer | null> | null) {
-    const valueInstance = value ? value.map(e => e ? e instanceof UserClass ? e.instance : e : null) : null;
-    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value ? value.map(e => e ? e instanceof UserClass ? e.instance : e : null) : null);
   }
 }
 
@@ -772,8 +764,7 @@ export class C1 extends ProxyBase {
   }
 
   public set P1(value: Promise<UserClass | UserClass.Initializer | null>) {
-    const valueInstance = value.then(e => e ? e instanceof UserClass ? e.instance : e : null);
-    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value.then(e => e ? e instanceof UserClass ? e.instance : e : null));
   }
 }
 
@@ -830,8 +821,7 @@ export class C1 extends ProxyBase {
   }
 
   public set P1(value: Promise<UserClass | UserClass.Initializer | null> | null) {
-    const valueInstance = value ? value.then(e => e ? e instanceof UserClass ? e.instance : e : null) : null;
-    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, valueInstance);
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value ? value.then(e => e ? e instanceof UserClass ? e.instance : e : null) : null);
   }
 }
 

@@ -95,8 +95,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
           }
 
           public M1(callback: (arg0: UserClass) => void): void {
-            const callbackInstance = (arg0: ManagedObject) => callback(ProxyBase.fromHandle(UserClass, arg0));
-            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, callbackInstance);
+            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, (arg0: ManagedObject) => callback(ProxyBase.fromHandle(UserClass, arg0)));
           }
         }
 
@@ -149,8 +148,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
           }
 
           public M1(callback: (arg0: UserClass) => void): void {
-            const callbackInstance = (arg0: ManagedObject) => callback(ProxyBase.fromHandle(UserClass, arg0));
-            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, callbackInstance);
+            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, (arg0: ManagedObject) => callback(ProxyBase.fromHandle(UserClass, arg0)));
           }
         }
 
@@ -202,8 +200,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
           }
 
           public M1(callback: (arg0: UserClass, arg1: number) => void): void {
-            const callbackInstance = (arg0: ManagedObject, arg1: number) => callback(ProxyBase.fromHandle(UserClass, arg0), arg1);
-            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, callbackInstance);
+            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, (arg0: ManagedObject, arg1: number) => callback(ProxyBase.fromHandle(UserClass, arg0), arg1));
           }
         }
 
@@ -265,8 +262,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
           }
 
           public M1(callback: (arg0: UserClass, arg1: number, arg2: AnotherUserClass) => void): void {
-            const callbackInstance = (arg0: ManagedObject, arg1: number, arg2: ManagedObject) => callback(ProxyBase.fromHandle(UserClass, arg0), arg1, ProxyBase.fromHandle(AnotherUserClass, arg2));
-            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, callbackInstance);
+            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, (arg0: ManagedObject, arg1: number, arg2: ManagedObject) => callback(ProxyBase.fromHandle(UserClass, arg0), arg1, ProxyBase.fromHandle(AnotherUserClass, arg2)));
           }
         }
 
@@ -469,8 +465,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
           }
 
           public M1(action: (arg0: UserClass) => void): void {
-            const actionInstance = (arg0: ManagedObject) => action(ProxyBase.fromHandle(UserClass, arg0));
-            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, actionInstance);
+            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, (arg0: ManagedObject) => action(ProxyBase.fromHandle(UserClass, arg0)));
           }
         }
 
@@ -520,8 +515,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
           }
 
           public M1(func: (arg0: UserClass) => UserClass): void {
-            const funcInstance = (arg0: ManagedObject) => { const retVal = func(ProxyBase.fromHandle(UserClass, arg0)); return retVal instanceof UserClass ? retVal.instance : retVal };
-            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, funcInstance);
+            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, (arg0: ManagedObject) => { const retVal = func(ProxyBase.fromHandle(UserClass, arg0)); return retVal instanceof UserClass ? retVal.instance : retVal });
           }
         }
         
@@ -571,8 +565,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
           }
 
           public M1(func: (arg0: UserClass) => UserClass | null): void {
-            const funcInstance = (arg0: ManagedObject) => { const retVal = func(ProxyBase.fromHandle(UserClass, arg0)); return retVal ? retVal instanceof UserClass ? retVal.instance : retVal : null };
-            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, funcInstance);
+            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, (arg0: ManagedObject) => { const retVal = func(ProxyBase.fromHandle(UserClass, arg0)); return retVal ? retVal instanceof UserClass ? retVal.instance : retVal : null });
           }
         }
         
@@ -648,8 +641,8 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
           }
 
           public M1(): () => string {
-            const retVal = TypeShimConfig.exports.N1.C1Interop.M1(this.instance);
-            return () => String.fromCharCode(retVal());
+            const res = TypeShimConfig.exports.N1.C1Interop.M1(this.instance);
+            return () => String.fromCharCode(res());
           }
         }
 
@@ -687,8 +680,8 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
           }
 
           public M1(): (arg0: string) => void {
-            const retVal = TypeShimConfig.exports.N1.C1Interop.M1(this.instance);
-            return (arg0: string) => retVal(arg0.charCodeAt(0));
+            const res = TypeShimConfig.exports.N1.C1Interop.M1(this.instance);
+            return (arg0: string) => res(arg0.charCodeAt(0));
           }
         }
 
@@ -766,11 +759,11 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
             super(TypeShimConfig.exports.N1.C1Interop.ctor());
           }
 
-          public M1((arg0: string) => void): void {
-            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, (arg0: number) => String.fromCharCode(arg0));
+          public M1(func: (arg0: string) => void): void {
+            TypeShimConfig.exports.N1.C1Interop.M1(this.instance, (arg0: number) => func(String.fromCharCode(arg0)));
           }
         }
-
+        
         """);
     }
 
