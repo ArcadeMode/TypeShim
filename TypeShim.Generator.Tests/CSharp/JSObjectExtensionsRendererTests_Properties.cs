@@ -377,4 +377,90 @@ internal class JSObjectExtensionsRendererTests_Properties
 
         AssertEx.EqualOrDiff(extensionsRenderContext.ToString(), expected);
     }
+    
+    [TestCase("Func<MyClass>", "Func<object>", "ObjectFunction", "JSType.Function<JSType.Any>")]
+    [TestCase("Action<MyClass>", "Action<object>", "ObjectVoidAction", "JSType.Function<JSType.Any>")]
+    [TestCase("Func<MyClass, MyClass>", "Func<object, object>", "ObjectObjectFunction", "JSType.Function<JSType.Any, JSType.Any>")]
+    [TestCase("Func<MyClass, MyClass, MyClass>", "Func<object, object, object>", "ObjectObjectObjectFunction", "JSType.Function<JSType.Any, JSType.Any, JSType.Any>")]
+    [TestCase("Action<MyClass, MyClass>", "Action<object, object>", "ObjectObjectVoidAction", "JSType.Function<JSType.Any, JSType.Any>")]
+    [TestCase("Action<MyClass, MyClass, MyClass>", "Action<object, object, object>", "ObjectObjectObjectVoidAction", "JSType.Function<JSType.Any, JSType.Any, JSType.Any>")]
+    [TestCase("Func<int, MyClass>", "Func<int, object>", "Int32ObjectFunction", "JSType.Function<JSType.Number, JSType.Any>")]
+    [TestCase("Func<string, MyClass>", "Func<string, object>", "StringObjectFunction", "JSType.Function<JSType.String, JSType.Any>")]
+    [TestCase("Func<bool, MyClass>", "Func<bool, object>", "BooleanObjectFunction", "JSType.Function<JSType.Boolean, JSType.Any>")]
+    [TestCase("Func<long, MyClass>", "Func<long, object>", "Int64ObjectFunction", "JSType.Function<JSType.Number, JSType.Any>")]
+    [TestCase("Func<MyClass, int>", "Func<object, int>", "ObjectInt32Function", "JSType.Function<JSType.Any, JSType.Number>")]
+    [TestCase("Func<MyClass, string>", "Func<object, string>", "ObjectStringFunction", "JSType.Function<JSType.Any, JSType.String>")]
+    [TestCase("Func<MyClass, bool>", "Func<object, bool>", "ObjectBooleanFunction", "JSType.Function<JSType.Any, JSType.Boolean>")]
+    [TestCase("Func<MyClass, long>", "Func<object, long>", "ObjectInt64Function", "JSType.Function<JSType.Any, JSType.Number>")]
+    [TestCase("Action<MyClass, int>", "Action<object, int>", "ObjectInt32VoidAction", "JSType.Function<JSType.Any, JSType.Number>")]
+    [TestCase("Action<MyClass, string>", "Action<object, string>", "ObjectStringVoidAction", "JSType.Function<JSType.Any, JSType.String>")]
+    [TestCase("Action<MyClass, bool>", "Action<object, bool>", "ObjectBooleanVoidAction", "JSType.Function<JSType.Any, JSType.Boolean>")]
+    [TestCase("Action<MyClass, long>", "Action<object, long>", "ObjectInt64VoidAction", "JSType.Function<JSType.Any, JSType.Number>")]
+    public void JSObjectExtensionsRendererTests_InstanceProperty_WithDelegateGenericType_IncludingUnexportedUserClass(
+        string exposedTypeName,
+        string boundaryTypeName,
+        string managedSuffix,
+        string jsType)
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            //[TSExport] not exported
+            public class MyClass
+            {
+                public void M1()
+                {
+                }
+            }
+        """);
+
+        string source = """
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public {{type}} P1 { get; set; }
+            }
+        """.Replace("{{type}}", exposedTypeName);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
+
+        List<InteropTypeInfo> types = [classInfo.Properties.First().Type];
+        RenderContext extensionsRenderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        new JSObjectExtensionsRenderer(extensionsRenderContext, types).Render();
+
+        string expected = """    
+        #nullable enable
+        // JSImports for the type marshalling process
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        public static partial class JSObjectExtensions
+        {
+            public static {{type}}? GetPropertyAs{{managed}}Nullable(this JSObject jsObject, string propertyName)
+            {
+                return jsObject.HasProperty(propertyName) ? MarshalAs{{managed}}(jsObject, propertyName) : null;
+            }
+            [JSImport("unwrapProperty", "@typeshim")]
+            [return: JSMarshalAs<{{jstype}}>]
+            public static partial {{type}} MarshalAs{{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+        }
+        
+        """
+        .Replace("{{type}}", boundaryTypeName)
+        .Replace("{{managed}}", managedSuffix)
+        .Replace("{{jstype}}", jsType);
+
+        AssertEx.EqualOrDiff(extensionsRenderContext.ToString(), expected);
+    }
 }

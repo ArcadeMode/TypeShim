@@ -13,6 +13,7 @@ internal class SyntaxTreeParsingTests_Delegates
     [TestCase("int[]")]
     [TestCase("int[]?")]
     [TestCase("int?")]
+    [TestCase("char?")]
     public void ClassInfoBuilder_RejectsUnsupportedInnerTypes(string innerType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""

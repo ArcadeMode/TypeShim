@@ -6,7 +6,7 @@ describe('Delegates Test', () => {
     let testObject: DelegatesClass;
     beforeEach(() => {
         exportedClass = new ExportedClass({ Id: 2 });
-        testObject = new DelegatesClass({ FuncBoolIntProperty: null });
+        testObject = new DelegatesClass({ FuncBoolIntProperty: null, FuncCharProperty: () => 'A' });
     });
 
     test('Set and Get FuncBoolIntProperty', async () => {
@@ -24,7 +24,8 @@ describe('Delegates Test', () => {
         testObject = new DelegatesClass({ 
             FuncBoolIntProperty: (arg0: boolean) => {
                 return arg0 ? 1 : 0;
-            } 
+            },
+            FuncCharProperty: () => 'A'
         });
         const retrievedFunc = testObject.FuncBoolIntProperty;
         expect(retrievedFunc).not.toBeNull();
@@ -73,13 +74,13 @@ describe('Delegates Test', () => {
         expect(receivedChar).toBe('Z');
     });
 
-    // test('Get GetCharCharFunc', async () => {
-    //     const fn = testObject.GetCharCharFunc();
-    //     const retVal = fn('D');
-    //     expect(retVal).not.toBeNull();
-    //     expect(retVal).toBeTypeOf('string');
-    //     expect(retVal).toBe('E'); // char + 1 on CS side
-    // });
+    test('Get GetCharCharFunc', async () => {
+        const fn = testObject.GetCharCharFunc();
+        const retVal = fn('D');
+        expect(retVal).not.toBeNull();
+        expect(retVal).toBeTypeOf('string');
+        expect(retVal).toBe('E'); // char + 1 on CS side
+    });
 
     test('Invoke Bool2 Action', async () => {
         let receivedBool1 = false;
@@ -184,5 +185,19 @@ describe('Delegates Test', () => {
         expect(retVal.Id).toBe(exportedClass.Id);
         // TODO: fix identity (https://github.com/ArcadeMode/TypeShim/issues/20)
         //expect(retVal).toBe(exportedClass);
+    });
+
+    test('Initializer with FuncCharProperty', async () => {
+        const testObject2 = new DelegatesClass({ 
+            FuncCharProperty: () => {
+                return 'X'
+            },
+            FuncBoolIntProperty: null
+         });
+        const fn = testObject2.FuncCharProperty;
+        const retVal = fn();
+        expect(retVal).not.toBeNull();
+        expect(retVal).toBeTypeOf('string');
+        expect(retVal).toBe('X');
     });
 });

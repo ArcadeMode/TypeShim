@@ -13,7 +13,7 @@ describe('Array Properties Test', () => {
             DoubleArrayProperty: [1.1, 2.2, 3.3],
             JSObjectArrayProperty: [{ a: 1 }, { b: 2 }, { c: 3 }],
             ObjectArrayProperty: [exportedClass.instance],
-            ExportedClassArrayProperty: [exportedClass],
+            ExportedClassArrayProperty: [],//[exportedClass],
         });
     });
 

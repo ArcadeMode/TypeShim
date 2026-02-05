@@ -22,7 +22,7 @@ describe('Simple Properties Test', () => {
             FloatProperty: 8.9,
             DateTimeProperty: dateNow,
             DateTimeOffsetProperty: dateNow,
-            ExportedClassProperty: exportedClass,
+            ExportedClassProperty: { Id: 2}, // exportedClass,
             ObjectProperty: exportedClass.instance,
             JSObjectProperty: jsObject,
         });

@@ -27,7 +27,7 @@ describe('Task Properties Test', () => {
             TaskOfDateTimeProperty: Promise.resolve(dateNow),
             TaskOfDateTimeOffsetProperty: Promise.resolve(dateNow),
             TaskOfObjectProperty: Promise.resolve(exportedClass.instance),
-            TaskOfExportedClassProperty: Promise.resolve(exportedClass),
+            TaskOfExportedClassProperty: Promise.resolve({ Id : 3}),
             TaskOfJSObjectProperty: Promise.resolve(jsObject),
         });
         simpleTestObject = new SimplePropertiesTest({
@@ -44,7 +44,7 @@ describe('Task Properties Test', () => {
             FloatProperty: 8.9,
             DateTimeProperty: dateNow,
             DateTimeOffsetProperty: dateNow,
-            ExportedClassProperty: exportedClass,
+            ExportedClassProperty: { Id: 4}, // exportedClass,
             ObjectProperty: exportedClass.instance,
             JSObjectProperty: jsObject,
         });

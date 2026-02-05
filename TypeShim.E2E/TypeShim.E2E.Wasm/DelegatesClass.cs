@@ -7,6 +7,7 @@ namespace TypeShim.E2E.Wasm;
 public class DelegatesClass
 {
     public Func<bool, int>? FuncBoolIntProperty { get; set; }
+    public required Func<char> FuncCharProperty { get; set; }
 
     public void InvokeVoidAction(Action action)
     {
@@ -31,11 +32,11 @@ public class DelegatesClass
     {
         action('Z');
     }
-    
-    //public Func<char, char> GetCharCharFunc()
-    //{
-    //    return (char c) => (char)(c + 1);
-    //}
+
+    public Func<char, char> GetCharCharFunc()
+    {
+        return (char c) => (char)(c + 1);
+    }
 
     public void InvokeBool2Action(Action<bool, bool> action)
     {

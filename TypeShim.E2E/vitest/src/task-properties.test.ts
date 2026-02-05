@@ -26,7 +26,7 @@ describe('Task Properties Test', () => {
             TaskOfDateTimeProperty: Promise.resolve(dateNow),
             TaskOfDateTimeOffsetProperty: Promise.resolve(dateNow),
             TaskOfObjectProperty: Promise.resolve(exportedClass.instance),
-            TaskOfExportedClassProperty: Promise.resolve(exportedClass),
+            TaskOfExportedClassProperty: Promise.resolve({ Id : 2}),
             TaskOfJSObjectProperty: Promise.resolve(jsObject),
         });
     });
