@@ -115,15 +115,15 @@ internal class JSObjectExtensionsRendererTests_Properties
         using System.Threading.Tasks;
         public static partial class JSObjectExtensions
         {
-            public static JSObject? GetPropertyAsJSObjectNullable(this JSObject jsObject, string propertyName)
+            public static object? GetPropertyAsObjectNullable(this JSObject jsObject, string propertyName)
             {
-                return jsObject.HasProperty(propertyName) ? MarshalAsJSObject(jsObject, propertyName) : null;
+                return jsObject.HasProperty(propertyName) ? MarshalAsObject(jsObject, propertyName) : null;
             }
             [JSImport("unwrapProperty", "@typeshim")]
-            [return: JSMarshalAs<JSType.Object>]
-            public static partial JSObject MarshalAsJSObject([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+            [return: JSMarshalAs<JSType.Any>]
+            public static partial object MarshalAsObject([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
-        
+
         """);
     }
 
@@ -173,13 +173,13 @@ internal class JSObjectExtensionsRendererTests_Properties
         using System.Threading.Tasks;
         public static partial class JSObjectExtensions
         {
-            public static JSObject[]? GetPropertyAsJSObjectArrayNullable(this JSObject jsObject, string propertyName)
+            public static object[]? GetPropertyAsObjectArrayNullable(this JSObject jsObject, string propertyName)
             {
-                return jsObject.HasProperty(propertyName) ? MarshalAsJSObjectArray(jsObject, propertyName) : null;
+                return jsObject.HasProperty(propertyName) ? MarshalAsObjectArray(jsObject, propertyName) : null;
             }
             [JSImport("unwrapProperty", "@typeshim")]
-            [return: JSMarshalAs<JSType.Array<JSType.Object>>]
-            public static partial JSObject[] MarshalAsJSObjectArray([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+            [return: JSMarshalAs<JSType.Array<JSType.Any>>]
+            public static partial object[] MarshalAsObjectArray([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
         
         """);
@@ -291,24 +291,24 @@ internal class JSObjectExtensionsRendererTests_Properties
         AssertEx.EqualOrDiff(extensionsRenderContext.ToString(), expected);
     }
 
-    [TestCase("Func<MyClass>", "Func<object>", "JSObjectFunction", "JSType.Function<JSType.Any>")]
-    [TestCase("Action<MyClass>", "Action<object>", "JSObjectVoidAction", "JSType.Function<JSType.Any>")]
-    [TestCase("Func<MyClass, MyClass>", "Func<object, object>", "JSObjectJSObjectFunction", "JSType.Function<JSType.Any, JSType.Any>")]
-    [TestCase("Func<MyClass, MyClass, MyClass>", "Func<object, object, object>", "JSObjectJSObjectJSObjectFunction", "JSType.Function<JSType.Any, JSType.Any, JSType.Any>")]
-    [TestCase("Action<MyClass, MyClass>", "Action<object, object>", "JSObjectJSObjectVoidAction", "JSType.Function<JSType.Any, JSType.Any>")]
-    [TestCase("Action<MyClass, MyClass, MyClass>", "Action<object, object, object>", "JSObjectJSObjectJSObjectVoidAction", "JSType.Function<JSType.Any, JSType.Any, JSType.Any>")]
-    [TestCase("Func<int, MyClass>", "Func<int, object>", "Int32JSObjectFunction", "JSType.Function<JSType.Number, JSType.Any>")]
-    [TestCase("Func<string, MyClass>", "Func<string, object>", "StringJSObjectFunction", "JSType.Function<JSType.String, JSType.Any>")]
-    [TestCase("Func<bool, MyClass>", "Func<bool, object>", "BooleanJSObjectFunction", "JSType.Function<JSType.Boolean, JSType.Any>")]
-    [TestCase("Func<long, MyClass>", "Func<long, object>", "Int64JSObjectFunction", "JSType.Function<JSType.Number, JSType.Any>")]
-    [TestCase("Func<MyClass, int>", "Func<object, int>", "JSObjectInt32Function", "JSType.Function<JSType.Any, JSType.Number>")]
-    [TestCase("Func<MyClass, string>", "Func<object, string>", "JSObjectStringFunction", "JSType.Function<JSType.Any, JSType.String>")]
-    [TestCase("Func<MyClass, bool>", "Func<object, bool>", "JSObjectBooleanFunction", "JSType.Function<JSType.Any, JSType.Boolean>")]
-    [TestCase("Func<MyClass, long>", "Func<object, long>", "JSObjectInt64Function", "JSType.Function<JSType.Any, JSType.Number>")]
-    [TestCase("Action<MyClass, int>", "Action<object, int>", "JSObjectInt32VoidAction", "JSType.Function<JSType.Any, JSType.Number>")]
-    [TestCase("Action<MyClass, string>", "Action<object, string>", "JSObjectStringVoidAction", "JSType.Function<JSType.Any, JSType.String>")]
-    [TestCase("Action<MyClass, bool>", "Action<object, bool>", "JSObjectBooleanVoidAction", "JSType.Function<JSType.Any, JSType.Boolean>")]
-    [TestCase("Action<MyClass, long>", "Action<object, long>", "JSObjectInt64VoidAction", "JSType.Function<JSType.Any, JSType.Number>")]
+    [TestCase("Func<MyClass>", "Func<object>", "ObjectFunction", "JSType.Function<JSType.Any>")]
+    [TestCase("Action<MyClass>", "Action<object>", "ObjectVoidAction", "JSType.Function<JSType.Any>")]
+    [TestCase("Func<MyClass, MyClass>", "Func<object, object>", "ObjectObjectFunction", "JSType.Function<JSType.Any, JSType.Any>")]
+    [TestCase("Func<MyClass, MyClass, MyClass>", "Func<object, object, object>", "ObjectObjectObjectFunction", "JSType.Function<JSType.Any, JSType.Any, JSType.Any>")]
+    [TestCase("Action<MyClass, MyClass>", "Action<object, object>", "ObjectObjectVoidAction", "JSType.Function<JSType.Any, JSType.Any>")]
+    [TestCase("Action<MyClass, MyClass, MyClass>", "Action<object, object, object>", "ObjectObjectObjectVoidAction", "JSType.Function<JSType.Any, JSType.Any, JSType.Any>")]
+    [TestCase("Func<int, MyClass>", "Func<int, object>", "Int32ObjectFunction", "JSType.Function<JSType.Number, JSType.Any>")]
+    [TestCase("Func<string, MyClass>", "Func<string, object>", "StringObjectFunction", "JSType.Function<JSType.String, JSType.Any>")]
+    [TestCase("Func<bool, MyClass>", "Func<bool, object>", "BooleanObjectFunction", "JSType.Function<JSType.Boolean, JSType.Any>")]
+    [TestCase("Func<long, MyClass>", "Func<long, object>", "Int64ObjectFunction", "JSType.Function<JSType.Number, JSType.Any>")]
+    [TestCase("Func<MyClass, int>", "Func<object, int>", "ObjectInt32Function", "JSType.Function<JSType.Any, JSType.Number>")]
+    [TestCase("Func<MyClass, string>", "Func<object, string>", "ObjectStringFunction", "JSType.Function<JSType.Any, JSType.String>")]
+    [TestCase("Func<MyClass, bool>", "Func<object, bool>", "ObjectBooleanFunction", "JSType.Function<JSType.Any, JSType.Boolean>")]
+    [TestCase("Func<MyClass, long>", "Func<object, long>", "ObjectInt64Function", "JSType.Function<JSType.Any, JSType.Number>")]
+    [TestCase("Action<MyClass, int>", "Action<object, int>", "ObjectInt32VoidAction", "JSType.Function<JSType.Any, JSType.Number>")]
+    [TestCase("Action<MyClass, string>", "Action<object, string>", "ObjectStringVoidAction", "JSType.Function<JSType.Any, JSType.String>")]
+    [TestCase("Action<MyClass, bool>", "Action<object, bool>", "ObjectBooleanVoidAction", "JSType.Function<JSType.Any, JSType.Boolean>")]
+    [TestCase("Action<MyClass, long>", "Action<object, long>", "ObjectInt64VoidAction", "JSType.Function<JSType.Any, JSType.Number>")]
     public void JSObjectExtensionsRendererTests_InstanceProperty_WithDelegateGenericType_IncludingUserClass(
         string exposedTypeName,
         string boundaryTypeName,

@@ -18,7 +18,7 @@ describe('Task Properties Test', () => {
             TaskOfNIntProperty: Promise.resolve(42),
             TaskOfShortProperty: Promise.resolve(43),
             TaskOfIntProperty: Promise.resolve(44),
-            TaskOfLongProperty: Promise.resolve(45),// new Promise(resolve => setTimeout(() => resolve(45), 1000)),
+            TaskOfLongProperty: Promise.resolve(45),
             TaskOfBoolProperty: Promise.resolve(true),
             TaskOfCharProperty: Promise.resolve('B'),
             TaskOfStringProperty: Promise.resolve("Task String"),
@@ -27,7 +27,7 @@ describe('Task Properties Test', () => {
             TaskOfDateTimeProperty: Promise.resolve(dateNow),
             TaskOfDateTimeOffsetProperty: Promise.resolve(dateNow),
             TaskOfObjectProperty: Promise.resolve(exportedClass.instance),
-            TaskOfExportedClassProperty: Promise.resolve({ Id : 3}),
+            TaskOfExportedClassProperty: Promise.resolve(exportedClass),
             TaskOfJSObjectProperty: Promise.resolve(jsObject),
         });
         simpleTestObject = new SimplePropertiesTest({
@@ -44,7 +44,7 @@ describe('Task Properties Test', () => {
             FloatProperty: 8.9,
             DateTimeProperty: dateNow,
             DateTimeOffsetProperty: dateNow,
-            ExportedClassProperty: { Id: 4}, // exportedClass,
+            ExportedClassProperty: exportedClass,
             ObjectProperty: exportedClass.instance,
             JSObjectProperty: jsObject,
         });
