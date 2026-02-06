@@ -209,7 +209,7 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
                 return new JSFunctionTypeInfo(true, Array.Empty<JSSimpleTypeInfo>());
             case INamedTypeSymbol actionType when fullTypeName.StartsWith(Constants.ActionGlobal, StringComparison.Ordinal):
                 JSTypeInfo?[] argumentTypes = [.. actionType.TypeArguments.Select(CreateJSTypeInfoForTypeSymbol)];
-                if (argumentTypes.Any(x => x is not JSSimpleTypeInfo and not JSNullableTypeInfo { IsValueType: false, ResultTypeInfo: JSSimpleTypeInfo }))
+                if (argumentTypes.Length > 3 || argumentTypes.Any(x => x is not JSSimpleTypeInfo and not JSNullableTypeInfo { IsValueType: false, ResultTypeInfo: JSSimpleTypeInfo }))
                 {
                     return new JSInvalidTypeInfo();
                 }
@@ -218,7 +218,7 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
             // function
             case INamedTypeSymbol funcType when fullTypeName.StartsWith(Constants.FuncGlobal, StringComparison.Ordinal):
                 JSTypeInfo?[] signatureTypes = [.. funcType.TypeArguments.Select(CreateJSTypeInfoForTypeSymbol)];
-                if (signatureTypes.Any(x => x is not JSSimpleTypeInfo and not JSNullableTypeInfo { IsValueType: false, ResultTypeInfo: JSSimpleTypeInfo }))
+                if (signatureTypes.Length > 4 || signatureTypes.Any(x => x is not JSSimpleTypeInfo and not JSNullableTypeInfo { IsValueType: false, ResultTypeInfo: JSSimpleTypeInfo }))
                 {
                     return new JSInvalidTypeInfo();
                 }
