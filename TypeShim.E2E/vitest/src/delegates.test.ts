@@ -199,4 +199,36 @@ describe('Delegates Test', () => {
         expect(retVal).toBeTypeOf('string');
         expect(retVal).toBe('X');
     });
+
+    test('GetBoolIntStringExportFunc', async () => {
+        const fn = testObject.GetBoolIntStringExportFunc();
+        const retVal = fn(true, 3, "1234");
+        expect(retVal).not.toBeNull();
+        expect(retVal).toBeInstanceOf(ExportedClass);
+        expect(retVal.Id).toBe(3);
+    });
+
+    test('GetBoolIntStringExportFunc', async () => {
+        const fn = testObject.GetBoolIntCharExportFunc();
+        const retVal = fn(false, 3, "A");
+        expect(retVal).not.toBeNull();
+        expect(retVal).toBeInstanceOf(ExportedClass);
+        expect(retVal.Id).toBe(65); // 'A' char code is 65, thats set on CS side
+    });
+
+    test('GetBoolIntExportCharFunc Proxy', async () => {
+        const fn = testObject.GetBoolIntExportCharFunc();
+        const retVal = fn(false, 3, new ExportedClass({ Id: 65 }));
+        expect(retVal).not.toBeNull();
+        expect(retVal).toBeTypeOf('string');
+        expect(retVal).toBe('A'); // 'A' char code is 65, thats returned from CS
+    });
+
+    test('GetBoolIntExportCharFunc Initializer', async () => {
+        const fn = testObject.GetBoolIntExportCharFunc();
+        const retVal = fn(false, 3, { Id: 66 });
+        expect(retVal).not.toBeNull();
+        expect(retVal).toBeTypeOf('string');
+        expect(retVal).toBe('B'); // 'B' char code is 66, thats returned from CS
+    });
 });

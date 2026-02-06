@@ -9,7 +9,7 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator.Tests.TypeScript;
 
-internal class TypeScriptUserClassInterfaceRendererTests
+internal class TypeScriptUserClassNamespaceRendererTests
 {
     [TestCase("string", "string")]
     [TestCase("double", "number")]
@@ -754,5 +754,59 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 
 """);
+    }
+
+    [Test]
+    public void UserClassNamespace_PropertyType_FuncCharAndUserClassParameter()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Threading.Tasks;
+        namespace N1;
+        [TSExport]
+        public class UserClass
+        {
+            public int Id { get; set; }
+        }
+        """);
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Threading.Tasks;
+        namespace N1;
+        [TSExport]
+        public class C1
+        {
+            public Func<char, UserClass> P1 { get; set; }
+        }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses[0], typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses[1], typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+        export class C1 extends ProxyBase {
+          constructor(jsObject: C1.Initializer) {
+            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: (arg0: number) => { const retVal = jsObject.P1(String.fromCharCode(arg0)); return retVal instanceof UserClass ? retVal.instance : retVal } }));
+          }
+
+          public get P1(): (arg0: string) => UserClass {
+            const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+            return (arg0: string) => { const retVal = res(arg0.charCodeAt(0)); return ProxyBase.fromHandle(UserClass, retVal) };
+          }
+
+          public set P1(value: (arg0: string) => UserClass) {
+            TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, (arg0: number) => { const retVal = value(String.fromCharCode(arg0)); return retVal instanceof UserClass ? retVal.instance : retVal });
+          }
+        }
+        
+        """);
     }
 }

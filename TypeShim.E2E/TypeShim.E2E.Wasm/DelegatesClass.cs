@@ -1,7 +1,14 @@
 using System;
 using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
 
 namespace TypeShim.E2E.Wasm;
+
+[TSExport]
+public class DelegatePropertyClass
+{
+    public required Func<ExportedClass, ExportedClass> ExportedClassFuncProperty { get; set; }
+}
 
 [TSExport]
 public class DelegatesClass
@@ -76,6 +83,21 @@ public class DelegatesClass
     public Func<ExportedClass> GetExportedClassFunc() 
     {
         return () => new ExportedClass { Id = 200 };
+    }
+
+    public Func<bool, int, string, ExportedClass> GetBoolIntStringExportFunc()
+    {
+        return (bool b, int a, string c) => new ExportedClass { Id = b ? a : c.Length };
+    }
+    
+    public Func<bool, int, char, ExportedClass> GetBoolIntCharExportFunc()
+    {
+        return (bool b, int a, char c) => new ExportedClass { Id = b ? a : c };
+    }
+
+    public Func<bool, int, ExportedClass, char> GetBoolIntExportCharFunc()
+    {
+        return (bool b, int a, ExportedClass c) => b ? (char)a : (char)c.Id;
     }
 
     public Func<ExportedClass, ExportedClass> GetExportedClassExportedClassFunc() 

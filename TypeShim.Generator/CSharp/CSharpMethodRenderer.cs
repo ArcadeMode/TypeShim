@@ -273,6 +273,17 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                 } 
                 else
                 {
+                    if (propertyInfo.Type.IsDelegateType())
+                    {
+                        // delegates with conversion requirements need to be stored in a temporary variable to avoid multiple invocations of the JSObject method from the wrapper delegate
+                        _ctx.Append(propertyInfo.Type.CSharpInteropTypeSyntax).Append(" tmp").Append(propertyInfo.Name).Append(" = ");
+                        valueRetrievalExpressionRenderer.Render();
+                        _ctx.AppendLine(";");
+                        valueRetrievalExpressionRenderer = DeferredExpressionRenderer.From(() => {
+                            _ctx.Append("tmp").Append(propertyInfo.Name);
+                        });
+                    }
+
                     DeferredExpressionRenderer convertedValueAccessorRenderer = _conversionRenderer.RenderVarTypeConversion(propertyInfo.Type, propertyInfo.Name, valueRetrievalExpressionRenderer);
                     convertedTaskExpressionDict.Add(propertyInfo, convertedValueAccessorRenderer);
                 }
