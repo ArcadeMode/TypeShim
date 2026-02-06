@@ -42,12 +42,15 @@ internal sealed class TypeScriptUserClassShapesRenderer(RenderContext ctx)
                 ctx.Append(propertyInfo.Name).Append(": ");
                 if (propertyInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true })
                 {
-                    ClassInfo classInfo = ctx.SymbolMap.GetClassInfo(propertyInfo.Type.GetInnermostType());
-                    TypeShimSymbolType symbolType = classInfo is { Constructor: { IsParameterless: true, AcceptsInitializer: true } }
-                        ? TypeShimSymbolType.ProxyInitializerUnion
-                        : TypeShimSymbolType.Proxy;
-                    string symbolName = TypeScriptSymbolNameRenderer.Render(propertyInfo.Type, ctx, TypeShimSymbolType.ProxyInitializerUnion, interop: false);
-                    ctx.Append(symbolName);
+                    if (propertyInfo.Type.IsDelegateType())
+                    {
+                        TypeScriptSymbolNameRenderer.RenderDelegate(propertyInfo.Type, ctx, parameterSymbolType: TypeShimSymbolType.ProxyInitializerUnion, returnSymbolType: TypeShimSymbolType.Proxy, interop: false);
+                    }
+                    else
+                    {
+                        string symbolName = TypeScriptSymbolNameRenderer.Render(propertyInfo.Type, ctx, TypeShimSymbolType.ProxyInitializerUnion, interop: false);
+                        ctx.Append(symbolName);
+                    }
                 }
                 else
                 {
@@ -75,7 +78,7 @@ internal sealed class TypeScriptUserClassShapesRenderer(RenderContext ctx)
             ctx.AppendLine("return {");
             using (ctx.Indent())
             {
-                foreach (PropertyInfo propertyInfo in ctx.Class.Properties.Where(p => !p.IsStatic))
+                foreach (PropertyInfo propertyInfo in ctx.Class.Properties.Where(p => !p.IsStatic && !p.Type.IsDelegateType()))
                 {
                     ctx.Append(propertyInfo.Name).Append(": ")
                        .Append(GetPropertyValueExpression(propertyInfo.Type, $"{proxyParamName}.{propertyInfo.Name}"))
@@ -103,13 +106,33 @@ internal sealed class TypeScriptUserClassShapesRenderer(RenderContext ctx)
                 }
                 else // exported user type
                 {
-                    string tsNamespace = TypeScriptSymbolNameRenderer.Render(typeInfo, ctx, TypeShimSymbolType.Namespace, interop: false);// ctx.SymbolMap.GetUserClassSymbolName(typeInfo, TypeShimSymbolType.Namespace);
+                    string tsNamespace = TypeScriptSymbolNameRenderer.Render(typeInfo, ctx, TypeShimSymbolType.Namespace, interop: false);
                     return $"{tsNamespace}.{RenderConstants.ProxyMaterializeFunction}({propertyAccessorExpression})";
                 }
             }
             else // simple primitive or unconvertable class
             {
                 return propertyAccessorExpression;
+            }
+
+            void RenderTypeConversionForMaterialization(InteropTypeInfo typeInfo, Action renderExpression)
+            {
+                bool requiresProxyConversion = typeInfo.RequiresTypeConversion && typeInfo.SupportsTypeConversion;
+                // note we stay on ts side so we need not do char conversion or handle extraction.
+                if (requiresProxyConversion && typeInfo.IsDelegateType())
+                {
+                    // (arg0: x, arg1: y) => 
+                    // renderExpression
+                    // (arg0, materialize(arg1))
+                }
+                else if (requiresProxyConversion)
+                {
+                    // materialize(renderExpression)
+                }
+                else
+                {
+                    renderExpression();
+                }
             }
         }
     }

@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { DelegatesClass, ExportedClass } from '@typeshim/e2e-wasm-lib';
+import { DelegatePropertyClass, DelegatesClass, ExportedClass } from '@typeshim/e2e-wasm-lib';
 
 describe('Delegates Test', () => {
     let exportedClass: ExportedClass;
@@ -230,5 +230,35 @@ describe('Delegates Test', () => {
         expect(retVal).not.toBeNull();
         expect(retVal).toBeTypeOf('string');
         expect(retVal).toBe('B'); // 'B' char code is 66, thats returned from CS
+    });
+
+    test('Property ExportedClassFuncProperty Proxy', async () => {
+        const delegatePropClass = new DelegatePropertyClass({
+            ExportedClassFuncProperty: (arg0: ExportedClass | ExportedClass.Initializer) => arg0 as ExportedClass,
+        });
+        const retVal = delegatePropClass.ExportedClassFuncProperty(new ExportedClass({ Id: 70 }));
+        expect(retVal).not.toBeNull();
+        expect(retVal).toBeInstanceOf(ExportedClass);
+        expect(retVal.Id).toBe(70);
+    });
+
+    test('Property ExportedClassFuncProperty Proxy', async () => {
+        const delegatePropClass = new DelegatePropertyClass({
+            ExportedClassFuncProperty: (arg0: ExportedClass | ExportedClass.Initializer) => arg0 as ExportedClass,
+        });
+        const retVal = delegatePropClass.ExportedClassFuncProperty(new ExportedClass({ Id: 70 }));
+        expect(retVal).not.toBeNull();
+        expect(retVal).toBeInstanceOf(ExportedClass);
+        expect(retVal.Id).toBe(70);
+    });
+
+    test('Property ExportedClassFuncProperty Initializer', async () => {
+        const delegatePropClass = new DelegatePropertyClass({
+            ExportedClassFuncProperty: (arg0: ExportedClass | ExportedClass.Initializer) => arg0 as ExportedClass,
+        });
+        const retVal = delegatePropClass.ExportedClassFuncProperty({ Id: 75 });
+        expect(retVal).not.toBeNull();
+        expect(retVal).toBeInstanceOf(ExportedClass);
+        expect(retVal.Id).toBe(75);
     });
 });
