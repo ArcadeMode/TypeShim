@@ -12,14 +12,12 @@ internal sealed class TypeScriptSymbolNameTemplate
     internal string Template { get; init; } = null!;
     internal Dictionary<string, InteropTypeInfo> InnerTypes { get; init; } = []; 
     
-    internal const string SuffixPlaceholder = "{SUFFIX_PLACEHOLDER}";
 
     internal static TypeScriptSymbolNameTemplate ForUserType(string originalTypeSyntax)
     {
         return new TypeScriptSymbolNameTemplate
         {
-            Template = $"{originalTypeSyntax}{SuffixPlaceholder}",
-            //InnerTypes = { { SuffixPlaceholder }, null! }
+            Template = originalTypeSyntax,
         };
     }
 

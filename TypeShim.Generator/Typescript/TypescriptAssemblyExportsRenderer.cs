@@ -72,8 +72,8 @@ internal sealed class TypescriptAssemblyExportsRenderer(
             {
                 // TODO: remove IsInjectedInstanceParameter property and split into separate methodInfo property
                 TypeShimSymbolType symbolType = parameterInfo.IsInjectedInstanceParameter ? TypeShimSymbolType.Proxy : TypeShimSymbolType.ProxyInitializerUnion;
-                string typeName = TypeScriptSymbolNameRenderer.Render(parameterInfo.Type, ctx, symbolType, interop: true);
-                ctx.Append(typeName);
+                TypeScriptSymbolNameRenderer.Render(parameterInfo.Type, ctx, symbolType, interop: true);
+                //ctx.Append(typeName);
             }
             isFirst = false;
         }
@@ -85,8 +85,8 @@ internal sealed class TypescriptAssemblyExportsRenderer(
         }
         else
         {
-            string returnTypeName = TypeScriptSymbolNameRenderer.Render(returnType, ctx, TypeShimSymbolType.Proxy, interop: true);
-            ctx.Append(returnTypeName);
+            TypeScriptSymbolNameRenderer.Render(returnType, ctx, TypeShimSymbolType.Proxy, interop: true);
+            //ctx.Append(returnTypeName);
         }
         ctx.AppendLine(";");
     }

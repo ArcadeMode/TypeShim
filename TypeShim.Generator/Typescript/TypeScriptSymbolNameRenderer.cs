@@ -6,82 +6,159 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator.Typescript;
 
-internal class TypeScriptSymbolNameRenderer(InteropTypeInfo typeInfo, RenderContext ctx)
+internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType, TypeShimSymbolType parameterSymbolType, bool interop, RenderContext ctx)
 {
-    public static string Render(InteropTypeInfo typeInfo, RenderContext ctx)
+    public static void Render(InteropTypeInfo typeInfo, RenderContext ctx)
     {
-        TypeScriptSymbolNameRenderer renderer = new(typeInfo, ctx);
-        return renderer.RenderCore(TypeShimSymbolType.Proxy, interop: false);
+        TypeScriptSymbolNameRenderer renderer = new(TypeShimSymbolType.None, TypeShimSymbolType.None, interop: false, ctx);
+        renderer.RenderCore(typeInfo);
     }
 
-    public static string Render(InteropTypeInfo typeInfo, RenderContext ctx, TypeShimSymbolType symbolType, bool interop)
+    public static void Render(InteropTypeInfo typeInfo, RenderContext ctx, TypeShimSymbolType symbolType, bool interop)
     {
-        TypeScriptSymbolNameRenderer renderer = new(typeInfo, ctx);
-        return renderer.RenderCore(symbolType, interop);
+        TypeScriptSymbolNameRenderer renderer = new(symbolType, symbolType, interop, ctx);
+        renderer.RenderCore(typeInfo);
     }
 
     internal static void RenderDelegate(InteropTypeInfo typeInfo, RenderContext ctx, TypeShimSymbolType parameterSymbolType, TypeShimSymbolType returnSymbolType, bool interop)
     {
         _ = typeInfo.ArgumentInfo ?? throw new ArgumentException("InteropTypeInfo does not represent a delegate type.", nameof(typeInfo));
-        TypeScriptSymbolNameRenderer renderer = new(typeInfo, ctx);
-        renderer.RenderDelegateCore(typeInfo.ArgumentInfo, parameterSymbolType, returnSymbolType, interop);
+        TypeScriptSymbolNameRenderer renderer = new(returnSymbolType, parameterSymbolType, interop, ctx);
+        renderer.RenderDelegateCore(typeInfo.ArgumentInfo);
     }
     
-    public string Render() => RenderCore(TypeShimSymbolType.Proxy, interop: false);
-
-    private string RenderCore(TypeShimSymbolType symbolType, bool interop)
+    private void RenderCore(InteropTypeInfo typeInfo, bool isDelegateParameter = false)
     {
-        TypeScriptSymbolNameTemplate symbolNameTemplate = GetSymbolNameTemplate(interop);
-        string template = symbolNameTemplate.Template;
-        foreach (KeyValuePair<string, InteropTypeInfo> kvp in symbolNameTemplate.InnerTypes)
+        if (typeInfo.IsDelegateType())
         {
-            TypeScriptSymbolNameRenderer innerRenderer = new(kvp.Value, ctx);
-            TypeScriptSymbolNameTemplate targetTemplate = interop ? kvp.Value.TypeScriptInteropTypeSyntax : kvp.Value.TypeScriptTypeSyntax;
-            template = template.Replace(kvp.Key, innerRenderer.RenderCore(symbolType, interop));
+            RenderDelegateCore(typeInfo.ArgumentInfo!);
+        } 
+        else if (typeInfo.IsNullableType)
+        {
+            RenderNullableCore(typeInfo);
+        }
+        else if (typeInfo.IsArrayType)
+        {
+            RenderArrayCore(typeInfo);
+        }
+        else if (typeInfo.IsTaskType)
+        {
+            RenderPromiseCore(typeInfo);
+        }
+        else
+        {
+            //TypeScriptSymbolNameTemplate symbolNameTemplate = GetSymbolNameTemplate(typeInfo);
+            //string type = symbolNameTemplate.Replace(TypeScriptSymbolNameTemplate.SuffixPlaceholder, ResolveSuffix(typeInfo));
+            ctx.Append(GetSymbolNameTemplate(typeInfo).Template);
+            if (typeInfo.IsTSExport)
+            {
+                RenderSuffix(typeInfo, isDelegateParameter ? parameterSymbolType : returnSymbolType);
+            }
         }
 
-        return template.Replace(TypeScriptSymbolNameTemplate.SuffixPlaceholder, ResolveSuffix(symbolType, interop));
+        //string template = symbolNameTemplate.Template;
+        //foreach (KeyValuePair<string, InteropTypeInfo> kvp in symbolNameTemplate.InnerTypes)
+        //{
+        //    TypeScriptSymbolNameRenderer innerRenderer = new(kvp.Value, ctx);
+        //    TypeScriptSymbolNameTemplate targetTemplate = interop ? kvp.Value.TypeScriptInteropTypeSyntax : kvp.Value.TypeScriptTypeSyntax;
+        //    template = template.Replace(kvp.Key, innerRenderer.RenderCore(returnSymbolType, parameterSymbolType, interop));
+        //}
+
     }
 
-    private void RenderDelegateCore(DelegateArgumentInfo delegateInfo, TypeShimSymbolType parameterSymbolType, TypeShimSymbolType returnSymbolType, bool interop)
+    private void RenderNullableCore(InteropTypeInfo typeInfo)
+    {
+        bool isNullableDelegate = typeInfo.TypeArgument?.IsDelegateType() == true;
+        if (isNullableDelegate) ctx.Append("(");
+
+        RenderCore(typeInfo.TypeArgument!);
+
+        if (isNullableDelegate) ctx.Append(")");
+
+        ctx.Append(" | null");
+    }
+
+    private void RenderArrayCore(InteropTypeInfo typeInfo)
+    {
+        ctx.Append("Array<");
+        RenderCore(typeInfo.TypeArgument!);
+        ctx.Append(">");
+    }
+    
+    private void RenderPromiseCore(InteropTypeInfo typeInfo)
+    {
+        if (typeInfo.TypeArgument == null)
+        {
+            ctx.Append("Promise<void>");
+        }
+        else
+        {
+            ctx.Append("Promise<");
+            RenderCore(typeInfo.TypeArgument!);
+            ctx.Append(">");
+        }
+    }
+
+    private void RenderDelegateCore(DelegateArgumentInfo delegateInfo)
     {
         ctx.Append("(");
         foreach (var param in delegateInfo.ParameterTypes.Select((t, i) => new { Type = t, Index = i }))
         {
             if (param.Index > 0) ctx.Append(", ");
-            ctx.Append("arg").Append(param.Index).Append(": ").Append(TypeScriptSymbolNameRenderer.Render(param.Type, ctx, parameterSymbolType, interop));
+            ctx.Append("arg").Append(param.Index).Append(": ");
+            RenderCore(param.Type, isDelegateParameter: true);
         }
-        ctx.Append(") => ").Append(TypeScriptSymbolNameRenderer.Render(delegateInfo.ReturnType, ctx, returnSymbolType, interop));
+        ctx.Append(") => ");
+        RenderCore(delegateInfo.ReturnType);
     }
 
-    private TypeScriptSymbolNameTemplate GetSymbolNameTemplate(bool interop) => interop ? typeInfo.TypeScriptInteropTypeSyntax : typeInfo.TypeScriptTypeSyntax;
+    private TypeScriptSymbolNameTemplate GetSymbolNameTemplate(InteropTypeInfo typeInfo) 
+        => interop ? typeInfo.TypeScriptInteropTypeSyntax : typeInfo.TypeScriptTypeSyntax;
 
-    private string ResolveSuffix(TypeShimSymbolType symbolType, bool interop)
+    private void RenderSuffix(InteropTypeInfo typeInfo, TypeShimSymbolType symbolType)
     {
-        if (typeInfo.GetInnermostType() is not { IsTSExport: true } innerMostTSExport)
+        if (typeInfo.GetInnermostType() is not { IsTSExport: true } innerMostTSExport 
+            || symbolType is TypeShimSymbolType.Proxy or TypeShimSymbolType.Namespace or TypeShimSymbolType.None)
         {
-            return string.Empty;
+            return;
         }
 
-
-        return (symbolType) switch
+        if (symbolType is TypeShimSymbolType.Snapshot)
         {
-            TypeShimSymbolType.Proxy => string.Empty,
-            TypeShimSymbolType.Namespace => string.Empty,
-            TypeShimSymbolType.Snapshot => $".{RenderConstants.Properties}",
-            TypeShimSymbolType.Initializer => $".{RenderConstants.Initializer}",
-            TypeShimSymbolType.ProxyInitializerUnion => GetProxyInitializerSuffix(interop, innerMostTSExport),
-            _ => throw new NotImplementedException(),
-        };
+            ctx.Append('.').Append(RenderConstants.Properties);
+            return;
+        }
+        
+        if (symbolType is TypeShimSymbolType.Initializer)
+        {
+            ctx.Append('.').Append(RenderConstants.Initializer);
+            return;
+        }
 
-        string GetProxyInitializerSuffix(bool interop, InteropTypeInfo innerMostTSExport)
+        if (symbolType is TypeShimSymbolType.ProxyInitializerUnion)
+        {
+            RenderProxyInitializerSuffix(interop, innerMostTSExport);
+            return;
+        }
+
+        throw new NotImplementedException($"Unhandled type/symboltype combination for {typeInfo.CSharpTypeSyntax} {symbolType}");
+
+        void RenderProxyInitializerSuffix(bool interop, InteropTypeInfo innerMostTSExport)
         {
             if (ctx.SymbolMap.GetClassInfo(innerMostTSExport) is not { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
             {
-                return ResolveSuffix(TypeShimSymbolType.Proxy, interop); // initializer not supported, fall back to proxy only.
+                RenderSuffix(typeInfo, TypeShimSymbolType.Proxy); // initializer not supported, fall back to proxy only.
             }
-
-            return interop ? " | object" : $" | {Render(innerMostTSExport, ctx, TypeShimSymbolType.Initializer, interop)}";
+            else if (interop)
+            {
+                ctx.Append(" | object");
+            }
+            else
+            {
+                ctx.Append(" | ");
+                TypeScriptSymbolNameRenderer innerRenderer = new(TypeShimSymbolType.Initializer, TypeShimSymbolType.Initializer, interop, ctx);
+                innerRenderer.RenderCore(innerMostTSExport);
+            }
         }
     }
 
