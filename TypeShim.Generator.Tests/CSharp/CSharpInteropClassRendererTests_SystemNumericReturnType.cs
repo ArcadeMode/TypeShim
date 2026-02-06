@@ -45,7 +45,7 @@ internal class CSharpInteropClassRendererTests_SystemNumericReturnType
         InteropTypeInfoCache typeInfoCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeInfoCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 #nullable enable
@@ -104,7 +104,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeInfoCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeInfoCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 #nullable enable

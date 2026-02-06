@@ -48,7 +48,7 @@ internal class CSharpInteropClassRendererTests_SystemTaskParameterType
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 #nullable enable
@@ -118,11 +118,11 @@ public partial class C1Interop
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         // Important assertion here, Task<object> required for interop, cannot be simply casted to Task<MyClass>
         // the return type is void so we cannot await either, hence the TaskCompletionSource-based conversion.
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
@@ -136,7 +136,7 @@ public partial class C1Interop
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
     {
         TaskCompletionSource<MyClass> taskTcs = new();
-        task.ContinueWith(t => {
+        (task).ContinueWith(t => {
             if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) taskTcs.SetCanceled();
             else taskTcs.SetResult(MyClassInterop.FromObject(t.Result));
@@ -154,7 +154,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 
     [Test]
@@ -196,7 +196,7 @@ public partial class C1Interop
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 #nullable enable
@@ -212,7 +212,7 @@ public partial class C1Interop
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
     {
         TaskCompletionSource<MyClass> taskTcs = new();
-        task.ContinueWith(t => {
+        (task).ContinueWith(t => {
             if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) taskTcs.SetCanceled();
             else taskTcs.SetResult(MyClassInterop.FromObject(t.Result));
@@ -259,7 +259,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         // Note: as there is no known mapping for these types, there is no 'FromObject' mapping, instead just try to cast ("taskTcs.SetResult(({{typeName}})t.Result)")
         // the user shouldnt be able to do much with the object anyway as its untyped on the JS/TS side.
@@ -277,7 +277,7 @@ public partial class C1Interop
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
     {
         TaskCompletionSource<{{typeName}}> taskTcs = new();
-        task.ContinueWith(t => {
+        (task).ContinueWith(t => {
             if (t.IsFaulted) taskTcs.SetException(t.Exception.InnerExceptions);
             else if (t.IsCanceled) taskTcs.SetCanceled();
             else taskTcs.SetResult(({{typeName}})t.Result);
@@ -323,7 +323,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -376,7 +376,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         AssertEx.EqualOrDiff(interopClass, """
 #nullable enable
@@ -393,7 +393,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = (jsObject.GetPropertyAsVoidTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
+            P1 = jsObject.GetPropertyAsTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
         };
     }
     [JSExport]
@@ -423,7 +423,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = (jsObject.GetPropertyAsVoidTask("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
+            P1 = jsObject.GetPropertyAsTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
         };
     }
 }

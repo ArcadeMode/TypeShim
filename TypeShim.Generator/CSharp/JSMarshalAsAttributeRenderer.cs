@@ -5,7 +5,7 @@ using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.CSharp;
 
-internal sealed class JSMarshalAsAttributeRenderer(InteropTypeInfo interopTypeInfo)
+internal sealed class JSMarshalAsAttributeRenderer()
 {
     internal AttributeListSyntax RenderJSExportAttribute()
     {
@@ -17,25 +17,44 @@ internal sealed class JSMarshalAsAttributeRenderer(InteropTypeInfo interopTypeIn
             )
         );
     }
-
-    internal AttributeListSyntax RenderReturnAttribute()
+    
+    internal AttributeListSyntax RenderJSImportAttribute(string method)
     {
-        return RenderAttributeListWithJSMarshalAs().WithTarget( // 'return:'
+        return SyntaxFactory.AttributeList(
+            SyntaxFactory.SingletonSeparatedList(
+                SyntaxFactory.Attribute(
+                    SyntaxFactory.IdentifierName("JSImport"),
+                    SyntaxFactory.AttributeArgumentList([
+                        SyntaxFactory.AttributeArgument(
+                            SyntaxFactory.ParseExpression($"\"{method}\"")
+                        ),
+                        SyntaxFactory.AttributeArgument(
+                            SyntaxFactory.ParseExpression("\"@typeshim\"")
+                        )
+                    ])
+                )
+            )
+        );
+    }
+
+    internal AttributeListSyntax RenderReturnAttribute(TypeSyntax jsTypeSyntax)
+    {
+        return RenderAttributeListWithJSMarshalAs(jsTypeSyntax).WithTarget( // 'return:'
             SyntaxFactory.AttributeTargetSpecifier(
                 SyntaxFactory.Token(SyntaxKind.ReturnKeyword)
             )
         );
     }
 
-    internal AttributeListSyntax RenderParameterAttribute()
+    internal AttributeListSyntax RenderParameterAttribute(TypeSyntax jsTypeSyntax)
     {
-        return RenderAttributeListWithJSMarshalAs();
+        return RenderAttributeListWithJSMarshalAs(jsTypeSyntax);
     }
 
-    private AttributeListSyntax RenderAttributeListWithJSMarshalAs()
+    private AttributeListSyntax RenderAttributeListWithJSMarshalAs(TypeSyntax jsTypeSyntax)
     {
         TypeArgumentListSyntax marshalAsTypeArgument = SyntaxFactory.TypeArgumentList(
-            SyntaxFactory.SingletonSeparatedList(interopTypeInfo.JSTypeSyntax)
+            SyntaxFactory.SingletonSeparatedList(jsTypeSyntax)
         );
 
         AttributeSyntax marshalAsAttribute = SyntaxFactory.Attribute(SyntaxFactory.GenericName("JSMarshalAs").WithTypeArgumentList(marshalAsTypeArgument));

@@ -9,7 +9,7 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator.Tests.TypeScript;
 
-internal class TypeScriptUserClassInterfaceRendererTests
+internal class TypeScriptUserClassNamespaceRendererTests
 {
     [TestCase("string", "string")]
     [TestCase("double", "number")]
@@ -754,5 +754,105 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 
 """);
+    }
+
+    [Test]
+    public void UserClassNamespace_PropertyType_Func_DoesNotRenderInSnapshot()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Threading.Tasks;
+        namespace N1;
+        [TSExport]
+        public class UserClass
+        {
+            public int Id { get; set; }
+        }
+        """);
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Threading.Tasks;
+        namespace N1;
+        [TSExport]
+        public class C1
+        {
+            public Func<char, UserClass> P1 { get; set; }
+        }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses[0], typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses[1], typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+        export namespace C1 {
+          export interface Initializer {
+            P1: (arg0: string) => UserClass;
+          }
+        }
+
+        """);
+    }
+    
+    [Test]
+    public void UserClassNamespace_PropertyType_FuncAndInt_OmitsFuncInSnapshot()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Threading.Tasks;
+        namespace N1;
+        [TSExport]
+        public class UserClass
+        {
+            public int Id { get; set; }
+        }
+        """);
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Threading.Tasks;
+        namespace N1;
+        [TSExport]
+        public class C1
+        {
+            public Func<char, UserClass> P1 { get; set; }
+            public int P2 { get; set; }
+        }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses[0], typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses[1], typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+        export namespace C1 {
+          export interface Initializer {
+            P1: (arg0: string) => UserClass;
+            P2: number;
+          }
+          export interface Snapshot {
+            P2: number;
+          }
+          export function materialize(proxy: C1): C1.Snapshot {
+            return {
+              P2: proxy.P2,
+            };
+          }
+        }
+
+        """);
     }
 }

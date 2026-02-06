@@ -17,6 +17,7 @@ describe('Simple Properties Test', () => {
             BoolProperty: true,
             StringProperty: "Test",
             CharProperty: 'A',
+            CharNullableProperty: null,
             DoubleProperty: 6.7,
             FloatProperty: 8.9,
             DateTimeProperty: dateNow,
@@ -35,6 +36,32 @@ describe('Simple Properties Test', () => {
     test('Returns ExportedClass property correctly', () => {
         expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
         expect(testObject.ExportedClassProperty.Id).toBe(2);
+    });
+    test('Mutates ExportedClass property correctly', () => {
+        expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
+        expect(testObject.ExportedClassProperty.Id).toBe(2);
+        const newExportedClass = new ExportedClass({ Id: 99 });
+        testObject.ExportedClassProperty = newExportedClass;
+        expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
+        expect(testObject.ExportedClassProperty.Id).toBe(99);
+        // TODO: fix identity (https://github.com/ArcadeMode/TypeShim/issues/20)
+        // expect(testObject.ExportedClassProperty).toBe(newExportedClass);
+    });
+    test('Mutates ExportedClass property with Initializer', () => {
+        expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
+        expect(testObject.ExportedClassProperty.Id).toBe(2);
+        const exportedClassInitializer = { Id: 12345 };
+        testObject.ExportedClassProperty = exportedClassInitializer;
+        expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
+        expect(testObject.ExportedClassProperty.Id).toBe(12345);
+    });
+    test('Mutates ExportedClass property does not affect snapshot', () => {
+        const snapshot = SimplePropertiesTest.materialize(testObject);
+        expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
+        expect(testObject.ExportedClassProperty.Id).toBe(2);
+        const newExportedClass = new ExportedClass({ Id: 99 });
+        testObject.ExportedClassProperty = newExportedClass;
+        expect(snapshot.ExportedClassProperty.Id).toBe(2);
     });
     test('Returns JSObject property by reference', () => {
         expect(testObject.JSObjectProperty).toBe(jsObject);

@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices.JavaScript;
 
-namespace TypeShim.Sample;
+namespace TypeShim.E2E.Wasm;
 
 [TSExport]
 public class  ArrayPropertiesClass

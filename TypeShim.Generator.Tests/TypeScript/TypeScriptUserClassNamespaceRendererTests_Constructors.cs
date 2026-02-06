@@ -9,7 +9,7 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator.Tests.TypeScript;
 
-internal class TypeScriptUserClassInterfaceRendererTests_Constructors
+internal class TypeScriptUserClassNamespaceRendererTests_Constructors
 {
     [Test]
     public void UserClassInterface_PrivateConstructor_InstanceProperty_GeneratesNoInitializer()

@@ -10,7 +10,6 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
         PropertyInfo[] initializerProperties = [..classProperties.Where(p => p is { SetMethod: { } } or { InitMethod: { } })];
         MethodParameterInfo[] parameterInfos = [.. parameterInfoBuilder.Build()];
         
-        // TODO: somehow support optional parameters. For now user must provide all parameters when constructing from JS object.
         MethodParameterInfo? initializersObjectParameter = initializerProperties.Length == 0 ? null : new()
         {
             Name = "jsObject",

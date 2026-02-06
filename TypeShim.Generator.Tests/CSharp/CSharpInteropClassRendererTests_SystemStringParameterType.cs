@@ -35,7 +35,7 @@ internal class CSharpInteropClassRendererTests_SystemStringParameterType
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -82,7 +82,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -113,8 +113,8 @@ public partial class C1Interop
 """);
     }
 
-    [TestCase("string", "string", "GetPropertyAsString")]
-    [TestCase("String", "string", "GetPropertyAsString")]
+    [TestCase("string", "string", "GetPropertyAsStringNullable")]
+    [TestCase("String", "string", "GetPropertyAsStringNullable")]
     [TestCase("char", "char", "GetPropertyAsCharNullable")]
     [TestCase("Char", "char", "GetPropertyAsCharNullable")]
     public void CSharpInteropClass_InstanceProperty_WithStringParameterType(string typeName, string interopTypeExpression, string jsObjectMethod)
@@ -136,7 +136,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -153,7 +153,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = (jsObject.{{jsObjectMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
+            P1 = jsObject.{{jsObjectMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
         };
     }
     [JSExport]
@@ -183,7 +183,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = (jsObject.{{jsObjectMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
+            P1 = jsObject.{{jsObjectMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
         };
     }
 }

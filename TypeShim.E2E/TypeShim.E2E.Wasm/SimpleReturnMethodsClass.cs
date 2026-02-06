@@ -1,7 +1,7 @@
 using System;
 using System.Globalization;
 
-namespace TypeShim.Sample;
+namespace TypeShim.E2E.Wasm;
 
 [TSExport]
 public class SimpleReturnMethodsClass

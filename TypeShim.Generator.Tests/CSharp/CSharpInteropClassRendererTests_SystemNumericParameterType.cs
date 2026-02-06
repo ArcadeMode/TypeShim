@@ -45,7 +45,7 @@ internal class CSharpInteropClassRendererTests_SystemNumericParameterType
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 #nullable enable
@@ -104,7 +104,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 #nullable enable
@@ -164,7 +164,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         Assert.That(interopClass, Is.EqualTo("""    
 #nullable enable
@@ -203,8 +203,8 @@ public partial class C1Interop
     [TestCase("int", "int", "GetPropertyAsInt32Nullable")]
     [TestCase("Int64", "long", "GetPropertyAsInt64Nullable")]
     [TestCase("long", "long", "GetPropertyAsInt64Nullable")]
-    [TestCase("Single", "float", "GetPropertyAsFloatNullable")]
-    [TestCase("float", "float", "GetPropertyAsFloatNullable")]
+    [TestCase("Single", "float", "GetPropertyAsSingleNullable")]
+    [TestCase("float", "float", "GetPropertyAsSingleNullable")]
     [TestCase("Double", "double", "GetPropertyAsDoubleNullable")]
     [TestCase("double", "double", "GetPropertyAsDoubleNullable")]
     [TestCase("IntPtr", "nint", "GetPropertyAsIntPtrNullable")]
@@ -229,7 +229,7 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext).Render();
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -246,7 +246,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = (jsObject.{{jsObjectMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
+            P1 = jsObject.{{jsObjectMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
         };
     }
     [JSExport]
@@ -276,7 +276,7 @@ public partial class C1Interop
     {
         return new C1()
         {
-            P1 = (jsObject.{{jsObjectMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))),
+            P1 = jsObject.{{jsObjectMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
         };
     }
 }

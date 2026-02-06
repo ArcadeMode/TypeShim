@@ -623,4 +623,236 @@ export interface AssemblyExports{
 
 """);
     }
+
+    [Test]
+    public void TypeScriptInteropInterfaceRenderer_InstanceMethod_WithFuncUserClassParameterType_HasFunctionType()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public void M1(Func<UserClass> u) {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo]);
+        RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
+
+        AssertEx.EqualOrDiff(renderCtx.ToString(), """
+// TypeShim generated TypeScript module exports interface
+export interface AssemblyExports{
+  N1: {
+    C1Interop: {
+      ctor(): ManagedObject;
+      M1(instance: ManagedObject, u: () => ManagedObject): void;
+    };
+    UserClassInterop: {
+      ctor(jsObject: object): ManagedObject;
+      get_Id(instance: ManagedObject): number;
+      set_Id(instance: ManagedObject, value: number): void;
+    };
+  };
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptInteropInterfaceRenderer_InstanceMethod_WithFuncUserClassUserClassParameterType_HasFunctionType()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public void M1(Func<UserClass, UserClass> u) {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo]);
+        RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
+
+        AssertEx.EqualOrDiff(renderCtx.ToString(), """
+// TypeShim generated TypeScript module exports interface
+export interface AssemblyExports{
+  N1: {
+    C1Interop: {
+      ctor(): ManagedObject;
+      M1(instance: ManagedObject, u: (arg0: ManagedObject) => ManagedObject): void;
+    };
+    UserClassInterop: {
+      ctor(jsObject: object): ManagedObject;
+      get_Id(instance: ManagedObject): number;
+      set_Id(instance: ManagedObject, value: number): void;
+    };
+  };
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptInteropInterfaceRenderer_InstanceMethod_WithFuncUserClassReturnType_HasFunctionType()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public Func<UserClass> M1() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo]);
+        RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
+
+        AssertEx.EqualOrDiff(renderCtx.ToString(), """
+// TypeShim generated TypeScript module exports interface
+export interface AssemblyExports{
+  N1: {
+    C1Interop: {
+      ctor(): ManagedObject;
+      M1(instance: ManagedObject): () => ManagedObject;
+    };
+    UserClassInterop: {
+      ctor(jsObject: object): ManagedObject;
+      get_Id(instance: ManagedObject): number;
+      set_Id(instance: ManagedObject, value: number): void;
+    };
+  };
+}
+
+""");
+    }
+    
+    [Test]
+    public void TypeScriptInteropInterfaceRenderer_InstanceMethod_WithFuncUserClassUserClassReturnType__WithFuncUserClassUserClassParameterType_HasFunctionTypeWithInitializerUnionInParameter()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public Func<UserClass, UserClass> M1() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo, userClassInfo]);
+        RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
+
+        AssertEx.EqualOrDiff(renderCtx.ToString(), """
+// TypeShim generated TypeScript module exports interface
+export interface AssemblyExports{
+  N1: {
+    C1Interop: {
+      ctor(): ManagedObject;
+      M1(instance: ManagedObject): (arg0: ManagedObject | object) => ManagedObject;
+    };
+    UserClassInterop: {
+      ctor(jsObject: object): ManagedObject;
+      get_Id(instance: ManagedObject): number;
+      set_Id(instance: ManagedObject, value: number): void;
+    };
+  };
+}
+
+""");
+    }
 }

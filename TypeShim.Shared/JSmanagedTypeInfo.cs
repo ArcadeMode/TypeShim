@@ -12,7 +12,7 @@ using System.Linq;
 
 internal abstract record JSTypeInfo(KnownManagedType KnownType)
 {
-    public TypeSyntax? GetTypeSyntax()
+    public TypeSyntax GetTypeSyntax()
     {
         return this switch
         {
@@ -33,18 +33,34 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
                 SyntaxFactory.TypeArgumentList(
                     SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
                         asti.ElementTypeInfo.Syntax))),
-            JSTaskTypeInfo { ResultTypeInfo.KnownType: KnownManagedType.Void } => SyntaxFactory.IdentifierName(
-                SyntaxFactory.Identifier("Task")),
+            JSTaskTypeInfo { ResultTypeInfo.KnownType: KnownManagedType.Void } => SyntaxFactory.IdentifierName(SyntaxFactory.Identifier("Task")),
             JSTaskTypeInfo { ResultTypeInfo.KnownType: not KnownManagedType.Void }  tti => SyntaxFactory.GenericName(
                 SyntaxFactory.Identifier("Task"),
-                SyntaxFactory.TypeArgumentList(
-                    SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
-                        tti.ResultTypeInfo.GetTypeSyntax() ?? SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword))))),
-            JSNullableTypeInfo nti => SyntaxFactory.NullableType(
-                nti.ResultTypeInfo.GetTypeSyntax() ?? SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword))),
-            JSFunctionTypeInfo fti => throw new NotImplementedException("Function syntax not implemented"),
-            _ => null,
+                SyntaxFactory.TypeArgumentList(SyntaxFactory.SingletonSeparatedList<TypeSyntax>(tti.ResultTypeInfo.GetTypeSyntax()))),
+            JSNullableTypeInfo nti => SyntaxFactory.NullableType(nti.ResultTypeInfo.GetTypeSyntax()),
+            JSFunctionTypeInfo fti => GetFunctionTypeSyntax(fti),
+            _ => throw new NotSupportedTypeException($"JS type '{this.GetType()}' with KnownManagedType '{KnownType}' is not supported for type syntax generation"),
         };
+    }
+
+    private static TypeSyntax GetFunctionTypeSyntax(JSFunctionTypeInfo fti)
+    {
+        // - Action: 0 args => Action
+        // - Action<T1..Tn>: n args => Action<T1..Tn>
+        // - Func<T1..Tn, TReturn>: args + return => Func<T1..Tn, TReturn>
+        string identifier = fti.IsAction ? "Action" : "Func";
+
+        if (fti.ArgsTypeInfo.Length == 0)
+        {
+            return SyntaxFactory.IdentifierName(SyntaxFactory.Identifier(identifier));
+        }
+
+        SeparatedSyntaxList<TypeSyntax> typeArgs = SyntaxFactory.SeparatedList<TypeSyntax>(
+            fti.ArgsTypeInfo.Select(x => x.GetTypeSyntax()));
+
+        return SyntaxFactory.GenericName(
+            SyntaxFactory.Identifier(identifier),
+            SyntaxFactory.TypeArgumentList(typeArgs));
     }
 
     public static JSTypeInfo CreateJSTypeInfoForTypeSymbol(ITypeSymbol type)
@@ -192,8 +208,8 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
             case ITypeSymbol when fullTypeName == Constants.ActionGlobal:
                 return new JSFunctionTypeInfo(true, Array.Empty<JSSimpleTypeInfo>());
             case INamedTypeSymbol actionType when fullTypeName.StartsWith(Constants.ActionGlobal, StringComparison.Ordinal):
-                JSSimpleTypeInfo?[] argumentTypes = [.. actionType.TypeArguments.Select(arg => CreateJSTypeInfoForTypeSymbol(arg) as JSSimpleTypeInfo)];
-                if (argumentTypes.Any(x => x is null))
+                JSTypeInfo?[] argumentTypes = [.. actionType.TypeArguments.Select(CreateJSTypeInfoForTypeSymbol)];
+                if (argumentTypes.Length > 3 || argumentTypes.Any(x => x is not JSSimpleTypeInfo and not JSNullableTypeInfo { IsValueType: false, ResultTypeInfo: JSSimpleTypeInfo }))
                 {
                     return new JSInvalidTypeInfo();
                 }
@@ -201,8 +217,8 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
 
             // function
             case INamedTypeSymbol funcType when fullTypeName.StartsWith(Constants.FuncGlobal, StringComparison.Ordinal):
-                JSSimpleTypeInfo?[] signatureTypes = [.. funcType.TypeArguments.Select(argName => CreateJSTypeInfoForTypeSymbol(argName) as JSSimpleTypeInfo)];
-                if (signatureTypes.Any(x => x is null))
+                JSTypeInfo?[] signatureTypes = [.. funcType.TypeArguments.Select(CreateJSTypeInfoForTypeSymbol)];
+                if (signatureTypes.Length > 4 || signatureTypes.Any(x => x is not JSSimpleTypeInfo and not JSNullableTypeInfo { IsValueType: false, ResultTypeInfo: JSSimpleTypeInfo }))
                 {
                     return new JSInvalidTypeInfo();
                 }
@@ -240,7 +256,7 @@ internal sealed record JSTaskTypeInfo(JSTypeInfo ResultTypeInfo) : JSTypeInfo(Kn
 
 internal sealed record JSNullableTypeInfo(JSTypeInfo ResultTypeInfo, bool IsValueType) : JSTypeInfo(KnownManagedType.Nullable);
 
-internal sealed record JSFunctionTypeInfo(bool IsAction, JSSimpleTypeInfo[] ArgsTypeInfo) : JSTypeInfo(IsAction ? KnownManagedType.Action : KnownManagedType.Function);
+internal sealed record JSFunctionTypeInfo(bool IsAction, JSTypeInfo[] ArgsTypeInfo) : JSTypeInfo(IsAction ? KnownManagedType.Action : KnownManagedType.Function);
 
 
 internal enum KnownManagedType : int

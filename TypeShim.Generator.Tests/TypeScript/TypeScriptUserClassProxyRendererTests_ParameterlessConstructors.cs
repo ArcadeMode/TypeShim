@@ -39,7 +39,7 @@ internal class TypeScriptUserClassProxyRendererTests_ParameterlessConstructors
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(jsObject));
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
   }
 
   public get P1(): {{typeScriptType}} {

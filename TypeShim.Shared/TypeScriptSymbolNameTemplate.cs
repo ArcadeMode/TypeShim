@@ -1,34 +1,23 @@
-﻿
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
+using System.Collections.Generic;
+using System.Text;
 
 namespace TypeShim.Shared;
 
+internal sealed record TypeScriptFunctionParameterTemplate(string Name, TypeScriptSymbolNameTemplate TypeTemplate);
+
 internal sealed class TypeScriptSymbolNameTemplate
 {
-    internal required string Template { get; init; }
-    internal required TypeScriptSymbolNameTemplate? InnerTemplate { get; init; }
+    internal string Template { get; init; } = null!;
+    internal Dictionary<string, InteropTypeInfo> InnerTypes { get; init; } = []; 
     
-    private const string InnerPlaceholder = "{INNER_PLACEHOLDER}";
-    private const string SuffixPlaceholder = "{SUFFIX_PLACEHOLDER}";
-
-    internal string Render(string suffix = "")
-    {
-        string template = Template;
-        if (InnerTemplate is not null)
-        {
-            string inner = InnerTemplate.Render(suffix);
-            template = template.Replace(InnerPlaceholder, inner);
-        }
-
-        return template.Replace(SuffixPlaceholder, suffix);
-    }
 
     internal static TypeScriptSymbolNameTemplate ForUserType(string originalTypeSyntax)
     {
         return new TypeScriptSymbolNameTemplate
         {
-            Template = $"{originalTypeSyntax}{SuffixPlaceholder}",
-            InnerTemplate = null
+            Template = originalTypeSyntax,
         };
     }
 
@@ -37,34 +26,73 @@ internal sealed class TypeScriptSymbolNameTemplate
         return new TypeScriptSymbolNameTemplate
         {
             Template = typeName,
-            InnerTemplate = null
         };
     }
 
-    internal static TypeScriptSymbolNameTemplate ForArrayType(TypeScriptSymbolNameTemplate innerTemplate)
+    internal static TypeScriptSymbolNameTemplate ForArrayType(InteropTypeInfo innerType)
     {
         return new TypeScriptSymbolNameTemplate
         {
-            Template = $"Array<{InnerPlaceholder}>",
-            InnerTemplate = innerTemplate
+            Template = "Array<{TElement}>",
+            InnerTypes = { { "{TElement}", innerType } }
         };
     }
 
-    internal static TypeScriptSymbolNameTemplate ForPromiseType(TypeScriptSymbolNameTemplate? innerTemplate)
+    internal static TypeScriptSymbolNameTemplate ForPromiseType(InteropTypeInfo? innerType)
     {
+        if (innerType == null)
+        {
+            return new TypeScriptSymbolNameTemplate
+            {
+                Template = "Promise<void>",
+            };
+        }
         return new TypeScriptSymbolNameTemplate
         {
-            Template = innerTemplate != null ? $"Promise<{InnerPlaceholder}>" : "Promise<void>",
-            InnerTemplate = innerTemplate
+            Template = "Promise<{TValue}>",
+            InnerTypes = { { "{TValue}", innerType } }
         };
     }
 
-    internal static TypeScriptSymbolNameTemplate ForNullableType(TypeScriptSymbolNameTemplate innerTemplate)
+    internal static TypeScriptSymbolNameTemplate ForNullableType(InteropTypeInfo innerType)
     {
+        string template = innerType.IsDelegateType() ? "({TNullableValue}) | null" : "{TNullableValue} | null";
         return new TypeScriptSymbolNameTemplate
         {
-            Template = $"{InnerPlaceholder} | null",
-            InnerTemplate = innerTemplate
+            Template = template,
+            InnerTypes = { { "{TNullableValue}", innerType } }
         };
+    }
+    
+    internal static TypeScriptSymbolNameTemplate ForDelegateType(DelegateArgumentInfo argumentInfo)
+    {
+        Dictionary<string, InteropTypeInfo> paramTypeDict = [.. argumentInfo.ParameterTypes.Select((typeInfo, i) => new KeyValuePair<string, InteropTypeInfo>($"{{TArg{i}}}", typeInfo))];
+        KeyValuePair<string, InteropTypeInfo> returnTypeKvp = new("{TReturn}", argumentInfo.ReturnType);
+
+        StringBuilder templateBuilder = new();
+        templateBuilder.Append('(');
+        int i = 0;
+        foreach (KeyValuePair<string, InteropTypeInfo> typeInfo in paramTypeDict)
+        {
+            if (i > 0) templateBuilder.Append(", ");
+            templateBuilder.Append("arg").Append(i).Append(": ").Append(typeInfo.Key);
+            i++;
+        }
+        templateBuilder.Append(") => ").Append(returnTypeKvp.Key);
+        return new TypeScriptSymbolNameTemplate
+        {
+            Template = templateBuilder.ToString(),
+            InnerTypes = [..paramTypeDict, returnTypeKvp]
+        };
+    }
+}
+
+public static class DictionaryExtensions
+{
+    // Enables collection expressions for Dictionary<TKey, TValue> like newdict = [..dict, kvp]
+    public static Dictionary<TKey, TValue> Add<TKey, TValue>(this Dictionary<TKey, TValue> dict, KeyValuePair<TKey, TValue> keyValuePair) where TKey : notnull
+    {
+        dict[keyValuePair.Key] = keyValuePair.Value;
+        return dict;
     }
 }
