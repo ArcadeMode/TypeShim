@@ -318,14 +318,14 @@ TypeShim aims to continue to broaden its type support. Suggestions and contribut
 | `ArraySegment<Int32>`| `MemoryView`| 🚧     |      |
 | `ArraySegment<Double>`| `MemoryView`| 🚧    |      |
 | `Task`               | `Promise`   | ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) |
-| `Action`             | `Function`  | 🚧     |      |
-| `Action<T1>`         | `Function`  | 🚧     |      |
-| `Action<T1, T2>`     | `Function`  | 🚧     |      |
-| `Action<T1, T2, T3>` | `Function`  | 🚧     |      |
-| `Func<TResult>`      | `Function`  | 🚧     |      |
-| `Func<T1, TResult>`  | `Function`  | 🚧     |      |
-| `Func<T1, T2, TResult>` | `Function`| 🚧   |      |
-| `Func<T1, T2, T3, TResult>` | `Function` | 🚧 |      |
+| `Action`             | `Function`  | ✅     |      |
+| `Action<T1>`         | `Function`  | ✅     |      |
+| `Action<T1, T2>`     | `Function`  | ✅     |      |
+| `Action<T1, T2, T3>` | `Function`  | ✅     |      |
+| `Func<TResult>`      | `Function`  | ✅     |      |
+| `Func<T1, TResult>`  | `Function`  | ✅     |      |
+| `Func<T1, T2, TResult>` | `Function`| ✅   |      |
+| `Func<T1, T2, T3, TResult>` | `Function` | ✅ |      |
 
 *<sub>For `[TSExport]` classes</sub>
 
