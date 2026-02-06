@@ -64,30 +64,14 @@ internal sealed class TypescriptAssemblyExportsRenderer(
             if (!isFirst) ctx.Append(", ");
 
             ctx.Append(parameterInfo.Name).Append(": ");
-            if (parameterInfo.Type.IsDelegateType())
-            {
-                TypeScriptSymbolNameRenderer.RenderDelegate(parameterInfo.Type, ctx, parameterSymbolType: TypeShimSymbolType.Proxy, returnSymbolType: TypeShimSymbolType.Proxy, interop: true);
-            }
-            else
-            {
-                // TODO: remove IsInjectedInstanceParameter property and split into separate methodInfo property
-                TypeShimSymbolType symbolType = parameterInfo.IsInjectedInstanceParameter ? TypeShimSymbolType.Proxy : TypeShimSymbolType.ProxyInitializerUnion;
-                TypeScriptSymbolNameRenderer.Render(parameterInfo.Type, ctx, symbolType, interop: true);
-                //ctx.Append(typeName);
-            }
+            // TODO: remove IsInjectedInstanceParameter property and split into separate methodInfo property
+            TypeShimSymbolType symbolType = parameterInfo.IsInjectedInstanceParameter || parameterInfo.Type.IsDelegateType() ? TypeShimSymbolType.Proxy : TypeShimSymbolType.ProxyInitializerUnion;
+            TypeScriptSymbolNameRenderer.Render(parameterInfo.Type, ctx, symbolType, interop: true);
             isFirst = false;
         }
         ctx.Append("): ");
 
-        if (returnType.IsDelegateType())
-        {
-            TypeScriptSymbolNameRenderer.RenderDelegate(returnType, ctx, parameterSymbolType: TypeShimSymbolType.ProxyInitializerUnion, returnSymbolType: TypeShimSymbolType.Proxy, interop: true);
-        }
-        else
-        {
-            TypeScriptSymbolNameRenderer.Render(returnType, ctx, TypeShimSymbolType.Proxy, interop: true);
-            //ctx.Append(returnTypeName);
-        }
+        TypeScriptSymbolNameRenderer.Render(returnType, ctx, returnSymbolType: TypeShimSymbolType.Proxy, parameterSymbolType: TypeShimSymbolType.ProxyInitializerUnion, interop: true);
         ctx.AppendLine(";");
     }
 

@@ -573,7 +573,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
     }
     
     [Test]
-    public void TypeScriptUserClassProxy_MethodParameter_NullableFuncUserClassNullableUserClass()
+    public void TypeScriptUserClassProxy_MethodParameterType_NullableFuncUserClassNullableUserClass()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
         using System;
@@ -614,8 +614,110 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
             super(TypeShimConfig.exports.N1.C1Interop.ctor());
           }
 
-          public M1(func: (arg0: UserClass) => UserClass | null): void {
+          public M1(func: ((arg0: UserClass) => UserClass | null) | null): void {
             TypeShimConfig.exports.N1.C1Interop.M1(this.instance, func ? (arg0: ManagedObject) => { const retVal = func(ProxyBase.fromHandle(UserClass, arg0)); return retVal ? retVal instanceof UserClass ? retVal.instance : retVal : null } : null);
+          }
+        }
+        
+        """);
+    }
+    
+    [Test]
+    public void TypeScriptUserClassProxy_MethodReturnType_NullableFuncUserClassNullableUserClass()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Threading.Tasks;
+        namespace N1;
+        [TSExport]
+        public class UserClass
+        {
+            public int Id { get; set; }
+        }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Threading.Tasks;
+        namespace N1;
+        [TSExport]
+        public class C1
+        {
+            public Func<UserClass, UserClass?>? M1() {}
+        }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses[0], typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses[1], typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+        export class C1 extends ProxyBase {
+          constructor() {
+            super(TypeShimConfig.exports.N1.C1Interop.ctor());
+          }
+
+          public M1(): ((arg0: UserClass | UserClass.Initializer) => UserClass | null) | null {
+            const res = TypeShimConfig.exports.N1.C1Interop.M1(this.instance);
+            return res ? (arg0: UserClass | UserClass.Initializer) => { const retVal = res(arg0 instanceof UserClass ? arg0.instance : arg0); return retVal ? ProxyBase.fromHandle(UserClass, retVal) : null } : null;
+          }
+        }
+        
+        """);
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_MethodReturnType_NullableFuncUserClassUserClass()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Threading.Tasks;
+        namespace N1;
+        [TSExport]
+        public class UserClass
+        {
+            public int Id { get; set; }
+        }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+        using System;
+        using System.Threading.Tasks;
+        namespace N1;
+        [TSExport]
+        public class C1
+        {
+            public Func<UserClass, UserClass>? M1() {}
+        }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses[0], typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses[1], typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+        export class C1 extends ProxyBase {
+          constructor() {
+            super(TypeShimConfig.exports.N1.C1Interop.ctor());
+          }
+
+          public M1(): ((arg0: UserClass | UserClass.Initializer) => UserClass) | null {
+            const res = TypeShimConfig.exports.N1.C1Interop.M1(this.instance);
+            return res ? (arg0: UserClass | UserClass.Initializer) => { const retVal = res(arg0 instanceof UserClass ? arg0.instance : arg0); return ProxyBase.fromHandle(UserClass, retVal) } : null;
           }
         }
         

@@ -41,14 +41,8 @@ internal sealed class TypeScriptUserClassShapesRenderer(RenderContext ctx)
                 ctx.Append(propertyInfo.Name).Append(": ");
                 if (propertyInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true })
                 {
-                    if (propertyInfo.Type.IsDelegateType())
-                    {
-                        TypeScriptSymbolNameRenderer.RenderDelegate(propertyInfo.Type, ctx, parameterSymbolType: TypeShimSymbolType.ProxyInitializerUnion, returnSymbolType: TypeShimSymbolType.Proxy, interop: false);
-                    }
-                    else
-                    {
-                        TypeScriptSymbolNameRenderer.Render(propertyInfo.Type, ctx, TypeShimSymbolType.ProxyInitializerUnion, interop: false);
-                    }
+                    TypeShimSymbolType returnSymbolType = propertyInfo.Type.IsDelegateType() ? TypeShimSymbolType.Proxy : TypeShimSymbolType.ProxyInitializerUnion;
+                    TypeScriptSymbolNameRenderer.Render(propertyInfo.Type, ctx, returnSymbolType, parameterSymbolType: TypeShimSymbolType.ProxyInitializerUnion, interop: false);
                 }
                 else
                 {

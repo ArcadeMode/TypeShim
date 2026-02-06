@@ -19,12 +19,11 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
         TypeScriptSymbolNameRenderer renderer = new(symbolType, symbolType, interop, ctx);
         renderer.RenderCore(typeInfo);
     }
-
-    internal static void RenderDelegate(InteropTypeInfo typeInfo, RenderContext ctx, TypeShimSymbolType parameterSymbolType, TypeShimSymbolType returnSymbolType, bool interop)
+    
+    public static void Render(InteropTypeInfo typeInfo, RenderContext ctx, TypeShimSymbolType returnSymbolType, TypeShimSymbolType parameterSymbolType, bool interop)
     {
-        _ = typeInfo.ArgumentInfo ?? throw new ArgumentException("InteropTypeInfo does not represent a delegate type.", nameof(typeInfo));
         TypeScriptSymbolNameRenderer renderer = new(returnSymbolType, parameterSymbolType, interop, ctx);
-        renderer.RenderDelegateCore(typeInfo.ArgumentInfo);
+        renderer.RenderCore(typeInfo);
     }
     
     private void RenderCore(InteropTypeInfo typeInfo, bool isDelegateParameter = false)
@@ -47,23 +46,12 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
         }
         else
         {
-            //TypeScriptSymbolNameTemplate symbolNameTemplate = GetSymbolNameTemplate(typeInfo);
-            //string type = symbolNameTemplate.Replace(TypeScriptSymbolNameTemplate.SuffixPlaceholder, ResolveSuffix(typeInfo));
             ctx.Append(GetSymbolNameTemplate(typeInfo).Template);
             if (typeInfo.IsTSExport)
             {
                 RenderSuffix(typeInfo, isDelegateParameter ? parameterSymbolType : returnSymbolType);
             }
         }
-
-        //string template = symbolNameTemplate.Template;
-        //foreach (KeyValuePair<string, InteropTypeInfo> kvp in symbolNameTemplate.InnerTypes)
-        //{
-        //    TypeScriptSymbolNameRenderer innerRenderer = new(kvp.Value, ctx);
-        //    TypeScriptSymbolNameTemplate targetTemplate = interop ? kvp.Value.TypeScriptInteropTypeSyntax : kvp.Value.TypeScriptTypeSyntax;
-        //    template = template.Replace(kvp.Key, innerRenderer.RenderCore(returnSymbolType, parameterSymbolType, interop));
-        //}
-
     }
 
     private void RenderNullableCore(InteropTypeInfo typeInfo)
