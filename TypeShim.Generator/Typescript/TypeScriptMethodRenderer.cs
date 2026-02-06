@@ -153,18 +153,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
 
                 ctx.Append($"return ");
                 void resRenderer() => ctx.Append("res");
-                if (methodInfo.ReturnType.IsDelegateType())
-                {
-                    RenderInlineDelegateHandleExtraction(methodInfo.ReturnType.ArgumentInfo!, resRenderer);
-                }
-                else if (requiresCharConversion)
-                {
-                    RenderNumberToCharConversion(methodInfo.ReturnType, resRenderer);
-                }
-                else
-                {
-                    RenderInlineProxyConstruction(methodInfo.ReturnType, resRenderer);
-                }
+                RenderInlineProxyConstruction(methodInfo.ReturnType, resRenderer);
             }
             else
             {
@@ -199,6 +188,12 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             RenderInlineProxyConstruction(typeInfo.TypeArgument!, () => ctx.Append("e"));
             ctx.Append(')');
         }
+        else if (typeInfo.ManagedType == KnownManagedType.Char)
+        {
+            ctx.Append("String.fromCharCode(");
+            expressionRenderer();
+            ctx.Append(")");
+        }
         else
         {
             ctx.Append("ProxyBase.fromHandle(");
@@ -220,28 +215,23 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             TypeScriptSymbolNameRenderer.Render(param.Type, ctx, TypeShimSymbolType.Proxy, interop: true);
         }
         ctx.Append(") => ");
+        
         // Invoke target delegate (with optional return type conversion)
-        if (delegateInfo.ReturnType.RequiresTypeConversion && delegateInfo.ReturnType.SupportsTypeConversion)
+        Action renderExpression = () => RenderTargetDelegateInvocation(delegateInfo, targetDelegateExpressionRenderer);
+        bool requiresRetVal = delegateInfo.ReturnType.IsNullableType || (delegateInfo.ReturnType.RequiresTypeConversion && delegateInfo.ReturnType.SupportsTypeConversion);
+        if (requiresRetVal)
         {
             ctx.Append("{ const retVal = ");
-        }
-
-        bool requiresCharConversion = RequiresCharConversion(delegateInfo.ReturnType);
-        if (requiresCharConversion)
-        {
-            RenderCharToNumberConversion(delegateInfo.ReturnType, () => RenderTargetDelegateInvocation(delegateInfo, targetDelegateExpressionRenderer));
-        }
-        else
-        {
-            RenderTargetDelegateInvocation(delegateInfo, targetDelegateExpressionRenderer);
-        }
-
-        if (delegateInfo.ReturnType.RequiresTypeConversion && delegateInfo.ReturnType.SupportsTypeConversion)
-        {
+            renderExpression();
             ctx.Append("; return ");
-            RenderInlineHandleExtraction(delegateInfo.ReturnType, () => ctx.Append("retVal"));
-            ctx.Append(" }");
+            renderExpression = () => ctx.Append("retVal");
         }
+
+        RenderInlineHandleExtraction(delegateInfo.ReturnType, renderExpression);
+        if (requiresRetVal)
+        {
+            ctx.Append(" }");
+        } 
 
         void RenderTargetDelegateInvocation(DelegateArgumentInfo delegateInfo, Action targetDelegateExpressionRenderer)
         {
@@ -251,13 +241,9 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             {
                 if (param.Index > 0) ctx.Append(", ");
 
-                if (param.Type.RequiresTypeConversion && param.Type.SupportsTypeConversion)
+                if (param.Type.RequiresTypeConversion && param.Type.SupportsTypeConversion || RequiresCharConversion(param.Type))
                 {
                     RenderInlineProxyConstruction(param.Type, () => ctx.Append("arg" + param.Index));
-                }
-                else if (RequiresCharConversion(param.Type))
-                {
-                    RenderNumberToCharConversion(param.Type, () => ctx.Append("arg" + param.Index));
                 }
                 else
                 {
@@ -265,7 +251,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                 }
             }
             ctx.Append(")");
-        }            
+        }
     }
 
     private void RenderInlineHandleExtraction(InteropTypeInfo typeInfo, Action expressionRenderer)
@@ -283,14 +269,18 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             RenderInlineHandleExtraction(typeInfo.TypeArgument!, expressionRenderer);
             ctx.Append(" : null");
         }
-        else if (typeInfo is { IsArrayType: true } or { IsTaskType: true })
+        else if (typeInfo.ManagedType == KnownManagedType.Char)
+        {
+            ctx.Append(".charCodeAt(0)");
+        }
+        else if (typeInfo is { IsArrayType: true } or { IsTaskType: true } && typeInfo.TypeArgument != null)
         {
             string transformFunction = typeInfo.IsArrayType ? "map" : "then";
             ctx.Append('.').Append(transformFunction).Append("(e => ");
-            RenderInlineHandleExtraction(typeInfo.TypeArgument!, () => ctx.Append("e"));
+            RenderInlineHandleExtraction(typeInfo.TypeArgument, () => ctx.Append("e"));
             ctx.Append(')');
         }
-        else if (ctx.SymbolMap.GetClassInfo(typeInfo) is { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
+        else if (typeInfo.IsTSExport && ctx.SymbolMap.GetClassInfo(typeInfo) is { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
         {
             // accepts initializer or proxy, if proxy, extract handle, if init, pass as is
             ctx.Append(" instanceof ");
@@ -300,7 +290,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             ctx.Append(".instance : ");
             expressionRenderer();
         }
-        else // simple proxy
+        else if (typeInfo.IsTSExport) // simple proxy
         {
             ctx.Append(".instance");
         }
@@ -324,27 +314,27 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         }
         ctx.Append(") => ");
 
-        // Invoke target delegate (with optional return type conversion)
-        bool requiresProxyConversion = delegateInfo.ReturnType.RequiresTypeConversion && delegateInfo.ReturnType.SupportsTypeConversion;
-        bool requiresCharConversion = RequiresCharConversion(delegateInfo.ReturnType);
-        if (requiresProxyConversion)
+        Action renderExpression = () => RenderTargetDelegateInvocation(delegateInfo, expressionRenderer);
+        bool requiresRetVal = delegateInfo.ReturnType.IsNullableType || (delegateInfo.ReturnType.RequiresTypeConversion && delegateInfo.ReturnType.SupportsTypeConversion);
+        if (requiresRetVal)
         {
             ctx.Append("{ const retVal = ");
+            renderExpression();
+            ctx.Append("; return ");
+            renderExpression = () => ctx.Append("retVal");
         }
 
-        if (requiresCharConversion)
+        if (delegateInfo.ReturnType.RequiresTypeConversion && delegateInfo.ReturnType.SupportsTypeConversion || RequiresCharConversion(delegateInfo.ReturnType))
         {
-            RenderNumberToCharConversion(delegateInfo.ReturnType, () => RenderTargetDelegateInvocation(delegateInfo, expressionRenderer));
+            RenderInlineProxyConstruction(delegateInfo.ReturnType, renderExpression);
         }
         else
         {
-            RenderTargetDelegateInvocation(delegateInfo, expressionRenderer);
+            renderExpression();
         }
 
-        if (requiresProxyConversion)
+        if (requiresRetVal)
         {
-            ctx.Append("; return ");
-            RenderInlineProxyConstruction(delegateInfo.ReturnType, () => ctx.Append("retVal"));
             ctx.Append(" }");
         }
 
@@ -355,19 +345,8 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             foreach (var param in delegateInfo.ParameterTypes.Select((t, i) => new { Type = t, Index = i }))
             {
                 if (param.Index > 0) ctx.Append(", ");
-                if (param.Type.RequiresTypeConversion && param.Type.SupportsTypeConversion)
-                {
-                    //TypeScriptSymbolNameRenderer.Render(param.Type.GetInnermostType(), ctx, TypeShimSymbolType.Proxy, interop: false)
-                    RenderInlineHandleExtraction(param.Type, () => ctx.Append("arg").Append(param.Index));
-                }
-                else if (RequiresCharConversion(param.Type))
-                {
-                    RenderCharToNumberConversion(param.Type, () => ctx.Append("arg").Append(param.Index));
-                }
-                else
-                {
-                    ctx.Append("arg").Append(param.Index);
-                }
+                
+                RenderInlineHandleExtraction(param.Type, () => ctx.Append("arg").Append(param.Index));
             }
             ctx.Append(")");
         }
@@ -387,12 +366,15 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             foreach (MethodParameterInfo parameter in methodParameters)
             {
                 if (!isFirst) ctx.Append(", ");
-                bool requiresProxyConversion = parameter.Type.RequiresTypeConversion && parameter.Type.SupportsTypeConversion;
-                bool requiresCharConversion = RequiresCharConversion(parameter.Type);
-                void renderParameter() => ctx.Append(parameter.IsInjectedInstanceParameter ? instanceParameterExpression : parameter.Name);
-                if (!parameter.IsInjectedInstanceParameter && (requiresCharConversion || requiresProxyConversion))
+
+                void renderParameter() => ctx.Append(parameter.Name);
+                if (parameter.IsInjectedInstanceParameter)
                 {
-                    RenderTypeConversionForInteropCall(parameter.Type, requiresProxyConversion, requiresCharConversion, renderParameter);
+                    ctx.Append(instanceParameterExpression);
+                }
+                else if (parameter.Type.RequiresTypeConversion && parameter.Type.SupportsTypeConversion || RequiresCharConversion(parameter.Type))
+                {
+                    RenderInlineHandleExtraction(parameter.Type, renderParameter);
                 }
                 else
                 {
@@ -425,26 +407,9 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
 
                 void renderPropertyAccessorExpression() => ctx.Append(initializerObject.Name).Append('.').Append(propertyInfo.Name);
                 ctx.Append(", ").Append(propertyInfo.Name).Append(": ");
-                RenderTypeConversionForInteropCall(propertyInfo.Type, requiresProxyConversion, requiresCharConversion, renderPropertyAccessorExpression);
+                RenderInlineHandleExtraction(propertyInfo.Type, renderPropertyAccessorExpression);
             }
             ctx.Append(" }");
-        }
-
-        void RenderTypeConversionForInteropCall(InteropTypeInfo typeInfo, bool requiresProxyConversion, bool requiresCharConversion, Action renderParameter)
-        {
-            //if (typeInfo.IsDelegateType() && (requiresProxyConversion || requiresCharConversion))
-            //{
-            //    RenderInlineDelegateProxyConstruction(typeInfo.ArgumentInfo!, renderParameter);
-            //}
-            //else 
-            if (requiresProxyConversion)
-            {
-                RenderInlineHandleExtraction(typeInfo, renderParameter);
-            }
-            else if (requiresCharConversion)
-            {
-                RenderCharToNumberConversion(typeInfo, renderParameter);
-            }
         }
     }
 
@@ -459,67 +424,5 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             { ArgumentInfo: DelegateArgumentInfo argumentInfo } when (typeInfo.IsDelegateType()) => RequiresCharConversion(argumentInfo.ReturnType) || argumentInfo.ParameterTypes.Any(RequiresCharConversion),
             _ => false
         };
-    }
-
-    /// <summary>
-    /// Assumes type requires char conversion, may behave unexpectedly otherwise
-    /// </summary>
-    /// <param name="typeInfo"></param>
-    void RenderCharToNumberConversion(InteropTypeInfo typeInfo, Action renderStringExpression)
-    {
-        if (typeInfo is { ManagedType: KnownManagedType.Nullable })
-        {
-            renderStringExpression();
-            ctx.Append(" ? ");
-            RenderCharToNumberConversion(typeInfo.TypeArgument!, renderStringExpression);
-            ctx.Append(" : null");
-            return;
-        }
-
-        renderStringExpression();
-        if (typeInfo.ManagedType == KnownManagedType.Char)
-        {
-            ctx.Append(".charCodeAt(0)");
-        }
-        else if (typeInfo is { ManagedType: KnownManagedType.Task })
-        {
-            ctx.Append(".then(c => ");
-            RenderCharToNumberConversion(typeInfo.TypeArgument!, () => ctx.Append("c"));
-            ctx.Append(")");
-        }
-    }
-
-    /// <summary>
-    /// Assumes type requires char conversion, may behave unexpectedly otherwise
-    /// </summary>
-    /// <param name="typeInfo"></param>
-    /// <param name="renderNumberExpression"></param>
-    void RenderNumberToCharConversion(InteropTypeInfo typeInfo, Action renderNumberExpression)
-    {
-        if (typeInfo.ManagedType == KnownManagedType.Nullable)
-        {
-            renderNumberExpression();
-            ctx.Append(" ? ");
-            RenderNumberToCharConversion(typeInfo.TypeArgument!, renderNumberExpression);
-            ctx.Append(" : null");
-            return;
-        } 
-        else if (typeInfo.ManagedType == KnownManagedType.Char)
-        {
-            ctx.Append("String.fromCharCode(");
-        }
-
-        renderNumberExpression();
-
-        if (typeInfo.ManagedType == KnownManagedType.Char)
-        {
-            ctx.Append(")");
-        }
-        else if (typeInfo is { ManagedType: KnownManagedType.Task })
-        {
-            ctx.Append(".then(c => ");
-            RenderNumberToCharConversion(typeInfo.TypeArgument!, () => ctx.Append("c"));
-            ctx.Append(")");
-        }
     }
 }

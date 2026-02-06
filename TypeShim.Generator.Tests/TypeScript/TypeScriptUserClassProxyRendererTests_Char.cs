@@ -246,16 +246,16 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export class C1 extends ProxyBase {
           constructor(jsObject: C1.Initializer) {
-            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.then(c => c.charCodeAt(0)) }));
+            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.then(e => e.charCodeAt(0)) }));
           }
 
           public get P1(): Promise<string> {
             const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-            return res.then(c => String.fromCharCode(c));
+            return res.then(e => String.fromCharCode(e));
           }
 
           public set P1(value: Promise<string>) {
-            TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value.then(c => c.charCodeAt(0)));
+            TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value.then(e => e.charCodeAt(0)));
           }
         }
         
@@ -290,16 +290,16 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export class C1 extends ProxyBase {
           constructor(jsObject: C1.Initializer) {
-            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 ? jsObject.P1.then(c => c.charCodeAt(0)) : null }));
+            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 ? jsObject.P1.then(e => e.charCodeAt(0)) : null }));
           }
 
           public get P1(): Promise<string> | null {
             const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
-            return res ? res.then(c => String.fromCharCode(c)) : null;
+            return res ? res.then(e => String.fromCharCode(e)) : null;
           }
 
           public set P1(value: Promise<string> | null) {
-            TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value ? value.then(c => c.charCodeAt(0)) : null);
+            TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value ? value.then(e => e.charCodeAt(0)) : null);
           }
         }
         
