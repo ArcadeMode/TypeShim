@@ -4,7 +4,7 @@
 </p>
 
 ## Why TypeShim
-.NET-JS interop is powerful but lacks type info and ergonomics. With TypeShim you can use your .NET classes as if they were truly exported to TypeScript.
+Generated .NET-JS interop to provide out-of-the-box type safety and ergonomics. With TypeShim you can use your .NET classes as if they were truly exported to TypeScript.
 
 Simply install TypeShim in your .NET WASM project, drop a `[TSExport]` on your C# classes and _voilà_: .NET-JS interop is generated at build time including a powerful TypeScript library matching your C# classes exactly.
 
