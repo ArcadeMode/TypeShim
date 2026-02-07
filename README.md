@@ -4,7 +4,7 @@
 </p>
 
 ## Why TypeShim
-Install TypeShim's NuGet package in your .NET WASM project, drop one `[TSExport]` on your C# class(es) and _voilà_, TypeShim generates your .NET-JS interop including rich TypeScript client. The TypeScript client enables you to use your .NET classes as if they were truly exported to TypeScript. Repetitive type transformations are automated, type safety is provided and you are free to continue on your awesome project.
+Install TypeShim's NuGet package in your .NET WASM project, drop one `[TSExport]` on your C# class(es) and _voilà_, TypeShim generates your .NET-JS interop including a rich TypeScript library. The TypeScript code enables you to use your .NET classes as if they were truly exported to TypeScript.
 
 ## Features at a glance
 
@@ -214,7 +214,7 @@ public class Person
 
 ## <a name="concepts"></a> TypeShim Concepts
 
-Lets briefly introduce the concepts that are used in TypeShim. For starters, you will be using `[TSExport]` to annotate your classes  to define your interop API. Every annotated class will receive a TypeScript counterpart. The members included in the TypeScript code are limited to the _public_ members. That includes constructors, properties and methods, both static and instance.
+Lets briefly introduce the concepts that are used in TypeShim. For starters, you will be using `[TSExport]` to annotate your classes to define your interop API. Every annotated class will receive a TypeScript counterpart. The members included in the TypeScript code are limited to the _public_ members. That includes constructors, properties and methods, both static and instance.
 
 The build-time generated TypeScript can provide the following subcomponents for each exported class `MyClass`:
 
@@ -224,7 +224,7 @@ The build-time generated TypeScript can provide the following subcomponents for 
 ### Snapshots (`MyClass.Snapshot`)
 The snapshot type is created if your class has public properties. TypeShim provides a utility function `MyClass.materialize(your_instance)` that returns a snapshot. Snapshots are fully decoupled from the dotnet object and live in the JS runtime, this means that changes to the proxy object do not reflect in a snapshot. Properties of proxy types will be materialized as well. This is useful when you no longer require the Proxy instance but want to continue working with its data.
 
-### Initializers (`MyClass.Initializer`)
+### <a name="initializers"></a> Initializers (`MyClass.Initializer`)
 The `Initializer` type is created if the exported class has an exported constructor and accepts an initializer body in `new()` expressions. Initializer objects live in the JS runtime and may be used in the process of creating dotnet object instances, if it exists it will be a parameter in the constructor of the associated Proxy.
 
 Additionally, _if the class exports a parameterless constructor_ then initializer objects can also be passed instead of proxies in method parameters, property setters and even in other initializer objects. TypeShim will construct the appropriate dotnet class instance(s) from the initializer. Initializer's can even contain properties of Proxy type instead of an Initializer if you want to reference an existing object. Below a brief demonstration of the provided flexibility.
@@ -287,7 +287,7 @@ TypeShim aims to continue to broaden its type support. Suggestions and contribut
 | `Task<TClass>`            | `Promise<TClass>`| ✅     | `TClass` generated in TypeScript* |
 | `Task<T[]>`            | `Promise<T[]>`| 💡     | under consideration (for all array-compatible `T`) |
 | `TClass[]`                | `TClass[]`       | ✅     | `TClass` generated in TypeScript* |
-| `JSObject`           | `TClass`         | 💡     | [ArcadeMode/TypeShim#4](https://github.com/ArcadeMode/TypeShim/issues/4) (TS → C# only) |
+| `JSObject`           | `TClass`         | ✅     | see: [Initializers](#initializers) |
 | `TEnum`      | `TEnum`       | 💡     | under consideration |
 | `IEnumerable<T>`     | `T[]`       | 💡     | under consideration |
 | `Dictionary<TKey, TValue>` | `?`     | 💡     | under consideration |
@@ -366,9 +366,13 @@ TSExports are subject to minimal, but some, constraints.
 
 ## Contributing
 
-TODO_CONTRIBUTING
+Contributions are welcome.
+- Please discuss proposals in an issue before submitting changes.
+- Bugfixes should come with at least one test demonstrating the issue and its resolution.
+- New features should come with unit- and E2E tests to demonstrate their correctnes.
+- PRs should be made from a fork.
 
 ---
 
-> Got ideas, found a bug or want more features? Feel free to open a discussion or an issue!
+> Got ideas, found a bug or have an idea for a new feature? Feel free to open a discussion or an issue!
 
