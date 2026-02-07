@@ -1,3 +1,5 @@
+using System;
+
 namespace TypeShim.E2E.Wasm;
 
 [TSExport]

@@ -14,6 +14,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
 
     public InteropTypeInfo Build()
     {
+        ThrowIfGenericTSExport();       
         return cache.GetOrAdd(typeSymbol, BuildInternal);
     }
 
@@ -441,5 +442,13 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             KnownManagedType.Unknown
             or _ => TypeScriptSymbolNameTemplate.ForSimpleType("any"),
         };
+    }
+
+    private void ThrowIfGenericTSExport()
+    {
+        if (IsTSExport && typeSymbol is INamedTypeSymbol { Arity: not 0 })
+        {
+            throw new NotSupportedGenericClassException(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+        }
     }
 }

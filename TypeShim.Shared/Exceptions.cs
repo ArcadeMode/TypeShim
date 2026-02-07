@@ -31,6 +31,14 @@ public class NotSupportedConstructorOverloadException(string message, Exception?
 {
 }
 
+public class NotSupportedGenericClassException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
+{
+}
+
+public class NotSupportedGenericMethodException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
+{
+}
+
 public class NotFoundClassInfoException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
 {
 }
