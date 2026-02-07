@@ -54,4 +54,66 @@ export class C1 extends ProxyBase {
 """.Replace("{{typeScriptType}}", typeScriptType));
     }
 
+    [Test]
+    public void TypeScriptUserClassProxy_ParameterlessConstructor_WithUserClassPropertyTypes()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; set; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1()
+            {
+                public UserClass P1 { get; set; }
+                public UserClass P2 { get; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+        // P2 is not mapped in the initializer ctor param since it has no setter.
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 instanceof UserClass ? jsObject.P1.instance : jsObject.P1 }));
+  }
+
+  public get P1(): UserClass {
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+    return ProxyBase.fromHandle(UserClass, res);
+  }
+
+  public set P1(value: UserClass | UserClass.Initializer) {
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value instanceof UserClass ? value.instance : value);
+  }
+
+  public get P2(): UserClass {
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P2(this.instance);
+    return ProxyBase.fromHandle(UserClass, res);
+  }
+}
+
+""");
+    }
 }

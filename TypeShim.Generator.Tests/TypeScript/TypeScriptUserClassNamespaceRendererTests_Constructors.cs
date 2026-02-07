@@ -95,6 +95,53 @@ export namespace C1 {
 
 """);
     }
+    
+    [Test]
+    public void UserClassInterface_ParameterizedConstructor_GetOnlyInstanceProperty_IsOmittedFromInitializer()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public C1(int i) {}
+                public string P1 { get; set; }
+                public string P2 { get; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export namespace C1 {
+  export interface Initializer {
+    P1: string;
+  }
+  export interface Snapshot {
+    P1: string;
+    P2: string;
+  }
+  export function materialize(proxy: C1): C1.Snapshot {
+    return {
+      P1: proxy.P1,
+      P2: proxy.P2,
+    };
+  }
+}
+
+""");
+    }
 
     [Test]
     public void UserClassNamespace_ParameterlessConstructor_AndUnexportedPropertyType()
