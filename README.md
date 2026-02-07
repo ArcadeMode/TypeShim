@@ -230,9 +230,6 @@ The `Initializer` type is created if the exported class has an exported construc
 
 Additionally, _if the class exports a parameterless constructor_ then initializer objects can also be passed instead of proxies in method parameters, property setters and even in other initializer objects. TypeShim will construct the appropriate dotnet class instance(s) from the initializer. Initializer's can even contain properties of Proxy type instead of an Initializer if you want to reference an existing object. Below a brief demonstration of the provided flexibility.
 
-> 💡 Arrays of mixed proxies and initializers are supported as parameters for methods if the above conditions for the array element type are satisfied. The contained initializer objects will be constructed into new dotnet class instances while the object references behind the proxies are preserved.
-
-
 <table>
 <tr>
 <td style="width: 400px;">
@@ -271,6 +268,8 @@ Passing an initializer object in another initializer object.
 </td>
 </tr>
 </table>
+
+> 💡 Arrays of mixed proxies and initializers are supported as parameters for methods if the above conditions for the array element type are satisfied. The contained initializer objects will be constructed into new dotnet class instances while the object references behind the proxies are preserved.
 
 ## <a name="enriched-type-support"></a> Enriched Type support
 
