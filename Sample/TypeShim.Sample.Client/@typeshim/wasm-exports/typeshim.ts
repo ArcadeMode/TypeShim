@@ -8,16 +8,17 @@ class TypeShimConfig {
     return TypeShimConfig._exports;
   }
 
-  static initialize(options: { assemblyExports: AssemblyExports, setModuleImports: (scriptName: string, imports: object) => void }) {
+  static async initialize(runtimeInfo: any) {
     if (TypeShimConfig._exports){
       throw new Error("TypeShim has already been initialized.");
     }
-    options.setModuleImports("@typeshim", { 
+
+    runtimeInfo.setModuleImports("@typeshim", { 
       unwrap: (obj: any) => obj, 
       unwrapProperty: (obj: any, propertyName: string) => obj[propertyName],
       unwrapCharPromise: (promise: Promise<any>) => promise.then(c => c.charCodeAt(0))
     });
-    TypeShimConfig._exports = options.assemblyExports;
+    TypeShimConfig._exports = await runtimeInfo.getAssemblyExports(runtimeInfo.getConfig().mainAssemblyName);
   }
 }
 
@@ -158,7 +159,7 @@ export namespace ArraysDemo {
 // TypeShim generated TypeScript definitions for class: TypeShim.Sample.Capabilities.PrimitivesDemo
 export class PrimitivesDemo extends ProxyBase {
   constructor(jsObject: PrimitivesDemo.Initializer) {
-    super(TypeShimConfig.exports.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.ctor(jsObject));
+    super(TypeShimConfig.exports.TypeShim.Sample.Capabilities.PrimitivesDemoInterop.ctor({ ...jsObject }));
   }
 
   public GetStringLength(): number {
@@ -216,7 +217,7 @@ export namespace PrimitivesDemo {
 // TypeShim generated TypeScript definitions for class: TypeShim.Sample.People
 export class People extends ProxyBase {
   constructor(jsObject: People.Initializer) {
-    super(TypeShimConfig.exports.TypeShim.Sample.PeopleInterop.ctor(jsObject));
+    super(TypeShimConfig.exports.TypeShim.Sample.PeopleInterop.ctor({ ...jsObject, All: jsObject.All.map(e => e instanceof Person ? e.instance : e) }));
   }
 
   public get All(): Array<Person> {
@@ -225,8 +226,7 @@ export class People extends ProxyBase {
   }
 
   public set All(value: Array<Person | Person.Initializer>) {
-    const valueInstance = value.map(e => e instanceof Person ? e.instance : e);
-    TypeShimConfig.exports.TypeShim.Sample.PeopleInterop.set_All(this.instance, valueInstance);
+    TypeShimConfig.exports.TypeShim.Sample.PeopleInterop.set_All(this.instance, value.map(e => e instanceof Person ? e.instance : e));
   }
 }
 export namespace People {
@@ -246,12 +246,11 @@ export namespace People {
 // TypeShim generated TypeScript definitions for class: TypeShim.Sample.Person
 export class Person extends ProxyBase {
   constructor(jsObject: Person.Initializer) {
-    super(TypeShimConfig.exports.TypeShim.Sample.PersonInterop.ctor(jsObject));
+    super(TypeShimConfig.exports.TypeShim.Sample.PersonInterop.ctor({ ...jsObject, Pets: jsObject.Pets.map(e => e instanceof Dog ? e.instance : e) }));
   }
 
   public IsOlderThan(other: Person | Person.Initializer): boolean {
-    const otherInstance = other instanceof Person ? other.instance : other;
-    return TypeShimConfig.exports.TypeShim.Sample.PersonInterop.IsOlderThan(this.instance, otherInstance);
+    return TypeShimConfig.exports.TypeShim.Sample.PersonInterop.IsOlderThan(this.instance, other instanceof Person ? other.instance : other);
   }
 
   public AdoptPet(): void {
@@ -259,8 +258,7 @@ export class Person extends ProxyBase {
   }
 
   public Adopt(newPet: Dog | Dog.Initializer): void {
-    const newPetInstance = newPet instanceof Dog ? newPet.instance : newPet;
-    TypeShimConfig.exports.TypeShim.Sample.PersonInterop.Adopt(this.instance, newPetInstance);
+    TypeShimConfig.exports.TypeShim.Sample.PersonInterop.Adopt(this.instance, newPet instanceof Dog ? newPet.instance : newPet);
   }
   public get Id(): number {
     return TypeShimConfig.exports.TypeShim.Sample.PersonInterop.get_Id(this.instance);
@@ -292,8 +290,7 @@ export class Person extends ProxyBase {
   }
 
   public set Pets(value: Array<Dog | Dog.Initializer>) {
-    const valueInstance = value.map(e => e instanceof Dog ? e.instance : e);
-    TypeShimConfig.exports.TypeShim.Sample.PersonInterop.set_Pets(this.instance, valueInstance);
+    TypeShimConfig.exports.TypeShim.Sample.PersonInterop.set_Pets(this.instance, value.map(e => e instanceof Dog ? e.instance : e));
   }
 }
 export namespace Person {
@@ -322,7 +319,7 @@ export namespace Person {
 // TypeShim generated TypeScript definitions for class: TypeShim.Sample.Dog
 export class Dog extends ProxyBase {
   constructor(jsObject: Dog.Initializer) {
-    super(TypeShimConfig.exports.TypeShim.Sample.DogInterop.ctor(jsObject));
+    super(TypeShimConfig.exports.TypeShim.Sample.DogInterop.ctor({ ...jsObject }));
   }
 
   public Bark(): string {
@@ -395,7 +392,7 @@ export class MyApp extends ProxyBase {
 // TypeShim generated TypeScript definitions for class: TypeShim.Sample.PeopleProvider
 export class PeopleProvider extends ProxyBase {
   constructor(apiClient: ManagedObject, jsObject: PeopleProvider.Initializer) {
-    super(TypeShimConfig.exports.TypeShim.Sample.PeopleProviderInterop.ctor(apiClient, jsObject));
+    super(TypeShimConfig.exports.TypeShim.Sample.PeopleProviderInterop.ctor(apiClient, { ...jsObject, DelayTask: jsObject.DelayTask ? jsObject.DelayTask.then(e => e ? e instanceof TimeoutUnit ? e.instance : e : null) : null }));
   }
 
   public async FetchPeopleAsync(): Promise<People> {
@@ -413,8 +410,7 @@ export class PeopleProvider extends ProxyBase {
   }
 
   public set DelayTask(value: Promise<TimeoutUnit | TimeoutUnit.Initializer | null> | null) {
-    const valueInstance = value ? value.then(e => e ? e instanceof TimeoutUnit ? e.instance : e : null) : null;
-    TypeShimConfig.exports.TypeShim.Sample.PeopleProviderInterop.set_DelayTask(this.instance, valueInstance);
+    TypeShimConfig.exports.TypeShim.Sample.PeopleProviderInterop.set_DelayTask(this.instance, value ? value.then(e => e ? e instanceof TimeoutUnit ? e.instance : e : null) : null);
   }
 }
 export namespace PeopleProvider {
@@ -436,7 +432,7 @@ export namespace PeopleProvider {
 // TypeShim generated TypeScript definitions for class: TypeShim.Sample.TimeoutUnit
 export class TimeoutUnit extends ProxyBase {
   constructor(jsObject: TimeoutUnit.Initializer) {
-    super(TypeShimConfig.exports.TypeShim.Sample.TimeoutUnitInterop.ctor(jsObject));
+    super(TypeShimConfig.exports.TypeShim.Sample.TimeoutUnitInterop.ctor({ ...jsObject }));
   }
 
   public get Timeout(): number {
