@@ -4,7 +4,9 @@
 </p>
 
 ## Why TypeShim
-Install TypeShim's NuGet package in your .NET WASM project, drop one `[TSExport]` on your C# class(es) and _voilà_, TypeShim generates your .NET-JS interop including a rich TypeScript library. The TypeScript code enables you to use your .NET classes as if they were truly exported to TypeScript.
+Use your .NET classes as if they were truly exported to TypeScript.
+
+Simply install TypeShim in your .NET WASM project, drop a `[TSExport]` on your C# classes and _voilà_: .NET-JS interop is generated at build time including a powerful TypeScript library matching your C# classes exactly.
 
 ## Features at a glance
 
