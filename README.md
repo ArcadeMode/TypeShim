@@ -4,7 +4,7 @@
 </p>
 
 ## Why TypeShim
-Use your .NET classes as if they were truly exported to TypeScript.
+.NET-JS interop is powerful but lacks type info and ergonomics. With TypeShim you can use your .NET classes as if they were truly exported to TypeScript.
 
 Simply install TypeShim in your .NET WASM project, drop a `[TSExport]` on your C# classes and _voilà_: .NET-JS interop is generated at build time including a powerful TypeScript library matching your C# classes exactly.
 
@@ -16,7 +16,6 @@ Simply install TypeShim in your .NET WASM project, drop a `[TSExport]` on your C
 - 💰 [Enriched type marshalling](#enriched-type-support).
 - 🛡 Type-safety across the interop boundary.
 - 👍 [Easy setup](#installing)
-- 🧩 Compatible with your other JSExport/JSImport.
 
 ## Samples
 Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your wasm browserapp as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-) in order to retrieve its `exports`. 
