@@ -53,7 +53,7 @@ internal static class TypeShimDiagnostics
 
     internal static readonly DiagnosticDescriptor NonPublicSetterRule = new(
         id: "TSHIM010",
-        title: "Non-public set/init will be skipped during JSObject mapping",
+        title: "Non-public set/init will be skipped in 'Initializer' generation",
         messageFormat: "Property '{0}' has a non-public set/init, it will not be available in the TypeScript constructor of class '{1}'",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Info,
@@ -68,5 +68,23 @@ internal static class TypeShimDiagnostics
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "TypeShim does not support fields (yet), they're mostly ignored but required fields are banned to prevent invalid constructor initializers from being generated.");
+    
+    internal static readonly DiagnosticDescriptor NoGenericsTSExportRule = new(
+        id: "TSHIM012",
+        title: "Classes with type parameters are not supported",
+        messageFormat: "TSExport classes with type parameters are not supported",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: ".NET-JS interop and TypeShim neither support generic types.");
+    
+    internal static readonly DiagnosticDescriptor NoGenericsPublicMethodRule = new(
+        id: "TSHIM012",
+        title: "Public methods with type arguments are not supported",
+        messageFormat: "Public methods with type arguments are not supported in TSExport classes",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: ".NET-JS interop and TypeShim neither support generic types.");
 
 }

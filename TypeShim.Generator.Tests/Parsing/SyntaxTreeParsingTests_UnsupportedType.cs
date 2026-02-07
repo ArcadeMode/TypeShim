@@ -151,4 +151,61 @@ internal class SyntaxTreeParsingTests_UnsupportedType
             _ = new ClassInfoBuilder(classSymbol, typeCache).Build();
         });
     }
+    
+    [Test]
+    public void ClassInfoBuilder_Throws_ForGenericClass()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1<T>
+            {
+                public int M1()
+                {
+                    return 1;
+                }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        Assert.Throws<NotSupportedGenericClassException>(() =>
+        {
+            InteropTypeInfoCache typeCache = new();
+            _ = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        });
+    }
+    [Test]
+    public void ClassInfoBuilder_Throws_ForGenericMethod()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public int M1<T>()
+                {
+                    return 1;
+                }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        Assert.Throws<NotSupportedGenericMethodException>(() =>
+        {
+            InteropTypeInfoCache typeCache = new();
+            _ = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        });
+    }
 }

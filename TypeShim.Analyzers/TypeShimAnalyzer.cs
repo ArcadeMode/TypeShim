@@ -23,6 +23,8 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         TypeShimDiagnostics.UnsupportedTypeRule,
         TypeShimDiagnostics.NonExportedTypeInInteropApiRule,
         TypeShimDiagnostics.UnderDevelopmentTypeRule,
+        TypeShimDiagnostics.NoGenericsTSExportRule,
+        TypeShimDiagnostics.NoGenericsPublicMethodRule
     ];
 
     public override void Initialize(AnalysisContext context)
@@ -40,7 +42,11 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         bool hasTSExport = SymbolFacts.HasAttribute(type, "TypeShim.TSExportAttribute");
         if (!hasTSExport)
             return;
-
+        //Debugger.Launch();
+        if (TryGetTypeDiagnostic(type) is DiagnosticDescriptor descriptor)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(descriptor, LocationFinder.GetDefaultLocation(type), type.Name));
+        }
 
         AnalyzeClassAccessibility(context, type);
         AnalyzeMembers(context, type);
@@ -66,6 +72,7 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
                 case IMethodSymbol method when method.MethodKind is MethodKind.Ordinary or MethodKind.Constructor:
                     CheckForOverloads(context, seenMethodNames, method);
                     CheckMethodReturnType(context, method);
+                    CheckNoGenericsInMethod(context, method);
                     foreach (IParameterSymbol parameter in method.Parameters)
                         CheckMethodParameterType(context, method, parameter);
                     break;
@@ -90,6 +97,12 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         {
             seenMethodNames.Add(member.Name);
         }
+    }
+    private static void CheckNoGenericsInMethod(SymbolAnalysisContext context, IMethodSymbol member)
+    {
+        if (member.Arity == 0) return;
+
+        context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.NoGenericsPublicMethodRule, LocationFinder.GetDefaultLocation(member), member.Name));
     }
 
     private static void CheckMethodReturnType(SymbolAnalysisContext context, IMethodSymbol method)
@@ -166,6 +179,10 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         catch (NotImplementedException)
         {
             return TypeShimDiagnostics.UnderDevelopmentTypeRule;
+        }
+        catch (NotSupportedGenericClassException)
+        {
+            return TypeShimDiagnostics.NoGenericsTSExportRule;
         }
         return null;
     }
