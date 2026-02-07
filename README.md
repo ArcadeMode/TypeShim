@@ -288,7 +288,7 @@ TypeShim aims to continue to broaden its type support. Suggestions and contribut
 | `Task<TClass>`            | `Promise<TClass>`| ✅     | `TClass` generated in TypeScript* |
 | `Task<T[]>`            | `Promise<T[]>`| 💡     | under consideration (for all array-compatible `T`) |
 | `TClass[]`                | `TClass[]`       | ✅     | `TClass` generated in TypeScript* |
-| `JSObject`           | `TClass`         | ✅     | see: [Initializers](#initializers) |
+| `JSObject`           | `TClass`         | ✅     | [Initializers](#initializers) |
 | `TEnum`      | `TEnum`       | 💡     | under consideration |
 | `IEnumerable<T>`     | `T[]`       | 💡     | under consideration |
 | `Dictionary<TKey, TValue>` | `?`     | 💡     | under consideration |
