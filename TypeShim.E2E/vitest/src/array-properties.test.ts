@@ -38,6 +38,24 @@ describe('Array Properties Test', () => {
         expect(item).toBe(exportedClass);
     });
 
+    test('Initialized ExportedClass array property has element identity preserved', () => {
+        const item = testObject.ExportedClassArrayProperty[0];
+        expect(item).toBe(exportedClass);
+        const newClass = new ExportedClass({ Id: 999 });
+        testObject.ExportedClassArrayProperty = [...testObject.ExportedClassArrayProperty, newClass ];
+        expect(testObject.ExportedClassArrayProperty[0]).toBe(exportedClass);
+        expect(testObject.ExportedClassArrayProperty[1]).toBe(newClass);
+    });
+
+    test('Initialized ExportedClass array property has initializer element identity preserved', () => {
+        const item = testObject.ExportedClassArrayProperty[0];
+        expect(item).toBe(exportedClass);
+        const newClassInitializer = { Id: 999 };
+        testObject.ExportedClassArrayProperty = [...testObject.ExportedClassArrayProperty, newClassInitializer ];
+        expect(testObject.ExportedClassArrayProperty[0]).toBe(exportedClass);
+        expect(testObject.ExportedClassArrayProperty[1]).toBe(testObject.ExportedClassArrayProperty[1]);
+    });
+
     test('Initializer JSObject array property', () => {
         expect(testObject.JSObjectArrayProperty).toBeInstanceOf(Array);
         expect(testObject.JSObjectArrayProperty.length).toBe(3);

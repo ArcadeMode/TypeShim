@@ -33,10 +33,12 @@ describe('Simple Properties Test', () => {
         const snapshot = SimplePropertiesTest.materialize(testObject);
         expect(testObject).toMatchObject(snapshot); // each property in snapshot should have a matching value in testObject
     });
+    
     test('Returns ExportedClass property correctly', () => {
         expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
         expect(testObject.ExportedClassProperty.Id).toBe(2);
     });
+    
     test('Mutates ExportedClass property correctly', () => {
         expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
         expect(testObject.ExportedClassProperty.Id).toBe(2);
@@ -44,8 +46,9 @@ describe('Simple Properties Test', () => {
         testObject.ExportedClassProperty = newExportedClass;
         expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
         expect(testObject.ExportedClassProperty.Id).toBe(99);
-        expect(testObject.ExportedClassProperty).toBe(newExportedClass);
+        expect(testObject.ExportedClassProperty).toBe(newExportedClass); // tests reference equality
     });
+    
     test('Mutates ExportedClass property with Initializer', () => {
         expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
         expect(testObject.ExportedClassProperty.Id).toBe(2);
@@ -54,6 +57,13 @@ describe('Simple Properties Test', () => {
         expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
         expect(testObject.ExportedClassProperty.Id).toBe(12345);
     });
+
+    test('ExportedClass property has identity preserved', () => {
+        expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
+        expect(testObject.ExportedClassProperty).toBe(exportedClass); // reference equality check
+        expect(testObject.ExportedClassProperty).toBe(testObject.ExportedClassProperty); // equals itself
+    });
+    
     test('Mutates ExportedClass property does not affect snapshot', () => {
         const snapshot = SimplePropertiesTest.materialize(testObject);
         expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
@@ -62,6 +72,7 @@ describe('Simple Properties Test', () => {
         testObject.ExportedClassProperty = newExportedClass;
         expect(snapshot.ExportedClassProperty.Id).toBe(2);
     });
+    
     test('Returns JSObject property by reference', () => {
         expect(testObject.JSObjectProperty).toBe(jsObject);
         const obj = testObject.JSObjectProperty as any;
@@ -69,21 +80,25 @@ describe('Simple Properties Test', () => {
         expect(testObject.JSObjectProperty).toHaveProperty("bar", 123);
         expect(testObject.JSObjectProperty).toHaveProperty("foo", "bar");
     });
+    
     test('Returns DateTime property as new instance', () => {
         // dates are value object in dotnet, hence the new instance
         expect(testObject.DateTimeProperty).toBeInstanceOf(Date);
         expect(testObject.DateTimeProperty).not.toBe(dateNow);
         expect(testObject.DateTimeProperty).toEqual(dateNow);
     });
+    
     test('Returns DateTimeOffset property as new instance', () => {
         // dates are value object in dotnet, hence the new instance
         expect(testObject.DateTimeOffsetProperty).toBeInstanceOf(Date);
         expect(testObject.DateTimeOffsetProperty).not.toBe(dateNow);
         expect(testObject.DateTimeOffsetProperty).toEqual(dateNow); 
     });
+    
     test('Returns Long property by value', () => {
         expect(testObject.LongProperty).toBe(5);
     });
+    
     test('Mutates Long property', () => {
         testObject.LongProperty = 50;
         expect(testObject.LongProperty).toBe(50);
