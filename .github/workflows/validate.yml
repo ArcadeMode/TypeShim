@@ -69,7 +69,7 @@ jobs:
             **/e2e-report-*.xml
       
       - name: Determine badge content
-        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ !cancelled() && github.event_name == 'push' }}
         shell: bash
         run: |
           conclusion='${{ fromJSON(steps.test-results.outputs.json).conclusion }}'
@@ -82,7 +82,7 @@ jobs:
           fi
 
       - name: Update badge
-        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ !cancelled() && github.event_name == 'push' }}
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
