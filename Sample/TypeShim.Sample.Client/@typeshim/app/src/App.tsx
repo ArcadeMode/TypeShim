@@ -11,7 +11,7 @@ function App() {
 
   useMemo(async () => {
     const runtimeInfo = await createWasmRuntime();
-    TypeShimInitializer.initialize(runtimeInfo);
+    await TypeShimInitializer.initialize(runtimeInfo);
     MyApp.Initialize(document.baseURI);
   }, []);
 
