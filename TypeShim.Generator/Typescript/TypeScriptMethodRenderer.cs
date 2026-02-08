@@ -396,7 +396,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         void RenderInitializerParameter(MethodParameterInfo initializerObject)
         {
             ctx.Append("{ ...").Append(initializerObject.Name);
-            foreach (PropertyInfo propertyInfo in ctx.Class.Properties)
+            foreach (PropertyInfo propertyInfo in ctx.Class.Constructor?.MemberInitializers ?? throw new InvalidOperationException($"Can not render initializer parameter for class {ctx.Class.Name} with no constructor"))
             {
                 bool requiresProxyConversion = propertyInfo.Type.RequiresTypeConversion && propertyInfo.Type.SupportsTypeConversion;
                 bool requiresCharConversion = RequiresCharConversion(propertyInfo.Type);
