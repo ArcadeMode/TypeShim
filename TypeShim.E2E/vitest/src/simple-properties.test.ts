@@ -44,8 +44,7 @@ describe('Simple Properties Test', () => {
         testObject.ExportedClassProperty = newExportedClass;
         expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);
         expect(testObject.ExportedClassProperty.Id).toBe(99);
-        // TODO: fix identity (https://github.com/ArcadeMode/TypeShim/issues/20)
-        // expect(testObject.ExportedClassProperty).toBe(newExportedClass);
+        expect(testObject.ExportedClassProperty).toBe(newExportedClass);
     });
     test('Mutates ExportedClass property with Initializer', () => {
         expect(testObject.ExportedClassProperty).toBeInstanceOf(ExportedClass);

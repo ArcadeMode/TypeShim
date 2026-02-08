@@ -183,8 +183,7 @@ describe('Delegates Test', () => {
         expect(retVal).not.toBeNull();
         expect(retVal).toBeInstanceOf(ExportedClass);
         expect(retVal.Id).toBe(exportedClass.Id);
-        // TODO: fix identity (https://github.com/ArcadeMode/TypeShim/issues/20)
-        //expect(retVal).toBe(exportedClass);
+        expect(retVal).toBe(exportedClass);
     });
 
     test('Initializer with FuncCharProperty', async () => {

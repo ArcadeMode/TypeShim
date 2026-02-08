@@ -35,8 +35,7 @@ describe('Array Properties Test', () => {
         const item = testObject.ExportedClassArrayProperty[0];
         expect(item).toBeInstanceOf(ExportedClass);
         expect(item.Id).toBe(exportedClass.Id);
-        // TODO: fix identity (https://github.com/ArcadeMode/TypeShim/issues/20)
-        // expect(item).toBe(exportedClass);
+        expect(item).toBe(exportedClass);
     });
 
     test('Initializer JSObject array property', () => {
