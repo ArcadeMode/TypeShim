@@ -3,9 +3,7 @@
   <i>Strongly-typed .NET-JS interop facade generation</i>
 </p>
 
-<div style="float: right;">
-  <img src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ArcadeMode/0f24ed28316a25f6293d5771a247f19d/raw/typeshim-tests-badge.json" alt="Test status">
-</div>
+<img align="right" tabindex=-1 src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ArcadeMode/0f24ed28316a25f6293d5771a247f19d/raw/typeshim-tests-badge.json" alt="Test status" />
 
 ## Why TypeShim
 Generated .NET-JS interop to provide out-of-the-box type safety and ergonomics. With TypeShim you can use your .NET classes as if they were truly exported to TypeScript.
