@@ -36,15 +36,21 @@ class TypeShimConfig {
 
 export const TypeShimInitializer = { initialize: TypeShimConfig.initialize };
 
+const proxyMap = new WeakMap<ManagedObject, ProxyBase>();
 abstract class ProxyBase {
   instance: ManagedObject;
   constructor(instance: ManagedObject) {
     this.instance = instance;
+    proxyMap.set(instance, this);
   }
 
   static fromHandle<T extends ProxyBase>(ctor: { prototype: T }, handle: ManagedObject): T {
+    if (proxyMap.has(handle)) {
+      return proxyMap.get(handle) as T;
+    }
     const obj = Object.create(ctor.prototype) as T;
     obj.instance = handle;
+    proxyMap.set(handle, obj);
     return obj;
   }
 }
