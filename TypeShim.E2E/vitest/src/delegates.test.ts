@@ -260,4 +260,18 @@ describe('Delegates Test', () => {
         expect(retVal).toBeInstanceOf(ExportedClass);
         expect(retVal.Id).toBe(75);
     });
+    
+    test('Property ExportedClassFuncProperty doesnt preserve identity', () => {
+        const delegatePropClass = new DelegatePropertyClass({
+            ExportedClassFuncProperty: (arg0: ExportedClass | ExportedClass.Initializer) => arg0 as ExportedClass,
+        });
+        // TODO: when dotnet preserves delegate identity, update test and codegen to cache conversion delegates on both CS and JS side
+        expect(delegatePropClass.ExportedClassFuncProperty).not.toBe(delegatePropClass.ExportedClassFuncProperty);
+    });
+    
+    test('Property FuncBoolIntProperty doesnt preserve identity', () => {
+        const testObject = new DelegatesClass({ FuncBoolIntProperty: (arg0: boolean) => 1, FuncCharProperty: () => 'A' });
+        // TODO: when dotnet preserves delegate identity, update test
+        expect(testObject.FuncBoolIntProperty).not.toBe(testObject.FuncBoolIntProperty);
+    });
 });
