@@ -245,10 +245,12 @@ describe('Delegates Test', () => {
         const delegatePropClass = new DelegatePropertyClass({
             ExportedClassFuncProperty: (arg0: ExportedClass | ExportedClass.Initializer) => arg0 as ExportedClass,
         });
-        const retVal = delegatePropClass.ExportedClassFuncProperty(new ExportedClass({ Id: 70 }));
+        const obj = new ExportedClass({ Id: 70 });
+        const retVal = delegatePropClass.ExportedClassFuncProperty(obj);
         expect(retVal).not.toBeNull();
         expect(retVal).toBeInstanceOf(ExportedClass);
         expect(retVal.Id).toBe(70);
+        expect(retVal).toBe(obj); // tests reference equality, should be same object since its proxied
     });
 
     test('Property ExportedClassFuncProperty Initializer', async () => {
