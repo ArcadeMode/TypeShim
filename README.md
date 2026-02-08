@@ -20,8 +20,7 @@ Simply install TypeShim in your .NET WASM project, drop a `[TSExport]` on your C
 - 👍 [Easy setup](#installing)
 
 ## Samples
-Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your wasm browser app as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-) in order to retrieve its `exports`. 
-
+Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your wasm browser app as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-). The runtime created by `dotnet.create()` can be passed directly into the provided `TypeShimInitializer`'s `initialize` method. The initializer exists so that helper functions for type marshalling can be set up and a reference to the assembly exports can be retrieved for the generated types to use internally.
 
 ### TypeShim
 A simple example where we have an app about 'people', just to show basic language use powered by TypeShim.
@@ -67,14 +66,14 @@ public class Person
 }
 ```
 
-And the TypeScript side can look like this. One extra type is the TypeShimInitializer which should be passed the created runtime before engaging with interop. This is so that helper functions for type marshalling can be set up and a reference to the assembly exports can be retrieved.
+On the TypeScript side things look familiar, class names, properties, methods and constructors all resemble the exported C# classes. Note the aforementioned TypeShimInitializer being called before engaging with the generated types. 
 
 ```js
 import { TypeShimInitializer, PeopleRepository, Person } from './typeshim.ts';
 
-public UsingTypeShim() {
+public async UsingTypeShim() {
     const runtime = await dotnet.withApplicationArguments(args).create()
-    TypeShimInitializer.initialize(runtime);
+    await TypeShimInitializer.initialize(runtime);
 
     const repository = new PeopleRepository();
     const alice: Person = repository.GetPerson(0);
@@ -105,7 +104,7 @@ Here you can see a quick demonstration of roughly the same behavior as the TypeS
 Note the error sensitivity of passing untyped objects across the interop boundary.
 
 ```ts
-public UsingRawJSExport(exports: any) {
+public async UsingRawJSExport(exports: any) {
     const runtime = await dotnet.withApplicationArguments(args).create();
     const exports = runtime.assemblyExports;
 
@@ -222,13 +221,13 @@ Let's briefly introduce the concepts that are used in TypeShim. For starters, yo
 The build-time generated TypeScript can provide the following subcomponents for each exported class `MyClass`:
 
 ### Proxies (`MyClass`)
-`MyClass` grants access to the exported C# `MyClass` class _in a proxying capacity_, this type will also be referred to as a `Proxy`. A dotnet instance of the class being proxied _always_ lives in the dotnet runtime when you receive a proxy instance, changes to the dotnet object will reflect in typescript. To acquire an instance you may invoke your exported constructor or returned by any method and/or property. Alternatively you can access static members all the same. Proxies may also be used as parameters and will behave as typical reference types when performing any such operation.
+`MyClass` grants access to the exported C# `MyClass` class _in a proxying capacity_, this type will also be referred to as a `Proxy`. A dotnet instance of the class being proxied _always_ lives in the dotnet runtime when you receive a proxy instance, changes to the dotnet object will reflect in the JS runtime. To acquire an instance you may invoke your exported constructor or returned by any method and/or property. Proxies may also be used as parameters and will behave as typical reference types when performing any such operation.
 
 ### Snapshots (`MyClass.Snapshot`)
-The snapshot type is created if your class has public properties. TypeShim provides a utility function `MyClass.materialize(your_instance)` that returns a snapshot. Snapshots are fully decoupled from the dotnet object and live in the JS runtime, this means that changes to the proxy object do not reflect in a snapshot. Properties of proxy types will be materialized as well. This is useful when you no longer require the Proxy instance but want to continue working with its data.
+The snapshot type is generated if your class has public properties. TypeShim provides a utility function `MyClass.materialize(your_instance)` that returns a snapshot. Snapshots are fully decoupled from the dotnet object and live in the JS runtime, this means that changes to the proxy object do not reflect in a snapshot. Properties of proxy types will be materialized as well. This is useful when you no longer require the Proxy instance but want to continue working with its data.
 
 ### <a name="initializers"></a> Initializers (`MyClass.Initializer`)
-The `Initializer` type is created if the exported class has an exported constructor and accepts an initializer body in `new()` expressions. Initializer objects live in the JS runtime and may be used in the process of creating dotnet object instances, if it exists it will be a parameter in the constructor of the associated Proxy.
+The `Initializer` type is generated if the exported class has an exported constructor and accepts an initializer body in `new()` expressions. Initializer objects live in the JS runtime and may be used in the process of creating dotnet object instances, if it exists it will be a parameter in the constructor of the associated Proxy.
 
 Additionally, _if the class exports a parameterless constructor_ then initializer objects can also be passed instead of proxies in method parameters, property setters and even in other initializer objects. TypeShim will construct the appropriate dotnet class instance(s) from the initializer. Initializers can even contain properties of Proxy type instead of an Initializer if you want to reference an existing object. Below a brief demonstration of the provided flexibility.
 
@@ -303,7 +302,7 @@ TypeShim aims to continue to broaden its type support. Suggestions and contribut
 | `Int16` (`short`)    | `Number`    | ✅     |      |
 | `Int32` (`int`)      | `Number`    | ✅     |      |
 | `Int64` (`long`)     | `Number`    | ✅     |      |
-| `Int64` (`long`)     | `BigInt`    | ⏳     | [ArcadeMode/TypeShim#15](https://github.com/ArcadeMode/TypeShim/issues/15) |
+| `Int64` (`long`)     | `BigInt`    | ⏳      | [ArcadeMode/TypeShim#15](https://github.com/ArcadeMode/TypeShim/issues/15) |
 | `Single` (`float`)   | `Number`    | ✅     |      |
 | `Double` (`double`)  | `Number`    | ✅     |      |
 | `IntPtr` (`nint`)    | `Number`    | ✅     |      |
@@ -312,7 +311,7 @@ TypeShim aims to continue to broaden its type support. Suggestions and contribut
 | `Exception`          | `Error`     | ✅     |      |
 | `JSObject`           | `Object`    | ✅     | Requires manual JSObject handling |
 | `String`             | `String`    | ✅     |      |
-| `T[]`         | `T[]`| ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) |
+| `T[]`                | `T[]`       | ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) |
 | `Span<Byte>`         | `MemoryView`| 🚧     |      |
 | `Span<Int32>`        | `MemoryView`| 🚧     |      |
 | `Span<Double>`       | `MemoryView`| 🚧     |      |
@@ -364,7 +363,7 @@ TSExports are subject to minimal, but some, constraints.
 - Certain types are not supported by either TypeShim or .NET wasm type marshalling. Analyzers have been implemented to notify of such cases.
 - As overloading is not a real language feature in JavaScript nor TypeScript, this is currently not supported in TypeShim either. You can still define overloads that are not public. This goes for both constructors and methods.
 - By default, JSExport yields value semantics for Array instances, this is one reference type that is atypical. It is under consideration to be addressed but an effective alternative is to define your own List class to preserve reference semantics.
-
+- Classes with generic type parameters can not be part of interop codegen at this time.
 
 ## Contributing
 
