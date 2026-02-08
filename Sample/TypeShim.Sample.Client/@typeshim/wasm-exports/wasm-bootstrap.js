@@ -9,9 +9,7 @@ export async function createWasmRuntime(args) {
     isStarted = true;
     
     const runtimeInfo = await dotnet.withApplicationArguments(args).create();
-    const { setModuleImports, getAssemblyExports, getConfig, runMain } = runtimeInfo;
-    runMain(); // TODO: make configurable.
-    
-    const config = getConfig();
+    const { runMain } = runtimeInfo;
+    runMain();
     return runtimeInfo; 
 };
