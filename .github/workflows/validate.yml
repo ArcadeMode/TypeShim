@@ -2,6 +2,9 @@ name: Validate
 
 on:
   pull_request:
+  push:
+    branches:
+      - main
 
 permissions:
   checks: write
@@ -57,9 +60,34 @@ jobs:
         run: npm run test:browser
 
       - name: Publish Test Results
+        id: test-results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: (!cancelled())
         with:
           files: |
             **/*.trx
             **/e2e-report-*.xml
+      
+      - name: Set badge color
+        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        shell: bash
+        run: |
+          conclusion='${{ fromJSON(steps.test-results.outputs.json).conclusion }}'
+          if [ "$conclusion" = "success" ]; then
+            echo "BADGE_COLOR=#26cc23" >> "$GITHUB_ENV"
+            echo "BADGE_MESSAGE=${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs_succ }} passing" >> "$GITHUB_ENV"
+          else
+            echo "BADGE_COLOR=#cc5623" >> "$GITHUB_ENV"
+            echo "BADGE_MESSAGE=${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs_fail }}/${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} failing" >> "$GITHUB_ENV"
+          fi
+
+      - name: Update Tests Badge
+        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: '0f24ed28316a25f6293d5771a247f19d'
+          filename: typeshim-tests-badge.json
+          label: Tests
+          message: ${{ env.BADGE_MESSAGE }}
+          color: ${{ env.BADGE_COLOR }}
