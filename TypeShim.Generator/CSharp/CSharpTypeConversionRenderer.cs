@@ -104,9 +104,9 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         {
             RenderInlineObjectTypeDownConversion(typeInfo, accessorExpressionRenderer);
         }
-        else if (typeInfo.IsDelegateType() && typeInfo.ArgumentInfo is DelegateArgumentInfo argumentInfo) // Action/Action<T1...Tn>/Func<T1...Tn>
+        else if (typeInfo.IsDelegateType()) // Action/Action<T1...Tn>/Func<T1...Tn>
         {
-            RenderInlineDelegateTypeDownConversion(argumentInfo, accessorName, accessorExpressionRenderer);
+            RenderInlineDelegateTypeDownConversion(typeInfo, accessorName, accessorExpressionRenderer);
         }
         else
         {
@@ -226,9 +226,13 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         return $"{tcsVarName}?.Task";
     }
 
-    private void RenderInlineDelegateTypeDownConversion(DelegateArgumentInfo argumentInfo, string accessorName, DeferredExpressionRenderer accessorExpressionRenderer)
+    private void RenderInlineDelegateTypeDownConversion(InteropTypeInfo typeInfo, string accessorName, DeferredExpressionRenderer accessorExpressionRenderer)
     {
-        _ctx.Append('(');
+        DelegateArgumentInfo argumentInfo = typeInfo.ArgumentInfo ?? throw new InvalidOperationException("Delegate type is missing argumentinfo.");
+        _ctx.Append("MarshallArgumentsTable.GetOrCreate<").Append(typeInfo.CSharpTypeSyntax).Append(">(");
+        accessorExpressionRenderer.Render();
+        _ctx.Append(", () => ")
+            .Append('(');
         for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
         {
             if (i > 0) _ctx.Append(", ");
@@ -257,11 +261,13 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         {
             invocationExpressionRenderer.Render();
         }
+        _ctx.Append(')');
     }
 
     private void RenderInlineDelegateTypeUpConversion(InteropTypeInfo typeInfo, string varName, DelegateArgumentInfo argumentInfo)
     {
-        _ctx.Append('(');
+        _ctx.Append("MarshallArgumentsTable.GetOrCreate<").Append(typeInfo.CSharpInteropTypeSyntax).Append(">(").Append(varName).Append(", () => ")
+            .Append('(');
         for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
         {
             if (i > 0)
@@ -299,5 +305,6 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         {
             invocationExpressionRenderer.Render();
         }
+        _ctx.Append(')');
     }
 }
