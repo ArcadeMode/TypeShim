@@ -183,8 +183,7 @@ describe('Delegates Test', () => {
         expect(retVal).not.toBeNull();
         expect(retVal).toBeInstanceOf(ExportedClass);
         expect(retVal.Id).toBe(exportedClass.Id);
-        // TODO: fix identity (https://github.com/ArcadeMode/TypeShim/issues/20)
-        //expect(retVal).toBe(exportedClass);
+        expect(retVal).toBe(exportedClass);
     });
 
     test('Initializer with FuncCharProperty', async () => {
@@ -246,10 +245,12 @@ describe('Delegates Test', () => {
         const delegatePropClass = new DelegatePropertyClass({
             ExportedClassFuncProperty: (arg0: ExportedClass | ExportedClass.Initializer) => arg0 as ExportedClass,
         });
-        const retVal = delegatePropClass.ExportedClassFuncProperty(new ExportedClass({ Id: 70 }));
+        const obj = new ExportedClass({ Id: 70 });
+        const retVal = delegatePropClass.ExportedClassFuncProperty(obj);
         expect(retVal).not.toBeNull();
         expect(retVal).toBeInstanceOf(ExportedClass);
         expect(retVal.Id).toBe(70);
+        expect(retVal).toBe(obj); // tests reference equality, should be same object since its proxied
     });
 
     test('Property ExportedClassFuncProperty Initializer', async () => {
@@ -260,5 +261,19 @@ describe('Delegates Test', () => {
         expect(retVal).not.toBeNull();
         expect(retVal).toBeInstanceOf(ExportedClass);
         expect(retVal.Id).toBe(75);
+    });
+    
+    test('Property ExportedClassFuncProperty doesnt preserve identity', () => {
+        const delegatePropClass = new DelegatePropertyClass({
+            ExportedClassFuncProperty: (arg0: ExportedClass | ExportedClass.Initializer) => arg0 as ExportedClass,
+        });
+        // TODO: when dotnet preserves delegate identity, update test and codegen to cache conversion delegates on both CS and JS side
+        expect(delegatePropClass.ExportedClassFuncProperty).not.toBe(delegatePropClass.ExportedClassFuncProperty);
+    });
+    
+    test('Property FuncBoolIntProperty doesnt preserve identity', () => {
+        const testObject = new DelegatesClass({ FuncBoolIntProperty: (arg0: boolean) => 1, FuncCharProperty: () => 'A' });
+        // TODO: when dotnet preserves delegate identity, update test
+        expect(testObject.FuncBoolIntProperty).not.toBe(testObject.FuncBoolIntProperty);
     });
 });
