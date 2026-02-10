@@ -58,6 +58,11 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         _ctx.AppendLine("{");
         using (_ctx.Indent())
         {
+            if (constructorInfo.InitializerObject is MethodParameterInfo initializerParamInfo)
+            {
+                _ctx.Append("using var _ = ").Append(initializerParamInfo.Name).AppendLine(";");
+            }
+
             foreach (MethodParameterInfo originalParamInfo in allParameters)
             {
                 _conversionRenderer.RenderParameterTypeConversion(originalParamInfo);
@@ -211,6 +216,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
         using (_ctx.Indent())
         {
+            _ctx.AppendLine("using var _ = jsObject;");
             RenderConstructorInvocation(constructorInfo);
         }
         _ctx.AppendLine("}");
