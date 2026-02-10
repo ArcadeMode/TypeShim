@@ -1028,6 +1028,7 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Any>]
             public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
             {
+                using var _ = jsObject;
                 Func<object, object> tmpP1 = jsObject.GetPropertyAsObjectObjectFunctionNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject));
                 return new C1()
                 {
@@ -1061,6 +1062,7 @@ public partial class C1Interop
             }
             public static C1 FromJSObject(JSObject jsObject)
             {
+                using var _ = jsObject;
                 Func<object, object> tmpP1 = jsObject.GetPropertyAsObjectObjectFunctionNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject));
                 return new C1()
                 {
@@ -1118,6 +1120,7 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Any>]
             public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
             {
+                using var _ = jsObject;
                 Func<object, object> tmpP1 = jsObject.GetPropertyAsObjectObjectFunctionNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject));
                 return new C1()
                 {
@@ -1151,6 +1154,7 @@ public partial class C1Interop
             }
             public static C1 FromJSObject(JSObject jsObject)
             {
+                using var _ = jsObject;
                 Func<object, object> tmpP1 = jsObject.GetPropertyAsObjectObjectFunctionNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject));
                 return new C1()
                 {
@@ -1198,6 +1202,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
     {
+        using var _ = jsObject;
         return new C1()
         {
             P1 = jsObject.GetPropertyAsVoidActionNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
@@ -1228,6 +1233,7 @@ public partial class C1Interop
     }
     public static C1 FromJSObject(JSObject jsObject)
     {
+        using var _ = jsObject;
         return new C1()
         {
             P1 = jsObject.GetPropertyAsVoidActionNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
@@ -1274,6 +1280,7 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Any>]
             public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
             {
+                using var _ = jsObject;
                 return new C1()
                 {
                     P1 = jsObject.GetPropertyAsCharVoidActionNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
@@ -1304,6 +1311,7 @@ public partial class C1Interop
             }
             public static C1 FromJSObject(JSObject jsObject)
             {
+                using var _ = jsObject;
                 return new C1()
                 {
                     P1 = jsObject.GetPropertyAsCharVoidActionNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
