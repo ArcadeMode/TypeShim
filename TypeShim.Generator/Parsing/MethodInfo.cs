@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
-using TypeShim.Shared;
+using System.Reflection;
 using TypeShim.Generator.Parsing;
+using TypeShim.Shared;
 
 internal sealed class MethodInfo
 {
@@ -29,5 +30,10 @@ internal sealed class MethodInfo
             Parameters = [.. this.Parameters.Select(p => p.WithInteropTypeInfo())],
             ReturnType = this.ReturnType.AsInteropTypeInfo(),
         };
+    }
+
+    internal bool MatchesDisposeSignature()
+    {
+        return Name == "Dispose" && !Parameters.Any(p => !p.IsInjectedInstanceParameter) && ReturnType.ManagedType == KnownManagedType.Void;
     }
 }

@@ -549,4 +549,49 @@ export class C1 extends ProxyBase {
 
 """);
     }
+    
+    [Test]
+    public void TypeScriptUserClassProxy_InstanceMethod_Dispose_InvokesProxyDisposeToo()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1 : IDisposable
+            {
+                public void DoStuff(Task u) {}
+                public void Dispose() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public DoStuff(u: Promise<void>): void {
+    TypeShimConfig.exports.N1.C1Interop.DoStuff(this.instance, u);
+  }
+
+  public Dispose(): void {
+    TypeShimConfig.exports.N1.C1Interop.Dispose(this.instance);
+    this.instance.dispose();
+  }
+}
+
+""");
+    }
 }

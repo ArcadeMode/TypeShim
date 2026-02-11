@@ -161,6 +161,11 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                 RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
             }
             ctx.AppendLine(";");
+
+            if (methodInfo.MatchesDisposeSignature())
+            {
+                ctx.AppendLine("this.instance.dispose();");
+            }
         }
         ctx.AppendLine("}");
     }
