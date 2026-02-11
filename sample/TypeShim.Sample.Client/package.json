@@ -8,9 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:exports": "npm run build -w @typeshim/wasm-exports",
     "build:people": "npm run build -w @typeshim/people-ui",
-    "build:capabilities": "npm run build -w @typeshim/capabilities-ui",
     "build:app": "npm run build -w @typeshim/app",
-    "build": "npm run build:exports && npm run build:people && npm run build:capabilities && npm run build:app"
+    "build": "npm run build:exports && npm run build:people && npm run build:app"
   },
   "keywords": [],
   "author": "",

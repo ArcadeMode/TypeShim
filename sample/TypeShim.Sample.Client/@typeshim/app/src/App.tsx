@@ -1,10 +1,9 @@
 import { useMemo, useState } from 'react';
 import Home from './pages/Home';
 import People from './pages/People';
-import CapabilitiesPage from './pages/Capabilities';
 import { createWasmRuntime, MyApp, TypeShimInitializer } from '@typeshim/wasm-exports';
 
-type Page = 'home' | 'people' | 'capabilities';
+type Page = 'home' | 'people';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -40,19 +39,11 @@ function App() {
           >
             People
           </a>
-          <a
-            href="#"
-            onClick={(e) => { e.preventDefault(); setCurrentPage('capabilities'); }}
-            style={{ color: currentPage === 'capabilities' ? '#61dafb' : '#ccc' }}
-          >
-            Capabilities
-          </a>
         </nav>
       </header>
       <main style={{ padding: '1rem', maxWidth: 800, margin: '0 auto' }}>
         {currentPage === 'home' && <Home />}
         {currentPage === 'people' && <People />}
-        {currentPage === 'capabilities' && <CapabilitiesPage />}
       </main>
     </div>
   );
