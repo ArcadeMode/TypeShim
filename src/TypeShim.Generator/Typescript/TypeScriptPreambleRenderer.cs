@@ -26,9 +26,7 @@ class TypeShimConfig {
     }
 
     runtimeInfo.setModuleImports("@typeshim", { 
-      unwrap: (obj: any) => obj, 
       unwrapProperty: (obj: any, propertyName: string) => obj[propertyName],
-      unwrapCharPromise: (promise: Promise<any>) => promise.then(c => c.charCodeAt(0))
     });
     TypeShimConfig._exports = await runtimeInfo.getAssemblyExports(runtimeInfo.getConfig().mainAssemblyName);
   }
