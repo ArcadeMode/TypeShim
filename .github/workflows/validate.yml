@@ -16,10 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
+      
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -28,20 +30,23 @@ jobs:
           cache-dependency-path: TypeShim.E2E/vitest/package-lock.json
 
       - name: Restore
+        working-directory: src
         run: >
           dotnet nuget disable source LocalDev &&
           dotnet restore TypeShim.slnx
       - name: Build
+        working-directory: src
         run: >
           dotnet build TypeShim.slnx 
           --configuration Release 
           --no-restore
 
       - name: Initialize E2E
-        working-directory: TypeShim.E2E/vitest
+        working-directory: src/TypeShim.E2E/vitest
         run: npm run initialize
 
       - name: Run Unit Tests
+        working-directory: src
         run: >
           dotnet test TypeShim.slnx 
           --configuration Release 
@@ -51,12 +56,12 @@ jobs:
 
       - name: Run E2E (Node)
         if: (!cancelled())
-        working-directory: TypeShim.E2E/vitest
+        working-directory: src/TypeShim.E2E/vitest
         run: npm run test:node
 
       - name: Run E2E (Browser)
         if: (!cancelled())
-        working-directory: TypeShim.E2E/vitest
+        working-directory: src/TypeShim.E2E/vitest
         run: npm run test:browser
 
       - name: Publish Test Results

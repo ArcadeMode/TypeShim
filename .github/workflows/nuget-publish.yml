@@ -41,7 +41,6 @@ jobs:
 
           if (-not $raw) { Write-Error "No version provided via workflow_dispatch or tag push."; exit 1 }
 
-          # normalize: allow leading 'v'
           $ver = $raw -replace '^v', ''
 
           # SemVer 2.0.0: x.y.z with optional -prerelease and +build
@@ -56,19 +55,21 @@ jobs:
       - name: Restore
         run: >
           dotnet nuget disable source LocalDev &&
-          dotnet restore TypeShim.slnx
+          dotnet restore src/TypeShim.slnx
 
       - name: Build
+        working-directory: src
         run: dotnet build TypeShim/TypeShim.csproj -c Release --no-restore
 
       - name: Test
+        working-directory: src
         run: dotnet test TypeShim/TypeShim.csproj -c Release --no-build
 
       - name: Pack TypeShim
         env:
           PKG_VERSION: ${{ steps.ver.outputs.version }}
         run: >
-          dotnet pack TypeShim/TypeShim.csproj 
+          dotnet pack src/TypeShim/TypeShim.csproj 
           -c Release 
           -o .\.artifacts 
           --no-build 
