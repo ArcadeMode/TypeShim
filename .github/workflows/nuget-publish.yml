@@ -8,6 +8,11 @@ on:
         required: true
         default: ''
         type: string
+      dry-run:
+        description: 'Perform a dry run without pushing to NuGet'
+        required: false
+        default: false
+        type: boolean
   push:
     tags: 
       - "v[0-9]+.[0-9]+.[0-9]+*"
@@ -78,6 +83,7 @@ jobs:
           -p:ContinuousIntegrationBuild=true
 
       - name: Push to GitHub Packages
+        if: ${{ !inputs.dry-run }}
         run: >
           dotnet nuget push .\.artifacts\*.nupkg
           -k ${{ secrets.NUGET_KEY }} 
