@@ -29,75 +29,11 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSArrayTypeInfo arrayTypeInfo => BuildArrayTypeInfo(arrayTypeInfo, clrTypeSyntax),
             JSTaskTypeInfo taskTypeInfo => BuildTaskTypeInfo(taskTypeInfo, clrTypeSyntax),
             JSNullableTypeInfo nullableTypeInfo => BuildNullableTypeInfo(nullableTypeInfo, clrTypeSyntax),
-            JSSpanTypeInfo => throw new NotImplementedException("Span<T> is not yet supported"),
-            JSArraySegmentTypeInfo => throw new NotImplementedException("ArraySegment<T> is not yet supported"),
+            JSSpanTypeInfo or JSArraySegmentTypeInfo => BuildSpanOrArraySegmentTypeInfo(jsTypeInfo, clrTypeSyntax),
             JSFunctionTypeInfo functionTypeInfo => BuildFunctionTypeInfo(functionTypeInfo, clrTypeSyntax),
             JSInvalidTypeInfo or _ => throw new NotSupportedTypeException(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)),
         };
     }
-
-    private InteropTypeInfo BuildFunctionTypeInfo(JSFunctionTypeInfo functionTypeInfo, TypeSyntax clrTypeSyntax)
-    {
-        (InteropTypeInfo[] argTypeInfos, InteropTypeInfo returnTypeInfo) = GetArgumentTypeInfos(typeSymbol);
-        InteropTypeInfo[] allArgTypeInfos = [.. argTypeInfos, returnTypeInfo];
-
-        DelegateArgumentInfo argumentInfo = new()
-        {
-            ParameterTypes = argTypeInfos,
-            ReturnType = returnTypeInfo
-        };
-
-        TypeScriptFunctionParameterTemplate[] tsParameterTemplates = [.. argTypeInfos.Select((InteropTypeInfo typeInfo, int i) =>
-            new TypeScriptFunctionParameterTemplate($"arg{i}", GetSimpleTypeScriptSymbolTemplate(typeInfo.ManagedType, typeInfo.CSharpTypeSyntax, typeInfo.RequiresTypeConversion, typeInfo.SupportsTypeConversion))
-        )];
-        TypeScriptSymbolNameTemplate tsSyntax = TypeScriptSymbolNameTemplate.ForDelegateType(argumentInfo);
-        
-        return new InteropTypeInfo
-        {
-            ManagedType = functionTypeInfo.KnownType,
-            JSTypeSyntax = GetJSTypeSyntax(functionTypeInfo, clrTypeSyntax),
-            CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(functionTypeInfo),
-            CSharpTypeSyntax = clrTypeSyntax,
-            TypeScriptTypeSyntax = tsSyntax,
-            TypeScriptInteropTypeSyntax = tsSyntax,
-            TypeArgument = null,
-            ArgumentInfo = argumentInfo,
-            IsTaskType = false,
-            IsArrayType = false,
-            IsNullableType = false,
-            IsTSExport = IsTSExport,
-            RequiresTypeConversion = allArgTypeInfos.Any(info => info.RequiresTypeConversion),
-            SupportsTypeConversion = allArgTypeInfos.Any(info => info.RequiresTypeConversion && info.SupportsTypeConversion)
-        };
-    }
-
-    private (InteropTypeInfo[] Parameters, InteropTypeInfo ReturnType) GetArgumentTypeInfos(ITypeSymbol typeSymbol)
-    {
-        string fullTypeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        PredefinedTypeSyntax voidSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword));
-        JSSimpleTypeInfo voidJSTypeInfo = new JSSimpleTypeInfo(KnownManagedType.Void)
-        {
-            Syntax = voidSyntax
-        };
-        switch (typeSymbol)
-        {
-            case ITypeSymbol when fullTypeName == Constants.ActionGlobal:
-                return (Parameters: [], ReturnType: BuildSimpleTypeInfo(voidJSTypeInfo, voidSyntax));
-
-            case INamedTypeSymbol actionType when fullTypeName.StartsWith(Constants.ActionGlobal, StringComparison.Ordinal):
-                InteropTypeInfo[] argumentTypes = [.. actionType.TypeArguments.Select(arg => new InteropTypeInfoBuilder(arg, cache).Build())];
-                return (Parameters: argumentTypes, ReturnType: BuildSimpleTypeInfo(voidJSTypeInfo, voidSyntax));
-
-            // function
-            case INamedTypeSymbol funcType when fullTypeName.StartsWith(Constants.FuncGlobal, StringComparison.Ordinal):
-                InteropTypeInfo[] signatureTypes = [.. funcType.TypeArguments.Select(arg => new InteropTypeInfoBuilder(arg, cache).Build())];
-                return (Parameters: [.. signatureTypes.Take(signatureTypes.Length - 1)], ReturnType: signatureTypes.Last());
-        }
-        throw new NotSupportedTypeException($"Delegate type '{typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}' has an unsupported argument types");
-    }
-
-
-    
 
     private InteropTypeInfo BuildSimpleTypeInfo(JSSimpleTypeInfo simpleTypeInfo, TypeSyntax clrTypeSyntax)
     {
@@ -110,8 +46,6 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSTypeSyntax = GetJSTypeSyntax(simpleTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(simpleTypeInfo),
             CSharpTypeSyntax = clrTypeSyntax,
-            TypeScriptTypeSyntax = GetSimpleTypeScriptSymbolTemplate(simpleTypeInfo.KnownType, clrTypeSyntax, requiresTypeConversion, supportsTypeConversion),
-            TypeScriptInteropTypeSyntax = GetInteropSimpleTypeScriptSymbolTemplate(simpleTypeInfo.KnownType, clrTypeSyntax),
             TypeArgument = null,
             ArgumentInfo = null,
             IsTaskType = false,
@@ -151,8 +85,6 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSTypeSyntax = GetJSTypeSyntax(arrayTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(arrayTypeInfo),
             CSharpTypeSyntax = clrTypeSyntax,
-            TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForArrayType(elementTypeInfo),
-            TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForArrayType(elementTypeInfo),
             TypeArgument = elementTypeInfo,
             ArgumentInfo = null,
             IsTaskType = false,
@@ -184,8 +116,6 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSTypeSyntax = GetJSTypeSyntax(taskTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(taskTypeInfo),
             CSharpTypeSyntax = clrTypeSyntax,
-            TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForPromiseType(taskReturnTypeInfo),
-            TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForPromiseType(taskReturnTypeInfo),
             TypeArgument = taskReturnTypeInfo,
             ArgumentInfo = null,
             IsTaskType = true,
@@ -220,8 +150,6 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSTypeSyntax = GetJSTypeSyntax(nullableTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(nullableTypeInfo),
             CSharpTypeSyntax = clrTypeSyntax,
-            TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForNullableType(innerTypeInfo),
-            TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForNullableType(innerTypeInfo),
             TypeArgument = innerTypeInfo,
             ArgumentInfo = null,
             IsTaskType = false,
@@ -249,6 +177,92 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         }
     }
 
+    private InteropTypeInfo BuildSpanOrArraySegmentTypeInfo(JSTypeInfo spanTypeInfo, TypeSyntax clrTypeSyntax)
+    {
+        if (spanTypeInfo is not JSSpanTypeInfo && spanTypeInfo is not JSArraySegmentTypeInfo || GetTypeArgument(typeSymbol) is not ITypeSymbol innerTypeSymbol)
+        {
+            throw new NotSupportedTypeException("Only Span<T> and ArraySegment<T> are supported");
+        }
+        InteropTypeInfo innerTypeInfo = new InteropTypeInfoBuilder(innerTypeSymbol, cache).Build();
+        return new InteropTypeInfo
+        {
+            ManagedType = spanTypeInfo.KnownType,
+            JSTypeSyntax = GetJSTypeSyntax(spanTypeInfo, clrTypeSyntax),
+            CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(spanTypeInfo),
+            CSharpTypeSyntax = clrTypeSyntax,
+            TypeArgument = innerTypeInfo,
+            ArgumentInfo = null,
+            IsTaskType = false,
+            IsArrayType = false,
+            IsNullableType = false,
+            IsTSExport = IsTSExport,
+            RequiresTypeConversion = innerTypeInfo.RequiresTypeConversion,
+            SupportsTypeConversion = innerTypeInfo.SupportsTypeConversion
+        };
+
+        static ITypeSymbol? GetTypeArgument(ITypeSymbol typeSymbol)
+        {
+            if (typeSymbol is INamedTypeSymbol { TypeArguments.Length: 1 } spanType)
+            {
+                return spanType.TypeArguments[0];
+            }
+            return null;
+        }
+    }
+
+    private InteropTypeInfo BuildFunctionTypeInfo(JSFunctionTypeInfo functionTypeInfo, TypeSyntax clrTypeSyntax)
+    {
+        (InteropTypeInfo[] argTypeInfos, InteropTypeInfo returnTypeInfo) = GetArgumentTypeInfos(typeSymbol);
+        InteropTypeInfo[] allArgTypeInfos = [.. argTypeInfos, returnTypeInfo];
+
+        DelegateArgumentInfo argumentInfo = new()
+        {
+            ParameterTypes = argTypeInfos,
+            ReturnType = returnTypeInfo
+        };
+
+        return new InteropTypeInfo
+        {
+            ManagedType = functionTypeInfo.KnownType,
+            JSTypeSyntax = GetJSTypeSyntax(functionTypeInfo, clrTypeSyntax),
+            CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(functionTypeInfo),
+            CSharpTypeSyntax = clrTypeSyntax,
+            TypeArgument = null,
+            ArgumentInfo = argumentInfo,
+            IsTaskType = false,
+            IsArrayType = false,
+            IsNullableType = false,
+            IsTSExport = IsTSExport,
+            RequiresTypeConversion = allArgTypeInfos.Any(info => info.RequiresTypeConversion),
+            SupportsTypeConversion = allArgTypeInfos.Any(info => info.RequiresTypeConversion && info.SupportsTypeConversion)
+        };
+    }
+
+    private (InteropTypeInfo[] Parameters, InteropTypeInfo ReturnType) GetArgumentTypeInfos(ITypeSymbol typeSymbol)
+    {
+        string fullTypeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        PredefinedTypeSyntax voidSyntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword));
+        JSSimpleTypeInfo voidJSTypeInfo = new JSSimpleTypeInfo(KnownManagedType.Void)
+        {
+            Syntax = voidSyntax
+        };
+        switch (typeSymbol)
+        {
+            case ITypeSymbol when fullTypeName == Constants.ActionGlobal:
+                return (Parameters: [], ReturnType: BuildSimpleTypeInfo(voidJSTypeInfo, voidSyntax));
+
+            case INamedTypeSymbol actionType when fullTypeName.StartsWith(Constants.ActionGlobal, StringComparison.Ordinal):
+                InteropTypeInfo[] argumentTypes = [.. actionType.TypeArguments.Select(arg => new InteropTypeInfoBuilder(arg, cache).Build())];
+                return (Parameters: argumentTypes, ReturnType: BuildSimpleTypeInfo(voidJSTypeInfo, voidSyntax));
+
+            // function
+            case INamedTypeSymbol funcType when fullTypeName.StartsWith(Constants.FuncGlobal, StringComparison.Ordinal):
+                InteropTypeInfo[] signatureTypes = [.. funcType.TypeArguments.Select(arg => new InteropTypeInfoBuilder(arg, cache).Build())];
+                return (Parameters: [.. signatureTypes.Take(signatureTypes.Length - 1)], ReturnType: signatureTypes.Last());
+        }
+        throw new NotSupportedTypeException($"Delegate type '{typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}' has an unsupported argument types");
+    }
+
     private static TypeSyntax GetCSInteropTypeSyntax(JSTypeInfo jsTypeInfo)
     {
         return jsTypeInfo switch
@@ -271,8 +285,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSTaskTypeInfo taskTypeInfo => GetPromiseJSMarshalAsTypeArgument(taskTypeInfo.ResultTypeInfo, clrTypeSyntax),
             JSNullableTypeInfo { IsValueType: true } nullableTypeInfo => GetNullableJSMarshalAsTypeArgument(nullableTypeInfo.ResultTypeInfo.KnownType, clrTypeSyntax),
             JSNullableTypeInfo { IsValueType: false } nullableTypeInfo => GetJSTypeSyntax(nullableTypeInfo.ResultTypeInfo, clrTypeSyntax).ToString(),
-            JSSpanTypeInfo => throw new NotImplementedException("Span<T> is not yet supported"),
-            JSArraySegmentTypeInfo => throw new NotImplementedException("ArraySegment<T> is not yet supported"),
+            JSSpanTypeInfo or JSArraySegmentTypeInfo => "JSType.MemoryView",
             JSFunctionTypeInfo functionTypeInfo => GetFunctionJSMarshalAsTypeArgument(functionTypeInfo),
             JSInvalidTypeInfo or _ => throw new NotSupportedTypeException(clrTypeSyntax.ToFullString()),
         });
@@ -386,62 +399,6 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
                 _ => throw new NotSupportedTypeException($"Unsupported Nullable<T> type argument {managedType} ({syntax})")
             };
         }
-    }
-
-    private TypeScriptSymbolNameTemplate GetInteropSimpleTypeScriptSymbolTemplate(KnownManagedType managedType, TypeSyntax originalSyntax)
-    {
-        return managedType switch
-        {
-            KnownManagedType.Object // objects are represented differently on the interop boundary
-                => TypeScriptSymbolNameTemplate.ForUserType("ManagedObject"),
-            KnownManagedType.Char // chars are represented as numbers on the interop boundary (is intended: https://github.com/dotnet/runtime/issues/123187)
-                => TypeScriptSymbolNameTemplate.ForSimpleType("number"),
-            _ => GetSimpleTypeScriptSymbolTemplate(managedType, originalSyntax, true, false)
-        };
-    }
-
-    private TypeScriptSymbolNameTemplate GetSimpleTypeScriptSymbolTemplate(KnownManagedType managedType, TypeSyntax originalSyntax, bool requiresTypeConversion, bool supportsTypeConversion)
-    {
-        return managedType switch
-        {
-            KnownManagedType.Object when requiresTypeConversion && supportsTypeConversion
-                => TypeScriptSymbolNameTemplate.ForUserType(originalSyntax.ToString()),
-            KnownManagedType.Object when requiresTypeConversion && !supportsTypeConversion
-                => TypeScriptSymbolNameTemplate.ForUserType("ManagedObject"),
-            KnownManagedType.Object when !requiresTypeConversion
-                => TypeScriptSymbolNameTemplate.ForSimpleType("ManagedObject"),
-
-            KnownManagedType.None => TypeScriptSymbolNameTemplate.ForSimpleType("undefined"),
-            KnownManagedType.Void => TypeScriptSymbolNameTemplate.ForSimpleType("void"),
-            KnownManagedType.JSObject
-                => TypeScriptSymbolNameTemplate.ForSimpleType("object"),
-
-            KnownManagedType.Boolean => TypeScriptSymbolNameTemplate.ForSimpleType("boolean"),
-            KnownManagedType.Char
-            or KnownManagedType.String => TypeScriptSymbolNameTemplate.ForSimpleType("string"),
-            KnownManagedType.Byte
-            or KnownManagedType.Int16
-            or KnownManagedType.Int32
-            or KnownManagedType.Int64
-            or KnownManagedType.Double
-            or KnownManagedType.Single
-            or KnownManagedType.IntPtr
-                => TypeScriptSymbolNameTemplate.ForSimpleType("number"),
-            KnownManagedType.DateTime
-            or KnownManagedType.DateTimeOffset => TypeScriptSymbolNameTemplate.ForSimpleType("Date"),
-            KnownManagedType.Exception => TypeScriptSymbolNameTemplate.ForSimpleType("Error"),
-
-            // TODO: add support for ArraySegment<T> and Span<T> i.e. MemoryView
-            KnownManagedType.ArraySegment
-            or KnownManagedType.Span
-                => throw new NotImplementedException("ArraySegment and Span are not yet supported"),
-            // TODO: add support for Action and Function types
-            KnownManagedType.Action => throw new NotImplementedException("Action is not yet supported"), // "(() => void)"
-            KnownManagedType.Function => throw new NotImplementedException("Function is not yet supported"), // "Function"
-
-            KnownManagedType.Unknown
-            or _ => TypeScriptSymbolNameTemplate.ForSimpleType("any"),
-        };
     }
 
     private void ThrowIfGenericTSExport()

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using TypeShim.Generator.Parsing;
@@ -44,9 +45,21 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
         {
             RenderPromiseCore(typeInfo);
         }
+        else if (typeInfo.ManagedType is KnownManagedType.Span) 
+        {
+            ctx.Append("Span<");
+            ctx.Append("Uint8Array"); // TODO use resolver to get inner name
+            ctx.Append(">");
+        }
+        else if (typeInfo.ManagedType is KnownManagedType.ArraySegment) 
+        {
+            ctx.Append("ArraySegment<");
+            ctx.Append("Uint8Array"); // TODO use resolver to get inner name
+            ctx.Append(">");
+        }
         else
         {
-            ctx.Append(GetSymbolNameTemplate(typeInfo).Template);
+            ctx.Append(GetSymbolName(typeInfo));
             if (typeInfo.IsTSExport)
             {
                 RenderSuffix(typeInfo, isDelegateParameter ? parameterSymbolType : returnSymbolType);
@@ -100,8 +113,8 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
         RenderCore(delegateInfo.ReturnType);
     }
 
-    private TypeScriptSymbolNameTemplate GetSymbolNameTemplate(InteropTypeInfo typeInfo) 
-        => interop ? typeInfo.TypeScriptInteropTypeSyntax : typeInfo.TypeScriptTypeSyntax;
+    private string GetSymbolName(InteropTypeInfo typeInfo) 
+        => interop ? TypeScriptSymbolNameResolver.GetInteropSimpleTypeSymbol(typeInfo) : TypeScriptSymbolNameResolver.GetSimpleTypeSymbol(typeInfo);
 
     private void RenderSuffix(InteropTypeInfo typeInfo, TypeShimSymbolType symbolType)
     {
@@ -150,4 +163,55 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
         }
     }
 
+}
+
+internal static class TypeScriptSymbolNameResolver
+{
+    internal static string GetInteropSimpleTypeSymbol(InteropTypeInfo typeInfo)
+    {
+        return typeInfo.ManagedType switch
+        {
+            KnownManagedType.Object // objects are represented differently on the interop boundary
+                => "ManagedObject",
+            KnownManagedType.Char // chars are represented as numbers on the interop boundary (is intended: https://github.com/dotnet/runtime/issues/123187)
+                => "number",
+            _ => GetSimpleTypeSymbol(typeInfo)
+        };
+    }
+
+    internal static string GetSimpleTypeSymbol(InteropTypeInfo typeInfo)
+    {
+        return typeInfo.ManagedType switch
+        {
+            KnownManagedType.Object when typeInfo.RequiresTypeConversion && typeInfo.SupportsTypeConversion
+                => typeInfo.CSharpTypeSyntax.ToString(),
+            KnownManagedType.Object when typeInfo.RequiresTypeConversion && !typeInfo.SupportsTypeConversion
+                => "ManagedObject",
+            KnownManagedType.Object when !typeInfo.RequiresTypeConversion
+                => "ManagedObject",
+
+            KnownManagedType.None => "undefined",
+            KnownManagedType.Void => "void",
+            KnownManagedType.JSObject
+                => "object",
+
+            KnownManagedType.Boolean => "boolean",
+            KnownManagedType.Char
+            or KnownManagedType.String => "string",
+            KnownManagedType.Byte
+            or KnownManagedType.Int16
+            or KnownManagedType.Int32
+            or KnownManagedType.Int64
+            or KnownManagedType.Double
+            or KnownManagedType.Single
+            or KnownManagedType.IntPtr
+                => "number",
+            KnownManagedType.DateTime
+            or KnownManagedType.DateTimeOffset => "Date",
+            KnownManagedType.Exception => "Error",
+
+            KnownManagedType.Unknown
+            or _ => "any",
+        };
+    }
 }

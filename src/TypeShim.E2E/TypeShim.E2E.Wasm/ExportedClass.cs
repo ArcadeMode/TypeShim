@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices.JavaScript;
 
 namespace TypeShim.E2E.Wasm;
 
@@ -10,5 +11,15 @@ public class ExportedClass : IDisposable
     public void Dispose()
     {
         // no-op for testing purposes
+    }
+}
+
+
+public partial class ManualExport
+{
+    [return: JSMarshalAs<JSType.MemoryView>]
+    public Span<int> GetSpan()
+    {
+        return new Span<int>(new int[] { 1, 2, 3 });
     }
 }
