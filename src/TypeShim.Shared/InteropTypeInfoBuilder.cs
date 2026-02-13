@@ -44,7 +44,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         {
             ManagedType = simpleTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(simpleTypeInfo, clrTypeSyntax),
-            CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(simpleTypeInfo),
+            CSharpInteropTypeSyntax = simpleTypeInfo.GetTypeSyntax(),
             CSharpTypeSyntax = clrTypeSyntax,
             TypeArgument = null,
             ArgumentInfo = null,
@@ -83,7 +83,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         {
             ManagedType = arrayTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(arrayTypeInfo, clrTypeSyntax),
-            CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(arrayTypeInfo),
+            CSharpInteropTypeSyntax = arrayTypeInfo.GetTypeSyntax(),
             CSharpTypeSyntax = clrTypeSyntax,
             TypeArgument = elementTypeInfo,
             ArgumentInfo = null,
@@ -114,7 +114,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         {
             ManagedType = taskTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(taskTypeInfo, clrTypeSyntax),
-            CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(taskTypeInfo),
+            CSharpInteropTypeSyntax = taskTypeInfo.GetTypeSyntax(),
             CSharpTypeSyntax = clrTypeSyntax,
             TypeArgument = taskReturnTypeInfo,
             ArgumentInfo = null,
@@ -148,7 +148,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         {
             ManagedType = nullableTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(nullableTypeInfo, clrTypeSyntax),
-            CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(nullableTypeInfo),
+            CSharpInteropTypeSyntax = nullableTypeInfo.GetTypeSyntax(),
             CSharpTypeSyntax = clrTypeSyntax,
             TypeArgument = innerTypeInfo,
             ArgumentInfo = null,
@@ -188,7 +188,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         {
             ManagedType = spanTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(spanTypeInfo, clrTypeSyntax),
-            CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(spanTypeInfo),
+            CSharpInteropTypeSyntax = spanTypeInfo.GetTypeSyntax(),
             CSharpTypeSyntax = clrTypeSyntax,
             TypeArgument = innerTypeInfo,
             ArgumentInfo = null,
@@ -225,7 +225,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         {
             ManagedType = functionTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(functionTypeInfo, clrTypeSyntax),
-            CSharpInteropTypeSyntax = GetCSInteropTypeSyntax(functionTypeInfo),
+            CSharpInteropTypeSyntax = functionTypeInfo.GetTypeSyntax(),
             CSharpTypeSyntax = clrTypeSyntax,
             TypeArgument = null,
             ArgumentInfo = argumentInfo,
@@ -261,19 +261,6 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
                 return (Parameters: [.. signatureTypes.Take(signatureTypes.Length - 1)], ReturnType: signatureTypes.Last());
         }
         throw new NotSupportedTypeException($"Delegate type '{typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)}' has an unsupported argument types");
-    }
-
-    private static TypeSyntax GetCSInteropTypeSyntax(JSTypeInfo jsTypeInfo)
-    {
-        return jsTypeInfo switch
-        {
-            JSSimpleTypeInfo simpleTypeInfo => simpleTypeInfo.Syntax,
-            JSArrayTypeInfo arrayTypeInfo => arrayTypeInfo.GetTypeSyntax(),
-            JSTaskTypeInfo taskTypeInfo => taskTypeInfo.GetTypeSyntax(),
-            JSNullableTypeInfo nullableTypeInfo => SyntaxFactory.NullableType(GetCSInteropTypeSyntax(nullableTypeInfo.ResultTypeInfo)),
-            JSFunctionTypeInfo functionTypeInfo => functionTypeInfo.GetTypeSyntax().NormalizeWhitespace(),
-            _ => throw new NotSupportedTypeException("Unsupported JSTypeInfo for interop type syntax generation"),
-        } ?? throw new ArgumentException($"Invalid JSTypeInfo of known type '{jsTypeInfo.KnownType}' yielded no syntax");
     }
 
     private static TypeSyntax GetJSTypeSyntax(JSTypeInfo jSTypeInfo, TypeSyntax clrTypeSyntax)

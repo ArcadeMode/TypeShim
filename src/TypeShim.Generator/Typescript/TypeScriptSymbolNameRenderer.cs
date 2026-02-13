@@ -48,13 +48,13 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
         else if (typeInfo.ManagedType is KnownManagedType.Span) 
         {
             ctx.Append("Span<");
-            ctx.Append("Uint8Array"); // TODO use resolver to get inner name
+            ctx.Append(TypeScriptSymbolNameResolver.ResolveMemoryViewTypeArgSymbol(typeInfo));
             ctx.Append(">");
         }
         else if (typeInfo.ManagedType is KnownManagedType.ArraySegment) 
         {
             ctx.Append("ArraySegment<");
-            ctx.Append("Uint8Array"); // TODO use resolver to get inner name
+            ctx.Append(TypeScriptSymbolNameResolver.ResolveMemoryViewTypeArgSymbol(typeInfo));
             ctx.Append(">");
         }
         else
@@ -114,7 +114,7 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
     }
 
     private string GetSymbolName(InteropTypeInfo typeInfo) 
-        => interop ? TypeScriptSymbolNameResolver.GetInteropSimpleTypeSymbol(typeInfo) : TypeScriptSymbolNameResolver.GetSimpleTypeSymbol(typeInfo);
+        => interop ? TypeScriptSymbolNameResolver.ResolveSimpleInteropTypeSymbol(typeInfo) : TypeScriptSymbolNameResolver.ResolveSimpleTypeSymbol(typeInfo);
 
     private void RenderSuffix(InteropTypeInfo typeInfo, TypeShimSymbolType symbolType)
     {
@@ -167,7 +167,7 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
 
 internal static class TypeScriptSymbolNameResolver
 {
-    internal static string GetInteropSimpleTypeSymbol(InteropTypeInfo typeInfo)
+    internal static string ResolveSimpleInteropTypeSymbol(InteropTypeInfo typeInfo)
     {
         return typeInfo.ManagedType switch
         {
@@ -175,11 +175,11 @@ internal static class TypeScriptSymbolNameResolver
                 => "ManagedObject",
             KnownManagedType.Char // chars are represented as numbers on the interop boundary (is intended: https://github.com/dotnet/runtime/issues/123187)
                 => "number",
-            _ => GetSimpleTypeSymbol(typeInfo)
+            _ => ResolveSimpleTypeSymbol(typeInfo)
         };
     }
 
-    internal static string GetSimpleTypeSymbol(InteropTypeInfo typeInfo)
+    internal static string ResolveSimpleTypeSymbol(InteropTypeInfo typeInfo)
     {
         return typeInfo.ManagedType switch
         {
@@ -212,6 +212,22 @@ internal static class TypeScriptSymbolNameResolver
 
             KnownManagedType.Unknown
             or _ => "any",
+        };
+    }
+
+    internal static string ResolveMemoryViewTypeArgSymbol(InteropTypeInfo typeInfo)
+    {
+        if (typeInfo.ManagedType is not KnownManagedType.Span and not KnownManagedType.ArraySegment)
+        {
+            throw new InvalidOperationException($"Type '{typeInfo.ManagedType}' is not a valid MemoryView type.");
+        }
+
+        return typeInfo.TypeArgument switch
+        {
+            { ManagedType: KnownManagedType.Byte } => "Uint8Array",
+            { ManagedType: KnownManagedType.Int32 } => "Int32Array",
+            { ManagedType: KnownManagedType.Double } => "Float64Array",
+            _ => throw new InvalidOperationException($"Type argument '{typeInfo.TypeArgument?.ManagedType}' is not valid for MemoryView types.")
         };
     }
 }
