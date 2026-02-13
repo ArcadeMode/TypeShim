@@ -68,5 +68,31 @@ export interface ManagedError extends IDisposable {
     getManageStack(): any;
 }
 
+interface IMemoryView<TArray> extends IDisposable {
+    /**
+     * copies elements from provided source to the wasm memory.
+     * target has to have the elements of the same type as the underlying C# array.
+     * same as TypedArray.set()
+     */
+    set(source: TArray, targetOffset?: number): void;
+    /**
+     * copies elements from wasm memory to provided target.
+     * target has to have the elements of the same type as the underlying C# array.
+     */
+    copyTo(target: TArray, sourceOffset?: number): void;
+    /**
+     * same as TypedArray.slice()
+     */
+    slice(start?: number, end?: number): TArray;
+
+    get length(): number;
+    get byteLength(): number;
+}
+
+declare const __instantiationGuard: unique symbol; // deliberately not exported
+type DoNotInstantiateGuard<Msg extends string> = { readonly [__instantiationGuard]: Msg };
+
+export type Span<TArray> = IMemoryView<TArray> & DoNotInstantiateGuard<"Span cannot be instantiated from JS">
+export type ArraySegment<TArray> = IMemoryView<TArray> & DoNotInstantiateGuard<"ArraySegment cannot be instantiated from JS">
 """;
 }
