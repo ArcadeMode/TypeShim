@@ -92,6 +92,51 @@ function runMemoryViewTests(options: {
     });
 }
 
+function runMemoryViewSumTests(options: {
+    viewKind: 'Span' | 'ArraySegment';
+    typeLabel: 'Byte' | 'Int32' | 'Double';
+    getView: MemoryViewGetter;
+    sum: (instance: MemoryViewClass, view: ReturnType<MemoryViewGetter>) => number;
+    expectedSum: number;
+    setValues: number[];
+    expectedSumAfterSet: number;
+}) {
+    const {
+        viewKind,
+        typeLabel,
+        getView,
+        sum,
+        expectedSum,
+        setValues,
+        expectedSumAfterSet,
+    } = options;
+
+    test(`${typeLabel} ${viewKind} sum is as expected`, () => {
+        const testInstance = new MemoryViewClass();
+        const view = getView(testInstance);
+        const actual = sum(testInstance, view);
+        if (typeLabel === 'Double') {
+            expect(actual).toBeCloseTo(expectedSum, 10);
+        } else {
+            expect(actual).toBe(expectedSum);
+        }
+    });
+
+    test(`${typeLabel} ${viewKind} sum reflects mutations from JS`, () => {
+        const testInstance = new MemoryViewClass();
+        const view = getView(testInstance);
+        const ctor = (view.slice().constructor as unknown) as AnyTypedArrayCtor;
+        view.set(new ctor(setValues));
+
+        const actual = sum(testInstance, view);
+        if (typeLabel === 'Double') {
+            expect(actual).toBeCloseTo(expectedSumAfterSet, 10);
+        } else {
+            expect(actual).toBe(expectedSumAfterSet);
+        }
+    });
+}
+
 describe('MemoryView Tests', () => {
     describe('Span', () => {
         runMemoryViewTests({
@@ -116,6 +161,38 @@ describe('MemoryView Tests', () => {
             getView: (x) => x.GetDoubleSpan(),
             ctor: Float64Array,
             expected: [0.1, 1.1, 2.1, 3.1, 4.1],
+        });
+
+        describe('Sum', () => {
+            runMemoryViewSumTests({
+                viewKind: 'Span',
+                typeLabel: 'Int32',
+                getView: (x) => x.GetInt32Span(),
+                sum: (x, v) => x.SumInt32Span(v as any),
+                expectedSum: 10,
+                setValues: [10, 20, 30, 40, 50],
+                expectedSumAfterSet: 150,
+            });
+
+            runMemoryViewSumTests({
+                viewKind: 'Span',
+                typeLabel: 'Byte',
+                getView: (x) => x.GetByteSpan(),
+                sum: (x, v) => x.SumByteSpan(v as any),
+                expectedSum: (1 << 0) + (1 << 1) + (1 << 2) + (1 << 3) + (1 << 4),
+                setValues: [10, 20, 30, 40, 50],
+                expectedSumAfterSet: 150,
+            });
+
+            runMemoryViewSumTests({
+                viewKind: 'Span',
+                typeLabel: 'Double',
+                getView: (x) => x.GetDoubleSpan(),
+                sum: (x, v) => x.SumDoubleSpan(v as any),
+                expectedSum: 0.1 + 1.1 + 2.1 + 3.1 + 4.1,
+                setValues: [10.5, 20.5, 30.5, 40.5, 50.5],
+                expectedSumAfterSet: 152.5,
+            });
         });
     });
 
@@ -142,6 +219,38 @@ describe('MemoryView Tests', () => {
             getView: (x) => x.GetDoubleArraySegment(),
             ctor: Float64Array,
             expected: [0.1, 1.1, 2.1, 3.1, 4.1],
+        });
+
+        describe('Sum', () => {
+            runMemoryViewSumTests({
+                viewKind: 'ArraySegment',
+                typeLabel: 'Int32',
+                getView: (x) => x.GetInt32ArraySegment(),
+                sum: (x, v) => x.SumInt32ArraySegment(v as any),
+                expectedSum: 10,
+                setValues: [10, 20, 30, 40, 50],
+                expectedSumAfterSet: 150,
+            });
+
+            runMemoryViewSumTests({
+                viewKind: 'ArraySegment',
+                typeLabel: 'Byte',
+                getView: (x) => x.GetByteArraySegment(),
+                sum: (x, v) => x.SumByteArraySegment(v as any),
+                expectedSum: (1 << 0) + (1 << 1) + (1 << 2) + (1 << 3) + (1 << 4),
+                setValues: [10, 20, 30, 40, 50],
+                expectedSumAfterSet: 150,
+            });
+
+            runMemoryViewSumTests({
+                viewKind: 'ArraySegment',
+                typeLabel: 'Double',
+                getView: (x) => x.GetDoubleArraySegment(),
+                sum: (x, v) => x.SumDoubleArraySegment(v as any),
+                expectedSum: 0.1 + 1.1 + 2.1 + 3.1 + 4.1,
+                setValues: [10.5, 20.5, 30.5, 40.5, 50.5],
+                expectedSumAfterSet: 152.5,
+            });
         });
     });
 });
