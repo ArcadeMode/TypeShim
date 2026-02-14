@@ -184,6 +184,12 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             throw new NotSupportedTypeException("Only Span<T> and ArraySegment<T> are supported");
         }
         InteropTypeInfo innerTypeInfo = new InteropTypeInfoBuilder(innerTypeSymbol, cache).Build();
+
+        if (innerTypeInfo.ManagedType is not KnownManagedType.Byte and not KnownManagedType.Int32 and not KnownManagedType.Double)
+        {
+            throw new NotSupportedTypeException($"Type argument {innerTypeInfo.CSharpTypeSyntax} in {clrTypeSyntax} is not supported.");
+        }
+
         return new InteropTypeInfo
         {
             ManagedType = spanTypeInfo.KnownType,
