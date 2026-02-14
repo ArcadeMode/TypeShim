@@ -17,8 +17,9 @@ public class ExportedClass : IDisposable
 
 public partial class ManualExport
 {
+    [JSExport]
     [return: JSMarshalAs<JSType.MemoryView>]
-    public Span<int> GetSpan()
+    public static Span<int> GetSpan()
     {
         return new Span<int>(new int[] { 1, 2, 3 });
     }
