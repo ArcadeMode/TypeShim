@@ -68,7 +68,9 @@ export interface ManagedError extends IDisposable {
     getManageStack(): any;
 }
 
-interface IMemoryView<TArray> extends IDisposable {
+declare const __instantiationGuard: unique symbol; // deliberately not exported
+export interface IMemoryView<TArray> extends IDisposable {
+    readonly [__instantiationGuard]: "MemoryView types cannot be instantiated in JS, they can only be returned from C# code";
     /**
      * copies elements from provided source to the wasm memory.
      * target has to have the elements of the same type as the underlying C# array.
@@ -88,11 +90,5 @@ interface IMemoryView<TArray> extends IDisposable {
     get length(): number;
     get byteLength(): number;
 }
-
-declare const __instantiationGuard: unique symbol; // deliberately not exported
-type DoNotInstantiateGuard<Msg extends string> = { readonly [__instantiationGuard]: Msg };
-
-export type Span<TArray> = IMemoryView<TArray> & DoNotInstantiateGuard<"Span cannot be instantiated from JS">
-export type ArraySegment<TArray> = IMemoryView<TArray> & DoNotInstantiateGuard<"ArraySegment cannot be instantiated from JS">
 """;
 }

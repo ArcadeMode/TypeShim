@@ -45,15 +45,9 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
         {
             RenderPromiseCore(typeInfo);
         }
-        else if (typeInfo.ManagedType is KnownManagedType.Span) 
+        else if (typeInfo.ManagedType is KnownManagedType.Span or KnownManagedType.ArraySegment) 
         {
-            ctx.Append("Span<");
-            ctx.Append(TypeScriptSymbolNameResolver.ResolveMemoryViewTypeArgSymbol(typeInfo));
-            ctx.Append(">");
-        }
-        else if (typeInfo.ManagedType is KnownManagedType.ArraySegment) 
-        {
-            ctx.Append("ArraySegment<");
+            ctx.Append("IMemoryView<");
             ctx.Append(TypeScriptSymbolNameResolver.ResolveMemoryViewTypeArgSymbol(typeInfo));
             ctx.Append(">");
         }
