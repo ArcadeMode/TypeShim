@@ -38,7 +38,7 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
                 SyntaxFactory.Identifier("Task"),
                 SyntaxFactory.TypeArgumentList(SyntaxFactory.SingletonSeparatedList<TypeSyntax>(tti.ResultTypeInfo.GetTypeSyntax()))),
             JSNullableTypeInfo nti => SyntaxFactory.NullableType(nti.ResultTypeInfo.GetTypeSyntax()),
-            JSFunctionTypeInfo fti => GetFunctionTypeSyntax(fti),
+            JSFunctionTypeInfo fti => GetFunctionTypeSyntax(fti).NormalizeWhitespace(),
             _ => throw new NotSupportedTypeException($"JS type '{this.GetType()}' with KnownManagedType '{KnownType}' is not supported for type syntax generation"),
         };
     }

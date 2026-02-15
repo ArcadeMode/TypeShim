@@ -30,9 +30,6 @@ internal sealed class InteropTypeInfo
     /// but e.g. YourClass, Task&lt;YourClass&gt; or YourClass[] have to be object, Task&lt;object&gt; or object[] for the interop method.
     /// </summary>
     public required TypeSyntax CSharpInteropTypeSyntax { get; init; }
-    
-    public required TypeScriptSymbolNameTemplate TypeScriptTypeSyntax { get; init; }
-    public required TypeScriptSymbolNameTemplate TypeScriptInteropTypeSyntax { get; init; }
 
     /// <summary>
     /// Tasks and Arrays _may_ have type arguments. Nullables always do.
@@ -79,8 +76,6 @@ internal sealed class InteropTypeInfo
             JSTypeSyntax = this.JSTypeSyntax,
             CSharpTypeSyntax = this.CSharpInteropTypeSyntax, // essentially overwrite clr type with interop type
             CSharpInteropTypeSyntax = this.CSharpInteropTypeSyntax,
-            TypeScriptTypeSyntax = this.TypeScriptInteropTypeSyntax,
-            TypeScriptInteropTypeSyntax = this.TypeScriptInteropTypeSyntax,
             IsTaskType = this.IsTaskType,
             IsArrayType = this.IsArrayType,
             IsNullableType = this.IsNullableType,
@@ -99,8 +94,6 @@ internal sealed class InteropTypeInfo
     {
         IsTSExport = false,
         ManagedType = KnownManagedType.JSObject,
-        TypeScriptTypeSyntax = TypeScriptSymbolNameTemplate.ForSimpleType("object"),
-        TypeScriptInteropTypeSyntax = TypeScriptSymbolNameTemplate.ForSimpleType("object"),
         JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Object"),
         CSharpInteropTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
         CSharpTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),

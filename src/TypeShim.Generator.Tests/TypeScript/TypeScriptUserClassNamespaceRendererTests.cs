@@ -14,7 +14,12 @@ internal class TypeScriptUserClassNamespaceRendererTests
     [TestCase("string", "string")]
     [TestCase("double", "number")]
     [TestCase("bool", "boolean")]
-    public void UserClassNamespace_InstancePropertyOfSimpleType_GeneratesProperty(string typeExpression, string typeScriptType)
+    [TestCase("string[]", "Array<string>")]
+    [TestCase("double[]", "Array<number>")]
+    [TestCase("ArraySegment<int>", "IMemoryView<Int32Array>")]
+    [TestCase("Task<string>", "Promise<string>")]
+    [TestCase("Task<double>", "Promise<number>")]
+    public void UserClassNamespace_InstancePropertyOfType_GeneratesPropertyInSnapshotAndInitializer(string typeExpression, string typeScriptType)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -54,95 +59,6 @@ export namespace C1 {
 }
 
 """.Replace("{{typeScriptType}}", typeScriptType));
-    }
-
-    [TestCase("string[]", "Array<string>", "string")]
-    [TestCase("double[]", "Array<number>", "number")]
-    public void UserClassNamespace_InstancePropertyOfArrayType_GeneratesProperty(string typeExpression, string typeScriptType, string typeScriptElementType)
-    {
-        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
-            using System;
-            using System.Threading.Tasks;
-            namespace N1;
-            [TSExport]
-            public class C1
-            {
-                public {{typeExpression}} P1 { get; set; }
-            }
-        """.Replace("{{typeExpression}}", typeExpression));
-
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
-        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
-        Assert.That(exportedClasses, Has.Count.EqualTo(1));
-        INamedTypeSymbol classSymbol = exportedClasses[0];
-
-        InteropTypeInfoCache typeCache = new();
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
-
-        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
-
-        AssertEx.EqualOrDiff(renderContext.ToString(), """
-export namespace C1 {
-  export interface Initializer {
-    P1: {{typeScriptType}};
-  }
-  export interface Snapshot {
-    P1: {{typeScriptType}};
-  }
-  export function materialize(proxy: C1): C1.Snapshot {
-    return {
-      P1: proxy.P1,
-    };
-  }
-}
-
-""".Replace("{{typeScriptType}}", typeScriptType)
-   .Replace("{{typeScriptElementType}}", typeScriptElementType));
-    }
-
-    [TestCase("Task<string>", "Promise<string>")]
-    [TestCase("Task<double>", "Promise<number>")]
-    public void UserClassNamespace_InstancePropertyOfTaskType_GeneratesPromiseProperty(string csTypeExpression, string tsTypeExpression)
-    {
-        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
-            using System;
-            using System.Threading.Tasks;
-            namespace N1;
-            [TSExport]
-            public class C1
-            {
-                public {{csTypeExpression}} P1 { get; set; }
-            }
-        """.Replace("{{csTypeExpression}}", csTypeExpression));
-
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
-        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
-        Assert.That(exportedClasses, Has.Count.EqualTo(1));
-        INamedTypeSymbol classSymbol = exportedClasses[0];
-
-        InteropTypeInfoCache typeCache = new();
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
-
-        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
-        new TypeScriptUserClassNamespaceRenderer(renderContext).Render();
-
-        AssertEx.EqualOrDiff(renderContext.ToString(), """
-export namespace C1 {
-  export interface Initializer {
-    P1: {{tsTypeExpression}};
-  }
-  export interface Snapshot {
-    P1: {{tsTypeExpression}};
-  }
-  export function materialize(proxy: C1): C1.Snapshot {
-    return {
-      P1: proxy.P1,
-    };
-  }
-}
-
-""".Replace("{{tsTypeExpression}}", tsTypeExpression));
     }
 
     [Test]
