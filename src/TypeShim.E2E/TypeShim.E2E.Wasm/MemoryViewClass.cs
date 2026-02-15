@@ -3,7 +3,7 @@
 namespace TypeShim.E2E.Wasm;
 
 [TSExport]
-public class MemoryViewClass
+public class MemoryViewMethodClass
 {
     public Span<byte> GetByteSpan() => new Span<byte>([1 << 0, 1 << 1, 1 << 2, 1 << 3, 1 << 4]);
     public Span<int> GetInt32Span() => new Span<int>([0, 1, 2, 3, 4]);
@@ -73,3 +73,14 @@ public class MemoryViewClass
         return sum;
     }
 }
+
+[TSExport]
+public class MemoryViewPropertyClass
+{ 
+    public required ArraySegment<byte> ByteArraySegment { get; set; }
+    public required ArraySegment<int> Int32ArraySegment { get; set; }
+    public required ArraySegment<double> DoubleArraySegment { get; set; }
+
+    // span properties are not allowed in classes.
+}
+
