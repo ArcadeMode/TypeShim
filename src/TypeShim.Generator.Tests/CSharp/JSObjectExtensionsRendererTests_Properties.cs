@@ -18,7 +18,7 @@ internal class JSObjectExtensionsRendererTests_Properties
     [TestCase("long", "Int64", "JSType.Number")]
     [TestCase("float", "Single", "JSType.Number")]
     [TestCase("double", "Double", "JSType.Number")]
-    public void JSObjectExtensionsRendererTests_InstanceProperty_WithBooleanType(string csTypeName, string managedSuffix, string jsType)
+    public void JSObjectExtensionsRendererTests_InstanceProperty_WithSimpleType(string csTypeName, string managedSuffix, string jsType)
     {
         string source = """
             using System;
@@ -397,6 +397,78 @@ internal class JSObjectExtensionsRendererTests_Properties
     [TestCase("Action<MyClass, bool>", "Action<object, bool>", "ObjectBooleanVoidAction", "JSType.Function<JSType.Any, JSType.Boolean>")]
     [TestCase("Action<MyClass, long>", "Action<object, long>", "ObjectInt64VoidAction", "JSType.Function<JSType.Any, JSType.Number>")]
     public void JSObjectExtensionsRendererTests_InstanceProperty_WithDelegateGenericType_IncludingUnexportedUserClass(
+        string exposedTypeName,
+        string boundaryTypeName,
+        string managedSuffix,
+        string jsType)
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            //[TSExport] not exported
+            public class MyClass
+            {
+                public void M1()
+                {
+                }
+            }
+        """);
+
+        string source = """
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public {{type}} P1 { get; set; }
+            }
+        """.Replace("{{type}}", exposedTypeName);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
+
+        List<InteropTypeInfo> types = [classInfo.Properties.First().Type];
+        RenderContext extensionsRenderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        new JSObjectExtensionsRenderer(extensionsRenderContext, types).Render();
+
+        string expected = """    
+        #nullable enable
+        // JSImports for the type marshalling process
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        public static partial class JSObjectExtensions
+        {
+            public static {{type}}? GetPropertyAs{{managed}}Nullable(this JSObject jsObject, string propertyName)
+            {
+                return jsObject.HasProperty(propertyName) ? MarshalAs{{managed}}(jsObject, propertyName) : null;
+            }
+            [JSImport("unwrapProperty", "@typeshim")]
+            [return: JSMarshalAs<{{jstype}}>]
+            public static partial {{type}} MarshalAs{{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+        }
+        
+        """
+        .Replace("{{type}}", boundaryTypeName)
+        .Replace("{{managed}}", managedSuffix)
+        .Replace("{{jstype}}", jsType);
+
+        AssertEx.EqualOrDiff(extensionsRenderContext.ToString(), expected);
+    }
+    
+    [TestCase("ArraySegment<int>", "ArraySegment<int>", "Int32ArraySegment", "JSType.MemoryView")]
+    [TestCase("ArraySegment<double>", "ArraySegment<double>", "DoubleArraySegment", "JSType.MemoryView")]
+    [TestCase("Span<int>", "Span<int>", "Int32Span", "JSType.MemoryView")]
+    [TestCase("Span<double>", "Span<double>", "DoubleSpan", "JSType.MemoryView")]
+    public void JSObjectExtensionsRendererTests_InstanceProperty_WithMemoryViewType(
         string exposedTypeName,
         string boundaryTypeName,
         string managedSuffix,
