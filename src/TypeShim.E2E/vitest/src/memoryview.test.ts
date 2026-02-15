@@ -347,7 +347,23 @@ describe('MemoryView Tests', () => {
             expect(testInstance.DoubleArraySegment).toEqual(arraySegment);
             expect(testInstance.DoubleArraySegment.slice()).toEqual(arraySegment.slice());
         });
+        
+        test('ArraySegment properties are contained in snapshot', () => {
+            const helper = new MemoryViewMethodClass();
+            const testInstance = new MemoryViewPropertyClass({
+                ByteArraySegment: helper.GetByteArraySegment(),
+                Int32ArraySegment: helper.GetInt32ArraySegment(),
+                DoubleArraySegment: helper.GetDoubleArraySegment(),
+            });
 
+            const snapshot = MemoryViewPropertyClass.materialize(testInstance);
+            expect(snapshot.ByteArraySegment).toEqual(testInstance.ByteArraySegment);
+            expect(snapshot.ByteArraySegment.slice()).toEqual(testInstance.ByteArraySegment.slice());
+            expect(snapshot.Int32ArraySegment).toEqual(testInstance.Int32ArraySegment);
+            expect(snapshot.Int32ArraySegment.slice()).toEqual(testInstance.Int32ArraySegment.slice());
+            expect(snapshot.DoubleArraySegment).toEqual(testInstance.DoubleArraySegment);
+            expect(snapshot.DoubleArraySegment.slice()).toEqual(testInstance.DoubleArraySegment.slice());
+        });
 
     });
 });
