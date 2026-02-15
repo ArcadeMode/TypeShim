@@ -276,7 +276,7 @@ Passing an initializer object in another initializer object.
 
 TypeShim enriches the supported types by JSExport by adding _your_ classes to the [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings). Repetitive patterns for type transformation are readily supported and tested in TypeShim.
 
-Of course, TypeShim brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. This work is largely completed with the exception of Span and ArraySegment.
+Of course, TypeShim brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. Makes TypeShim officially offer a superset of the .NET types available in JS.
 
 TypeShim aims to continue to broaden its type support. Suggestions and contributions are welcome.
 
@@ -312,12 +312,12 @@ TypeShim aims to continue to broaden its type support. Suggestions and contribut
 | `JSObject`           | `Object`    | ✅     | Requires manual JSObject handling |
 | `String`             | `String`    | ✅     |      |
 | `T[]`                | `T[]`       | ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) |
-| `Span<Byte>`         | `MemoryView`| 🚧     |      |
-| `Span<Int32>`        | `MemoryView`| 🚧     |      |
-| `Span<Double>`       | `MemoryView`| 🚧     |      |
-| `ArraySegment<Byte>` | `MemoryView`| 🚧     |      |
-| `ArraySegment<Int32>`| `MemoryView`| 🚧     |      |
-| `ArraySegment<Double>`| `MemoryView`| 🚧    |      |
+| `Span<Byte>`         | `MemoryView`| ✅     |      |
+| `Span<Int32>`        | `MemoryView`| ✅     |      |
+| `Span<Double>`       | `MemoryView`| ✅     |      |
+| `ArraySegment<Byte>` | `MemoryView`| ✅     |      |
+| `ArraySegment<Int32>`| `MemoryView`| ✅     |      |
+| `ArraySegment<Double>`| `MemoryView`| ✅    |      |
 | `Task`               | `Promise`   | ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) |
 | `Action`             | `Function`  | ✅     |      |
 | `Action<T1>`         | `Function`  | ✅     |      |
