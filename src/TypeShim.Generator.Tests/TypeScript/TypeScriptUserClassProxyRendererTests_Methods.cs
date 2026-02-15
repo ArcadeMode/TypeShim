@@ -594,4 +594,53 @@ export class C1 extends ProxyBase {
 
 """);
     }
+
+    [TestCase("Span<int>", "Int32Array")]
+    [TestCase("Span<byte>", "Uint8Array")]
+    [TestCase("Span<double>", "Float64Array")]
+    [TestCase("ArraySegment<int>", "Int32Array")]
+    [TestCase("ArraySegment<byte>", "Uint8Array")]
+    [TestCase("ArraySegment<double>", "Float64Array")]
+    public void TypeScriptUserClassProxy_MemoryViewMethods_RendersMemoryViewTypes(string typeName, string tsArrayType)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1(int i)
+            {
+                public {{typeName}} M1() {}
+                public void M2({{typeName}} span) {}
+            }
+        """.Replace("{{typeName}}", typeName));
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderCtx = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderCtx).Render();
+
+        AssertEx.EqualOrDiff(renderCtx.ToString(), """
+        export class C1 extends ProxyBase {
+          constructor(i: number) {
+            super(TypeShimConfig.exports.N1.C1Interop.ctor(i));
+          }
+
+          public M1(): IMemoryView<{{tsArrayType}}> {
+            return TypeShimConfig.exports.N1.C1Interop.M1(this.instance);
+          }
+
+          public M2(span: IMemoryView<{{tsArrayType}}>): void {
+            TypeShimConfig.exports.N1.C1Interop.M2(this.instance, span);
+          }
+        }
+
+        """.Replace("{{tsArrayType}}", tsArrayType));
+    }
 }
