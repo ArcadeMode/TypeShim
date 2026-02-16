@@ -206,21 +206,21 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             int colonIndex = cref.IndexOf(':');
             if (colonIndex >= 0 && colonIndex < cref.Length - 1)
             {
-                cref = cref.Substring(colonIndex + 1);
+                cref = cref[(colonIndex + 1)..];
             }
             
             // Get just the type/member name without namespace
             int lastDotIndex = cref.LastIndexOf('.');
             if (lastDotIndex >= 0 && lastDotIndex < cref.Length - 1)
             {
-                cref = cref.Substring(lastDotIndex + 1);
+                cref = cref[(lastDotIndex + 1)..];
             }
             
             // Remove parameter list if present (e.g., "Method(System.String)" -> "Method")
             int parenIndex = cref.IndexOf('(');
             if (parenIndex >= 0)
             {
-                cref = cref.Substring(0, parenIndex);
+                cref = cref[..parenIndex];
             }
             
             return $"`{cref}`";

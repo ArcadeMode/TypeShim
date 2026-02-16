@@ -17,7 +17,9 @@ internal class TypeScriptJSDocRenderer
         // Render description
         if (!string.IsNullOrWhiteSpace(comment.Description))
         {
-            string[] descriptionLines = comment.Description.Split('\n');
+            // Normalize line endings to handle cross-platform scenarios
+            string normalizedDescription = comment.Description.Replace("\r\n", "\n").Replace("\r", "\n");
+            string[] descriptionLines = normalizedDescription.Split('\n');
             foreach (string line in descriptionLines)
             {
                 string trimmedLine = line.Trim();
