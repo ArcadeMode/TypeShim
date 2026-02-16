@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <PackageJsonName Condition="$(PackageJsonName) == ''">@typeshim/demo</PackageJsonName>
+    <PackageJsonVersion Condition="$(PackageJsonVersion) == ''">1.0.0</PackageJsonVersion>
+    <PackageJsonDescription Condition="$(PackageJsonDescription) == ''"></PackageJsonDescription>
+    <PackageJsonScriptsStart Condition="$(PackageJsonScriptsStart) == ''">npm run dev -w @typeshim/app</PackageJsonScriptsStart>
+    <PackageJsonScriptsDev Condition="$(PackageJsonScriptsDev) == ''">npm run dev -w @typeshim/app</PackageJsonScriptsDev>
+    <PackageJsonScriptsTest Condition="$(PackageJsonScriptsTest) == ''">echo "Error: no test specified" &amp;&amp; exit 1</PackageJsonScriptsTest>
+    <PackageJsonScriptsBuildExports Condition="$(PackageJsonScriptsBuildExports) == ''">npm run build -w @typeshim/wasm-exports</PackageJsonScriptsBuildExports>
+    <PackageJsonScriptsBuildPeople Condition="$(PackageJsonScriptsBuildPeople) == ''">npm run build -w @typeshim/people-ui</PackageJsonScriptsBuildPeople>
+    <PackageJsonScriptsBuildApp Condition="$(PackageJsonScriptsBuildApp) == ''">npm run build -w @typeshim/app</PackageJsonScriptsBuildApp>
+    <PackageJsonScriptsBuild Condition="$(PackageJsonScriptsBuild) == ''">npm run build:exports &amp;&amp; npm run build:people &amp;&amp; npm run build:app</PackageJsonScriptsBuild>
+    <PackageJsonKeywords Condition="$(PackageJsonKeywords) == ''">[]</PackageJsonKeywords>
+    <PackageJsonAuthor Condition="$(PackageJsonAuthor) == ''"></PackageJsonAuthor>
+    <PackageJsonLicense Condition="$(PackageJsonLicense) == ''">ISC</PackageJsonLicense>
+    <PackageJsonPrivate Condition="$(PackageJsonPrivate) == ''">true</PackageJsonPrivate>
+    <PackageJsonWorkspaces Condition="$(PackageJsonWorkspaces) == ''">[
+  "@typeshim/*"
+]</PackageJsonWorkspaces>
+    <PackageJsonDependenciesReact Condition="$(PackageJsonDependenciesReact) == ''">^18.3.1</PackageJsonDependenciesReact>
+    <PackageJsonDependenciesReactDom Condition="$(PackageJsonDependenciesReactDom) == ''">^18.3.1</PackageJsonDependenciesReactDom>
+    <PackageJsonDevdependenciesTypesReact Condition="$(PackageJsonDevdependenciesTypesReact) == ''">^19.2.6</PackageJsonDevdependenciesTypesReact>
+    <PackageJsonDevdependenciesTypesReactDom Condition="$(PackageJsonDevdependenciesTypesReactDom) == ''">^19.2.3</PackageJsonDevdependenciesTypesReactDom>
+    <PackageJsonDevdependenciesVitejsPluginReact Condition="$(PackageJsonDevdependenciesVitejsPluginReact) == ''">^4.3.4</PackageJsonDevdependenciesVitejsPluginReact>
+    <PackageJsonDevdependenciesTypescript Condition="$(PackageJsonDevdependenciesTypescript) == ''">^5.9.3</PackageJsonDevdependenciesTypescript>
+    <PackageJsonDevdependenciesVite Condition="$(PackageJsonDevdependenciesVite) == ''">7.2.4</PackageJsonDevdependenciesVite>
+    <PackageJsonDevdependenciesVitePluginTopLevelAwait Condition="$(PackageJsonDevdependenciesVitePluginTopLevelAwait) == ''">^1.6.0</PackageJsonDevdependenciesVitePluginTopLevelAwait>
+    <PackageJsonDevdependenciesVitePluginWasm Condition="$(PackageJsonDevdependenciesVitePluginWasm) == ''">^3.5.0</PackageJsonDevdependenciesVitePluginWasm>
+  </PropertyGroup>
+</Project>
