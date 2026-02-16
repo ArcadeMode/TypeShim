@@ -21,7 +21,12 @@ internal class TypeScriptJSDocRenderer
             foreach (string line in descriptionLines)
             {
                 string trimmedLine = line.Trim();
-                if (!string.IsNullOrEmpty(trimmedLine))
+                // Render empty lines as blank comment lines
+                if (string.IsNullOrEmpty(trimmedLine))
+                {
+                    ctx.AppendLine(" *");
+                }
+                else
                 {
                     ctx.AppendLine($" * {trimmedLine}");
                 }
