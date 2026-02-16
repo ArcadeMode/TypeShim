@@ -61,6 +61,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
 
     internal void RenderProxyMethod(MethodInfo methodInfo)
     {
+        TypeScriptJSDocRenderer.RenderJSDoc(ctx, methodInfo.Comment);
         RenderProxyMethodSignature(methodInfo.WithoutInstanceParameter());
         RenderMethodBody(methodInfo);
 
@@ -79,6 +80,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
 
     internal void RenderProxyProperty(PropertyInfo propertyInfo)
     {
+        TypeScriptJSDocRenderer.RenderJSDoc(ctx, propertyInfo.Comment);
         MethodInfo getterInfo = propertyInfo.GetMethod;
         RenderProxyPropertyGetterSignature(getterInfo.WithoutInstanceParameter());
         RenderMethodBody(getterInfo);

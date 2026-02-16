@@ -11,6 +11,8 @@ internal sealed class PropertyInfo
     internal required MethodInfo GetMethod { get; init; }
     internal required MethodInfo? SetMethod { get; init; }
     internal required MethodInfo? InitMethod { get; init; }
+    
+    internal required CommentInfo? Comment { get; init; }
 
     public PropertyInfo WithInteropTypeInfo()
     {
@@ -23,6 +25,7 @@ internal sealed class PropertyInfo
             GetMethod = this.GetMethod.WithInteropTypeInfo(),
             SetMethod = this.SetMethod?.WithInteropTypeInfo(),
             InitMethod = this.InitMethod?.WithInteropTypeInfo(),
+            Comment = this.Comment,
         };
     }
 }
