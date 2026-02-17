@@ -744,4 +744,279 @@ export class C1 extends ProxyBase {
 
 """);
     }
+
+    [Test]
+    public void TypeScriptUserClassProxy_MethodWithListTag_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Processes items in the following order:
+                /// <list type="bullet">
+                /// <item><term>First</term><description>Initialize the system</description></item>
+                /// <item><term>Second</term><description>Process the data</description></item>
+                /// <item><term>Third</term><description>Clean up resources</description></item>
+                /// </list>
+                /// </summary>
+                public void Process() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  /**
+   * Processes items in the following order: - First: Initialize the system - Second: Process the data - Third: Clean up resources
+   */
+  public Process(): void {
+    TypeShimConfig.exports.N1.C1Interop.Process(this.instance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_MethodWithMultipleParamRefs_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Compares <paramref name="left"/> with <paramref name="right"/> and returns true if <paramref name="left"/> equals <paramref name="right"/>.
+                /// </summary>
+                /// <param name="left">The first value</param>
+                /// <param name="right">The second value</param>
+                /// <returns>True if equal</returns>
+                public bool Compare(int left, int right) { return left == right; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  /**
+   * Compares `left` with `right` and returns true if `left` equals `right`.
+   *
+   * @param left The first value
+   * @param right The second value
+   * @returns True if equal
+   */
+  public Compare(left: number, right: number): boolean {
+    return TypeShimConfig.exports.N1.C1Interop.Compare(this.instance, left, right);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ExceptionWithoutNamespace_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Performs an operation.
+                /// </summary>
+                /// <exception cref="InvalidOperationException">Thrown when operation is invalid</exception>
+                /// <exception cref="ArgumentException">Thrown when argument is invalid</exception>
+                public void DoOperation() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  /**
+   * Performs an operation.
+   *
+   * @throws {System.InvalidOperationException} Thrown when operation is invalid
+   * @throws {System.ArgumentException} Thrown when argument is invalid
+   */
+  public DoOperation(): void {
+    TypeShimConfig.exports.N1.C1Interop.DoOperation(this.instance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_MissingClosingTagInParam_RendersNoJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Processes a value.
+                /// </summary>
+                /// <param name="value">This is <b>important text that never closes
+                public void Process(int value) {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public Process(value: number): void {
+    TypeShimConfig.exports.N1.C1Interop.Process(this.instance, value);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_MissingClosingTagInSummary_RendersNoJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// This method has <b>unclosed bold tag.
+                /// </summary>
+                public void DoSomething() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public DoSomething(): void {
+    TypeShimConfig.exports.N1.C1Interop.DoSomething(this.instance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_MalformedParamTag_RendersNoJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Processes a value.
+                /// </summary>
+                /// <param name="value">This has no closing param tag
+                /// <returns>The result</returns>
+                public int Process(int value) { return value; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public Process(value: number): number {
+    return TypeShimConfig.exports.N1.C1Interop.Process(this.instance, value);
+  }
+}
+
+""");
+    }
 }
