@@ -1674,4 +1674,58 @@ export class C1 extends ProxyBase {
 
 """);
     }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ListStartsOnNewLineWithoutBrTag_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// This method performs the following steps:
+                /// <list type="number">
+                /// <item><description>Step one</description></item>
+                /// <item><description>Step two</description></item>
+                /// </list>
+                /// After the steps are complete, it returns.
+                /// </summary>
+                public void Process() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  /**
+   * This method performs the following steps:
+   *
+   * - Step one
+   * - Step two
+   *
+   * After the steps are complete, it returns.
+   */
+  public Process(): void {
+    TypeShimConfig.exports.N1.C1Interop.Process(this.instance);
+  }
+}
+
+""");
+    }
 }

@@ -142,7 +142,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
         return throws;
     }
 
-    private string ProcessInnerTags(XElement element)
+    private string ProcessInnerTags(XElement element, bool insideInnerTag = false, bool normalizeWhitespace = true)
     {
         StringBuilder result = new();
 
@@ -154,25 +154,33 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             }
             else if (node is XElement innerElement)
             {
-                result.Append(TransformInnerTag(innerElement));
+                result.Append(TransformInnerTag(innerElement, insideInnerTag));
             }
         }
 
-        // Normalize whitespace but preserve explicit newlines from <br> tags
         string text = result.ToString();
-        // First, protect our newlines by temporarily replacing them
-        text = text.Replace("\n", "\u0000");
-        // Then normalize other whitespace
-        text = System.Text.RegularExpressions.Regex.Replace(text, @"\s+", " ");
-        // Restore our newlines
-        text = text.Replace("\u0000", "\n");
+        
+        // Only normalize whitespace at the top level (not in nested calls)
+        if (normalizeWhitespace)
+        {
+            // Normalize ALL whitespace (including XML source line breaks) to single spaces,
+            // but preserve explicit line breaks from <br> tags and lists which use a special marker
+            // Replace our special newline marker with a placeholder
+            text = text.Replace("\u0001", "\u0000");
+            // Normalize all whitespace (including regular newlines from XML source)
+            text = System.Text.RegularExpressions.Regex.Replace(text, @"\s+", " ");
+            // Restore our special newlines
+            text = text.Replace("\u0000", "\n");
+        }
+        
         return text;
     }
 
-    private string TransformInnerTag(XElement element)
+    private string TransformInnerTag(XElement element, bool insideInnerTag = false)
     {
         string tagName = element.Name.LocalName.ToLowerInvariant();
-        string innerText = ProcessInnerTags(element);
+        // When processing inner tags, always pass insideInnerTag=true for nested content
+        string innerText = ProcessInnerTags(element, insideInnerTag: true, normalizeWhitespace: false);
 
         return tagName switch
         {
@@ -189,8 +197,9 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             "i" => $"*{innerText}*",
             "em" => $"*{innerText}*",
             
-            // Line break
-            "br" => "\n",
+            // Line break - use special marker to distinguish from XML source newlines
+            // Inside inner tags, single newline; at top level, double newline for blank line
+            "br" => insideInnerTag ? "\u0001" : "\u0001\u0001",
             
             // References - just use the reference name
             "see" => GetReferenceText(element),
@@ -241,13 +250,15 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
         }
         
         // If no cref, get inner text
-        string innerText = ProcessInnerTags(element);
+        string innerText = ProcessInnerTags(element, insideInnerTag: false, normalizeWhitespace: false);
         return string.IsNullOrWhiteSpace(innerText) ? "" : $"`{innerText}`";
     }
 
     private string ProcessList(XElement listElement)
     {
         // Simplified list processing - extract listheader and items, one per line
+        // Lists start with two newlines to create a blank line before them
+        // and end with two newlines to create a blank line after them
         StringBuilder result = new();
         
         // Process listheader if present
@@ -259,10 +270,10 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             
             if (headerTerm != null || headerDescription != null)
             {
-                result.Append("\n- ");
+                result.Append("\u0001\u0001- ");
                 if (headerTerm != null)
                 {
-                    result.Append(ProcessInnerTags(headerTerm).Trim());
+                    result.Append(ProcessInnerTags(headerTerm, insideInnerTag: true, normalizeWhitespace: false).Trim());
                     if (headerDescription != null)
                     {
                         result.Append(": ");
@@ -270,21 +281,22 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 }
                 if (headerDescription != null)
                 {
-                    result.Append(ProcessInnerTags(headerDescription).Trim());
+                    result.Append(ProcessInnerTags(headerDescription, insideInnerTag: true, normalizeWhitespace: false).Trim());
                 }
             }
             else
             {
                 // If listheader has just text
-                string headerText = ProcessInnerTags(listHeader).Trim();
+                string headerText = ProcessInnerTags(listHeader, insideInnerTag: true, normalizeWhitespace: false).Trim();
                 if (!string.IsNullOrWhiteSpace(headerText))
                 {
-                    result.Append("\n").Append(headerText);
+                    result.Append("\u0001\u0001").Append(headerText);
                 }
             }
         }
         
-        // Process items
+        // Process items - first item gets two newlines (to create blank line), rest get one
+        bool isFirstItem = listHeader == null;
         foreach (XElement item in listElement.Elements("item"))
         {
             XElement? term = item.Element("term");
@@ -292,10 +304,10 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             
             if (term != null || description != null)
             {
-                result.Append("\n- ");
+                result.Append(isFirstItem ? "\u0001\u0001- " : "\u0001- ");
                 if (term != null)
                 {
-                    result.Append(ProcessInnerTags(term).Trim());
+                    result.Append(ProcessInnerTags(term, insideInnerTag: true, normalizeWhitespace: false).Trim());
                     if (description != null)
                     {
                         result.Append(": ");
@@ -303,19 +315,23 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 }
                 if (description != null)
                 {
-                    result.Append(ProcessInnerTags(description).Trim());
+                    result.Append(ProcessInnerTags(description, insideInnerTag: true, normalizeWhitespace: false).Trim());
                 }
             }
             else
             {
                 // If item has just text
-                string itemText = ProcessInnerTags(item).Trim();
+                string itemText = ProcessInnerTags(item, insideInnerTag: true, normalizeWhitespace: false).Trim();
                 if (!string.IsNullOrWhiteSpace(itemText))
                 {
-                    result.Append("\n").Append(itemText);
+                    result.Append(isFirstItem ? "\u0001\u0001" : "\u0001").Append(itemText);
                 }
             }
+            isFirstItem = false;
         }
+        
+        // Add trailing double newline to create blank line after list
+        result.Append("\u0001\u0001");
         
         return result.ToString();
     }
