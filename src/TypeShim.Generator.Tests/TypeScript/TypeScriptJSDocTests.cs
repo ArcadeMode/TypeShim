@@ -509,4 +509,178 @@ export class C1 extends ProxyBase {
 
 """);
     }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ComprehensiveClassWithVariousComments_RendersAllJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            
+            /// <summary>
+            /// A comprehensive calculator class demonstrating various comment types.
+            /// </summary>
+            /// <remarks>
+            /// This class showcases how different XML documentation elements are transformed
+            /// into JSDoc format for TypeScript consumption.
+            /// </remarks>
+            [TSExport]
+            public class Calculator
+            {
+                /// <summary>
+                /// Gets or sets the current result value.
+                /// </summary>
+                /// <remarks>
+                /// This property stores the most recent calculation result.
+                /// </remarks>
+                public double Result { get; set; }
+
+                /// <summary>
+                /// Gets the calculation history count.
+                /// </summary>
+                public int HistoryCount { get; }
+
+                /// <summary>
+                /// Adds two numbers and returns the sum.
+                /// </summary>
+                /// <param name="a">The first number to add</param>
+                /// <param name="b">The second number to add</param>
+                /// <returns>The sum of <paramref name="a"/> and <paramref name="b"/></returns>
+                public double Add(double a, double b) { return a + b; }
+
+                /// <summary>
+                /// Subtracts <paramref name="b"/> from <paramref name="a"/>.
+                /// </summary>
+                /// <param name="a">The minuend</param>
+                /// <param name="b">The subtrahend</param>
+                /// <returns>The difference between the two numbers</returns>
+                public double Subtract(double a, double b) { return a - b; }
+
+                /// <summary>
+                /// Divides one number by another with error handling.
+                /// </summary>
+                /// <param name="numerator">The number to be divided</param>
+                /// <param name="denominator">The number to divide by</param>
+                /// <returns>The quotient of the division</returns>
+                /// <exception cref="System.DivideByZeroException">Thrown when <paramref name="denominator"/> is zero</exception>
+                /// <exception cref="System.ArgumentException">Thrown when inputs are invalid</exception>
+                public double Divide(double numerator, double denominator) { return numerator / denominator; }
+
+                /// <summary>
+                /// Calculates the power of a number using the <c>Math.Pow</c> method.
+                /// </summary>
+                /// <param name="baseNumber">The base number</param>
+                /// <param name="exponent">The exponent to raise to</param>
+                /// <returns>The result of <paramref name="baseNumber"/> raised to <paramref name="exponent"/></returns>
+                public double Power(double baseNumber, double exponent) { return Math.Pow(baseNumber, exponent); }
+
+                /// <summary>
+                /// Clears all calculation history and resets the calculator.
+                /// </summary>
+                /// <remarks>
+                /// This operation cannot be undone. Use with caution.
+                /// </remarks>
+                public void Clear() { }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+/**
+ * A comprehensive calculator class demonstrating various comment types.
+ *
+ * This class showcases how different XML documentation elements are transformed into JSDoc format for TypeScript consumption.
+ */
+export class Calculator extends ProxyBase {
+  constructor(jsObject: Calculator.Initializer) {
+    super(TypeShimConfig.exports.N1.CalculatorInterop.ctor({ ...jsObject }));
+  }
+
+  /**
+   * Adds two numbers and returns the sum.
+   *
+   * @param a The first number to add
+   * @param b The second number to add
+   * @returns The sum of `a` and `b`
+   */
+  public Add(a: number, b: number): number {
+    return TypeShimConfig.exports.N1.CalculatorInterop.Add(this.instance, a, b);
+  }
+
+  /**
+   * Subtracts `b` from `a`.
+   *
+   * @param a The minuend
+   * @param b The subtrahend
+   * @returns The difference between the two numbers
+   */
+  public Subtract(a: number, b: number): number {
+    return TypeShimConfig.exports.N1.CalculatorInterop.Subtract(this.instance, a, b);
+  }
+
+  /**
+   * Divides one number by another with error handling.
+   *
+   * @param numerator The number to be divided
+   * @param denominator The number to divide by
+   * @returns The quotient of the division
+   * @throws {System.DivideByZeroException} Thrown when `denominator` is zero
+   * @throws {System.ArgumentException} Thrown when inputs are invalid
+   */
+  public Divide(numerator: number, denominator: number): number {
+    return TypeShimConfig.exports.N1.CalculatorInterop.Divide(this.instance, numerator, denominator);
+  }
+
+  /**
+   * Calculates the power of a number using the `Math.Pow` method.
+   *
+   * @param baseNumber The base number
+   * @param exponent The exponent to raise to
+   * @returns The result of `baseNumber` raised to `exponent`
+   */
+  public Power(baseNumber: number, exponent: number): number {
+    return TypeShimConfig.exports.N1.CalculatorInterop.Power(this.instance, baseNumber, exponent);
+  }
+
+  /**
+   * Clears all calculation history and resets the calculator.
+   *
+   * This operation cannot be undone. Use with caution.
+   */
+  public Clear(): void {
+    TypeShimConfig.exports.N1.CalculatorInterop.Clear(this.instance);
+  }
+  /**
+   * Gets or sets the current result value.
+   *
+   * This property stores the most recent calculation result.
+   */
+  public get Result(): number {
+    return TypeShimConfig.exports.N1.CalculatorInterop.get_Result(this.instance);
+  }
+
+  public set Result(value: number) {
+    TypeShimConfig.exports.N1.CalculatorInterop.set_Result(this.instance, value);
+  }
+
+  /**
+   * Gets the calculation history count.
+   */
+  public get HistoryCount(): number {
+    return TypeShimConfig.exports.N1.CalculatorInterop.get_HistoryCount(this.instance);
+  }
+}
+
+""");
+    }
 }
