@@ -179,6 +179,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             // Code tags
             "code" => $"`{innerText}`",
             "c" => $"`{innerText}`",
+            "example" => $"`{innerText}`",
             
             // Bold tags (not standard in JSDoc, but we can use markdown-style)
             "b" => $"**{innerText}**",
