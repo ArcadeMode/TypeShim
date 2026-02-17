@@ -784,7 +784,11 @@ export class C1 extends ProxyBase {
   }
 
   /**
-   * Processes items in the following order: - First: Initialize the system - Second: Process the data - Third: Clean up resources
+   * Processes items in the following order:
+   *
+   * - First: Initialize the system
+   * - Second: Process the data
+   * - Third: Clean up resources
    */
   public Process(): void {
     TypeShimConfig.exports.N1.C1Interop.Process(this.instance);
@@ -1106,7 +1110,11 @@ export class C1 extends ProxyBase {
   }
 
   /**
-   * Items to process: First item Second item Third item
+   * Items to process:
+   *
+   * First item
+   * Second item
+   * Third item
    */
   public Process(): void {
     TypeShimConfig.exports.N1.C1Interop.Process(this.instance);
@@ -1155,7 +1163,11 @@ export class C1 extends ProxyBase {
   }
 
   /**
-   * Key concepts: - First - Second - Third
+   * Key concepts:
+   *
+   * - First
+   * - Second
+   * - Third
    */
   public Process(): void {
     TypeShimConfig.exports.N1.C1Interop.Process(this.instance);
@@ -1262,7 +1274,11 @@ export class C1 extends ProxyBase {
   }
 
   /**
-   * Processing steps: - Step: Action - First: Initialize - Second: Process
+   * Processing steps:
+   *
+   * - Step: Action
+   * - First: Initialize
+   * - Second: Process
    */
   public Process(): void {
     TypeShimConfig.exports.N1.C1Interop.Process(this.instance);
@@ -1313,7 +1329,11 @@ export class C1 extends ProxyBase {
   }
 
   /**
-   * Options: - Available Options - Option A - Option B
+   * Options:
+   *
+   * - Available Options
+   * - Option A
+   * - Option B
    */
   public Process(): void {
     TypeShimConfig.exports.N1.C1Interop.Process(this.instance);
@@ -1362,7 +1382,202 @@ export class C1 extends ProxyBase {
   }
 
   /**
-   * Notes: Header text here
+   * Notes:
+   *
+   * Header text here
+   */
+  public Process(): void {
+    TypeShimConfig.exports.N1.C1Interop.Process(this.instance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_MethodWithBrTag_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// First line of text.<br/>
+                /// Second line of text.<br/>
+                /// Third line of text.
+                /// </summary>
+                public void Process() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  /**
+   * First line of text.
+   *
+   * Second line of text.
+   *
+   * Third line of text.
+   */
+  public Process(): void {
+    TypeShimConfig.exports.N1.C1Interop.Process(this.instance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_BrInsideBoldTag_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// This is <b>important text<br/>spanning multiple lines</b> in the description.
+                /// </summary>
+                public void Process() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  /**
+   * This is **important text
+   * spanning multiple lines** in the description.
+   */
+  public Process(): void {
+    TypeShimConfig.exports.N1.C1Interop.Process(this.instance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_BrInsideCodeTag_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Use this code: <c>var x = 1;<br/>var y = 2;</c> for initialization.
+                /// </summary>
+                public void Process() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  /**
+   * Use this code: `var x = 1;
+   * var y = 2;` for initialization.
+   */
+  public Process(): void {
+    TypeShimConfig.exports.N1.C1Interop.Process(this.instance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_BrInsideListItem_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Steps to follow:
+                /// <list type="bullet">
+                /// <item><description>First step<br/>with details</description></item>
+                /// <item><description>Second step<br/>with more info</description></item>
+                /// </list>
+                /// </summary>
+                public void Process() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  /**
+   * Steps to follow:
+   *
+   * - First step
+   * with details
+   * - Second step
+   * with more info
    */
   public Process(): void {
     TypeShimConfig.exports.N1.C1Interop.Process(this.instance);

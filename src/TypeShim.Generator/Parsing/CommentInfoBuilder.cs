@@ -158,9 +158,14 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             }
         }
 
-        // Normalize whitespace: replace multiple whitespaces/newlines with single space
+        // Normalize whitespace but preserve explicit newlines from <br> tags
         string text = result.ToString();
+        // First, protect our newlines by temporarily replacing them
+        text = text.Replace("\n", "\u0000");
+        // Then normalize other whitespace
         text = System.Text.RegularExpressions.Regex.Replace(text, @"\s+", " ");
+        // Restore our newlines
+        text = text.Replace("\u0000", "\n");
         return text;
     }
 
@@ -182,6 +187,9 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             // Italic tags
             "i" => $"*{innerText}*",
             "em" => $"*{innerText}*",
+            
+            // Line break
+            "br" => "\n",
             
             // References - just use the reference name
             "see" => GetReferenceText(element),
@@ -238,7 +246,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
 
     private string ProcessList(XElement listElement)
     {
-        // Simplified list processing - extract listheader and items
+        // Simplified list processing - extract listheader and items, one per line
         StringBuilder result = new();
         
         // Process listheader if present
@@ -250,7 +258,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             
             if (headerTerm != null || headerDescription != null)
             {
-                result.Append("- ");
+                result.Append("\n- ");
                 if (headerTerm != null)
                 {
                     result.Append(ProcessInnerTags(headerTerm).Trim());
@@ -263,7 +271,6 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 {
                     result.Append(ProcessInnerTags(headerDescription).Trim());
                 }
-                result.Append(" ");
             }
             else
             {
@@ -271,7 +278,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 string headerText = ProcessInnerTags(listHeader).Trim();
                 if (!string.IsNullOrWhiteSpace(headerText))
                 {
-                    result.Append(headerText).Append(" ");
+                    result.Append("\n").Append(headerText);
                 }
             }
         }
@@ -284,7 +291,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             
             if (term != null || description != null)
             {
-                result.Append("- ");
+                result.Append("\n- ");
                 if (term != null)
                 {
                     result.Append(ProcessInnerTags(term).Trim());
@@ -297,7 +304,6 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 {
                     result.Append(ProcessInnerTags(description).Trim());
                 }
-                result.Append(" ");
             }
             else
             {
@@ -305,7 +311,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 string itemText = ProcessInnerTags(item).Trim();
                 if (!string.IsNullOrWhiteSpace(itemText))
                 {
-                    result.Append(itemText).Append(" ");
+                    result.Append("\n").Append(itemText);
                 }
             }
         }
