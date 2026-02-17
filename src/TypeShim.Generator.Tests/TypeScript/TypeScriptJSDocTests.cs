@@ -1813,4 +1813,56 @@ export class C1 extends ProxyBase {
 
 """);
     }
+
+    [Test]
+    public void TypeScriptUserClassProxy_SeeTagWithNestedClass_PreservesOuterClassName()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            
+            public class OuterClass
+            {
+                public class InnerClass
+                {
+                }
+            }
+            
+            /// <summary>
+            /// This method references <see cref="OuterClass.InnerClass"/> in the documentation.
+            /// </summary>
+            [TSExport]
+            public class C1
+            {
+                public void DoSomething() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+/**
+ * This method references `OuterClass.InnerClass` in the documentation.
+ */
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public DoSomething(): void {
+    TypeShimConfig.exports.N1.C1Interop.DoSomething(this.instance);
+  }
+}
+
+""");
+    }
 }
