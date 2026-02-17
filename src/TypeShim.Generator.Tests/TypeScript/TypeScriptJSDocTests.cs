@@ -1717,4 +1717,100 @@ export class C1 extends ProxyBase {
 
 """);
     }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ParamWithEmptyName_IgnoresParam()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Method with empty param name.
+                /// </summary>
+                /// <param name="">This param should be ignored</param>
+                /// <param name="value">This param should be included</param>
+                public void DoSomething(int value) {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  /**
+   * Method with empty param name.
+   *
+   * @param value This param should be included
+   */
+  public DoSomething(value: number): void {
+    TypeShimConfig.exports.N1.C1Interop.DoSomething(this.instance, value);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ExceptionWithEmptyCref_IgnoresException()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Method with empty exception cref.
+                /// </summary>
+                /// <exception cref="">This exception should be ignored</exception>
+                /// <exception cref="System.InvalidOperationException">This exception should be included</exception>
+                public void DoSomething() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  /**
+   * Method with empty exception cref.
+   *
+   * @throws {System.InvalidOperationException} This exception should be included
+   */
+  public DoSomething(): void {
+    TypeShimConfig.exports.N1.C1Interop.DoSomething(this.instance);
+  }
+}
+
+""");
+    }
 }

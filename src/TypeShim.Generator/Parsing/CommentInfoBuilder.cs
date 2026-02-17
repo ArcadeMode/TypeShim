@@ -15,8 +15,6 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             return null;
         }
 
-        // Strip all line breaks from the XML string before parsing
-        // This simplifies the implementation - we only add line breaks where explicitly needed
         xmlCommentString = xmlCommentString.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ");
 
         try
@@ -34,54 +32,53 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             string? returns = BuildReturns(root);
             IReadOnlyCollection<ThrowsCommentInfo> throws = BuildThrows(root);
 
-            // Only return CommentInfo if there's any actual content
-            if (string.IsNullOrWhiteSpace(description) && 
-                parameters.Count == 0 && 
-                string.IsNullOrWhiteSpace(returns) && 
-                throws.Count == 0)
-            {
-                return null;
-            }
-
-            return new CommentInfo
+            CommentInfo commentInfo = new()
             {
                 Description = description,
                 Parameters = parameters,
                 Returns = returns,
                 Throws = throws
             };
+
+            return IsEmpty(commentInfo) ? null : commentInfo;
         }
         catch
         {
-            // If XML parsing fails, return null
             return null;
         }
+    }
+
+    private static bool IsEmpty(CommentInfo commentInfo)
+    {
+        return string.IsNullOrWhiteSpace(commentInfo.Description) && 
+               commentInfo.Parameters.Count == 0 && 
+               string.IsNullOrWhiteSpace(commentInfo.Returns) && 
+               commentInfo.Throws.Count == 0;
     }
 
     private string BuildDescription(XElement root)
     {
         StringBuilder description = new();
 
-        // Get summary tag
         XElement? summary = root.Element("summary");
         if (summary != null)
         {
-            string summaryText = ProcessInnerTags(summary);
-            description.Append(summaryText.Trim());
+            description.Append(ProcessInnerTags(summary).Trim());
         }
 
-        // Get remarks tag
         XElement? remarks = root.Element("remarks");
-        if (remarks != null)
+        if (remarks == null)
         {
-            string remarksText = ProcessInnerTags(remarks);
-            if (description.Length > 0 && !string.IsNullOrWhiteSpace(remarksText))
-            {
-                description.Append(Environment.NewLine);
-                description.Append(Environment.NewLine);
-            }
-            description.Append(remarksText.Trim());
+            return description.ToString();
         }
+
+        string remarksText = ProcessInnerTags(remarks);
+        if (description.Length > 0 && !string.IsNullOrWhiteSpace(remarksText))
+        {
+            description.Append(Environment.NewLine);
+            description.Append(Environment.NewLine);
+        }
+        description.Append(remarksText.Trim());
 
         return description.ToString();
     }
@@ -93,15 +90,17 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
         foreach (XElement param in root.Elements("param"))
         {
             string? name = param.Attribute("name")?.Value;
-            if (!string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name))
             {
-                string description = ProcessInnerTags(param).Trim();
-                parameters.Add(new ParameterCommentInfo
-                {
-                    Name = name,
-                    Description = description
-                });
+                continue;
             }
+
+            string description = ProcessInnerTags(param).Trim();
+            parameters.Add(new ParameterCommentInfo
+            {
+                Name = name,
+                Description = description
+            });
         }
 
         return parameters;
@@ -126,25 +125,39 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
         foreach (XElement exception in root.Elements("exception"))
         {
             string? cref = exception.Attribute("cref")?.Value;
-            if (!string.IsNullOrWhiteSpace(cref))
+            if (string.IsNullOrWhiteSpace(cref))
             {
-                // Remove "T:" prefix from cref if present
-                string type = cref.StartsWith("T:") ? cref[2..] : cref;
-                // Remove "!:" prefix for unknown/error types
-                if (type.StartsWith("!:"))
-                {
-                    type = type[2..];
-                }
-                string description = ProcessInnerTags(exception).Trim();
-                throws.Add(new ThrowsCommentInfo
-                {
-                    Type = type,
-                    Description = description
-                });
+                continue;
             }
+
+            string type = ExtractTypeFromCref(cref);
+            if (string.IsNullOrWhiteSpace(type))
+            {
+                continue;
+            }
+
+            string description = ProcessInnerTags(exception).Trim();
+            throws.Add(new ThrowsCommentInfo
+            {
+                Type = type,
+                Description = description
+            });
         }
 
         return throws;
+    }
+
+    private static string ExtractTypeFromCref(string cref)
+    {
+        string[] parts = cref.Split(':');
+        string type = parts[^1];
+        
+        if (type.StartsWith("!"))
+        {
+            type = type[1..];
+        }
+        
+        return type.Trim();
     }
 
     private string ProcessInnerTags(XElement element)
@@ -178,37 +191,14 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
 
         return tagName switch
         {
-            // Code tags
-            "code" => $"`{innerText}`",
-            "c" => $"`{innerText}`",
-            "example" => $"`{innerText}`",
-            
-            // Bold tags (not standard in JSDoc, but we can use markdown-style)
-            "b" => $"**{innerText}**",
-            "strong" => $"**{innerText}**",
-            
-            // Italic tags
-            "i" => $"*{innerText}*",
-            "em" => $"*{innerText}*",
-            
-            // Line break
+            "code" or "c" or "example" => $"`{innerText}`",
+            "b" or "strong" => $"**{innerText}**",
+            "i" or "em" => $"*{innerText}*",
             "br" => Environment.NewLine,
-            
-            // References - just use the reference name
-            "see" => GetReferenceText(element),
-            "seealso" => GetReferenceText(element),
-            
-            // Parameter references
-            "paramref" => $"`{element.Attribute("name")?.Value ?? ""}`",
-            "typeparamref" => $"`{element.Attribute("name")?.Value ?? ""}`",
-            
-            // Para (paragraph) - just return the text
+            "see" or "seealso" => GetReferenceText(element),
+            "paramref" or "typeparamref" => $"`{element.Attribute("name")?.Value ?? ""}`",
             "para" => innerText,
-            
-            // Lists - simplified representation
             "list" => ProcessList(element),
-            
-            // Default: just return inner text
             _ => innerText
         };
     }
@@ -249,83 +239,53 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
 
     private string ProcessList(XElement listElement)
     {
-        // Simplified list processing - extract listheader and items, one per line
         StringBuilder result = new();
-        
-        // Lists start on a new line
         result.Append(Environment.NewLine);
         
-        // Process listheader if present
         XElement? listHeader = listElement.Element("listheader");
         if (listHeader != null)
         {
-            XElement? headerTerm = listHeader.Element("term");
-            XElement? headerDescription = listHeader.Element("description");
-            
-            if (headerTerm != null || headerDescription != null)
-            {
-                result.Append("- ");
-                if (headerTerm != null)
-                {
-                    result.Append(ProcessInnerTags(headerTerm).Trim());
-                    if (headerDescription != null)
-                    {
-                        result.Append(": ");
-                    }
-                }
-                if (headerDescription != null)
-                {
-                    result.Append(ProcessInnerTags(headerDescription).Trim());
-                }
-                result.Append(Environment.NewLine);
-            }
-            else
-            {
-                // If listheader has just text
-                string headerText = ProcessInnerTags(listHeader).Trim();
-                if (!string.IsNullOrWhiteSpace(headerText))
-                {
-                    result.Append(headerText);
-                    result.Append(Environment.NewLine);
-                }
-            }
+            RenderListItem(listHeader, result);
         }
         
-        // Process items
         foreach (XElement item in listElement.Elements("item"))
         {
-            XElement? term = item.Element("term");
-            XElement? description = item.Element("description");
-            
-            if (term != null || description != null)
-            {
-                result.Append("- ");
-                if (term != null)
-                {
-                    result.Append(ProcessInnerTags(term).Trim());
-                    if (description != null)
-                    {
-                        result.Append(": ");
-                    }
-                }
-                if (description != null)
-                {
-                    result.Append(ProcessInnerTags(description).Trim());
-                }
-                result.Append(Environment.NewLine);
-            }
-            else
-            {
-                // If item has just text
-                string itemText = ProcessInnerTags(item).Trim();
-                if (!string.IsNullOrWhiteSpace(itemText))
-                {
-                    result.Append(itemText);
-                    result.Append(Environment.NewLine);
-                }
-            }
+            RenderListItem(item, result);
         }
         
         return result.ToString();
+    }
+
+    private void RenderListItem(XElement item, StringBuilder result)
+    {
+        XElement? term = item.Element("term");
+        XElement? description = item.Element("description");
+        
+        if (term != null || description != null)
+        {
+            result.Append("- ");
+            if (term != null)
+            {
+                result.Append(ProcessInnerTags(term).Trim());
+                if (description != null)
+                {
+                    result.Append(": ");
+                }
+            }
+            if (description != null)
+            {
+                result.Append(ProcessInnerTags(description).Trim());
+            }
+            result.Append(Environment.NewLine);
+        }
+        else
+        {
+            string itemText = ProcessInnerTags(item).Trim();
+            if (!string.IsNullOrWhiteSpace(itemText))
+            {
+                result.Append(itemText);
+                result.Append(Environment.NewLine);
+            }
+        }
     }
 }
