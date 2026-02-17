@@ -124,7 +124,12 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             if (!string.IsNullOrWhiteSpace(cref))
             {
                 // Remove "T:" prefix from cref if present
-                string type = cref.StartsWith("T:") ? cref.Substring(2) : cref;
+                string type = cref.StartsWith("T:") ? cref[2..] : cref;
+                // Remove "!:" prefix for unknown/error types
+                if (type.StartsWith("!:"))
+                {
+                    type = type[2..];
+                }
                 string description = ProcessInnerTags(exception).Trim();
                 throws.Add(new ThrowsCommentInfo
                 {
@@ -233,9 +238,46 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
 
     private string ProcessList(XElement listElement)
     {
-        // Simplified list processing - just extract items
+        // Simplified list processing - extract listheader and items
         StringBuilder result = new();
-        foreach (XElement item in listElement.Descendants("item"))
+        
+        // Process listheader if present
+        XElement? listHeader = listElement.Element("listheader");
+        if (listHeader != null)
+        {
+            XElement? headerTerm = listHeader.Element("term");
+            XElement? headerDescription = listHeader.Element("description");
+            
+            if (headerTerm != null || headerDescription != null)
+            {
+                result.Append("- ");
+                if (headerTerm != null)
+                {
+                    result.Append(ProcessInnerTags(headerTerm).Trim());
+                    if (headerDescription != null)
+                    {
+                        result.Append(": ");
+                    }
+                }
+                if (headerDescription != null)
+                {
+                    result.Append(ProcessInnerTags(headerDescription).Trim());
+                }
+                result.Append(" ");
+            }
+            else
+            {
+                // If listheader has just text
+                string headerText = ProcessInnerTags(listHeader).Trim();
+                if (!string.IsNullOrWhiteSpace(headerText))
+                {
+                    result.Append(headerText).Append(" ");
+                }
+            }
+        }
+        
+        // Process items
+        foreach (XElement item in listElement.Elements("item"))
         {
             XElement? term = item.Element("term");
             XElement? description = item.Element("description");
@@ -257,7 +299,17 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 }
                 result.Append(" ");
             }
+            else
+            {
+                // If item has just text
+                string itemText = ProcessInnerTags(item).Trim();
+                if (!string.IsNullOrWhiteSpace(itemText))
+                {
+                    result.Append(itemText).Append(" ");
+                }
+            }
         }
+        
         return result.ToString();
     }
 }
