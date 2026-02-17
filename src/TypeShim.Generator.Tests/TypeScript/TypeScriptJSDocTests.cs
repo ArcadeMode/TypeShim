@@ -1019,4 +1019,51 @@ export class C1 extends ProxyBase {
 
 """);
     }
+
+    [Test]
+    public void TypeScriptUserClassProxy_UnknownExceptionType_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Processes data that may fail.
+                /// </summary>
+                /// <exception cref="MissingImportException">Thrown when import is missing</exception>
+                public void ProcessData() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  /**
+   * Processes data that may fail.
+   *
+   * @throws {!:MissingImportException} Thrown when import is missing
+   */
+  public ProcessData(): void {
+    TypeShimConfig.exports.N1.C1Interop.ProcessData(this.instance);
+  }
+}
+
+""");
+    }
 }
