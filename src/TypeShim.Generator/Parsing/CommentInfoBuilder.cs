@@ -27,33 +27,20 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 return null;
             }
 
-            string description = BuildDescription(root);
-            IReadOnlyCollection<ParameterCommentInfo> parameters = BuildParameters(root);
-            string? returns = BuildReturns(root);
-            IReadOnlyCollection<ThrowsCommentInfo> throws = BuildThrows(root);
-
             CommentInfo commentInfo = new()
             {
-                Description = description,
-                Parameters = parameters,
-                Returns = returns,
-                Throws = throws
+                Description = BuildDescription(root),
+                Parameters = BuildParameters(root),
+                Returns = BuildReturns(root),
+                Throws = BuildThrows(root)
             };
 
-            return IsEmpty(commentInfo) ? null : commentInfo;
+            return commentInfo.IsEmpty() ? null : commentInfo;
         }
         catch
         {
             return null;
         }
-    }
-
-    private static bool IsEmpty(CommentInfo commentInfo)
-    {
-        return string.IsNullOrWhiteSpace(commentInfo.Description) && 
-               commentInfo.Parameters.Count == 0 && 
-               string.IsNullOrWhiteSpace(commentInfo.Returns) && 
-               commentInfo.Throws.Count == 0;
     }
 
     private string BuildDescription(XElement root)
@@ -63,7 +50,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
         XElement? summary = root.Element("summary");
         if (summary != null)
         {
-            description.Append(ProcessInnerTags(summary).Trim());
+            description.Append(ProcessFormatTags(summary).Trim());
         }
 
         XElement? remarks = root.Element("remarks");
@@ -72,7 +59,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             return description.ToString();
         }
 
-        string remarksText = ProcessInnerTags(remarks);
+        string remarksText = ProcessFormatTags(remarks);
         if (description.Length > 0 && !string.IsNullOrWhiteSpace(remarksText))
         {
             description.Append(Environment.NewLine);
@@ -95,7 +82,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 continue;
             }
 
-            string description = ProcessInnerTags(param).Trim();
+            string description = ProcessFormatTags(param).Trim();
             parameters.Add(new ParameterCommentInfo
             {
                 Name = name,
@@ -114,7 +101,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             return null;
         }
 
-        string returnsText = ProcessInnerTags(returns).Trim();
+        string returnsText = ProcessFormatTags(returns).Trim();
         return string.IsNullOrWhiteSpace(returnsText) ? null : returnsText;
     }
 
@@ -136,7 +123,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 continue;
             }
 
-            string description = ProcessInnerTags(exception).Trim();
+            string description = ProcessFormatTags(exception).Trim();
             throws.Add(new ThrowsCommentInfo
             {
                 Type = type,
@@ -160,7 +147,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
         return type.Trim();
     }
 
-    private string ProcessInnerTags(XElement element)
+    private string ProcessFormatTags(XElement element)
     {
         StringBuilder result = new();
 
@@ -187,7 +174,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
     private string TransformInnerTag(XElement element)
     {
         string tagName = element.Name.LocalName.ToLowerInvariant();
-        string innerText = ProcessInnerTags(element);
+        string innerText = ProcessFormatTags(element);
 
         return tagName switch
         {
@@ -208,32 +195,26 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
         string? cref = element.Attribute("cref")?.Value;
         if (!string.IsNullOrWhiteSpace(cref))
         {
-            // Remove prefix like "T:", "M:", "P:" etc.
-            int colonIndex = cref.IndexOf(':');
-            if (colonIndex >= 0 && colonIndex < cref.Length - 1)
-            {
-                cref = cref[(colonIndex + 1)..];
-            }
+            string type = ExtractTypeFromCref(cref);
             
             // Get just the type/member name without namespace
-            int lastDotIndex = cref.LastIndexOf('.');
-            if (lastDotIndex >= 0 && lastDotIndex < cref.Length - 1)
+            int lastDotIndex = type.LastIndexOf('.');
+            if (lastDotIndex >= 0 && lastDotIndex < type.Length - 1)
             {
-                cref = cref[(lastDotIndex + 1)..];
+                type = type[(lastDotIndex + 1)..];
             }
             
             // Remove parameter list if present (e.g., "Method(System.String)" -> "Method")
-            int parenIndex = cref.IndexOf('(');
+            int parenIndex = type.IndexOf('(');
             if (parenIndex >= 0)
             {
-                cref = cref[..parenIndex];
+                type = type[..parenIndex];
             }
             
-            return $"`{cref}`";
+            return $"`{type}`";
         }
         
-        // If no cref, get inner text
-        string innerText = ProcessInnerTags(element);
+        string innerText = ProcessFormatTags(element);
         return string.IsNullOrWhiteSpace(innerText) ? "" : $"`{innerText}`";
     }
 
@@ -266,7 +247,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             result.Append("- ");
             if (term != null)
             {
-                result.Append(ProcessInnerTags(term).Trim());
+                result.Append(ProcessFormatTags(term).Trim());
                 if (description != null)
                 {
                     result.Append(": ");
@@ -274,13 +255,13 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             }
             if (description != null)
             {
-                result.Append(ProcessInnerTags(description).Trim());
+                result.Append(ProcessFormatTags(description).Trim());
             }
             result.Append(Environment.NewLine);
         }
         else
         {
-            string itemText = ProcessInnerTags(item).Trim();
+            string itemText = ProcessFormatTags(item).Trim();
             if (!string.IsNullOrWhiteSpace(itemText))
             {
                 result.Append(itemText);

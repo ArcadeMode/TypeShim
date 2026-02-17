@@ -19,14 +19,13 @@ internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSym
         }
 
         IReadOnlyCollection<MethodParameterInfo> parameters = [.. parameterInfoBuilder.Build()];
-        CommentInfo? comment = new CommentInfoBuilder(memberMethod).Build();
         return new MethodInfo()
         {
             IsStatic = memberMethod.IsStatic,
             Name = memberMethod.Name,
             Parameters = parameters,
             ReturnType = typeInfoBuilder.Build(),
-            Comment = comment,
+            Comment = new CommentInfoBuilder(memberMethod).Build(),
         };
     }
 }

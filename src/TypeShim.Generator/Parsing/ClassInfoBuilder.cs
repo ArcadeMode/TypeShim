@@ -10,7 +10,6 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
         ThrowIfContainsRequiredFields();
 
         List<PropertyInfo> properties = BuildProperties();
-        CommentInfo? comment = new CommentInfoBuilder(classSymbol).Build();
         return new ClassInfo
         {
             Namespace = classSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
@@ -20,7 +19,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
             Constructor = BuildConstructor(properties),
             Methods = BuildMethods(),
             Properties = properties,
-            Comment = comment,
+            Comment = new CommentInfoBuilder(classSymbol).Build(),
         };
     }
 

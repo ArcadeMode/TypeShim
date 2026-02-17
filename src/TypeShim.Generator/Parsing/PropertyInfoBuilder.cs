@@ -37,7 +37,6 @@ internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropert
             }
         }
 
-        CommentInfo? comment = new CommentInfoBuilder(propertySymbol).Build();
         return new PropertyInfo
         {
             Name = propertySymbol.Name,
@@ -47,7 +46,7 @@ internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropert
             GetMethod = getMethod,
             SetMethod = setMethod,
             InitMethod = initMethod,
-            Comment = comment,
+            Comment = new CommentInfoBuilder(propertySymbol).Build(),
         };
     }
 }
