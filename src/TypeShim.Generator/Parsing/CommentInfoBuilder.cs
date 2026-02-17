@@ -15,6 +15,10 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             return null;
         }
 
+        // Strip all line breaks from the XML string before parsing
+        // This simplifies the implementation - we only add line breaks where explicitly needed
+        xmlCommentString = xmlCommentString.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ");
+
         try
         {
             XDocument xmlDoc = XDocument.Parse(xmlCommentString);
@@ -73,7 +77,8 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             string remarksText = ProcessInnerTags(remarks);
             if (description.Length > 0 && !string.IsNullOrWhiteSpace(remarksText))
             {
-                description.Append("\n\n");
+                description.Append(Environment.NewLine);
+                description.Append(Environment.NewLine);
             }
             description.Append(remarksText.Trim());
         }
@@ -142,7 +147,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
         return throws;
     }
 
-    private string ProcessInnerTags(XElement element, bool insideInnerTag = false, bool normalizeWhitespace = true)
+    private string ProcessInnerTags(XElement element)
     {
         StringBuilder result = new();
 
@@ -154,33 +159,22 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             }
             else if (node is XElement innerElement)
             {
-                result.Append(TransformInnerTag(innerElement, insideInnerTag));
+                result.Append(TransformInnerTag(innerElement));
             }
         }
 
         string text = result.ToString();
         
-        // Only normalize whitespace at the top level (not in nested calls)
-        if (normalizeWhitespace)
-        {
-            // Normalize ALL whitespace (including XML source line breaks) to single spaces,
-            // but preserve explicit line breaks from <br> tags and lists which use a special marker
-            // Replace our special newline marker with a placeholder
-            text = text.Replace("\u0001", "\u0000");
-            // Normalize all whitespace (including regular newlines from XML source)
-            text = System.Text.RegularExpressions.Regex.Replace(text, @"\s+", " ");
-            // Restore our special newlines
-            text = text.Replace("\u0000", "\n");
-        }
+        // Normalize whitespace (multiple spaces/tabs become single space)
+        text = System.Text.RegularExpressions.Regex.Replace(text, @"[ \t]+", " ");
         
         return text;
     }
 
-    private string TransformInnerTag(XElement element, bool insideInnerTag = false)
+    private string TransformInnerTag(XElement element)
     {
         string tagName = element.Name.LocalName.ToLowerInvariant();
-        // When processing inner tags, always pass insideInnerTag=true for nested content
-        string innerText = ProcessInnerTags(element, insideInnerTag: true, normalizeWhitespace: false);
+        string innerText = ProcessInnerTags(element);
 
         return tagName switch
         {
@@ -197,9 +191,8 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             "i" => $"*{innerText}*",
             "em" => $"*{innerText}*",
             
-            // Line break - use special marker to distinguish from XML source newlines
-            // Inside inner tags, single newline; at top level, double newline for blank line
-            "br" => insideInnerTag ? "\u0001" : "\u0001\u0001",
+            // Line break
+            "br" => Environment.NewLine,
             
             // References - just use the reference name
             "see" => GetReferenceText(element),
@@ -250,16 +243,17 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
         }
         
         // If no cref, get inner text
-        string innerText = ProcessInnerTags(element, insideInnerTag: false, normalizeWhitespace: false);
+        string innerText = ProcessInnerTags(element);
         return string.IsNullOrWhiteSpace(innerText) ? "" : $"`{innerText}`";
     }
 
     private string ProcessList(XElement listElement)
     {
         // Simplified list processing - extract listheader and items, one per line
-        // Lists start with two newlines to create a blank line before them
-        // and end with two newlines to create a blank line after them
         StringBuilder result = new();
+        
+        // Lists start on a new line
+        result.Append(Environment.NewLine);
         
         // Process listheader if present
         XElement? listHeader = listElement.Element("listheader");
@@ -270,10 +264,10 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             
             if (headerTerm != null || headerDescription != null)
             {
-                result.Append("\u0001\u0001- ");
+                result.Append("- ");
                 if (headerTerm != null)
                 {
-                    result.Append(ProcessInnerTags(headerTerm, insideInnerTag: true, normalizeWhitespace: false).Trim());
+                    result.Append(ProcessInnerTags(headerTerm).Trim());
                     if (headerDescription != null)
                     {
                         result.Append(": ");
@@ -281,22 +275,23 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 }
                 if (headerDescription != null)
                 {
-                    result.Append(ProcessInnerTags(headerDescription, insideInnerTag: true, normalizeWhitespace: false).Trim());
+                    result.Append(ProcessInnerTags(headerDescription).Trim());
                 }
+                result.Append(Environment.NewLine);
             }
             else
             {
                 // If listheader has just text
-                string headerText = ProcessInnerTags(listHeader, insideInnerTag: true, normalizeWhitespace: false).Trim();
+                string headerText = ProcessInnerTags(listHeader).Trim();
                 if (!string.IsNullOrWhiteSpace(headerText))
                 {
-                    result.Append("\u0001\u0001").Append(headerText);
+                    result.Append(headerText);
+                    result.Append(Environment.NewLine);
                 }
             }
         }
         
-        // Process items - first item gets two newlines (to create blank line), rest get one
-        bool isFirstItem = listHeader == null;
+        // Process items
         foreach (XElement item in listElement.Elements("item"))
         {
             XElement? term = item.Element("term");
@@ -304,10 +299,10 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             
             if (term != null || description != null)
             {
-                result.Append(isFirstItem ? "\u0001\u0001- " : "\u0001- ");
+                result.Append("- ");
                 if (term != null)
                 {
-                    result.Append(ProcessInnerTags(term, insideInnerTag: true, normalizeWhitespace: false).Trim());
+                    result.Append(ProcessInnerTags(term).Trim());
                     if (description != null)
                     {
                         result.Append(": ");
@@ -315,23 +310,21 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 }
                 if (description != null)
                 {
-                    result.Append(ProcessInnerTags(description, insideInnerTag: true, normalizeWhitespace: false).Trim());
+                    result.Append(ProcessInnerTags(description).Trim());
                 }
+                result.Append(Environment.NewLine);
             }
             else
             {
                 // If item has just text
-                string itemText = ProcessInnerTags(item, insideInnerTag: true, normalizeWhitespace: false).Trim();
+                string itemText = ProcessInnerTags(item).Trim();
                 if (!string.IsNullOrWhiteSpace(itemText))
                 {
-                    result.Append(isFirstItem ? "\u0001\u0001" : "\u0001").Append(itemText);
+                    result.Append(itemText);
+                    result.Append(Environment.NewLine);
                 }
             }
-            isFirstItem = false;
         }
-        
-        // Add trailing double newline to create blank line after list
-        result.Append("\u0001\u0001");
         
         return result.ToString();
     }

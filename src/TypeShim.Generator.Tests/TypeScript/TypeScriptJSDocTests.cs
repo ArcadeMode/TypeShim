@@ -785,7 +785,6 @@ export class C1 extends ProxyBase {
 
   /**
    * Processes items in the following order:
-   *
    * - First: Initialize the system
    * - Second: Process the data
    * - Third: Clean up resources
@@ -1111,7 +1110,6 @@ export class C1 extends ProxyBase {
 
   /**
    * Items to process:
-   *
    * First item
    * Second item
    * Third item
@@ -1164,7 +1162,6 @@ export class C1 extends ProxyBase {
 
   /**
    * Key concepts:
-   *
    * - First
    * - Second
    * - Third
@@ -1275,7 +1272,6 @@ export class C1 extends ProxyBase {
 
   /**
    * Processing steps:
-   *
    * - Step: Action
    * - First: Initialize
    * - Second: Process
@@ -1330,7 +1326,6 @@ export class C1 extends ProxyBase {
 
   /**
    * Options:
-   *
    * - Available Options
    * - Option A
    * - Option B
@@ -1383,7 +1378,6 @@ export class C1 extends ProxyBase {
 
   /**
    * Notes:
-   *
    * Header text here
    */
   public Process(): void {
@@ -1431,9 +1425,7 @@ export class C1 extends ProxyBase {
 
   /**
    * First line of text.
-   *
    * Second line of text.
-   *
    * Third line of text.
    */
   public Process(): void {
@@ -1573,7 +1565,6 @@ export class C1 extends ProxyBase {
 
   /**
    * Steps to follow:
-   *
    * - First step
    * with details
    * - Second step
@@ -1715,10 +1706,8 @@ export class C1 extends ProxyBase {
 
   /**
    * This method performs the following steps:
-   *
    * - Step one
    * - Step two
-   *
    * After the steps are complete, it returns.
    */
   public Process(): void {
