@@ -511,76 +511,18 @@ export class C1 extends ProxyBase {
     }
 
     [Test]
-    public void TypeScriptUserClassProxy_ComprehensiveClassWithVariousComments_RendersAllJSDoc()
+    public void TypeScriptUserClassProxy_MethodWithBoldTag_RendersJSDoc()
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
-            
-            /// <summary>
-            /// A comprehensive calculator class demonstrating various comment types.
-            /// </summary>
-            /// <remarks>
-            /// This class showcases how different XML documentation elements are transformed
-            /// into JSDoc format for TypeScript consumption.
-            /// </remarks>
             [TSExport]
-            public class Calculator
+            public class C1
             {
                 /// <summary>
-                /// Gets or sets the current result value.
+                /// This is <b>important</b> information.
                 /// </summary>
-                /// <remarks>
-                /// This property stores the most recent calculation result.
-                /// </remarks>
-                public double Result { get; set; }
-
-                /// <summary>
-                /// Gets the calculation history count.
-                /// </summary>
-                public int HistoryCount { get; }
-
-                /// <summary>
-                /// Adds two numbers and returns the sum.
-                /// </summary>
-                /// <param name="a">The first number to add</param>
-                /// <param name="b">The second number to add</param>
-                /// <returns>The sum of <paramref name="a"/> and <paramref name="b"/></returns>
-                public double Add(double a, double b) { return a + b; }
-
-                /// <summary>
-                /// Subtracts <paramref name="b"/> from <paramref name="a"/>.
-                /// </summary>
-                /// <param name="a">The minuend</param>
-                /// <param name="b">The subtrahend</param>
-                /// <returns>The difference between the two numbers</returns>
-                public double Subtract(double a, double b) { return a - b; }
-
-                /// <summary>
-                /// Divides one number by another with error handling.
-                /// </summary>
-                /// <param name="numerator">The number to be divided</param>
-                /// <param name="denominator">The number to divide by</param>
-                /// <returns>The quotient of the division</returns>
-                /// <exception cref="System.DivideByZeroException">Thrown when <paramref name="denominator"/> is zero</exception>
-                /// <exception cref="System.ArgumentException">Thrown when inputs are invalid</exception>
-                public double Divide(double numerator, double denominator) { return numerator / denominator; }
-
-                /// <summary>
-                /// Calculates the power of a number using the <c>Math.Pow</c> method.
-                /// </summary>
-                /// <param name="baseNumber">The base number</param>
-                /// <param name="exponent">The exponent to raise to</param>
-                /// <returns>The result of <paramref name="baseNumber"/> raised to <paramref name="exponent"/></returns>
-                public double Power(double baseNumber, double exponent) { return Math.Pow(baseNumber, exponent); }
-
-                /// <summary>
-                /// Clears all calculation history and resets the calculator.
-                /// </summary>
-                /// <remarks>
-                /// This operation cannot be undone. Use with caution.
-                /// </remarks>
-                public void Clear() { }
+                public void DoSomething() {}
             }
         """);
 
@@ -596,88 +538,207 @@ export class C1 extends ProxyBase {
         new TypescriptUserClassProxyRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-/**
- * A comprehensive calculator class demonstrating various comment types.
- *
- * This class showcases how different XML documentation elements are transformed into JSDoc format for TypeScript consumption.
- */
-export class Calculator extends ProxyBase {
-  constructor(jsObject: Calculator.Initializer) {
-    super(TypeShimConfig.exports.N1.CalculatorInterop.ctor({ ...jsObject }));
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
   /**
-   * Adds two numbers and returns the sum.
+   * This is **important** information.
+   */
+  public DoSomething(): void {
+    TypeShimConfig.exports.N1.C1Interop.DoSomething(this.instance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_MethodWithItalicTag_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// This method is <i>deprecated</i> and should not be used.
+                /// </summary>
+                public void DoSomething() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  /**
+   * This method is *deprecated* and should not be used.
+   */
+  public DoSomething(): void {
+    TypeShimConfig.exports.N1.C1Interop.DoSomething(this.instance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ParamWithInnerTags_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Processes the value.
+                /// </summary>
+                /// <param name="value">The <b>input</b> value, must be <c>positive</c> and <i>non-zero</i></param>
+                public void Process(int value) {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  /**
+   * Processes the value.
    *
-   * @param a The first number to add
-   * @param b The second number to add
-   * @returns The sum of `a` and `b`
+   * @param value The **input** value, must be `positive` and *non-zero*
    */
-  public Add(a: number, b: number): number {
-    return TypeShimConfig.exports.N1.CalculatorInterop.Add(this.instance, a, b);
+  public Process(value: number): void {
+    TypeShimConfig.exports.N1.C1Interop.Process(this.instance, value);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ReturnsWithInnerTags_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Gets the result.
+                /// </summary>
+                /// <returns>A <b>computed</b> value using <c>algorithm</c> that is <i>optimized</i></returns>
+                public int GetResult() { return 42; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
   /**
-   * Subtracts `b` from `a`.
+   * Gets the result.
    *
-   * @param a The minuend
-   * @param b The subtrahend
-   * @returns The difference between the two numbers
+   * @returns A **computed** value using `algorithm` that is *optimized*
    */
-  public Subtract(a: number, b: number): number {
-    return TypeShimConfig.exports.N1.CalculatorInterop.Subtract(this.instance, a, b);
+  public GetResult(): number {
+    return TypeShimConfig.exports.N1.C1Interop.GetResult(this.instance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ThrowsWithInnerTags_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Divides numbers.
+                /// </summary>
+                /// <param name="a">The dividend</param>
+                /// <param name="b">The divisor</param>
+                /// <returns>The quotient</returns>
+                /// <exception cref="System.DivideByZeroException">Thrown when <paramref name="b"/> is <c>zero</c> or <i>invalid</i></exception>
+                public double Divide(double a, double b) { return a / b; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
   }
 
   /**
-   * Divides one number by another with error handling.
+   * Divides numbers.
    *
-   * @param numerator The number to be divided
-   * @param denominator The number to divide by
-   * @returns The quotient of the division
-   * @throws {System.DivideByZeroException} Thrown when `denominator` is zero
-   * @throws {System.ArgumentException} Thrown when inputs are invalid
+   * @param a The dividend
+   * @param b The divisor
+   * @returns The quotient
+   * @throws {System.DivideByZeroException} Thrown when `b` is `zero` or *invalid*
    */
-  public Divide(numerator: number, denominator: number): number {
-    return TypeShimConfig.exports.N1.CalculatorInterop.Divide(this.instance, numerator, denominator);
-  }
-
-  /**
-   * Calculates the power of a number using the `Math.Pow` method.
-   *
-   * @param baseNumber The base number
-   * @param exponent The exponent to raise to
-   * @returns The result of `baseNumber` raised to `exponent`
-   */
-  public Power(baseNumber: number, exponent: number): number {
-    return TypeShimConfig.exports.N1.CalculatorInterop.Power(this.instance, baseNumber, exponent);
-  }
-
-  /**
-   * Clears all calculation history and resets the calculator.
-   *
-   * This operation cannot be undone. Use with caution.
-   */
-  public Clear(): void {
-    TypeShimConfig.exports.N1.CalculatorInterop.Clear(this.instance);
-  }
-  /**
-   * Gets or sets the current result value.
-   *
-   * This property stores the most recent calculation result.
-   */
-  public get Result(): number {
-    return TypeShimConfig.exports.N1.CalculatorInterop.get_Result(this.instance);
-  }
-
-  public set Result(value: number) {
-    TypeShimConfig.exports.N1.CalculatorInterop.set_Result(this.instance, value);
-  }
-
-  /**
-   * Gets the calculation history count.
-   */
-  public get HistoryCount(): number {
-    return TypeShimConfig.exports.N1.CalculatorInterop.get_HistoryCount(this.instance);
+  public Divide(a: number, b: number): number {
+    return TypeShimConfig.exports.N1.C1Interop.Divide(this.instance, a, b);
   }
 }
 

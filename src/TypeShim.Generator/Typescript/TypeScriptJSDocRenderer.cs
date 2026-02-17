@@ -30,7 +30,7 @@ internal class TypeScriptJSDocRenderer
                 }
                 else
                 {
-                    ctx.AppendLine($" * {trimmedLine}");
+                    ctx.Append(" * ").AppendLine(trimmedLine);
                 }
             }
         }
@@ -50,14 +50,14 @@ internal class TypeScriptJSDocRenderer
             string description = param.Description;
             // Replace newlines in parameter descriptions with spaces
             description = description.Replace("\n", " ").Trim();
-            ctx.AppendLine($" * @param {param.Name} {description}");
+            ctx.Append(" * @param ").Append(param.Name).Append(" ").AppendLine(description);
         }
 
         // Render returns
         if (!string.IsNullOrWhiteSpace(comment.Returns))
         {
             string returns = comment.Returns.Replace("\n", " ").Trim();
-            ctx.AppendLine($" * @returns {returns}");
+            ctx.Append(" * @returns ").AppendLine(returns);
         }
 
         // Render throws/exceptions
@@ -66,7 +66,7 @@ internal class TypeScriptJSDocRenderer
             string description = throwsInfo.Description;
             // Replace newlines in throws descriptions with spaces
             description = description.Replace("\n", " ").Trim();
-            ctx.AppendLine($" * @throws {{{throwsInfo.Type}}} {description}");
+            ctx.Append(" * @throws {").Append(throwsInfo.Type).Append("} ").AppendLine(description);
         }
 
         ctx.AppendLine(" */");
