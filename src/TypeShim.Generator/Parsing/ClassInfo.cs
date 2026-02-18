@@ -11,4 +11,5 @@ internal sealed class ClassInfo
     internal required ConstructorInfo? Constructor { get; init; }
     internal required IEnumerable<MethodInfo> Methods { get; init; }
     internal required IEnumerable<PropertyInfo> Properties { get; init; }
+    internal required CommentInfo? Comment { get; init; }
 }

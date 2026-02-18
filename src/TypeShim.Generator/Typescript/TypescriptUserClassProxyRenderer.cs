@@ -10,6 +10,7 @@ internal class TypescriptUserClassProxyRenderer(RenderContext ctx)
 
     internal void Render()
     {
+        TypeScriptJSDocRenderer.RenderJSDoc(ctx, ctx.Class.Comment);
         ctx.Append($"export class ").Append(ctx.Class.Name);
         if (!ctx.Class.IsStatic)
         {

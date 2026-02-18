@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using TypeShim.Shared;
+using TypeShim.Generator.Parsing;
 
 internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropertySymbol propertySymbol, InteropTypeInfoCache typeInfoCache)
 {
@@ -45,6 +46,7 @@ internal sealed class PropertyInfoBuilder(INamedTypeSymbol classSymbol, IPropert
             GetMethod = getMethod,
             SetMethod = setMethod,
             InitMethod = initMethod,
+            Comment = new CommentInfoBuilder(propertySymbol).Build(),
         };
     }
 }

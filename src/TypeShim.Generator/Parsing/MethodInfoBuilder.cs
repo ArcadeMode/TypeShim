@@ -25,6 +25,7 @@ internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSym
             Name = memberMethod.Name,
             Parameters = parameters,
             ReturnType = typeInfoBuilder.Build(),
+            Comment = new CommentInfoBuilder(memberMethod).Build(),
         };
     }
 }

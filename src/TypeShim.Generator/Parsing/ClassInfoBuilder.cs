@@ -19,6 +19,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
             Constructor = BuildConstructor(properties),
             Methods = BuildMethods(),
             Properties = properties,
+            Comment = new CommentInfoBuilder(classSymbol).Build(),
         };
     }
 

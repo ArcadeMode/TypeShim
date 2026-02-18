@@ -9,6 +9,7 @@ internal sealed class MethodInfo
     internal required string Name { get; init; }
     internal required IReadOnlyCollection<MethodParameterInfo> Parameters { get; init; }
     internal required InteropTypeInfo ReturnType { get; init; }
+    internal required CommentInfo? Comment { get; init; }
 
     public MethodInfo WithoutInstanceParameter()
     {
@@ -18,6 +19,7 @@ internal sealed class MethodInfo
             Name = this.Name,
             Parameters = [.. this.Parameters.Where(p => !p.IsInjectedInstanceParameter)],
             ReturnType = this.ReturnType,
+            Comment = this.Comment,
         };
     }
 
@@ -29,6 +31,7 @@ internal sealed class MethodInfo
             Name = this.Name,
             Parameters = [.. this.Parameters.Select(p => p.WithInteropTypeInfo())],
             ReturnType = this.ReturnType.AsInteropTypeInfo(),
+            Comment = this.Comment,
         };
     }
 
