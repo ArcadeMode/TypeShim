@@ -1851,7 +1851,7 @@ export class C1 extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 /**
- * This method references `OuterClass.InnerClass` in the documentation.
+ * This method references `N1.OuterClass.InnerClass` in the documentation.
  */
 export class C1 extends ProxyBase {
   constructor() {

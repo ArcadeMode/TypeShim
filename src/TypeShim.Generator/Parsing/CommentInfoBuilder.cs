@@ -204,26 +204,7 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 type = type[..parenIndex];
             }
             
-            // For nested classes like "Namespace.OuterClass.InnerClass", we want to preserve "OuterClass.InnerClass"
-            // For simple classes like "Namespace.Class", we want to preserve "Class"
-            // Strategy: if there are multiple dots, strip only the first segment (namespace)
-            // Otherwise, strip everything before the last dot
-            int firstDotIndex = type.IndexOf('.');
-            if (firstDotIndex >= 0)
-            {
-                int secondDotIndex = type.IndexOf('.', firstDotIndex + 1);
-                if (secondDotIndex >= 0)
-                {
-                    // Has 2+ dots, likely nested class - strip only first segment (namespace)
-                    type = type[(firstDotIndex + 1)..];
-                }
-                else
-                {
-                    // Only 1 dot, likely simple class - strip everything before last dot
-                    type = type[(firstDotIndex + 1)..];
-                }
-            }
-            
+            // Keep the full type path including namespace for clarity in JSDoc
             return $"`{type}`";
         }
         
