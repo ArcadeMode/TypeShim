@@ -134,9 +134,8 @@ export class C1 extends ProxyBase {
 
   /**
    * Calculates the sum of two numbers.
-   *
-   * @param a The first number
-   * @param b The second number
+   * @param a - The first number
+   * @param b - The second number
    * @returns The sum of a and b
    */
   public Add(a: number, b: number): number {
@@ -186,9 +185,8 @@ export class C1 extends ProxyBase {
 
   /**
    * Divides two numbers.
-   *
-   * @param a The dividend
-   * @param b The divisor
+   * @param a - The dividend
+   * @param b - The divisor
    * @returns The quotient
    * @throws {System.DivideByZeroException} Thrown when b is zero
    */
@@ -286,7 +284,7 @@ export class C1 extends ProxyBase {
 
   /**
    * This is the summary.
-   *
+   * @remarks
    * This is a remark with additional information.
    */
   public DoSomething(): void {
@@ -377,8 +375,7 @@ export class C1 extends ProxyBase {
 
   /**
    * This method uses `value` to do something.
-   *
-   * @param value The input value
+   * @param value - The input value
    */
   public Process(value: number): void {
     TypeShimConfig.exports.N1.C1Interop.Process(this.instance, value);
@@ -462,7 +459,7 @@ export class C1 extends ProxyBase {
   }
 
   /**
-   * @param name The name to print
+   * @param name - The name to print
    */
   public PrintName(name: string): void {
     TypeShimConfig.exports.N1.C1Interop.PrintName(this.instance, name);
@@ -601,6 +598,7 @@ export class C1 extends ProxyBase {
     [Test]
     public void TypeScriptUserClassProxy_ParamWithInnerTags_RendersJSDoc()
     {
+        // br should be ignored.
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
@@ -610,7 +608,7 @@ export class C1 extends ProxyBase {
                 /// <summary>
                 /// Processes the value.
                 /// </summary>
-                /// <param name="value">The <b>input</b> value, must be <c>positive</c> and <i>non-zero</i></param>
+                /// <param name="value">The <b>input</b> value, must be <c>positive</c> and<br/> <i>non-zero</i></param>
                 public void Process(int value) {}
             }
         """);
@@ -634,8 +632,7 @@ export class C1 extends ProxyBase {
 
   /**
    * Processes the value.
-   *
-   * @param value The **input** value, must be `positive` and *non-zero*
+   * @param value - The **input** value, must be `positive` and *non-zero*
    */
   public Process(value: number): void {
     TypeShimConfig.exports.N1.C1Interop.Process(this.instance, value);
@@ -681,7 +678,6 @@ export class C1 extends ProxyBase {
 
   /**
    * Gets the result.
-   *
    * @returns A **computed** value using `algorithm` that is *optimized*
    */
   public GetResult(): number {
@@ -707,7 +703,7 @@ export class C1 extends ProxyBase {
                 /// <param name="a">The dividend</param>
                 /// <param name="b">The divisor</param>
                 /// <returns>The quotient</returns>
-                /// <exception cref="System.DivideByZeroException">Thrown when <paramref name="b"/> is <c>zero</c> or <i>invalid</i></exception>
+                /// <exception cref="System.DivideByZeroException">Thrown when <paramref name="b"/> is<br/> <c>zero</c> or <i>invalid</i></exception>
                 public double Divide(double a, double b) { return a / b; }
             }
         """);
@@ -731,9 +727,8 @@ export class C1 extends ProxyBase {
 
   /**
    * Divides numbers.
-   *
-   * @param a The dividend
-   * @param b The divisor
+   * @param a - The dividend
+   * @param b - The divisor
    * @returns The quotient
    * @throws {System.DivideByZeroException} Thrown when `b` is `zero` or *invalid*
    */
@@ -835,9 +830,8 @@ export class C1 extends ProxyBase {
 
   /**
    * Compares `left` with `right` and returns true if `left` equals `right`.
-   *
-   * @param left The first value
-   * @param right The second value
+   * @param left - The first value
+   * @param right - The second value
    * @returns True if equal
    */
   public Compare(left: number, right: number): boolean {
@@ -885,7 +879,6 @@ export class C1 extends ProxyBase {
 
   /**
    * Performs an operation.
-   *
    * @throws {System.InvalidOperationException} Thrown when operation is invalid
    * @throws {System.ArgumentException} Thrown when argument is invalid
    */
@@ -1059,7 +1052,6 @@ export class C1 extends ProxyBase {
 
   /**
    * Processes data that may fail.
-   *
    * @throws {MissingImportException} Thrown when import is missing
    */
   public ProcessData(): void {
@@ -1755,8 +1747,7 @@ export class C1 extends ProxyBase {
 
   /**
    * Method with empty param name.
-   *
-   * @param value This param should be included
+   * @param value - This param should be included
    */
   public DoSomething(value: number): void {
     TypeShimConfig.exports.N1.C1Interop.DoSomething(this.instance, value);
@@ -1803,7 +1794,6 @@ export class C1 extends ProxyBase {
 
   /**
    * Method with empty exception cref.
-   *
    * @throws {System.InvalidOperationException} This exception should be included
    */
   public DoSomething(): void {
@@ -1850,19 +1840,107 @@ export class C1 extends ProxyBase {
         new TypescriptUserClassProxyRenderer(renderContext).Render();
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
-/**
- * This method references `N1.OuterClass.InnerClass` in the documentation.
- */
-export class C1 extends ProxyBase {
-  constructor() {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor());
-  }
+        /**
+         * This method references `N1.OuterClass.InnerClass` in the documentation.
+         */
+        export class C1 extends ProxyBase {
+          constructor() {
+            super(TypeShimConfig.exports.N1.C1Interop.ctor());
+          }
 
-  public DoSomething(): void {
-    TypeShimConfig.exports.N1.C1Interop.DoSomething(this.instance);
-  }
-}
+          public DoSomething(): void {
+            TypeShimConfig.exports.N1.C1Interop.DoSomething(this.instance);
+          }
+        }
 
-""");
+        """);
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ClassWithAnchorInSummaryComment_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            /// <summary>
+            /// This comment has <a href="https://learn.microsoft.com/">an anchor</a>.
+            /// </summary>
+            [TSExport]
+            public class C1
+            {
+                public void DoSomething() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+        /**
+         * This comment has {@link https://learn.microsoft.com/ | an anchor}.
+         */
+        export class C1 extends ProxyBase {
+          constructor() {
+            super(TypeShimConfig.exports.N1.C1Interop.ctor());
+          }
+
+          public DoSomething(): void {
+            TypeShimConfig.exports.N1.C1Interop.DoSomething(this.instance);
+          }
+        }
+
+        """);
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ClassWithBoldAnchorInSummaryComment_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            /// <summary>
+            /// This comment has <a href="https://learn.microsoft.com/">an <b>anchor</b></a>.
+            /// </summary>
+            [TSExport]
+            public class C1
+            {
+                public void DoSomething() {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+        /**
+         * This comment has {@link https://learn.microsoft.com/ | an **anchor**}.
+         */
+        export class C1 extends ProxyBase {
+          constructor() {
+            super(TypeShimConfig.exports.N1.C1Interop.ctor());
+          }
+
+          public DoSomething(): void {
+            TypeShimConfig.exports.N1.C1Interop.DoSomething(this.instance);
+          }
+        }
+
+        """);
     }
 }

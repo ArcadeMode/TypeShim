@@ -4,7 +4,7 @@ using System.Xml.Linq;
 
 namespace TypeShim.Generator.Parsing;
 
-internal sealed class CommentInfoBuilder(ISymbol symbol)
+internal sealed partial class CommentInfoBuilder(ISymbol symbol)
 {
     internal CommentInfo? Build()
     {
@@ -14,27 +14,22 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
         {
             return null;
         }
-
-        xmlCommentString = xmlCommentString.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ");
-
         try
         {
-            XDocument xmlDoc = XDocument.Parse(xmlCommentString);
+            XDocument xmlDoc = XDocument.Parse(xmlCommentString.Replace("\n", " ").Replace("\r", " "));
             XElement? root = xmlDoc.Root;
-
             if (root == null)
             {
                 return null;
             }
-
             CommentInfo commentInfo = new()
             {
-                Description = BuildDescription(root),
+                Description = BuildFormattedTextElement(root, "summary"),
+                Remarks = BuildFormattedTextElement(root, "remarks"),
                 Parameters = BuildParameters(root),
                 Returns = BuildReturns(root),
                 Throws = BuildThrows(root)
             };
-
             return commentInfo.IsEmpty() ? null : commentInfo;
         }
         catch
@@ -43,37 +38,18 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
         }
     }
 
-    private string BuildDescription(XElement root)
+    private static string BuildFormattedTextElement(XElement root, string elementName)
     {
-        StringBuilder description = new();
-
-        XElement? summary = root.Element("summary");
-        if (summary != null)
+        if (root.Element(elementName) is XElement element)
         {
-            description.Append(ProcessFormatTags(summary).Trim());
+            return ProcessFormatXMLElement(element).Trim();
         }
-
-        XElement? remarks = root.Element("remarks");
-        if (remarks == null)
-        {
-            return description.ToString();
-        }
-
-        string remarksText = ProcessFormatTags(remarks);
-        if (description.Length > 0 && !string.IsNullOrWhiteSpace(remarksText))
-        {
-            description.Append(Environment.NewLine);
-            description.Append(Environment.NewLine);
-        }
-        description.Append(remarksText.Trim());
-
-        return description.ToString();
+        return string.Empty;
     }
 
-    private IReadOnlyCollection<ParameterCommentInfo> BuildParameters(XElement root)
+    private static List<ParameterCommentInfo> BuildParameters(XElement root)
     {
         List<ParameterCommentInfo> parameters = [];
-
         foreach (XElement param in root.Elements("param"))
         {
             string? name = param.Attribute("name")?.Value;
@@ -82,18 +58,17 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 continue;
             }
 
-            string description = ProcessFormatTags(param).Trim();
+            string description = ProcessFormatXMLElement(param).Trim();
             parameters.Add(new ParameterCommentInfo
             {
                 Name = name,
                 Description = description
             });
         }
-
         return parameters;
     }
 
-    private string? BuildReturns(XElement root)
+    private static string? BuildReturns(XElement root)
     {
         XElement? returns = root.Element("returns");
         if (returns == null)
@@ -101,14 +76,13 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             return null;
         }
 
-        string returnsText = ProcessFormatTags(returns).Trim();
+        string returnsText = ProcessFormatXMLElement(returns).Trim();
         return string.IsNullOrWhiteSpace(returnsText) ? null : returnsText;
     }
 
-    private IReadOnlyCollection<ThrowsCommentInfo> BuildThrows(XElement root)
+    private static IReadOnlyCollection<ThrowsCommentInfo> BuildThrows(XElement root)
     {
         List<ThrowsCommentInfo> throws = [];
-
         foreach (XElement exception in root.Elements("exception"))
         {
             string? cref = exception.Attribute("cref")?.Value;
@@ -123,14 +97,13 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
                 continue;
             }
 
-            string description = ProcessFormatTags(exception).Trim();
+            string description = ProcessFormatXMLElement(exception).Trim();
             throws.Add(new ThrowsCommentInfo
             {
                 Type = type,
                 Description = description
             });
         }
-
         return throws;
     }
 
@@ -138,44 +111,17 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
     {
         string[] parts = cref.Split(':');
         string type = parts[^1];
-        
-        if (type.StartsWith("!"))
+        if (type.StartsWith('!'))
         {
             type = type[1..];
         }
-        
         return type.Trim();
     }
 
-    private string ProcessFormatTags(XElement element)
-    {
-        StringBuilder result = new();
-
-        foreach (XNode node in element.Nodes())
-        {
-            if (node is XText textNode)
-            {
-                result.Append(textNode.Value);
-            }
-            else if (node is XElement innerElement)
-            {
-                result.Append(TransformInnerTag(innerElement));
-            }
-        }
-
-        string text = result.ToString();
-        
-        // Normalize whitespace (multiple spaces/tabs become single space)
-        text = System.Text.RegularExpressions.Regex.Replace(text, @"[ \t]+", " ");
-        
-        return text;
-    }
-
-    private string TransformInnerTag(XElement element)
+    private static string ProcessXMLElement(XElement element)
     {
         string tagName = element.Name.LocalName.ToLowerInvariant();
-        string innerText = ProcessFormatTags(element);
-
+        string innerText = ProcessFormatXMLElement(element);
         return tagName switch
         {
             "code" or "c" or "example" => $"`{innerText}`",
@@ -186,33 +132,58 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
             "paramref" or "typeparamref" => $"`{element.Attribute("name")?.Value ?? ""}`",
             "para" => innerText,
             "list" => ProcessList(element),
+            "a" => ProcessAnchor(element),
             _ => innerText
         };
     }
 
-    private string GetReferenceText(XElement element)
+    private static string ProcessFormatXMLElement(XElement element)
+    {
+        StringBuilder result = new();
+        foreach (XNode node in element.Nodes())
+        {
+            if (node is XText textNode)
+            {
+                result.Append(textNode.Value);
+            }
+            else if (node is XElement innerElement)
+            {
+                result.Append(ProcessXMLElement(innerElement));
+            }
+        }
+        return GetMultiWhitespaceRegex().Replace(result.ToString(), " "); // Normalize whitespace
+    }
+
+    private static string ProcessAnchor(XElement element)
+    {
+        string? href = element.Attribute("href")?.Value;
+        if (string.IsNullOrEmpty(href))
+        {
+            return element.Value;
+        }
+        return $"{{@link {href} | {ProcessFormatXMLElement(element)}}}";
+    }
+
+    private static string GetReferenceText(XElement element)
     {
         string? cref = element.Attribute("cref")?.Value;
         if (!string.IsNullOrWhiteSpace(cref))
         {
             string type = ExtractTypeFromCref(cref);
-            
             // Remove parameter list if present (e.g., "Method(System.String)" -> "Method")
             int parenIndex = type.IndexOf('(');
             if (parenIndex >= 0)
             {
-                type = type[..parenIndex];
-            }
-            
-            // Keep the full type path including namespace for clarity in JSDoc
+                type = type[..parenIndex].Trim();
+            }            
             return $"`{type}`";
         }
         
-        string innerText = ProcessFormatTags(element);
-        return string.IsNullOrWhiteSpace(innerText) ? "" : $"`{innerText}`";
+        string innerText = ProcessFormatXMLElement(element);
+        return string.IsNullOrWhiteSpace(innerText) ? string.Empty : $"`{innerText}`";
     }
 
-    private string ProcessList(XElement listElement)
+    private static string ProcessList(XElement listElement)
     {
         StringBuilder result = new();
         result.Append(Environment.NewLine);
@@ -220,47 +191,50 @@ internal sealed class CommentInfoBuilder(ISymbol symbol)
         XElement? listHeader = listElement.Element("listheader");
         if (listHeader != null)
         {
-            RenderListItem(listHeader, result);
+            ProcessListItem(listHeader, result);
         }
         
         foreach (XElement item in listElement.Elements("item"))
         {
-            RenderListItem(item, result);
+            ProcessListItem(item, result);
         }
         
         return result.ToString();
-    }
 
-    private void RenderListItem(XElement item, StringBuilder result)
-    {
-        XElement? term = item.Element("term");
-        XElement? description = item.Element("description");
-        
-        if (term != null || description != null)
+        static void ProcessListItem(XElement item, StringBuilder result)
         {
-            result.Append("- ");
-            if (term != null)
+            XElement? term = item.Element("term");
+            XElement? description = item.Element("description");
+
+            if (term != null || description != null)
             {
-                result.Append(ProcessFormatTags(term).Trim());
+                result.Append("- ");
+                if (term != null)
+                {
+                    result.Append(ProcessFormatXMLElement(term).Trim());
+                    if (description != null)
+                    {
+                        result.Append(": ");
+                    }
+                }
                 if (description != null)
                 {
-                    result.Append(": ");
+                    result.Append(ProcessFormatXMLElement(description).Trim());
                 }
-            }
-            if (description != null)
-            {
-                result.Append(ProcessFormatTags(description).Trim());
-            }
-            result.Append(Environment.NewLine);
-        }
-        else
-        {
-            string itemText = ProcessFormatTags(item).Trim();
-            if (!string.IsNullOrWhiteSpace(itemText))
-            {
-                result.Append(itemText);
                 result.Append(Environment.NewLine);
+            }
+            else
+            {
+                string itemText = ProcessFormatXMLElement(item).Trim();
+                if (!string.IsNullOrWhiteSpace(itemText))
+                {
+                    result.Append(itemText);
+                    result.Append(Environment.NewLine);
+                }
             }
         }
     }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"[ \t]+")]
+    private static partial System.Text.RegularExpressions.Regex GetMultiWhitespaceRegex();
 }

@@ -1,4 +1,5 @@
 using System.Text;
+using System.Xml.Linq;
 using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
@@ -14,61 +15,51 @@ internal class TypeScriptJSDocRenderer
 
         ctx.AppendLine("/**");
 
-        // Render description
         if (!string.IsNullOrWhiteSpace(comment.Description))
         {
-            // Normalize line endings to handle cross-platform scenarios
-            string normalizedDescription = comment.Description.Replace("\r\n", "\n").Replace("\r", "\n");
-            string[] descriptionLines = normalizedDescription.Split('\n');
-            foreach (string line in descriptionLines)
-            {
-                string trimmedLine = line.Trim();
-                // Render empty lines as blank comment lines
-                if (string.IsNullOrEmpty(trimmedLine))
-                {
-                    ctx.AppendLine(" *");
-                }
-                else
-                {
-                    ctx.Append(" * ").AppendLine(trimmedLine);
-                }
-            }
+            RenderCommentLines(ctx, comment.Description);
         }
 
-        // Add blank line before tags if there are any tags and a description
-        bool hasTags = comment.Parameters.Count > 0 || 
-                       !string.IsNullOrWhiteSpace(comment.Returns) || 
-                       comment.Throws.Count > 0;
-        if (!string.IsNullOrWhiteSpace(comment.Description) && hasTags)
+        if (!string.IsNullOrWhiteSpace(comment.Remarks))
         {
-            ctx.AppendLine(" *");
+            ctx.AppendLine(" * @remarks");
+            RenderCommentLines(ctx, comment.Remarks);
         }
 
-        // Render parameters
         foreach (ParameterCommentInfo param in comment.Parameters)
         {
-            string description = param.Description;
-            // Replace newlines in parameter descriptions with spaces
-            description = description.Replace("\n", " ").Trim();
-            ctx.Append(" * @param ").Append(param.Name).Append(" ").AppendLine(description);
+            string paramDescription = param.Description.Replace(Environment.NewLine, " ").Trim();
+            ctx.Append(" * @param ").Append(param.Name).Append(" - ").AppendLine(paramDescription);
         }
 
-        // Render returns
         if (!string.IsNullOrWhiteSpace(comment.Returns))
         {
-            string returns = comment.Returns.Replace("\n", " ").Trim();
+            string returns = comment.Returns.Replace(Environment.NewLine, " ").Trim();
             ctx.Append(" * @returns ").AppendLine(returns);
         }
 
-        // Render throws/exceptions
         foreach (ThrowsCommentInfo throwsInfo in comment.Throws)
         {
-            string description = throwsInfo.Description;
-            // Replace newlines in throws descriptions with spaces
-            description = description.Replace("\n", " ").Trim();
+            string description = throwsInfo.Description.Replace(Environment.NewLine, " ").Trim();
             ctx.Append(" * @throws {").Append(throwsInfo.Type).Append("} ").AppendLine(description);
         }
 
         ctx.AppendLine(" */");
+    }
+
+    private static void RenderCommentLines(RenderContext ctx, string text)
+    {
+        foreach (string line in text.Split(Environment.NewLine))
+        {
+            string trimmedLine = line.Trim();
+            if (string.IsNullOrEmpty(trimmedLine))
+            {
+                ctx.AppendLine(" *");
+            }
+            else
+            {
+                ctx.Append(" * ").AppendLine(trimmedLine);
+            }
+        }
     }
 }
