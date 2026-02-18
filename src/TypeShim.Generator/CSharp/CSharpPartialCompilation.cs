@@ -32,7 +32,9 @@ internal static class CSharpPartialCompilation
             .. AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location)) // include loaded assemblies
         ];
 
-        List<PortableExecutableReference> references = [.. baseAssemblies.Select(a => MetadataReference.CreateFromFile(a.Location))];
+        List<PortableExecutableReference> references = [.. baseAssemblies
+            .Where(a => !string.IsNullOrEmpty(a.Location)) // Filter out assemblies with empty location (AOT scenario)
+            .Select(a => MetadataReference.CreateFromFile(a.Location))];
         return references;
     }
 
