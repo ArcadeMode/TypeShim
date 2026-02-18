@@ -1,0 +1,7 @@
+# Build outputs
+bin/
+obj/
+GeneratorBuilds/
+
+# Temporary benchmark outputs
+*.tmp
