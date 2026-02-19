@@ -11,4 +11,8 @@
     <ProjectReference Include="..\TypeShim\TypeShim.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+  </ItemGroup>
+
 </Project>
