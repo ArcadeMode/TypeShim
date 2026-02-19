@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
@@ -33,19 +33,7 @@ internal static class CSharpPartialCompilation
 
         if (referenceAssemblyPaths.Count == 0)
         {
-            // TODO: throw if we cant find ref pack.
-            Assembly[] baseAssemblies =
-            [
-                typeof(object).Assembly,
-                typeof(JSObject).Assembly,
-                .. AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location)),
-            ];
-
-            referenceAssemblyPaths = [.. baseAssemblies
-                .Where(a => !string.IsNullOrEmpty(a.Location))
-                .Select(a => a.Location)
-                .Distinct(StringComparer.OrdinalIgnoreCase)];
+            throw new InvalidOperationException("Failed to find reference assemblies, did you install dotnet?");
         }
 
         return [.. referenceAssemblyPaths.Select(s => MetadataReference.CreateFromFile(s))];
@@ -95,8 +83,12 @@ internal static class CSharpPartialCompilation
             return [];
         }
 
-        // Include all packed runtime DLLs.
-        return [.. Directory.EnumerateFiles(refDir, "*.dll", SearchOption.TopDirectoryOnly)];
+        // Include _minimal_ dlls, to keep the codegen snappy
+        return [
+            $"{refDir}/System.Runtime.InteropServices.JavaScript.dll",
+            $"{refDir}/System.Collections.dll",
+            $"{refDir}/System.Runtime.dll",
+        ];
     }
 
     private static Version? TryParseVersionFromDirectoryName(string name)
@@ -113,13 +105,6 @@ internal static class CSharpPartialCompilation
 
     private static string? GetDotnetRoot()
     {
-        // Prefer DOTNET_ROOT if present (common for SDK installs/CI).
-        string? dotnetRoot = Environment.GetEnvironmentVariable("DOTNET_ROOT");
-        if (!string.IsNullOrWhiteSpace(dotnetRoot) && Directory.Exists(dotnetRoot))
-        {
-            return dotnetRoot;
-        }
-
         // Windows fallbacks
         string? programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
         if (!string.IsNullOrWhiteSpace(programFiles))
