@@ -23,12 +23,12 @@ New-Item -ItemType Directory -Force -Path "$OutputDir\AOT" | Out-Null
 # Build non-AOT version
 Write-Host ""
 Write-Host "Building non-AOT version..." -ForegroundColor Yellow
-dotnet build $GeneratorProject -c Release -o "$OutputDir\NonAOT" /p:PublishAot=false
+dotnet publish $GeneratorProject -c Release -o "$OutputDir\NonAOT" /p:NativeMode=false
 
 # Build AOT version
 Write-Host ""
 Write-Host "Building AOT version..." -ForegroundColor Yellow
-dotnet publish $GeneratorProject -c Release -o "$OutputDir\AOT" /p:PublishAot=true
+dotnet publish $GeneratorProject -c Release -o "$OutputDir\AOT" /p:NativeMode=true
 
 Write-Host ""
 Write-Host "Build completed successfully!" -ForegroundColor Green

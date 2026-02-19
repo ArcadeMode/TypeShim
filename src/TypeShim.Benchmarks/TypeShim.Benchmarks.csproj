@@ -8,6 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="SampleClasses\SampleClass.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="SampleClasses\SampleClass.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TypeShim\TypeShim.csproj" />
   </ItemGroup>
 
