@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Text;
 
 namespace TypeShim.Generator;
 
@@ -44,8 +45,8 @@ internal sealed class ProgramArguments
                 throw new InvalidOperationException($"Invalid .cs file path provided '{csFilePath}'");
             }
 
-            string code = File.ReadAllText(csFilePath);
-            fileInfos[i] = CSharpFileInfo.Create(CSharpSyntaxTree.ParseText(code));
+            using FileStream fs = new(csFilePath, FileMode.Open, FileAccess.Read);
+            fileInfos[i] = CSharpFileInfo.Create(CSharpSyntaxTree.ParseText(SourceText.From(fs)));
         }
         return fileInfos;
     }
