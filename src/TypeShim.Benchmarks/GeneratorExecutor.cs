@@ -16,7 +16,7 @@ public class GeneratorExecutor
         _projectRoot = projectRoot;
     }
 
-    public async Task<GeneratorResult> ExecuteAsync(List<string> csFiles, string csOutputDir, string tsOutputFile)
+    public GeneratorResult Execute(List<string> csFiles, string csOutputDir, string tsOutputFile)
     {
         // Create output directories
         Directory.CreateDirectory(csOutputDir);
@@ -45,13 +45,11 @@ public class GeneratorExecutor
             throw new InvalidOperationException("Failed to start generator process");
         }
 
-        var outputTask = process.StandardOutput.ReadToEndAsync();
-        var errorTask = process.StandardError.ReadToEndAsync();
+        // Synchronous read to avoid async in benchmarks
+        string output = process.StandardOutput.ReadToEnd();
+        string error = process.StandardError.ReadToEnd();
         
-        await process.WaitForExitAsync();
-
-        string output = await outputTask;
-        string error = await errorTask;
+        process.WaitForExit();
 
         return new GeneratorResult
         {
@@ -60,11 +58,6 @@ public class GeneratorExecutor
             Output = output,
             Error = error
         };
-    }
-
-    public void Execute(List<string> csFiles, string csOutputDir, string tsOutputFile)
-    {
-        ExecuteAsync(csFiles, csOutputDir, tsOutputFile).GetAwaiter().GetResult();
     }
 }
 
