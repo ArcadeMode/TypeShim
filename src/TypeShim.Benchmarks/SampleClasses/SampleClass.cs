@@ -1,3 +1,4 @@
+#nullable enable
 using TypeShim;
 
 namespace TypeShim.Benchmarks.SampleClasses;
@@ -164,12 +165,15 @@ public class SampleClass06
     /// <summary>
     /// Gets the items
     /// </summary>
-    public List<string> Items { get; } = [];
+    public string[] Items { get; private set; } = [];
 
     /// <summary>
     /// Adds an item
     /// </summary>
-    public void AddItem(string item) => Items.Add(item);
+    public void AddItem(string item)
+    {
+        Items = [.. Items, item];
+    }
 
     /// <summary>
     /// Gets items as array
@@ -179,7 +183,7 @@ public class SampleClass06
     /// <summary>
     /// Gets the count of items
     /// </summary>
-    public int GetCount() => Items.Count;
+    public int GetCount() => Items.Length;
 }
 
 /// <summary>
