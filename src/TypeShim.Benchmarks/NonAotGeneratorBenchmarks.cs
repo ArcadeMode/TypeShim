@@ -12,6 +12,7 @@ public class NonAotGeneratorBenchmarks
     private GeneratorSetup _setup = null!;
     private GeneratorExecutor _executor = null!;
     private string _tempDir = null!;
+    private Dictionary<int, List<string>> _pregeneratedClassFiles = null!;
 
     [GlobalSetup]
     public void Setup()
@@ -27,6 +28,17 @@ public class NonAotGeneratorBenchmarks
             Directory.Delete(_tempDir, true);
         }
         Directory.CreateDirectory(_tempDir);
+
+        // Pre-generate class files for each class count to avoid noise in benchmark results
+        _pregeneratedClassFiles = new Dictionary<int, List<string>>();
+        int[] classCounts = [1, 10, 25, 50, 100];
+        
+        foreach (int classCount in classCounts)
+        {
+            string tempClassesDir = Path.Combine(_tempDir, $"pregenerated_{classCount}");
+            var csFiles = _setup.GenerateClassFiles(classCount, tempClassesDir);
+            _pregeneratedClassFiles[classCount] = csFiles;
+        }
     }
 
     [GlobalCleanup]
@@ -85,9 +97,8 @@ public class NonAotGeneratorBenchmarks
         string runDir = Path.Combine(_tempDir, $"run_{classCount}_{Guid.NewGuid():N}");
         string csOutputDir = Path.Combine(runDir, "cs");
         string tsOutputFile = Path.Combine(runDir, "ts", "output.ts");
-        string tempClassesDir = Path.Combine(runDir, "temp_classes");
 
-        var csFiles = _setup.GenerateClassFiles(classCount, tempClassesDir);
+        var csFiles = _pregeneratedClassFiles[classCount];
         _executor.Execute(csFiles, csOutputDir, tsOutputFile);
     }
 }
