@@ -189,7 +189,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     internal void RenderFromObjectMapper()
     {
-        _ctx.Append("public static ").Append(_ctx.Class.Type.CSharpTypeSyntax.ToString()).Append(' ').Append(RenderConstants.FromJSObject).AppendLine("(object obj)");
+        _ctx.Append("public static ").Append(_ctx.Class.Type.CSharpTypeSyntax.ToString()).Append(' ').Append(RenderConstants.FromObject).AppendLine("(object obj)");
         _ctx.AppendLine("{");
         using (_ctx.Indent())
         {
@@ -202,7 +202,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                 {
                     _ctx.Append("JSObject jsObj => ").Append(RenderConstants.FromJSObject).AppendLine("(jsObj),");
                 }
-                _ctx.AppendLine("_ => throw new ArgumentException($\"Invalid object type {{obj?.GetType().ToString() ?? \"null\"}}\", nameof(obj)),");
+                _ctx.AppendLine("_ => throw new ArgumentException($\"Invalid object type {obj?.GetType().ToString() ?? \"null\"}\", nameof(obj)),");
             }
             _ctx.AppendLine("};");
         }
