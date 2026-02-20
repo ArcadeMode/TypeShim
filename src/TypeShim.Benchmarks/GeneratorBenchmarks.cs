@@ -11,9 +11,9 @@ public class GeneratorBenchmarks
     private string _tempDir = null!;
     private Dictionary<int, List<string>> _pregeneratedClassFiles = null!;
 
-    public enum Mode { Native, Managed }
+    public enum Mode { AOT, JIT }
 
-    [Params(Mode.Native, Mode.Managed)]
+    [Params(Mode.AOT, Mode.JIT)]
     public Mode TestMode { get; set; }
 
     [GlobalSetup]
@@ -42,7 +42,7 @@ public class GeneratorBenchmarks
     [IterationSetup]
     public void IterationSetup()
     {
-        _executor = new GeneratorExecutor(TestMode == Mode.Native ? _setup.AotGeneratorPath : _setup.NonAotGeneratorPath, _setup.ProjectRoot);
+        _executor = new GeneratorExecutor(TestMode == Mode.AOT ? _setup.AotGeneratorPath : _setup.NonAotGeneratorPath, _setup.ProjectRoot);
     }
 
     [GlobalCleanup]
@@ -61,37 +61,24 @@ public class GeneratorBenchmarks
         }
     }
 
+    [Benchmark(Baseline = true)]
+    [Arguments(1)]
+    [Arguments(10)]
+    [Arguments(25)]
+    [Arguments(50)]
+    [Arguments(100)]
+    public void Overhead(int classCount)
+    {
+        _executor.Execute([], "/", "/");
+    }
+
     [Benchmark]
     [Arguments(1)]
-    public async Task GenerateCode_01Class(int classCount)
-    {
-        RunBenchmark(classCount);
-    }
-
-    [Benchmark]
     [Arguments(10)]
-    public async Task GenerateCode_10Classes(int classCount)
-    {
-        RunBenchmark(classCount);
-    }
-
-    [Benchmark]
     [Arguments(25)]
-    public async Task GenerateCode_25Classes(int classCount)
-    {
-        RunBenchmark(classCount);
-    }
-
-    [Benchmark]
     [Arguments(50)]
-    public async Task GenerateCode_50Classes(int classCount)
-    {
-        RunBenchmark(classCount);
-    }
-
-    [Benchmark]
     [Arguments(100)]
-    public async Task GenerateCode_100Classes(int classCount)
+    public void Generate(int classCount)
     {
         RunBenchmark(classCount);
     }
@@ -101,7 +88,8 @@ public class GeneratorBenchmarks
         string runDir = Path.Combine(_tempDir, $"run_{classCount}_{Guid.NewGuid():N}");
         string csOutputDir = Path.Combine(runDir, "cs");
         string tsOutputFile = Path.Combine(runDir, "ts", "output.ts");
-
+        Directory.CreateDirectory(csOutputDir);
+        Directory.CreateDirectory(Path.GetDirectoryName(tsOutputFile)!);
         var csFiles = _pregeneratedClassFiles[classCount];
         _executor.Execute(csFiles, csOutputDir, tsOutputFile);
     }
