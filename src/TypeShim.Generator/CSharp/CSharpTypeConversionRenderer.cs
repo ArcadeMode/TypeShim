@@ -17,7 +17,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         string newVarName = $"typed_{_ctx.LocalScope.GetAccessorExpression(parameterInfo)}";
 
         DeferredExpressionRenderer convertedValueAccessor = RenderTypeDownConversion(parameterInfo.Type, varName, DeferredExpressionRenderer.From(() => _ctx.Append(varName)), parameterInfo.IsInjectedInstanceParameter);
-        _ctx.Append($"{parameterInfo.Type.CSharpTypeSyntax} {newVarName} = ");
+        _ctx.Append(parameterInfo.Type.CSharpTypeSyntax.ToString()).Append(' ').Append(newVarName).Append(" = ");
         convertedValueAccessor.Render();
         _ctx.AppendLine(";");
         _ctx.LocalScope.UpdateAccessorExpression(parameterInfo, newVarName);
@@ -116,13 +116,13 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
 
     private void RenderInlineCovariantTypeDownConversion(InteropTypeInfo typeInfo, DeferredExpressionRenderer accessorExpressionRenderer)
     {
-        _ctx.Append($"({typeInfo.CSharpTypeSyntax})");
+        _ctx.Append('(').Append(typeInfo.CSharpTypeSyntax.ToString()).Append(')');
         accessorExpressionRenderer.Render();
     }
     
     private void RenderInlineCovariantTypeUpConversion(InteropTypeInfo typeInfo, DeferredExpressionRenderer valueExpressionRenderer)
     {
-        _ctx.Append($"({typeInfo.CSharpInteropTypeSyntax})");
+        _ctx.Append('(').Append(typeInfo.CSharpInteropTypeSyntax.ToString()).Append(')');
         valueExpressionRenderer.Render();
     }
 
@@ -134,7 +134,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         {
             ClassInfo exportedClass = _ctx.SymbolMap.GetClassInfo(typeInfo);
             string targetInteropClass = RenderConstants.InteropClassName(exportedClass);
-            _ctx.Append($"{targetInteropClass}.{RenderConstants.FromObject}(");
+            _ctx.Append(RenderConstants.InteropClassName(exportedClass)).Append('.').Append(RenderConstants.FromObject).Append('(');
             accessorExpressionRenderer.Render();
             _ctx.Append(")");
         }
@@ -183,8 +183,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
     {
         InteropTypeInfo taskTypeParamInfo = targetTaskType.TypeArgument ?? throw new InvalidOperationException("Task type must have a type argument for conversion.");
         string tcsVarName = $"{sourceVarName}Tcs";
-        _ctx.AppendLine($"TaskCompletionSource<{taskTypeParamInfo.CSharpTypeSyntax}> {tcsVarName} = new();");
-
+        _ctx.Append("TaskCompletionSource<").Append(taskTypeParamInfo.CSharpTypeSyntax.ToString()).Append("> ").Append(tcsVarName).AppendLine(" = new();");
         _ctx.Append('(');
         sourceTaskExpressionRenderer.Render();
         _ctx.AppendLine(").ContinueWith(t => {");

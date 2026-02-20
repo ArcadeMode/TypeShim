@@ -42,7 +42,8 @@ internal sealed class ProgramArguments
 
             if (!File.Exists(csFilePath))
             {
-                throw new InvalidOperationException($"Invalid .cs file path provided '{csFilePath}'");
+                Console.Error.WriteLine($"Invalid .cs file path provided '{csFilePath}'");
+                Environment.Exit(1);
             }
 
             using FileStream fs = new(csFilePath, FileMode.Open, FileAccess.Read);

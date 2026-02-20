@@ -17,7 +17,6 @@ try
     List<ClassInfo> classInfos = [.. symbolExtractor.ExtractAllExportedSymbols()
         .Select(classSymbol => new ClassInfoBuilder(classSymbol, typeInfoCache).Build())
         .Where(ci => ci.Methods.Any() || ci.Properties.Any())]; // dont bother with empty classes
-
     Task generateTS = Task.Run(() => GenerateTypeScriptInteropCode(parsedArgs, classInfos));
     Task generateCS = Task.Run(() => GenerateCSharpInteropCode(parsedArgs, classInfos));
 
@@ -39,15 +38,13 @@ static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInf
     foreach (ClassInfo classInfo in classInfos)
     {
         RenderContext renderContext = new(classInfo, classInfos, RenderOptions.CSharp);
-        SourceText source = SourceText.From(new CSharpInteropClassRenderer(classInfo, renderContext, methodResolver).Render(), Encoding.UTF8);
         string outFileName = $"{classInfo.Name}.Interop.g.cs";
-        File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, outFileName), source.ToString());
+        File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, outFileName), new CSharpInteropClassRenderer(classInfo, renderContext, methodResolver).Render());
     }
 
     RenderContext jsObjRenderCtx = new(null, classInfos, RenderOptions.CSharp);
     new JSObjectExtensionsRenderer(jsObjRenderCtx, resolvedTypes).Render();
-    SourceText jsObjectExtensionsSource = SourceText.From(jsObjRenderCtx.ToString(), Encoding.UTF8);
-    File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, "JSObjectExtensions.g.cs"), jsObjectExtensionsSource.ToString());
+    File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, "JSObjectExtensions.g.cs"), jsObjRenderCtx.ToString());
 }
 
 static void GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)
@@ -58,5 +55,9 @@ static void GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<Clas
         HierarchyInfo = ModuleHierarchyInfo.FromClasses(classInfos)
     };
     TypeScriptRenderer tsRenderer = new(classInfos, moduleInfo);
-    File.WriteAllText(parsedArgs.TsOutputFilePath, tsRenderer.Render());
+    using FileStream fs = new(parsedArgs.TsOutputFilePath, FileMode.OpenOrCreate, FileAccess.Write);
+    StreamWriter tsWriter = new(fs, Encoding.UTF8, 16 * 1024);
+    tsRenderer.Render(tsWriter);
+    tsWriter.Flush();
+    tsWriter.Close();
 }
