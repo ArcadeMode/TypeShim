@@ -17,10 +17,9 @@ try
     List<ClassInfo> classInfos = [.. symbolExtractor.ExtractAllExportedSymbols()
         .Select(classSymbol => new ClassInfoBuilder(classSymbol, typeInfoCache).Build())
         .Where(ci => ci.Methods.Any() || ci.Properties.Any())]; // dont bother with empty classes
-    Task generateTS = Task.Run(() => GenerateTypeScriptInteropCode(parsedArgs, classInfos));
-    Task generateCS = Task.Run(() => GenerateCSharpInteropCode(parsedArgs, classInfos));
 
-    await Task.WhenAll(generateTS, generateCS);
+    GenerateTypeScriptInteropCode(parsedArgs, classInfos);
+    GenerateCSharpInteropCode(parsedArgs, classInfos);
 }
 catch (TypeShimException ex) // known exceptions warrant only an error message
 {
@@ -35,11 +34,20 @@ static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInf
     List<InteropTypeInfo> resolvedTypes = [];
     JSObjectMethodResolver methodResolver = new(resolvedTypes);
 
-    foreach (ClassInfo classInfo in classInfos)
+    RenderContext[] classCtxs = new RenderContext[classInfos.Count];
+    ParallelOptions options = new()
     {
-        RenderContext renderContext = new(classInfo, classInfos, RenderOptions.CSharp);
-        string outFileName = $"{classInfo.Name}.Interop.g.cs";
-        File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, outFileName), new CSharpInteropClassRenderer(classInfo, renderContext, methodResolver).Render());
+        MaxDegreeOfParallelism = Math.Min(4, Environment.ProcessorCount)
+    };
+    Parallel.For(0, classInfos.Count, options, i =>
+    {
+        classCtxs[i] = new(classInfos[i], classInfos, RenderOptions.CSharp);
+        new CSharpInteropClassRenderer(classInfos[i], classCtxs[i], methodResolver).Render();
+    });
+
+    foreach(RenderContext ctx in classCtxs)
+    {
+        File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, $"{ctx.Class.Name}.Interop.g.cs"), ctx.ToString());
     }
 
     RenderContext jsObjRenderCtx = new(null, classInfos, RenderOptions.CSharp);
