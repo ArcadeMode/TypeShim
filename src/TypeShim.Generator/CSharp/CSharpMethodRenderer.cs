@@ -49,9 +49,11 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     private void RenderConstructorMethodCore(ConstructorInfo constructorInfo)
     {
-        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new();
-        _ctx.AppendLine(marshalAsAttributeRenderer.RenderJSExportAttribute().NormalizeWhitespace().ToFullString())
-            .AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute(constructorInfo.Type.JSTypeSyntax).NormalizeWhitespace().ToFullString());
+        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(_ctx);
+        marshalAsAttributeRenderer.RenderJSExportAttribute();
+        _ctx.AppendLine();
+        marshalAsAttributeRenderer.RenderReturnAttribute(constructorInfo.Type.JSTypeSyntax);
+        _ctx.AppendLine();
 
         MethodParameterInfo[] allParameters = constructorInfo.GetParametersIncludingInitializerObject();
         RenderMethodSignature(constructorInfo.Name, constructorInfo.Type, allParameters);
@@ -75,9 +77,11 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     private void RenderMethodCore(MethodInfo methodInfo)
     {
-        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new();
-        _ctx.AppendLine(marshalAsAttributeRenderer.RenderJSExportAttribute().NormalizeWhitespace().ToFullString())
-            .AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute(methodInfo.ReturnType.JSTypeSyntax).NormalizeWhitespace().ToFullString());
+        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(_ctx);
+        marshalAsAttributeRenderer.RenderJSExportAttribute();
+        _ctx.AppendLine();
+        marshalAsAttributeRenderer.RenderReturnAttribute(methodInfo.ReturnType.JSTypeSyntax);
+        _ctx.AppendLine();
 
         RenderMethodSignature(methodInfo.Name, methodInfo.ReturnType, methodInfo.Parameters);
         _ctx.AppendLine("{");
@@ -122,9 +126,11 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     private void RenderPropertyMethodCore(PropertyInfo propertyInfo, MethodInfo methodInfo)
     {
-        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new();
-        _ctx.AppendLine(marshalAsAttributeRenderer.RenderJSExportAttribute().NormalizeWhitespace().ToFullString());
-        _ctx.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute(methodInfo.ReturnType.JSTypeSyntax).NormalizeWhitespace().ToFullString());
+        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(_ctx);
+        marshalAsAttributeRenderer.RenderJSExportAttribute();
+        _ctx.AppendLine();
+        marshalAsAttributeRenderer.RenderReturnAttribute(methodInfo.ReturnType.JSTypeSyntax);
+        _ctx.AppendLine();
 
         RenderMethodSignature(methodInfo.Name, methodInfo.ReturnType, methodInfo.Parameters);
         _ctx.AppendLine("{");
@@ -175,10 +181,14 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             foreach (MethodParameterInfo parameterInfo in parameterInfos)
             {
                 if (!isFirst) _ctx.Append(", ");
-
-                JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new();
-                _ctx.Append(marshalAsAttributeRenderer.RenderParameterAttribute(parameterInfo.Type.JSTypeSyntax).NormalizeWhitespace().ToFullString())
-                    .Append(' ')
+                JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(_ctx);
+                //marshalAsAttributeRenderer.RenderJSExportAttribute();
+                //_ctx.AppendLine();
+                //marshalAsAttributeRenderer.RenderReturnAttribute(methodInfo.ReturnType.JSTypeSyntax);
+                //_ctx.AppendLine();
+                //JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new();
+                marshalAsAttributeRenderer.RenderParameterAttribute(parameterInfo.Type.JSTypeSyntax);
+                _ctx.Append(' ')
                     .Append(parameterInfo.Type.CSharpInteropTypeSyntax)
                     .Append(' ')
                     .Append(parameterInfo.Name);

@@ -41,6 +41,7 @@ internal static class CSharpPartialCompilation
 
     private static List<string> TryGetNetCoreAppRefPackAssemblyPaths()
     {
+        // GetDotnetRoot is EXPENSIVE 
         string? dotnetRoot = GetDotnetRoot();
         if (string.IsNullOrWhiteSpace(dotnetRoot))
         {
@@ -60,7 +61,9 @@ internal static class CSharpPartialCompilation
             .Where(x => x.Version is not null)
             .OrderByDescending(x => x.Version)
             .Select(x => x.Dir)
-            .FirstOrDefault();
+            .FirstOrDefault(); // FILE ATTRIBUTE LOADING is EXPENSIVE
+
+        // TODO: come up with smarter way to find the `refDir`, equally expensive as writing 10 generated csharp files!
 
         if (bestVersionDir is null)
         {
