@@ -33,7 +33,7 @@ internal class JSObjectExtensionsRendererTests_Properties
 
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.First();
@@ -96,7 +96,7 @@ internal class JSObjectExtensionsRendererTests_Properties
                 public MyClass P1 { get; set; }
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -153,7 +153,7 @@ internal class JSObjectExtensionsRendererTests_Properties
                 public MyClass[] P1 { get; set; }
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
         INamedTypeSymbol classSymbol = exportedClasses.First();
@@ -199,7 +199,7 @@ internal class JSObjectExtensionsRendererTests_Properties
             }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.First();
@@ -254,7 +254,7 @@ internal class JSObjectExtensionsRendererTests_Properties
 
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.First();
@@ -341,7 +341,7 @@ internal class JSObjectExtensionsRendererTests_Properties
 
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -428,7 +428,7 @@ internal class JSObjectExtensionsRendererTests_Properties
 
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
 
@@ -500,7 +500,7 @@ internal class JSObjectExtensionsRendererTests_Properties
 
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
 

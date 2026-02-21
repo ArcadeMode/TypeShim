@@ -26,6 +26,23 @@
   <ItemGroup>
     <Using Include="NUnit.Framework" />
   </ItemGroup>
+  <Target Name="ResolveTargetingPackRefDir"
+          AfterTargets="ResolveAssemblyReferences">
 
+    <!-- Filter resolved compile-time references to find System.Runtime.dll (and with it, the current targeting pack dir) -->
+    <ItemGroup>
+      <_SystemRuntimeRef Include="@(ReferencePath)"
+                         Condition="$([System.String]::Equals('%(Filename)%(Extension)', 'System.Runtime.dll', System.StringComparison.OrdinalIgnoreCase))" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_SystemRuntimePath>%(_SystemRuntimeRef.FullPath)</_SystemRuntimePath>
+      <_TargetingPackRefDir Condition="'$(_SystemRuntimePath)' != ''" >$([System.IO.Path]::GetDirectoryName('$(_SystemRuntimePath)'))</_TargetingPackRefDir>
+    </PropertyGroup>
+
+    <Error Condition="'$(_TargetingPackRefDir)' == ''" Text="System.Runtime.dll is not referenced in compilation, without it TypeShim (and your project) wont be able to function." />
+    <Message Condition="'$(_TargetingPackRefDir)' != ''"  Importance="high" Text="TypeShim will resolve framework reference assemblies from: $(_TargetingPackRefDir)"></Message>
+    <WriteLinesToFile File="$(OutDir)TargetingPackRefDir.txt" Overwrite="true" Encoding="UTF-8" Lines="$(_TargetingPackRefDir)" />
+  </Target>
 </Project>
    
