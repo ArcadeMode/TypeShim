@@ -9,11 +9,11 @@ using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator;
 
-internal class SymbolExtractor(IEnumerable<CSharpFileInfo> fileInfos)
+internal class SymbolExtractor(IEnumerable<CSharpFileInfo> fileInfos, string runtimePackRefDir)
 {
     internal IEnumerable<INamedTypeSymbol> ExtractAllExportedSymbols()
     {
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation(fileInfos.Select(csFile => csFile.SyntaxTree));
+        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation(fileInfos.Select(csFile => csFile.SyntaxTree), runtimePackRefDir);
 
         List<INamedTypeSymbol> classInfos = [.. fileInfos.SelectMany(fileInfo => FindLabelledClassSymbols(compilation.GetSemanticModel(fileInfo.SyntaxTree), fileInfo.SyntaxTree.GetRoot()))];
         return classInfos;

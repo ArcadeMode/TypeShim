@@ -7,6 +7,7 @@ try
     setup.Validate();
     // Set environment variable so BenchmarkDotNet subprocesses can find generator builds
     Environment.SetEnvironmentVariable("TYPESHIM_GENERATOR_BUILDS_DIR", setup.GeneratorBuildsDir);
+    Environment.SetEnvironmentVariable("TYPESHIM_TARGETINGPACK_REF_DIR", setup.TargetingPackRefDir);
 }
 catch (Exception ex)
 {

@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using System.Text;
@@ -12,7 +12,7 @@ ProgramArguments parsedArgs = ProgramArguments.Parse(args);
 
 try
 {
-    SymbolExtractor symbolExtractor = new(parsedArgs.CsFileInfos);
+    SymbolExtractor symbolExtractor = new(parsedArgs.CsFileInfos, parsedArgs.RuntimePackRefDir);
     InteropTypeInfoCache typeInfoCache = new();
     List<ClassInfo> classInfos = [.. symbolExtractor.ExtractAllExportedSymbols()
         .Select(classSymbol => new ClassInfoBuilder(classSymbol, typeInfoCache).Build())

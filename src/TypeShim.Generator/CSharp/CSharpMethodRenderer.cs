@@ -182,11 +182,6 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             {
                 if (!isFirst) _ctx.Append(", ");
                 JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(_ctx);
-                //marshalAsAttributeRenderer.RenderJSExportAttribute();
-                //_ctx.AppendLine();
-                //marshalAsAttributeRenderer.RenderReturnAttribute(methodInfo.ReturnType.JSTypeSyntax);
-                //_ctx.AppendLine();
-                //JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new();
                 marshalAsAttributeRenderer.RenderParameterAttribute(parameterInfo.Type.JSTypeSyntax);
                 _ctx.Append(' ')
                     .Append(parameterInfo.Type.CSharpInteropTypeSyntax)
