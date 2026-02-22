@@ -5,26 +5,18 @@ using TypeShim.Generator;
 
 internal class TypeScriptRenderer(List<ClassInfo> classInfos, ModuleInfo moduleInfo)
 {
-    internal void Render(StreamWriter tsWriter)
+    internal List<RenderContext> Render()
     {
-        RenderContext configCtx = RenderTypeShimConfig();
-        tsWriter.WriteLine(configCtx.ToString());
-        RenderContext exportsCtx = RenderAssemblyExports();
-        tsWriter.WriteLine(exportsCtx.ToString());
-
-        RenderContext[] classCtxs = new RenderContext[classInfos.Count];
-        ParallelOptions options = new()
+        List<RenderContext> renderContexts = new(classInfos.Count + 2)
         {
-            MaxDegreeOfParallelism = Math.Min(4, Environment.ProcessorCount)
+            RenderTypeShimConfig(),
+            RenderAssemblyExports()
         };
-        Parallel.For(0, classInfos.Count, options, i =>
+        foreach (ClassInfo classInfo in classInfos)
         {
-            classCtxs[i] = RenderUserClass(classInfos[i]);
-        });
-        foreach (RenderContext ctx in classCtxs)
-        {
-            tsWriter.WriteLine(ctx.ToString()); 
+            renderContexts.Add(RenderUserClass(classInfo));
         }
+        return renderContexts;
     }
 
     private RenderContext RenderTypeShimConfig()
