@@ -190,9 +190,9 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         
         using (_ctx.Indent())
         {
-            _ctx.AppendLine($"if (t.IsFaulted) {tcsVarName}.SetException(t.Exception.InnerExceptions);");
-            _ctx.AppendLine($"else if (t.IsCanceled) {tcsVarName}.SetCanceled();");
-            _ctx.Append($"else {tcsVarName}.SetResult(");
+            _ctx.Append("if (t.IsFaulted) ").Append(tcsVarName).AppendLine(".SetException(t.Exception.InnerExceptions);")
+                .Append("else if (t.IsCanceled) ").Append(tcsVarName).AppendLine(".SetCanceled();")
+                .Append("else ").Append(tcsVarName).Append(".SetResult(");
             RenderInlineTypeDownConversion(taskTypeParamInfo, tcsVarName, DeferredExpressionRenderer.From(() => _ctx.Append("t.Result")));
             _ctx.AppendLine(");");
         }
@@ -213,10 +213,9 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         _ctx.AppendLine("?.ContinueWith(t => {");
         using (_ctx.Indent())
         {
-            _ctx.AppendLine($"if (t.IsFaulted) {tcsVarName}!.SetException(t.Exception.InnerExceptions);")
-                .AppendLine($"else if (t.IsCanceled) {tcsVarName}!.SetCanceled();");
-
-            _ctx.Append($"else {tcsVarName}!.SetResult(");
+            _ctx.Append("if (t.IsFaulted) ").Append(tcsVarName).AppendLine("!.SetException(t.Exception.InnerExceptions);")
+                .Append("else if (t.IsCanceled) ").Append(tcsVarName).AppendLine("!.SetCanceled();")
+                .Append("else ").Append(tcsVarName).Append("!.SetResult(");
             RenderInlineTypeDownConversion(taskReturnTypeParamInfo, tcsVarName, DeferredExpressionRenderer.From(() => _ctx.Append("t.Result")));
             _ctx.AppendLine(");");
 

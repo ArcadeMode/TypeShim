@@ -147,7 +147,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             DeferredExpressionRenderer typedValueExpressionRenderer = _conversionRenderer.RenderReturnTypeConversion(methodInfo.ReturnType, untypedValueExpressionRenderer);
             if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void) // getter
             {
-                _ctx.Append($"return ");
+                _ctx.Append("return ");
                 typedValueExpressionRenderer.Render();
                 _ctx.AppendLine(";");
             }
