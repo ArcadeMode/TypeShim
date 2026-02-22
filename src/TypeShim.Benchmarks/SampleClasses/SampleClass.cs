@@ -1,4 +1,6 @@
 #nullable enable
+using System;
+using System.Collections.Generic;
 using TypeShim;
 
 namespace TypeShim.Benchmarks.SampleClasses;
@@ -298,4 +300,132 @@ public class SampleClass10
     /// <param name="input">The input string to validate</param>
     /// <returns>True if valid, false otherwise</returns>
     public bool Validate(string input) => !string.IsNullOrEmpty(input);
+}
+public sealed class AlphaToken
+{
+    public string Name { get; init; } = "";
+    public int Id { get; set; }
+    public bool IsActive { get; set; } = true;
+
+    public int NextId() => Id + 1;
+    public void Deactivate() => IsActive = false;
+    public override string ToString() => $"{Name}#{Id}";
+}
+
+public sealed class BetaCounter
+{
+    public long Value { get; private set; }
+    public long Step { get; set; } = 1;
+
+    public void Add() => Value += Step;
+    public void Reset(long value = 0) => Value = value;
+    public bool IsZero() => Value == 0;
+}
+
+public sealed class GammaClock
+{
+    public DateTimeOffset Now { get; private set; } = DateTimeOffset.UtcNow;
+    public TimeSpan Skew { get; set; } = TimeSpan.Zero;
+
+    public DateTimeOffset Read() => Now + Skew;
+    public void Tick(TimeSpan delta) => Now = Now.Add(delta);
+    public void SyncUtc() => Now = DateTimeOffset.UtcNow;
+}
+
+public sealed class DeltaFlags
+{
+    public int Bits { get; private set; }
+    public string Label { get; set; } = "delta";
+
+    public void Set(int mask) => Bits |= mask;
+    public void Clear(int mask) => Bits &= ~mask;
+    public bool Has(int mask) => (Bits & mask) == mask;
+}
+
+public sealed class EpsilonBucket<T>
+{
+    public List<T> Items { get; } = new();
+    public int Capacity { get; set; } = 16;
+
+    public void Add(T item) => Items.Add(item);
+    public int Count() => Items.Count;
+    public void Clear() => Items.Clear();
+}
+
+public sealed class ZetaRange
+{
+    public int Start { get; set; }
+    public int End { get; set; }
+    public bool Inclusive { get; set; } = true;
+
+    public bool Contains(int value) => Inclusive ? (value >= Start && value <= End) : (value > Start && value < End);
+    public int Length() => Math.Max(0, End - Start);
+    public void Normalize() { if (End < Start) (Start, End) = (End, Start); }
+}
+
+public sealed class EtaCacheKey
+{
+    public string Kind { get; init; } = "eta";
+    public Guid CorrelationId { get; init; } = Guid.NewGuid();
+    public int Version { get; set; } = 1;
+
+    public string Format() => $"{Kind}:{Version}:{CorrelationId:D}";
+    public EtaCacheKey Bump() => new() { Kind = Kind, Version = Version + 1, CorrelationId = CorrelationId };
+    public bool IsV1() => Version == 1;
+}
+
+public sealed class ThetaMath
+{
+    public double A { get; set; }
+    public double B { get; set; }
+    public double Epsilon { get; set; } = 1e-9;
+
+    public double Sum() => A + B;
+    public bool NearlyEquals() => Math.Abs(A - B) <= Epsilon;
+    public void Swap() => (A, B) = (B, A);
+}
+
+public sealed class IotaUser
+{
+    public string UserName { get; set; } = "";
+    public string? Email { get; set; }
+    public DateTime CreatedUtc { get; } = DateTime.UtcNow;
+
+    public bool HasEmail() => !string.IsNullOrWhiteSpace(Email);
+    public void SetEmail(string? email) => Email = email;
+    public string Display() => HasEmail() ? $"{UserName} <{Email}>" : UserName;
+}
+
+public sealed class KappaSwitch
+{
+    public bool Enabled { get; set; }
+    public string Reason { get; set; } = "";
+
+    public void Enable(string reason = "") { Enabled = true; Reason = reason; }
+    public void Disable(string reason = "") { Enabled = false; Reason = reason; }
+    public string State() => Enabled ? "On" : "Off";
+}
+
+public sealed class LambdaQueue<T>
+{
+    private readonly Queue<T> _queue = new();
+
+    public int Count => _queue.Count;
+    public bool IsEmpty => _queue.Count == 0;
+    public T? LastPushed { get; private set; }
+
+    public void Enqueue(T item) { _queue.Enqueue(item); LastPushed = item; }
+    public bool TryDequeue(out T? item) => _queue.TryDequeue(out item);
+    public void Clear() => _queue.Clear();
+}
+
+public sealed class MuConfig
+{
+    public string Environment { get; set; } = "dev";
+    public int RetryCount { get; set; } = 3;
+    public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(10);
+
+    public bool IsProd() => string.Equals(Environment, "prod", StringComparison.OrdinalIgnoreCase);
+    public void UseProd() => Environment = "prod";
+    public string Summary() => $"{Environment}; retries={RetryCount}; timeout={Timeout.TotalSeconds:0}s";
 }

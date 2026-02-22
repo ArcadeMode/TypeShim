@@ -1819,7 +1819,7 @@ export class C1 extends ProxyBase {
             }
             
             /// <summary>
-            /// This method references <see cref="OuterClass.InnerClass"/> in the documentation.
+            /// This method references <see cref="N1.OuterClass.InnerClass"/> in the documentation.
             /// </summary>
             [TSExport]
             public class C1

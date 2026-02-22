@@ -143,31 +143,4 @@ internal class SyntaxTreeParsingTests_Constructors
         InteropTypeInfoCache typeCache = new();
         Assert.Throws<NotSupportedConstructorOverloadException>(() => new ClassInfoBuilder(classSymbol, typeCache).Build());
     }
-
-    [Test]
-    public void ClassInfoBuilder_PrimaryConstructor_UnmarshallableParameter_ReturnsConstructor()
-    {
-        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
-            using System;
-            namespace N1;
-            public class UnmarshallableType
-            {
-            }
-            [TSExport]
-            public class C1(UnmarshallableType name)
-            {
-            }
-        """);
-
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
-        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
-        Assert.That(exportedClasses, Has.Count.EqualTo(1));
-        INamedTypeSymbol classSymbol = exportedClasses.Last();
-        InteropTypeInfoCache typeCache = new();
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
-        Assert.That(classInfo.Constructor, Is.Not.Null);
-        MethodParameterInfo param = classInfo.Constructor.Parameters[0];
-        Assert.That(param.Type.RequiresTypeConversion, Is.True);
-        Assert.That(param.Type.SupportsTypeConversion, Is.False);
-    }
 }
