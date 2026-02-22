@@ -1,0 +1,10 @@
+# Build outputs
+bin/
+obj/
+GeneratorBuilds/
+
+# BenchmarkDotNet artifacts
+BenchmarkDotNet.Artifacts/
+
+# Temporary benchmark outputs
+*.tmp

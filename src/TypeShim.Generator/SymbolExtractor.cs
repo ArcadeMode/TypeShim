@@ -9,32 +9,40 @@ using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator;
 
-internal class SymbolExtractor(IEnumerable<CSharpFileInfo> fileInfos)
+internal class SymbolExtractor(CSharpFileInfo[] fileInfos, string runtimePackRefDir)
 {
-    internal IEnumerable<INamedTypeSymbol> ExtractAllExportedSymbols()
+    internal List<INamedTypeSymbol> ExtractAllExportedSymbols()
     {
-        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation(fileInfos.Select(csFile => csFile.SyntaxTree));
-
-        List<INamedTypeSymbol> classInfos = [.. fileInfos.SelectMany(fileInfo => FindLabelledClassSymbols(compilation.GetSemanticModel(fileInfo.SyntaxTree), fileInfo.SyntaxTree.GetRoot()))];
-        return classInfos;
-
+        CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation(GetExportOnlyTrees(), runtimePackRefDir);
+        List<INamedTypeSymbol> exportedSymbols = new(fileInfos.Length * 2); // should be enough space to avoid having to extend the list
+        FindExports(compilation.Assembly.GlobalNamespace, exportedSymbols);
+        return exportedSymbols;
     }
 
-    private static IEnumerable<INamedTypeSymbol> FindLabelledClassSymbols(SemanticModel semanticModel, SyntaxNode root)
+    private IEnumerable<SyntaxTree> GetExportOnlyTrees()
     {
-        foreach (var cls in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
+        foreach (CSharpFileInfo fileInfo in fileInfos)
         {
-            if (semanticModel.GetDeclaredSymbol(cls) is not INamedTypeSymbol symbol)
+            TSExportOnlySyntaxRewriter rewriter = new();
+            CompilationUnitSyntax root = fileInfo.SyntaxTree.GetCompilationUnitRoot();
+            if (rewriter.Visit(root) is not CompilationUnitSyntax syntax)
             {
                 continue;
             }
+            yield return fileInfo.SyntaxTree.WithRootAndOptions(syntax, fileInfo.SyntaxTree.Options);
+        }
+    }
 
-            if (symbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSExportAttribute" or "TSExport"))
-            {
-                //TODO: add verbosity argument and use with ILogger
-                //Console.WriteLine($"TsExport: {symbol.ToDisplayString()}");
-                yield return symbol;
-            }
+    private static void FindExports(INamespaceSymbol ns, List<INamedTypeSymbol> exportedSymbols)
+    {
+        foreach (INamedTypeSymbol typeMember in ns.GetTypeMembers())
+        {
+            exportedSymbols.Add(typeMember);
+        }
+
+        foreach (INamespaceSymbol namespaceSymbol in ns.GetNamespaceMembers())
+        {
+            FindExports(namespaceSymbol, exportedSymbols);
         }
     }
 }

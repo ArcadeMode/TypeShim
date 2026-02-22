@@ -49,9 +49,11 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     private void RenderConstructorMethodCore(ConstructorInfo constructorInfo)
     {
-        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new();
-        _ctx.AppendLine(marshalAsAttributeRenderer.RenderJSExportAttribute().NormalizeWhitespace().ToFullString())
-            .AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute(constructorInfo.Type.JSTypeSyntax).NormalizeWhitespace().ToFullString());
+        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(_ctx);
+        marshalAsAttributeRenderer.RenderJSExportAttribute();
+        _ctx.AppendLine();
+        marshalAsAttributeRenderer.RenderReturnAttribute(constructorInfo.Type.JSTypeSyntax);
+        _ctx.AppendLine();
 
         MethodParameterInfo[] allParameters = constructorInfo.GetParametersIncludingInitializerObject();
         RenderMethodSignature(constructorInfo.Name, constructorInfo.Type, allParameters);
@@ -75,9 +77,11 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     private void RenderMethodCore(MethodInfo methodInfo)
     {
-        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new();
-        _ctx.AppendLine(marshalAsAttributeRenderer.RenderJSExportAttribute().NormalizeWhitespace().ToFullString())
-            .AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute(methodInfo.ReturnType.JSTypeSyntax).NormalizeWhitespace().ToFullString());
+        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(_ctx);
+        marshalAsAttributeRenderer.RenderJSExportAttribute();
+        _ctx.AppendLine();
+        marshalAsAttributeRenderer.RenderReturnAttribute(methodInfo.ReturnType.JSTypeSyntax);
+        _ctx.AppendLine();
 
         RenderMethodSignature(methodInfo.Name, methodInfo.ReturnType, methodInfo.Parameters);
         _ctx.AppendLine("{");
@@ -122,9 +126,11 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     private void RenderPropertyMethodCore(PropertyInfo propertyInfo, MethodInfo methodInfo)
     {
-        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new();
-        _ctx.AppendLine(marshalAsAttributeRenderer.RenderJSExportAttribute().NormalizeWhitespace().ToFullString());
-        _ctx.AppendLine(marshalAsAttributeRenderer.RenderReturnAttribute(methodInfo.ReturnType.JSTypeSyntax).NormalizeWhitespace().ToFullString());
+        JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(_ctx);
+        marshalAsAttributeRenderer.RenderJSExportAttribute();
+        _ctx.AppendLine();
+        marshalAsAttributeRenderer.RenderReturnAttribute(methodInfo.ReturnType.JSTypeSyntax);
+        _ctx.AppendLine();
 
         RenderMethodSignature(methodInfo.Name, methodInfo.ReturnType, methodInfo.Parameters);
         _ctx.AppendLine("{");
@@ -137,7 +143,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             }
 
             string accessedObject = methodInfo.IsStatic ? _ctx.Class.Name : _ctx.LocalScope.GetAccessorExpression(methodInfo.Parameters.ElementAt(0));
-            DeferredExpressionRenderer untypedValueExpressionRenderer = DeferredExpressionRenderer.From(() => _ctx.Append($"{accessedObject}.{propertyInfo.Name}"));
+            DeferredExpressionRenderer untypedValueExpressionRenderer = DeferredExpressionRenderer.From(() => _ctx.Append(accessedObject).Append('.').Append(propertyInfo.Name));
             DeferredExpressionRenderer typedValueExpressionRenderer = _conversionRenderer.RenderReturnTypeConversion(methodInfo.ReturnType, untypedValueExpressionRenderer);
             if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void) // getter
             {
@@ -175,10 +181,9 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             foreach (MethodParameterInfo parameterInfo in parameterInfos)
             {
                 if (!isFirst) _ctx.Append(", ");
-
-                JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new();
-                _ctx.Append(marshalAsAttributeRenderer.RenderParameterAttribute(parameterInfo.Type.JSTypeSyntax).NormalizeWhitespace().ToFullString())
-                    .Append(' ')
+                JSMarshalAsAttributeRenderer marshalAsAttributeRenderer = new(_ctx);
+                marshalAsAttributeRenderer.RenderParameterAttribute(parameterInfo.Type.JSTypeSyntax);
+                _ctx.Append(' ')
                     .Append(parameterInfo.Type.CSharpInteropTypeSyntax)
                     .Append(' ')
                     .Append(parameterInfo.Name);
@@ -189,20 +194,20 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     internal void RenderFromObjectMapper()
     {
-        _ctx.AppendLine($"public static {_ctx.Class.Type.CSharpTypeSyntax} {RenderConstants.FromObject}(object obj)");
+        _ctx.Append("public static ").Append(_ctx.Class.Type.CSharpTypeSyntax.ToString()).Append(' ').Append(RenderConstants.FromObject).AppendLine("(object obj)");
         _ctx.AppendLine("{");
         using (_ctx.Indent())
         {
-            _ctx.AppendLine($"return obj switch");
+            _ctx.AppendLine("return obj switch");
             _ctx.AppendLine("{");
             using (_ctx.Indent())
             {
-                _ctx.AppendLine($"{_ctx.Class.Type.CSharpTypeSyntax} instance => instance,");
+                _ctx.Append(_ctx.Class.Type.CSharpTypeSyntax.ToString()).AppendLine(" instance => instance,");
                 if (_ctx.Class is { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
                 {
-                    _ctx.AppendLine($"JSObject jsObj => {RenderConstants.FromJSObject}(jsObj),");
+                    _ctx.Append("JSObject jsObj => ").Append(RenderConstants.FromJSObject).AppendLine("(jsObj),");
                 }
-                _ctx.AppendLine($"_ => throw new ArgumentException($\"Invalid object type {{obj?.GetType().ToString() ?? \"null\"}}\", nameof(obj)),");
+                _ctx.AppendLine("_ => throw new ArgumentException($\"Invalid object type {obj?.GetType().ToString() ?? \"null\"}\", nameof(obj)),");
             }
             _ctx.AppendLine("};");
         }
@@ -211,7 +216,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     internal void RenderFromJSObjectMapper(ConstructorInfo constructorInfo)
     {
-        _ctx.AppendLine($"public static {_ctx.Class.Type.CSharpTypeSyntax} {RenderConstants.FromJSObject}(JSObject jsObject)")
+        _ctx.Append("public static ").Append(_ctx.Class.Type.CSharpTypeSyntax).Append(' ').Append(RenderConstants.FromJSObject).AppendLine("(JSObject jsObject)")
             .AppendLine("{");
 
         using (_ctx.Indent())

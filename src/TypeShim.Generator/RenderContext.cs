@@ -14,7 +14,7 @@ internal sealed class RenderContext(ClassInfo? targetClass, IEnumerable<ClassInf
     internal LocalScope LocalScope => _localScope ?? throw new InvalidOperationException("No active method in context");
     internal SymbolMap SymbolMap { get; } = new(allClasses);
 
-    private readonly StringBuilder _sb = new();
+    private readonly StringBuilder _sb = new(capacity: 16 * 1024);
 
     private int _currentDepth = 0;
     private bool _isNewLine = true;

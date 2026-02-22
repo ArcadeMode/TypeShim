@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Text;
 
 namespace TypeShim.Generator;
 
@@ -7,23 +8,25 @@ internal sealed class ProgramArguments
     internal CSharpFileInfo[] CsFileInfos { get; private init; }
     internal string CsOutputDir { get; private init; }
     internal string TsOutputFilePath { get; private init; }
+    internal string RuntimePackRefDir {  get; private init; }
 
-    private ProgramArguments(CSharpFileInfo[] csFileInfos, string csOutputDir, string tsOutputFilePath)
+    private ProgramArguments(CSharpFileInfo[] csFileInfos, string csOutputDir, string tsOutputFilePath, string runtimePackRefDir)
     {
         CsFileInfos = csFileInfos;
         CsOutputDir = csOutputDir;
         TsOutputFilePath = tsOutputFilePath;
+        RuntimePackRefDir = runtimePackRefDir;
     }
 
     internal static ProgramArguments Parse(string[] args)
     {
-        if (args.Length != 3)
+        if (args.Length != 4)
         {
             Console.Error.WriteLine("TypeShim usage: <csFilePaths> <csOutputDir> <tsOutputFilePath>");
             Environment.Exit(1);
         }
 
-        return new ProgramArguments(ParseCsFilePaths(args[0]), ParseCsOutputDir(args[1]), ParseTsOutputFilePath(args[2]));
+        return new ProgramArguments(ParseCsFilePaths(args[0]), ParseCsOutputDir(args[1]), ParseTsOutputFilePath(args[2]), args[3]);
     }
 
     private static CSharpFileInfo[] ParseCsFilePaths(string arg)
@@ -41,11 +44,12 @@ internal sealed class ProgramArguments
 
             if (!File.Exists(csFilePath))
             {
-                throw new InvalidOperationException($"Invalid .cs file path provided '{csFilePath}'");
+                Console.Error.WriteLine($"Invalid .cs file path provided '{csFilePath}'");
+                Environment.Exit(1);
             }
 
-            string code = File.ReadAllText(csFilePath);
-            fileInfos[i] = CSharpFileInfo.Create(CSharpSyntaxTree.ParseText(code));
+            using FileStream fs = new(csFilePath, FileMode.Open, FileAccess.Read);
+            fileInfos[i] = CSharpFileInfo.Create(CSharpSyntaxTree.ParseText(SourceText.From(fs)));
         }
         return fileInfos;
     }

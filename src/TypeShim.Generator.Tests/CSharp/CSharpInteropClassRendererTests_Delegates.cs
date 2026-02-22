@@ -24,7 +24,7 @@ internal class CSharpInteropClassRendererTests_Delegates
                 public void M1(Action callback) => callback();
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.First();
@@ -82,7 +82,7 @@ public partial class C1Interop
                 public void M1(Action<string> callback) => callback();
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.First();
@@ -140,7 +140,7 @@ public partial class C1Interop
                 public void M1(Action<string, int> callback) => callback();
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.First();
@@ -198,7 +198,7 @@ public partial class C1Interop
                 public void M1(Action<string, int, bool> callback) => callback();
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.First();
@@ -256,7 +256,7 @@ public partial class C1Interop
                 public string M1(Func<string> callback) => callback();
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.First();
@@ -314,7 +314,7 @@ public partial class C1Interop
                 public string M1(Func<string, int> callback) => callback(1);
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.First();
@@ -372,7 +372,7 @@ public partial class C1Interop
                 public string M1(Func<string, int, bool> callback) => callback(1, true);
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.First();
@@ -441,7 +441,7 @@ public partial class C1Interop
                 public void M1(Action<MyClass> callback) => callback(new MyClass() { Id = 1 });
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -511,7 +511,7 @@ public partial class C1Interop
                 public Action<MyClass> M1() => (MyClass obj) => {};
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -581,7 +581,7 @@ public partial class C1Interop
                 public Func<MyClass, MyClass> M1() => (MyClass obj) => obj;
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -651,7 +651,7 @@ public partial class C1Interop
                 public Func<int, MyClass?> M1() {}
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -721,7 +721,7 @@ public partial class C1Interop
                 public Func<MyClass?> M1() {}
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -791,7 +791,7 @@ public partial class C1Interop
                 public void M1(Func<int, MyClass?> func) {}
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -861,7 +861,7 @@ public partial class C1Interop
                 public void M1(Func<MyClass?> func) {}
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -934,7 +934,7 @@ public partial class C1Interop
                 }
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -1005,7 +1005,7 @@ public partial class C1Interop
                 public Func<MyClass, MyClass> P1 { get; set; }
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -1075,98 +1075,6 @@ public partial class C1Interop
     }
 
     [Test]
-    public void CSharpInteropClass_PropertyType_FunctionUserClassUserClass_Unexported()
-    {
-        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
-            using System;
-            using System.Threading.Tasks;
-            namespace N1;
-            //[TSExport] unexported
-            public class MyClass
-            {
-                public int Id { get; set; }
-            }
-        """);
-
-        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
-            using System;
-            using System.Threading.Tasks;
-            namespace N1;
-            [TSExport]
-            public class C1
-            {
-                public Func<MyClass, MyClass> P1 { get; set; }
-            }
-        """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
-        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
-        Assert.That(exportedClasses, Has.Count.EqualTo(1));
-
-        InteropTypeInfoCache typeCache = new();
-        ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.First(), typeCache).Build();
-        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
-
-        AssertEx.EqualOrDiff(interopClass, """    
-        #nullable enable
-        // TypeShim generated TypeScript interop definitions
-        using System;
-        using System.Runtime.InteropServices.JavaScript;
-        using System.Threading.Tasks;
-        namespace N1;
-        public partial class C1Interop
-        {
-            [JSExport]
-            [return: JSMarshalAs<JSType.Any>]
-            public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
-            {
-                using var _ = jsObject;
-                Func<object, object> tmpP1 = jsObject.GetPropertyAsObjectObjectFunctionNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject));
-                return new C1()
-                {
-                    P1 = (MyClass arg0) => (MyClass)tmpP1(arg0),
-                };
-            }
-            [JSExport]
-            [return: JSMarshalAs<JSType.Function<JSType.Any, JSType.Any>>]
-            public static Func<object, object> get_P1([JSMarshalAs<JSType.Any>] object instance)
-            {
-                C1 typed_instance = (C1)instance;
-                Func<MyClass, MyClass> retVal = typed_instance.P1;
-                return (object arg0) => (object)retVal((MyClass)arg0);
-            }
-            [JSExport]
-            [return: JSMarshalAs<JSType.Void>]
-            public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Any, JSType.Any>>] Func<object, object> value)
-            {
-                C1 typed_instance = (C1)instance;
-                Func<MyClass, MyClass> typed_value = (MyClass arg0) => (MyClass)value(arg0);
-                typed_instance.P1 = typed_value;
-            }
-            public static C1 FromObject(object obj)
-            {
-                return obj switch
-                {
-                    C1 instance => instance,
-                    JSObject jsObj => FromJSObject(jsObj),
-                    _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-                };
-            }
-            public static C1 FromJSObject(JSObject jsObject)
-            {
-                using var _ = jsObject;
-                Func<object, object> tmpP1 = jsObject.GetPropertyAsObjectObjectFunctionNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject));
-                return new C1()
-                {
-                    P1 = (MyClass arg0) => (MyClass)tmpP1(arg0),
-                };
-            }
-        }
-        
-        """);
-    }
-
-    [Test]
     public void CSharpInteropClass_PropertyType_Action()
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -1179,7 +1087,7 @@ public partial class C1Interop
                 public Action P1 { get; set; }
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.First();
@@ -1257,7 +1165,7 @@ public partial class C1Interop
                 public Action<char> P1 { get; set; }
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.First();

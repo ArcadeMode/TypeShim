@@ -5,9 +5,36 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NativeMode Condition="'$(NativeMode)' == ''">false</NativeMode>
   </PropertyGroup>
-  
+
+  <!-- Non-AOT / normal (JIT) settings -->
+  <PropertyGroup Condition="'$(NativeMode)' != 'true'">
+    <Optimize>true</Optimize>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+
+    <SelfContained>true</SelfContained>
+    <TieredCompilation>false</TieredCompilation>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRunComposite>true</PublishReadyToRunComposite>
+  </PropertyGroup>
+
+  <!-- AOT (NativeAOT) settings -->
+  <PropertyGroup Condition="'$(NativeMode)' == 'true'">
+    <PublishAot>true</PublishAot>
+    <SelfContained>true</SelfContained>
+
+    <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <StripSymbols>true</StripSymbols>
+    <PublishTrimmed>true</PublishTrimmed>
+
+    <!-- reduce globalization/ICU payload -->
+    <IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
+    <!--<PublishSingleFile>true</PublishSingleFile>-->
+  </PropertyGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="TypeShim.Generator.Tests" />
   </ItemGroup>
