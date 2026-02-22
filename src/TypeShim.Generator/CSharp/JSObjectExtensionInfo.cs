@@ -5,11 +5,6 @@ namespace TypeShim.Generator.CSharp;
 internal record JSObjectExtensionInfo(InteropTypeInfo TypeInfo)
 {
     internal string Name = string.Join("", GetManagedTypeListForType(TypeInfo));
-        
-    internal string GetMarshalAsMethodName()
-    {
-        return $"MarshalAs{Name}";
-    }
 
     internal string GetGetPropertyAsMethodName()
     {

@@ -15,9 +15,4 @@ internal class JSObjectMethodResolver(List<InteropTypeInfo> resolvedTypes)
         resolvedTypes.Add(typeInfo);
         return extensionMethodName;
     }
-
-    internal IEnumerable<InteropTypeInfo> GetResolvedTypes()
-    {
-        return resolvedTypes;
-    }
 }
