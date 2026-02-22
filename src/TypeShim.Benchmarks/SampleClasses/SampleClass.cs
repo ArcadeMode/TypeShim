@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using TypeShim;
+using System.Threading.Tasks;
 
 namespace TypeShim.Benchmarks.SampleClasses;
 
@@ -33,6 +34,20 @@ public class SampleClass01
     /// <param name="greeting">The greeting message</param>
     /// <returns>A formatted greeting</returns>
     public string Greet(string greeting) => $"{greeting}, {Name}!";
+
+    public Task<string> GreetAsync(string greeting)
+    {
+        return Task.FromResult($"{greeting}, {Name}!");
+    }
+
+    public void GreetThis(Task<SampleClass02> other)
+    {
+        other.ContinueWith(task =>
+        {
+            var otherInstance = task.Result;
+            Console.WriteLine($"Hello from {Name} to {otherInstance.Description}!");
+        });
+    }
 }
 
 /// <summary>
@@ -60,6 +75,9 @@ public class SampleClass02
     /// Gets the description
     /// </summary>
     public string Description { get; set; } = "Sample";
+
+    public SampleClass02[] Siblings { get; set; } = Array.Empty<SampleClass02>();
+    public int[] SiblingIDs { get; set; } = Array.Empty<int>();
 }
 
 /// <summary>
@@ -102,6 +120,13 @@ public class SampleClass03
     /// Toggles the active state
     /// </summary>
     public void Toggle() => IsActive = !IsActive;
+
+    public Func<SampleClass03> OnThing { get; set; } = () => new SampleClass03();
+
+    public static void StaticMethodWithFunc(Func<int, string> func)
+    {
+        Console.WriteLine(func(42));
+    }   
 }
 
 /// <summary>
@@ -147,7 +172,7 @@ public class SampleClass05
     /// </summary>
     public static SampleClass05 Create(string id) => new(id);
 
-    private SampleClass05(string id)
+    public SampleClass05(string id)
     {
         Id = id;
     }

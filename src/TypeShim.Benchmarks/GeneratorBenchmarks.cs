@@ -2,8 +2,7 @@ using BenchmarkDotNet.Attributes;
 
 namespace TypeShim.Benchmarks;
 
-//[MemoryDiagnoser]
-[MinColumn, MaxColumn, MeanColumn, MedianColumn]
+[MinColumn, MaxColumn]
 public class GeneratorBenchmarks
 {
     private GeneratorSetup _setup = null!;
@@ -11,10 +10,10 @@ public class GeneratorBenchmarks
     private string _tempDir = null!;
     private Dictionary<int, List<string>> _pregeneratedClassFiles = null!;
 
-    public enum Mode { AOT, JIT }
+    public enum CompilationMode { AOT, JIT }
 
-    [Params(Mode.AOT, Mode.JIT)]
-    public Mode TestMode { get; set; }
+    [Params(CompilationMode.AOT, CompilationMode.JIT)]
+    public CompilationMode Compilation { get; set; }
 
     [GlobalSetup]
     public void Setup()
@@ -42,7 +41,7 @@ public class GeneratorBenchmarks
     [IterationSetup]
     public void IterationSetup()
     {
-        _executor = new GeneratorExecutor(TestMode == Mode.AOT ? _setup.AotGeneratorPath : _setup.NonAotGeneratorPath, _setup.ProjectRoot);
+        _executor = new GeneratorExecutor(Compilation == CompilationMode.AOT ? _setup.AotGeneratorPath : _setup.NonAotGeneratorPath, _setup.ProjectRoot);
     }
 
     [GlobalCleanup]
@@ -61,26 +60,24 @@ public class GeneratorBenchmarks
         }
     }
 
-    [Benchmark(Baseline = true)]
-    [Arguments(1)]
-    [Arguments(10)]
-    [Arguments(25)]
-    [Arguments(50)]
-    [Arguments(100)]
-    public void Overhead(int classCount)
-    {
-        _executor.Execute([], "/", "/");
-    }
-
     [Benchmark]
+    [Arguments(0)] // determine process-start overhead
     [Arguments(1)]
     [Arguments(10)]
     [Arguments(25)]
     [Arguments(50)]
     [Arguments(100)]
-    public void Generate(int classCount)
+    [Arguments(200)]
+    public void Generate(int ClassCount)
     {
-        RunBenchmark(classCount);
+        if (ClassCount == 0)
+        {
+            _executor.Execute([], "/", "/");
+        }
+        else
+        {
+            RunBenchmark(ClassCount);
+        }
     }
 
     private void RunBenchmark(int classCount)
