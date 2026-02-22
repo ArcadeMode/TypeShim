@@ -31,7 +31,7 @@ internal sealed class ProgramArguments
 
     private static CSharpFileInfo[] ParseCsFilePaths(string arg)
     {
-        string[] csFilePaths = arg.Split(';');
+        string[] csFilePaths = arg.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         if (csFilePaths.Length == 0)
         {
             Console.Error.WriteLine("No .cs file paths provided");
@@ -40,16 +40,17 @@ internal sealed class ProgramArguments
         CSharpFileInfo[] fileInfos = new CSharpFileInfo[csFilePaths.Length];
         for (int i = 0; i < csFilePaths.Length; i++)
         {
-            string csFilePath = csFilePaths[i];
-
-            if (!File.Exists(csFilePath))
+            try
             {
-                Console.Error.WriteLine($"Invalid .cs file path provided '{csFilePath}'");
+                string csFilePath = csFilePaths[i];
+                using FileStream fs = new(csFilePath, FileMode.Open, FileAccess.Read);
+                fileInfos[i] = CSharpFileInfo.Create(CSharpSyntaxTree.ParseText(SourceText.From(fs)));
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error reading .cs file at path '{csFilePaths[i]}'. Error: {ex.Message}");
                 Environment.Exit(1);
             }
-
-            using FileStream fs = new(csFilePath, FileMode.Open, FileAccess.Read);
-            fileInfos[i] = CSharpFileInfo.Create(CSharpSyntaxTree.ParseText(SourceText.From(fs)));
         }
         return fileInfos;
     }
