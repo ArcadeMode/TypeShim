@@ -31,7 +31,6 @@ internal static class CSharpPartialCompilation
     {
         List<string> referenceAssemblyPaths = [
             $"{runtimePackRefDir}/System.Runtime.InteropServices.JavaScript.dll",
-            $"{runtimePackRefDir}/System.Collections.dll",
             $"{runtimePackRefDir}/System.Runtime.dll",
         ]; ;
 
