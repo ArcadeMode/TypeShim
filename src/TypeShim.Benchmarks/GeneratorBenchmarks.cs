@@ -29,7 +29,7 @@ public class GeneratorBenchmarks
         Directory.CreateDirectory(_tempDir);
 
         _pregeneratedClassFiles = [];
-        int[] classCounts = [1, 10, 25, 50, 100];
+        int[] classCounts = [1, 10, 25, 50, 100, 200];
         foreach (int classCount in classCounts)
         {
             string tempClassesDir = Path.Combine(_tempDir, $"pregenerated_{classCount}");
