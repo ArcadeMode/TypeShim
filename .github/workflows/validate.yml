@@ -100,6 +100,8 @@ jobs:
   benchmarks:
     name: 🏁 Benchmark Generator
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && !cancelled()
+    needs: build-and-test
     steps:
       - uses: actions/checkout@v4
 
