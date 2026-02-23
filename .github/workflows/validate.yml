@@ -49,7 +49,6 @@ jobs:
         run: >
           dotnet test TypeShim.slnx 
           --configuration Release 
-          --no-build 
           --verbosity normal
           --logger "trx;LogFileName=test-results.trx"
 
