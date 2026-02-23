@@ -1,17 +1,10 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   
-  <!-- Defaults for TypeShim build properties -->
-  <PropertyGroup Condition="$(TypeShim_MSBuildMessagePriority) == ''">
-    <TypeShim_MSBuildMessagePriority>Normal</TypeShim_MSBuildMessagePriority>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(TypeShim_GeneratedDir) == ''">
-    <TypeShim_GeneratedDir>TypeShim</TypeShim_GeneratedDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(TypeShim_TypeScriptOutputDirectory) == ''">
-    <TypeShim_TypeScriptOutputDirectory>wwwroot</TypeShim_TypeScriptOutputDirectory>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(TypeShim_TypeScriptOutputFileName) == ''">
-    <TypeShim_TypeScriptOutputFileName>typeshim.ts</TypeShim_TypeScriptOutputFileName>
+  <PropertyGroup >
+    <TypeShim_MSBuildMessagePriority Condition="$(TypeShim_MSBuildMessagePriority) == ''">Normal</TypeShim_MSBuildMessagePriority>
+    <TypeShim_GeneratedDir Condition="$(TypeShim_GeneratedDir) == ''">TypeShim</TypeShim_GeneratedDir>
+    <TypeShim_TypeScriptOutputDirectory Condition="$(TypeShim_TypeScriptOutputDirectory) == ''">wwwroot</TypeShim_TypeScriptOutputDirectory>
+    <TypeShim_TypeScriptOutputFileName Condition="$(TypeShim_TypeScriptOutputFileName) == ''">typeshim.ts</TypeShim_TypeScriptOutputFileName>
   </PropertyGroup>
   
   <Target Name="TypeShimCleanGeneratedCs" BeforeTargets="TypeShimGenerateInterop" Condition="'$(DesignTimeBuild)' != 'true'">
@@ -45,10 +38,8 @@
         <_TypeShimGeneratorFileName Condition="'$(OS)' != 'Windows_NT'">TypeShim.Generator</_TypeShimGeneratorFileName>
         <_TypeShimGeneratorFallbackPath>$([System.IO.Path]::Combine('$(_TypeShimGeneratorRootDir)', '$(_TypeShimGeneratorFileName)'))</_TypeShimGeneratorFallbackPath>
         <_TypeShimRidFile>$([System.IO.Path]::Combine('$(IntermediateOutputPath)', 'typeshim.rid'))</_TypeShimRidFile>
-        <_TypeShimGenPathFile>$([System.IO.Path]::Combine('$(IntermediateOutputPath)', 'typeshim.generator.path'))</_TypeShimGenPathFile>
     </PropertyGroup>
 
-    <!-- Print RID into an intermediate file (Windows -> .bat, Unix -> .sh) -->
     <Exec
         Condition="'$(OS)' == 'Windows_NT'"
         Command="$(_TypeShimGeneratorRootDir)/print-rid.bat &gt; &quot;$(_TypeShimRidFile)&quot;"
@@ -61,7 +52,6 @@
         WorkingDirectory="$(ProjectDir)"
         IgnoreExitCode="false" />
 
-    <!-- Read RID from file (strip new lines just in case) -->
     <ReadLinesFromFile File="$(_TypeShimRidFile)">
         <Output TaskParameter="Lines" PropertyName="_TypeShimRidRaw" />
     </ReadLinesFromFile>
@@ -69,14 +59,12 @@
     <PropertyGroup>
         <_TypeShimRid>$([System.String]::Copy('$(_TypeShimRidRaw)').Trim())</_TypeShimRid>
         <_TypeShimGeneratorRidPath Condition="'$(_TypeShimRid)' != ''">$([System.IO.Path]::Combine('$(_TypeShimGeneratorRootDir)', '$(_TypeShimRid)', '$(_TypeShimGeneratorFileName)'))</_TypeShimGeneratorRidPath>
-
-        <!-- Choose RID-specific generator if present, else fallback to existing path -->
+        <!-- Choose native build if exists, or fallback to non-native build -->
         <_TypeShimGeneratorExePath Condition="'$(_TypeShimGeneratorRidPath)' != '' and Exists('$(_TypeShimGeneratorRidPath)')">$(_TypeShimGeneratorRidPath)</_TypeShimGeneratorExePath>
         <_TypeShimGeneratorExePath Condition="'$(_TypeShimGeneratorExePath)' == ''">$(_TypeShimGeneratorFallbackPath)</_TypeShimGeneratorExePath>
     </PropertyGroup>
 
     <Message Importance="$(TypeShim_MSBuildMessagePriority)" Text="TypeShim RID: $(_TypeShimRid)" />
-    <Message Importance="$(TypeShim_MSBuildMessagePriority)" Text="TypeShim RID PATHHH: $(_TypeShimGeneratorRidPath)" />
     <Message Importance="$(TypeShim_MSBuildMessagePriority)" Text="TypeShim generator selected: $(_TypeShimGeneratorExePath)" />
   </Target>
     
