@@ -14,10 +14,11 @@
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
 
-    <SelfContained>true</SelfContained>
+    <!--<SelfContained>true</SelfContained>-->
     <TieredCompilation>false</TieredCompilation>
-    <PublishReadyToRun>true</PublishReadyToRun>
-    <PublishReadyToRunComposite>true</PublishReadyToRunComposite>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!--<PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRunComposite>true</PublishReadyToRunComposite>-->
   </PropertyGroup>
 
   <!-- AOT (NativeAOT) settings -->
