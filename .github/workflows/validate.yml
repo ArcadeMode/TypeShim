@@ -36,6 +36,7 @@ jobs:
           dotnet restore TypeShim.slnx
       - name: Build
         working-directory: src/TypeShim
+        shell: pwsh
         run: >
           ./build.ps1
 
