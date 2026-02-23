@@ -41,7 +41,9 @@
           Condition="'$(DesignTimeBuild)' != 'true'">
     <PropertyGroup>
         <_TypeShimGeneratorRootDir>$(MSBuildThisFileDirectory)</_TypeShimGeneratorRootDir>
-        <_TypeShimGeneratorFallbackPath>$([System.IO.Path]::Combine('$(_TypeShimGeneratorRootDir)', 'TypeShim.Generator.exe'))</_TypeShimGeneratorFallbackPath>
+        <_TypeShimGeneratorFileName Condition="'$(OS)' == 'Windows_NT'">TypeShim.Generator.exe</_TypeShimGeneratorFileName>
+        <_TypeShimGeneratorFileName Condition="'$(OS)' != 'Windows_NT'">TypeShim.Generator</_TypeShimGeneratorFileName>
+        <_TypeShimGeneratorFallbackPath>$([System.IO.Path]::Combine('$(_TypeShimGeneratorRootDir)', '$(_TypeShimGeneratorFileName)'))</_TypeShimGeneratorFallbackPath>
         <_TypeShimRidFile>$([System.IO.Path]::Combine('$(IntermediateOutputPath)', 'typeshim.rid'))</_TypeShimRidFile>
         <_TypeShimGenPathFile>$([System.IO.Path]::Combine('$(IntermediateOutputPath)', 'typeshim.generator.path'))</_TypeShimGenPathFile>
     </PropertyGroup>
@@ -66,7 +68,7 @@
 
     <PropertyGroup>
         <_TypeShimRid>$([System.String]::Copy('$(_TypeShimRidRaw)').Trim())</_TypeShimRid>
-        <_TypeShimGeneratorRidPath Condition="'$(_TypeShimRid)' != ''">$([System.IO.Path]::Combine('$(_TypeShimGeneratorRootDir)', '$(_TypeShimRid)', 'TypeShim.Generator.exe'))</_TypeShimGeneratorRidPath>
+        <_TypeShimGeneratorRidPath Condition="'$(_TypeShimRid)' != ''">$([System.IO.Path]::Combine('$(_TypeShimGeneratorRootDir)', '$(_TypeShimRid)', '$(_TypeShimGeneratorFileName)'))</_TypeShimGeneratorRidPath>
 
         <!-- Choose RID-specific generator if present, else fallback to existing path -->
         <_TypeShimGeneratorExePath Condition="'$(_TypeShimGeneratorRidPath)' != '' and Exists('$(_TypeShimGeneratorRidPath)')">$(_TypeShimGeneratorRidPath)</_TypeShimGeneratorExePath>
