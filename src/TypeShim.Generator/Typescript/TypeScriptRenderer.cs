@@ -1,20 +1,22 @@
 ﻿using System.Text;
 using TypeShim.Generator.Parsing;
 using TypeShim.Generator.Typescript;
-using TypeShim.Generator.CSharp;
 using TypeShim.Generator;
 
-internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo moduleInfo)
+internal class TypeScriptRenderer(List<ClassInfo> classInfos, ModuleInfo moduleInfo)
 {
-    private readonly StringBuilder sb = new();
-
-    internal string Render()
+    internal List<RenderContext> Render()
     {
-        foreach(RenderContext ctx in (RenderContext[])[RenderTypeShimConfig(), RenderAssemblyExports(), .. RenderUserClasses()])
+        List<RenderContext> renderContexts = new(classInfos.Count + 2)
         {
-            sb.AppendLine(ctx.ToString());
+            RenderTypeShimConfig(),
+            RenderAssemblyExports()
+        };
+        foreach (ClassInfo classInfo in classInfos)
+        {
+            renderContexts.Add(RenderUserClass(classInfo));
         }
-        return sb.ToString();
+        return renderContexts;
     }
 
     private RenderContext RenderTypeShimConfig()
@@ -32,18 +34,15 @@ internal class TypeScriptRenderer(IEnumerable<ClassInfo> classInfos, ModuleInfo 
         moduleInterfaceRenderer.Render();
         return renderCtx;
     }
-
-    private IEnumerable<RenderContext> RenderUserClasses()
+    
+    private RenderContext RenderUserClass(ClassInfo classInfo)
     {
-        foreach (ClassInfo classInfo in classInfos)
-        {
-            RenderContext renderCtx = new(classInfo, classInfos, RenderOptions.TypeScript);
-            renderCtx.AppendLine($"// TypeShim generated TypeScript definitions for class: {renderCtx.Class.Namespace}.{renderCtx.Class.Name}");
-            TypescriptUserClassProxyRenderer proxyRenderer = new(renderCtx);
-            proxyRenderer.Render();
-            TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(renderCtx);
-            namespaceRenderer.Render();
-            yield return renderCtx;
-        }
+        RenderContext renderCtx = new(classInfo, classInfos, RenderOptions.TypeScript);
+        renderCtx.AppendLine($"// TypeShim generated TypeScript definitions for class: {renderCtx.Class.Namespace}.{renderCtx.Class.Name}");
+        TypescriptUserClassProxyRenderer proxyRenderer = new(renderCtx);
+        proxyRenderer.Render();
+        TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(renderCtx);
+        namespaceRenderer.Render();
+        return renderCtx;
     }
 }

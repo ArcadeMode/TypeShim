@@ -77,8 +77,6 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
     {
         foreach (IFieldSymbol fieldSymbol in classSymbol.GetMembers().OfType<IFieldSymbol>())
         {
-            if (fieldSymbol.DeclaredAccessibility != Accessibility.Public)
-                continue;
             if (fieldSymbol.IsRequired)
             {
                 throw new NotSupportedFieldException($"Field '{classSymbol.Name}.{fieldSymbol.Name}' is required. Required fields are currently not supported.");

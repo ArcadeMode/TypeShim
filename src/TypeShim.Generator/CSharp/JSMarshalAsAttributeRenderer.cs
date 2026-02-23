@@ -5,60 +5,34 @@ using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.CSharp;
 
-internal sealed class JSMarshalAsAttributeRenderer()
+internal sealed class JSMarshalAsAttributeRenderer(RenderContext ctx)
 {
-    internal AttributeListSyntax RenderJSExportAttribute()
+    internal void RenderJSExportAttribute()
     {
-        return SyntaxFactory.AttributeList(
-            SyntaxFactory.SingletonSeparatedList(
-                SyntaxFactory.Attribute(
-                    SyntaxFactory.IdentifierName("JSExport")
-                )
-            )
-        );
+        ctx.Append("[JSExport]");
     }
     
-    internal AttributeListSyntax RenderJSImportAttribute(string method)
+    internal void RenderJSImportAttribute(string method)
     {
-        return SyntaxFactory.AttributeList(
-            SyntaxFactory.SingletonSeparatedList(
-                SyntaxFactory.Attribute(
-                    SyntaxFactory.IdentifierName("JSImport"),
-                    SyntaxFactory.AttributeArgumentList([
-                        SyntaxFactory.AttributeArgument(
-                            SyntaxFactory.ParseExpression($"\"{method}\"")
-                        ),
-                        SyntaxFactory.AttributeArgument(
-                            SyntaxFactory.ParseExpression("\"@typeshim\"")
-                        )
-                    ])
-                )
-            )
-        );
+        ctx.Append("[JSImport(\"").Append(method).Append("\", \"@typeshim\")]");
     }
 
-    internal AttributeListSyntax RenderReturnAttribute(TypeSyntax jsTypeSyntax)
+    internal void RenderReturnAttribute(TypeSyntax jsTypeSyntax)
     {
-        return RenderAttributeListWithJSMarshalAs(jsTypeSyntax).WithTarget( // 'return:'
-            SyntaxFactory.AttributeTargetSpecifier(
-                SyntaxFactory.Token(SyntaxKind.ReturnKeyword)
-            )
-        );
+        ctx.Append("[return: ");
+        RenderAttributeListWithJSMarshalAs(jsTypeSyntax);
+        ctx.Append("]");
     }
 
-    internal AttributeListSyntax RenderParameterAttribute(TypeSyntax jsTypeSyntax)
+    internal void RenderParameterAttribute(TypeSyntax jsTypeSyntax)
     {
-        return RenderAttributeListWithJSMarshalAs(jsTypeSyntax);
+        ctx.Append("[");
+        RenderAttributeListWithJSMarshalAs(jsTypeSyntax);
+        ctx.Append("]");
     }
 
-    private AttributeListSyntax RenderAttributeListWithJSMarshalAs(TypeSyntax jsTypeSyntax)
+    private void RenderAttributeListWithJSMarshalAs(TypeSyntax jsTypeSyntax)
     {
-        TypeArgumentListSyntax marshalAsTypeArgument = SyntaxFactory.TypeArgumentList(
-            SyntaxFactory.SingletonSeparatedList(jsTypeSyntax)
-        );
-
-        AttributeSyntax marshalAsAttribute = SyntaxFactory.Attribute(SyntaxFactory.GenericName("JSMarshalAs").WithTypeArgumentList(marshalAsTypeArgument));
-        AttributeListSyntax attributeList = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(marshalAsAttribute));
-        return attributeList;
+        ctx.Append("JSMarshalAs<").Append(jsTypeSyntax.ToString()).Append(">");
     }
 }

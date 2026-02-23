@@ -18,9 +18,9 @@ internal static class TypeShimDiagnostics
     internal static readonly DiagnosticDescriptor NonExportedTypeInInteropApiRule = new(
         id: "TSHIM006",
         title: "Non-TSExport type on a method in the interop API",
-        messageFormat: "Type '{0}' has no [TSExport] annotation, it will present in TypeScript as 'ManagedObject'",
-        category: "Design",
-        defaultSeverity: DiagnosticSeverity.Warning,
+        messageFormat: "Type '{0}' needs [TSExport] to appear in a public member of a [TSExport] class",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "TSExport public API should use supported .NET-JS interop types or (other) TSExport classes.");
 

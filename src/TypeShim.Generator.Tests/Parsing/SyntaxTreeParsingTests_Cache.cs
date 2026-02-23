@@ -37,7 +37,7 @@ internal class SyntaxTreeParsingTests_Cache
                 public MyClass? P1 { get; set; }
             }
         """);
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
         INamedTypeSymbol classSymbol = exportedClasses.First();

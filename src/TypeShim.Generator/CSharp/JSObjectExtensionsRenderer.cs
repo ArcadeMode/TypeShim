@@ -59,15 +59,19 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, IEnumerable
         }
         _ctx.AppendLine("}");
 
-        JSMarshalAsAttributeRenderer attributeRenderer = new();
-        _ctx.AppendLine(attributeRenderer.RenderJSImportAttribute("unwrapProperty").NormalizeWhitespace().ToString());
-        _ctx.AppendLine(attributeRenderer.RenderReturnAttribute(extensionInfo.TypeInfo.JSTypeSyntax).NormalizeWhitespace().ToString());
+        JSMarshalAsAttributeRenderer attributeRenderer = new(_ctx);
+        attributeRenderer.RenderJSImportAttribute("unwrapProperty");
+        _ctx.AppendLine();
+        attributeRenderer.RenderReturnAttribute(extensionInfo.TypeInfo.JSTypeSyntax);
+        _ctx.AppendLine();
         _ctx.Append("public static partial ").Append(extensionInfo.TypeInfo.CSharpInteropTypeSyntax).Append(' ');
         marshalAsMethodNameRenderer.Render();
-        _ctx.Append('(')
-            .Append(attributeRenderer.RenderParameterAttribute(SyntaxFactory.ParseTypeName("JSType.Object")).NormalizeWhitespace()).Append(' ').Append(InteropTypeInfo.JSObjectTypeInfo.CSharpInteropTypeSyntax).Append(" obj")
-            .Append(", ")
-            .Append(attributeRenderer.RenderParameterAttribute(SyntaxFactory.ParseTypeName("JSType.String")).NormalizeWhitespace()).Append(" string propertyName")
+        _ctx.Append('(');
+        attributeRenderer.RenderParameterAttribute(SyntaxFactory.ParseTypeName("JSType.Object"));
+        _ctx.Append(' ').Append(InteropTypeInfo.JSObjectTypeInfo.CSharpInteropTypeSyntax).Append(" obj")
+            .Append(", ");
+        attributeRenderer.RenderParameterAttribute(SyntaxFactory.ParseTypeName("JSType.String"));
+        _ctx.Append(" string propertyName")
             .AppendLine(");");
     }
 }

@@ -96,3 +96,45 @@ jobs:
           label: Tests
           message: ${{ env.BADGE_MESSAGE }}
           color: ${{ env.BADGE_COLOR }}
+
+  benchmarks:
+    name: 🏁 Benchmark Generator
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && !cancelled()
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: src/global.json
+
+      - name: Restore
+        working-directory: src
+        run: >
+          dotnet nuget disable source LocalDev &&
+          dotnet restore TypeShim.Benchmarks/TypeShim.Benchmarks.csproj
+
+      - name: Build
+        working-directory: src
+        run: >
+          dotnet build TypeShim.Benchmarks/TypeShim.Benchmarks.csproj
+          --configuration Release
+          --no-restore
+
+      - name: Build Generators
+        working-directory: src/TypeShim.Benchmarks
+        shell: pwsh
+        run: ./Scripts/build-generators.ps1
+
+      - name: Run Benchmarks
+        working-directory: src/TypeShim.Benchmarks
+        run: dotnet run --configuration Release --project TypeShim.Benchmarks.csproj --no-build
+
+      - name: Sticky PR Benchmark Comment
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: benchmark-results
+          path: src/TypeShim.Benchmarks/BenchmarkDotNet.Artifacts/results/TypeShim.Benchmarks.GeneratorBenchmarks-report-github.md

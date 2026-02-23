@@ -24,7 +24,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
@@ -75,7 +75,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
         INamedTypeSymbol classSymbol = exportedClasses[0];
@@ -128,7 +128,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
         INamedTypeSymbol classSymbol = exportedClasses[0];
@@ -180,7 +180,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
         INamedTypeSymbol classSymbol = exportedClasses[0];
@@ -243,7 +243,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass), CSharpFileInfo.Create(anotherUserClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass), CSharpFileInfo.Create(anotherUserClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(3));
 
@@ -294,7 +294,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -345,7 +345,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -396,7 +396,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -447,7 +447,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -497,7 +497,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -547,7 +547,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -597,7 +597,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -647,7 +647,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -698,7 +698,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -738,7 +738,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
 
@@ -776,7 +776,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
 
@@ -815,7 +815,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
 
@@ -854,7 +854,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
 
@@ -894,7 +894,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
 
@@ -942,7 +942,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -991,7 +991,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -1041,7 +1041,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -1095,7 +1095,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -1149,7 +1149,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -1203,7 +1203,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(2));
 
@@ -1247,7 +1247,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
 
@@ -1285,7 +1285,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         }
         """);
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
 

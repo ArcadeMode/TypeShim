@@ -28,7 +28,7 @@ internal class CSharpInteropClassRendererTests_Snapshots
             }
         """.Replace("{{typeExpression}}", typeExpression));
 
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
@@ -95,90 +95,6 @@ public partial class C1Interop
    .Replace("{{jsObjectMethod}}", jsObjectMethod));
     }
 
-    [TestCase("string", "string", "JSType.String")]
-    [TestCase("double", "double", "JSType.Number")]
-    [TestCase("bool", "bool", "JSType.Boolean")]
-    public void CSharpInteropClass_SupportedPropertyType_AndNotExportedReferenceType_GeneratesNoFromJSObjectMethod(string typeExpression, string interopTypeExpression, string jsType)
-    {
-        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
-            using System;
-            using System.Threading.Tasks;
-            using System.Collections.Generic;
-            namespace N1;
-            [TSExport]
-            public class C1
-            {
-                public List<{{typeExpression}}> P2 { get; set; }
-            }
-        """.Replace("{{typeExpression}}", typeExpression));
-
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
-        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
-        Assert.That(exportedClasses, Has.Count.EqualTo(1));
-        INamedTypeSymbol classSymbol = exportedClasses[0];
-
-        InteropTypeInfoCache typeCache = new();
-        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
-        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
-
-        AssertEx.EqualOrDiff(interopClass, """
-#nullable enable
-// TypeShim generated TypeScript interop definitions
-using System;
-using System.Runtime.InteropServices.JavaScript;
-using System.Threading.Tasks;
-namespace N1;
-public partial class C1Interop
-{
-    [JSExport]
-    [return: JSMarshalAs<JSType.Any>]
-    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
-    {
-        using var _ = jsObject;
-        return new C1()
-        {
-            P2 = (List<{{typeExpression}}>)jsObject.GetPropertyAsObjectNullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
-        };
-    }
-    [JSExport]
-    [return: JSMarshalAs<JSType.Any>]
-    public static object get_P2([JSMarshalAs<JSType.Any>] object instance)
-    {
-        C1 typed_instance = (C1)instance;
-        return (object)typed_instance.P2;
-    }
-    [JSExport]
-    [return: JSMarshalAs<JSType.Void>]
-    public static void set_P2([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Any>] object value)
-    {
-        C1 typed_instance = (C1)instance;
-        List<{{typeExpression}}> typed_value = (List<{{typeExpression}}>)value;
-        typed_instance.P2 = typed_value;
-    }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
-        {
-            C1 instance => instance,
-            JSObject jsObj => FromJSObject(jsObj),
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
-    }
-    public static C1 FromJSObject(JSObject jsObject)
-    {
-        using var _ = jsObject;
-        return new C1()
-        {
-            P2 = (List<{{typeExpression}}>)jsObject.GetPropertyAsObjectNullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
-        };
-    }
-}
-
-""".Replace("{{typeExpression}}", interopTypeExpression)
-   .Replace("{{jsType}}", jsType));
-    }
-
     [TestCase("Version")]
     [TestCase("Uri")]
     public void CSharpInteropClass_SupportedPropertyType_AndNotExportedArrayType_GeneratesNoFromJSObjectMethod(string typeName)
@@ -194,7 +110,7 @@ public partial class C1Interop
                 public int P2 { get; set; }
             }
         """.Replace("{{typeName}}", typeName));
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.Last();
@@ -291,7 +207,7 @@ public partial class C1Interop
                 public int P2 { get; set; }
             }
         """.Replace("{{typeName}}", typeName));
-        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)]);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses.Last();

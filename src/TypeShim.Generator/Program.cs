@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using System.Text;
@@ -12,45 +12,41 @@ ProgramArguments parsedArgs = ProgramArguments.Parse(args);
 
 try
 {
-    SymbolExtractor symbolExtractor = new(parsedArgs.CsFileInfos);
+    SymbolExtractor symbolExtractor = new(parsedArgs.CsFileInfos, parsedArgs.RuntimePackRefDir);
     InteropTypeInfoCache typeInfoCache = new();
     List<ClassInfo> classInfos = [.. symbolExtractor.ExtractAllExportedSymbols()
         .Select(classSymbol => new ClassInfoBuilder(classSymbol, typeInfoCache).Build())
         .Where(ci => ci.Methods.Any() || ci.Properties.Any())]; // dont bother with empty classes
 
-    Task generateTS = Task.Run(() => GenerateTypeScriptInteropCode(parsedArgs, classInfos));
-    Task generateCS = Task.Run(() => GenerateCSharpInteropCode(parsedArgs, classInfos));
-
-    await Task.WhenAll(generateTS, generateCS);
+    Task csIo = GenerateCSharpInteropCode(parsedArgs, classInfos);
+    Task tsIo = GenerateTypeScriptInteropCode(parsedArgs, classInfos);
+    await Task.WhenAll(csIo, tsIo);
 }
 catch (TypeShimException ex) // known exceptions warrant only an error message
 {
     Console.Error.WriteLine($"TypeShim received invalid input, no code was generated. {ex.GetType().Name} {ex.Message}");
     Environment.Exit(0);
 }
-
 // End of main program
 
-static void GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)
+static Task GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)
 {
     List<InteropTypeInfo> resolvedTypes = [];
     JSObjectMethodResolver methodResolver = new(resolvedTypes);
-
-    foreach (ClassInfo classInfo in classInfos)
+    List<Task> ioTasks = new(classInfos.Count + 1);
+    foreach(ClassInfo classInfo in classInfos)
     {
-        RenderContext renderContext = new(classInfo, classInfos, RenderOptions.CSharp);
-        SourceText source = SourceText.From(new CSharpInteropClassRenderer(classInfo, renderContext, methodResolver).Render(), Encoding.UTF8);
-        string outFileName = $"{classInfo.Name}.Interop.g.cs";
-        File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, outFileName), source.ToString());
+        RenderContext ctx = new(classInfo, classInfos, RenderOptions.CSharp);
+        new CSharpInteropClassRenderer(classInfo, ctx, methodResolver).Render();
+        ioTasks.Add(File.WriteAllTextAsync(Path.Combine(parsedArgs.CsOutputDir, $"{classInfo.Name}.g.cs"), ctx.ToString()));
     }
-
     RenderContext jsObjRenderCtx = new(null, classInfos, RenderOptions.CSharp);
     new JSObjectExtensionsRenderer(jsObjRenderCtx, resolvedTypes).Render();
-    SourceText jsObjectExtensionsSource = SourceText.From(jsObjRenderCtx.ToString(), Encoding.UTF8);
-    File.WriteAllText(Path.Combine(parsedArgs.CsOutputDir, "JSObjectExtensions.g.cs"), jsObjectExtensionsSource.ToString());
+    ioTasks.Add(File.WriteAllTextAsync(Path.Combine(parsedArgs.CsOutputDir, "JSObjectExtensions.g.cs"), jsObjRenderCtx.ToString()));
+    return Task.WhenAll(ioTasks);
 }
 
-static void GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)
+static Task GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)
 {
     ModuleInfo moduleInfo = new()
     {
@@ -58,5 +54,17 @@ static void GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<Clas
         HierarchyInfo = ModuleHierarchyInfo.FromClasses(classInfos)
     };
     TypeScriptRenderer tsRenderer = new(classInfos, moduleInfo);
-    File.WriteAllText(parsedArgs.TsOutputFilePath, tsRenderer.Render());
+    return WriteFile(tsRenderer.Render());
+
+    async Task WriteFile(List<RenderContext> ctxs)
+    {
+        using FileStream fs = new(parsedArgs.TsOutputFilePath, FileMode.OpenOrCreate, FileAccess.Write);
+        StreamWriter tsWriter = new(fs, Encoding.UTF8, 16 * 1024);
+        foreach (RenderContext ctx in ctxs)
+        {
+            await tsWriter.WriteLineAsync(ctx.ToString());
+        }
+        tsWriter.Flush();
+        tsWriter.Close();
+    }
 }
