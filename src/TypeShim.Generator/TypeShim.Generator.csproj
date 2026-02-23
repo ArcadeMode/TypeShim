@@ -8,20 +8,19 @@
     <NativeMode Condition="'$(NativeMode)' == ''">false</NativeMode>
   </PropertyGroup>
 
-  <!-- Non-AOT / normal (JIT) settings -->
+  <!-- JIT build properties -->
   <PropertyGroup Condition="'$(NativeMode)' != 'true'">
     <Optimize>true</Optimize>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
 
-    <!--<SelfContained>true</SelfContained>-->
-    <TieredCompilation>false</TieredCompilation>
+    <TieredCompilation>true</TieredCompilation>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>link</TrimMode>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <!--<PublishReadyToRun>true</PublishReadyToRun>
-    <PublishReadyToRunComposite>true</PublishReadyToRunComposite>-->
   </PropertyGroup>
 
-  <!-- AOT (NativeAOT) settings -->
+  <!-- AOT build properties -->
   <PropertyGroup Condition="'$(NativeMode)' == 'true'">
     <PublishAot>true</PublishAot>
     <SelfContained>true</SelfContained>
@@ -31,9 +30,8 @@
     <StripSymbols>true</StripSymbols>
     <PublishTrimmed>true</PublishTrimmed>
 
-    <!-- reduce globalization/ICU payload -->
-    <IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
-    <!--<PublishSingleFile>true</PublishSingleFile>-->
+    <!--<DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>-->
   </PropertyGroup>
 
   <ItemGroup>
