@@ -26,17 +26,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="pack/*.*" Pack="true" PackagePath="build" />
-    <Content Include="pack\analyzers\**\*" Pack="true" PackagePath="analyzers/dotnet/cs" />
+    <Content Include="bin/pack/*.*" Pack="true" PackagePath="build" />
+    <Content Include="bin/pack/analyzers/**/*.*" Pack="true" PackagePath="analyzers/dotnet/cs" />
   </ItemGroup>
 
+    <Target Name="CopyStaticsToPackDir" BeforeTargets="Build">
+        <ItemGroup>
+            <StaticFiles Include="./scripts/*.*" />
+        </ItemGroup>
+        <Copy SourceFiles="@(StaticFiles)" DestinationFolder="$(ProjectDir)/bin/pack/" />
+    </Target>
+    
   <Target Name="BuildAnalyzers" BeforeTargets="Build">
     <Message Text="Building $(AnalyzersProjectName)" Importance="high" />
     <MSBuild Projects="..\$(AnalyzersProjectName)\$(AnalyzersProjectName).csproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform)" />
     <ItemGroup>
         <AnalyzerOutput Include="../$(AnalyzersProjectName)/bin/$(Configuration)/$(TargetFramework)/**/*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(AnalyzerOutput)" DestinationFolder="$(ProjectDir)pack\analyzers\" />
+    <Copy SourceFiles="@(AnalyzerOutput)" DestinationFolder="$(ProjectDir)/bin/pack/analyzers/" />
   </Target>
 
   <Target Name="BuildGenerator" BeforeTargets="Build">
@@ -46,6 +53,6 @@
     <ItemGroup>
       <GeneratorFiles Include="../$(GeneratorProjectName)/bin/build/**/*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(GeneratorFiles)" DestinationFolder="$(ProjectDir)/pack/" />
+    <Copy SourceFiles="@(GeneratorFiles)" DestinationFolder="$(ProjectDir)/bin/pack/" />
   </Target>
 </Project>
