@@ -130,21 +130,9 @@ jobs:
         working-directory: src/TypeShim.Benchmarks
         run: dotnet run --configuration Release --project TypeShim.Benchmarks.csproj --no-build
 
-      - name: Find Benchmark Report
-        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-        id: benchmark-report
-        shell: bash
-        run: |
-          report_file=$(find src/TypeShim.Benchmarks/bin/Release -type f -name '*-report-github.md' | head -n 1)
-          if [ -z "$report_file" ]; then
-            echo "No benchmark report markdown found."
-            exit 1
-          fi
-          echo "path=$report_file" >> "$GITHUB_OUTPUT"
-
       - name: Sticky PR Benchmark Comment
         if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: benchmark-results
-          path: ${{ steps.benchmark-report.outputs.path }}
+          path: src/TypeShim.Benchmarks/BenchmarkDotNet.Artifacts/results/TypeShim.Benchmarks.GeneratorBenchmarks-report-github.md
