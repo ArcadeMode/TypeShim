@@ -49,14 +49,14 @@
     <!-- Print RID into an intermediate file (Windows -> .bat, Unix -> .sh) -->
     <Exec
         Condition="'$(OS)' == 'Windows_NT'"
-        Command="print-rid.bat &gt; &quot;typeshim.rid&quot;"
-        WorkingDirectory="$(_TypeShimGeneratorRootDir)"
+        Command="$(_TypeShimGeneratorRootDir)/print-rid.bat &gt; &quot;$(_TypeShimRidFile)&quot;"
+        WorkingDirectory="$(ProjectDir)"
         IgnoreExitCode="false" />
 
     <Exec
         Condition="'$(OS)' != 'Windows_NT'"
-        Command="sh print-rid.sh &gt; &quot;typeshim.rid&quot;"
-        WorkingDirectory="$(_TypeShimGeneratorRootDir)"
+        Command="sh $(_TypeShimGeneratorRootDir)/print-rid.sh &gt; &quot;$(_TypeShimRidFile)&quot;"
+        WorkingDirectory="$(ProjectDir)"
         IgnoreExitCode="false" />
 
     <!-- Read RID from file (strip new lines just in case) -->
@@ -74,6 +74,7 @@
     </PropertyGroup>
 
     <Message Importance="$(TypeShim_MSBuildMessagePriority)" Text="TypeShim RID: $(_TypeShimRid)" />
+    <Message Importance="$(TypeShim_MSBuildMessagePriority)" Text="TypeShim RID PATHHH: $(_TypeShimGeneratorRidPath)" />
     <Message Importance="$(TypeShim_MSBuildMessagePriority)" Text="TypeShim generator selected: $(_TypeShimGeneratorExePath)" />
   </Target>
     
