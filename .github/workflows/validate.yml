@@ -35,11 +35,9 @@ jobs:
           dotnet nuget disable source LocalDev &&
           dotnet restore TypeShim.slnx
       - name: Build
-        working-directory: src
+        working-directory: src/TypeShim
         run: >
-          dotnet build TypeShim.slnx 
-          --configuration Release 
-          --no-restore
+          ./build.ps1
 
       - name: Initialize E2E
         working-directory: src/TypeShim.E2E/vitest
