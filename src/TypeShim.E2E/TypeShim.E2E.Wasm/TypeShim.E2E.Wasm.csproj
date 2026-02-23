@@ -15,7 +15,7 @@
     <TypeShim_MSBuildMessagePriority>High</TypeShim_MSBuildMessagePriority>
   </PropertyGroup>
 
-  <Import Project="../../package/TypeShim.targets" />
+  <Import Project="../../TypeShim/bin/pack/build/TypeShim.targets" />
   <ItemGroup>
     <ProjectReference Include="../../TypeShim/TypeShim.csproj" />
     <ProjectReference Include="../../TypeShim.Analyzers/TypeShim.Analyzers.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
