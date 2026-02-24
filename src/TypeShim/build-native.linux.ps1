@@ -26,7 +26,11 @@ if ([string]::IsNullOrWhiteSpace($sdkVersion)) {
     throw "Failed to read sdk.version from '$globalJsonPath'"
 }
 
-$image = if ($muslRids -contains $RID) { "mcr.microsoft.com/dotnet/sdk:10.0-alpine" } else { "mcr.microsoft.com/dotnet/sdk:10.0" }
+$image = if ($muslRids -contains $RID) {
+    "mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.20"
+} else {
+    "mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-22.04"
+}
 
 Write-Host "Building RID $RID using Docker image $image (SDK required: $sdkVersion)" -ForegroundColor Cyan
 
