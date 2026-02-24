@@ -33,7 +33,7 @@ runs:
       working-directory: src
       run: |
         if ("${{ runner.os }}" -eq "Linux") {
-          ./TypeShim/build-native.linux.ps1 -RID '${{ matrix.rid }}'
+          ./TypeShim/build-native.linux.ps1 -RID '${{ inputs.rid }}'
         } else {
-          ./TypeShim/build-native.ps1 -RID '${{ matrix.rid }}'
+          ./TypeShim/build-native.ps1 -RID '${{ inputs.rid }}'
         }

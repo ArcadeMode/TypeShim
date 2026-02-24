@@ -1,4 +1,4 @@
-name: 🛠️ Build
+name: Validate & Pack
 
 on:
   workflow_dispatch:
@@ -12,50 +12,16 @@ permissions:
   pull-requests: write
 
 jobs:
-  build-managed:
-    name: 🛠️ Build Managed
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup and Build
-        uses: ./.github/actions/setup-build
-        with:
-          rid: managed
-
-      - name: Run Unit Tests
-        id: unit-tests
-        continue-on-error: true
-        uses: ./.github/actions/run-unit-tests
-        with:
-          working-directory: src
-          test-target: TypeShim.slnx
-          configuration: Release
-          artifact-name: test-results-unit
-          rid: managed
-
-      - name: Run E2E Tests
-        if: ${{ !cancelled() }}
-        continue-on-error: true
-        uses: ./.github/actions/run-e2e-tests
-        with:
-          working-directory: src/TypeShim.E2E/vitest
-          artifact-name: test-results-e2e
-          rid: managed
-
-      - name: Upload RID artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pack-build-managed
-          path: src/TypeShim/bin/pack/build/**
-          if-no-files-found: error
-
-  build-native:
-    name: 🛠️ Build Native (${{ matrix.rid }})
+  build:
+    name: Build & Validate (${{ matrix.rid }})
     strategy:
       fail-fast: false
       matrix:
         include:
+          - os: ubuntu-24.04
+            rid: managed
+            e2e: true
+            unit: true # only run unit tests once
           - os: ubuntu-24.04
             rid: linux-x64
             e2e: true
@@ -91,6 +57,17 @@ jobs:
         uses: ./.github/actions/setup-build
         with:
           rid: ${{ matrix.rid }}
+      
+      - name: Run Unit Tests
+        if: ${{ matrix.unit }}
+        continue-on-error: true
+        uses: ./.github/actions/run-unit-tests
+        with:
+          working-directory: src
+          test-target: TypeShim.slnx
+          configuration: Release
+          artifact-name: test-results-unit
+          rid: managed
 
       - name: Run E2E Tests
         if: ${{ !cancelled() && matrix.e2e }}
@@ -100,16 +77,17 @@ jobs:
           artifact-name: test-results-e2e
           rid: ${{ matrix.rid }}
 
-      - name: Upload RID artifact
+      - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: pack-build-${{ matrix.rid }}
-          path: src/TypeShim/bin/pack/build/${{ matrix.rid }}**
+          path: src/TypeShim/bin/pack/build/${{ matrix.rid == 'managed' && '' || matrix.rid }}**
           if-no-files-found: error
+          retention-days: 1
 
   combine:
     name: 📦 Publish Artifacts
-    needs: [build-managed, build-native]
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -130,22 +108,22 @@ jobs:
   publish-results:
     name: 🧾 Publish Results
     runs-on: ubuntu-latest
-    needs: [build-managed, build-native]
+    needs: build
     if: ${{ always() && !cancelled() }}
     steps:
       - name: Download test results
         uses: actions/download-artifact@v4
         with:
           pattern: test-results-*
-          path: artifacts
+          path: results
 
       - name: Publish test results
         id: test-results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           files: |
-            artifacts/**/*.trx
-            artifacts/**/e2e-report-*.xml
+            results/**/*.trx
+            results/**/e2e-report-*.xml
 
       - name: Determine badge content
         if: ${{ github.event_name == 'push' }}
@@ -170,3 +148,37 @@ jobs:
           label: Tests
           message: ${{ env.BADGE_MESSAGE }}
           color: ${{ env.BADGE_COLOR }}
+
+  benchmarks:
+    name: 🏁 Benchmark Generator
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && !cancelled()
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: src/global.json
+
+      - name: Build
+        working-directory: src
+        run: >
+          dotnet build TypeShim.Benchmarks/TypeShim.Benchmarks.csproj
+          --configuration Release
+
+      - name: Build Generators
+        working-directory: src/TypeShim.Benchmarks
+        shell: pwsh
+        run: ./Scripts/build-generators.ps1
+
+      - name: Run Benchmarks
+        working-directory: src/TypeShim.Benchmarks
+        run: dotnet run --configuration Release --project TypeShim.Benchmarks.csproj --no-build
+
+      - name: Sticky PR Benchmark Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: benchmark-results
+          path: src/TypeShim.Benchmarks/BenchmarkDotNet.Artifacts/results/TypeShim.Benchmarks.GeneratorBenchmarks-report-github.md

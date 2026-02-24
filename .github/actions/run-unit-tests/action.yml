@@ -47,3 +47,4 @@ runs:
         if-no-files-found: warn
         path: |
           ${{ inputs.working-directory }}/**/*.trx
+        retention-days: 1

@@ -43,3 +43,4 @@ runs:
         path: |
           ${{ inputs.working-directory }}/e2e-report-*.xml
           ${{ inputs.working-directory }}/**/e2e-report-*.xml
+        retention-days: 1
