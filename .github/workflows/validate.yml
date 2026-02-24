@@ -38,7 +38,7 @@ jobs:
         working-directory: src/TypeShim
         shell: pwsh
         run: >
-          ./build.ps1
+          ./build.ps1 -RID linux-x64
 
       - name: Initialize E2E
         working-directory: src/TypeShim.E2E/vitest

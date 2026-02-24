@@ -1,6 +1,11 @@
 # Build TypeShim.Generator for both AOT and non-AOT modes
 # Usage: .\build-generators.ps1
 
+param(
+    [Parameter(Mandatory = $true)]
+    [string]$RID
+)
+
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -15,7 +20,7 @@ if (Test-Path $OutputDir) {
 }
 New-Item -ItemType Directory -Force -Path "$OutputDir\analyzers" | Out-Null
 New-Item -ItemType Directory -Force -Path "$OutputDir\build" | Out-Null
-New-Item -ItemType Directory -Force -Path "$OutputDir\build\win-x64" | Out-Null
+New-Item -ItemType Directory -Force -Path "$OutputDir\build\$RID" | Out-Null
 
 Write-Host ""
 Write-Host "Building TypeShim" -ForegroundColor Yellow
@@ -25,7 +30,7 @@ Write-Host "Building Generator (JIT)" -ForegroundColor Yellow
 dotnet publish $GeneratorProject -c Release -o "$OutputDir\build" /p:NativeMode=false
 Write-Host ""
 Write-Host "Building Generator (AOT)" -ForegroundColor Yellow
-dotnet publish $GeneratorProject -c Release -o "$OutputDir\build\win-x64" /p:NativeMode=true
+dotnet publish $GeneratorProject -c Release -o "$OutputDir\build\$RID" /p:NativeMode=true -r $RID
 Write-Host ""
 Write-Host "Building Analyzers" -ForegroundColor Yellow
 dotnet publish $AnalyzersProject -c Release -o "$OutputDir\analyzers"
