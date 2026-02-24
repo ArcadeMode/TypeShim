@@ -6,15 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NativeMode Condition="'$(NativeMode)' == ''">false</NativeMode>
+
+    <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
+    <DebugSymbols Condition="'$(Configuration)' == 'Release'">false</DebugSymbols>
   </PropertyGroup>
 
   <!-- JIT build properties -->
   <PropertyGroup Condition="'$(NativeMode)' != 'true'">
-    <Optimize>true</Optimize>
-    <DebugType>none</DebugType>
-    <DebugSymbols>false</DebugSymbols>
-
-    <TieredCompilation>true</TieredCompilation>
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>link</TrimMode>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
@@ -24,14 +22,10 @@
   <PropertyGroup Condition="'$(NativeMode)' == 'true'">
     <PublishAot>true</PublishAot>
     <SelfContained>true</SelfContained>
-
     <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
     <InvariantGlobalization>true</InvariantGlobalization>
     <StripSymbols>true</StripSymbols>
     <PublishTrimmed>true</PublishTrimmed>
-
-    <!--<DebugType>portable</DebugType>
-    <DebugSymbols>true</DebugSymbols>-->
   </PropertyGroup>
 
   <ItemGroup>
