@@ -15,22 +15,31 @@ jobs:
         include:
           - os: ubuntu-24.04
             rid: linux-x64
-          - os: ubuntu-24.04
-            rid: linux-musl-x64
-          - os: ubuntu-24.04-arm
-            rid: linux-musl-arm64
+            e2e: true
           - os: ubuntu-24.04-arm
             rid: linux-arm64
+            e2e: true
+          - os: ubuntu-24.04
+            rid: linux-musl-x64
+            e2e: false # linux-musl-x64 runners are not available on GHA
+          - os: ubuntu-24.04-arm
+            rid: linux-musl-arm64
+            e2e: false # linux-musl-arm64 runners are not available on GHA
           - os: windows-latest
             rid: win-x64
+            e2e: true 
           - os: windows-latest
             rid: win-x86
+            e2e: false # win-x86 runners are not available on GHA
           - os: windows-latest
             rid: win-arm64
+            e2e: false # win-arm64 runners are not available on GHA
           - os: macos-latest
             rid: osx-x64
+            e2e: false # osx-x64 runners are not available on GHA
           - os: macos-latest
             rid: osx-arm64
+            e2e: true
 
     runs-on: ${{ matrix.os }}
 
@@ -66,7 +75,7 @@ jobs:
           }
 
       - name: Run E2E
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.e2e }}
         uses: ./.github/actions/run-e2e
         with:
           working-directory: src/TypeShim.E2E/vitest
