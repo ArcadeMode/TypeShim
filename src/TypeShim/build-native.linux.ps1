@@ -27,9 +27,9 @@ if ([string]::IsNullOrWhiteSpace($sdkVersion)) {
 }
 
 $image = if ($muslRids -contains $RID) {
-    "mcr.microsoft.com/dotnet/sdk:$sdkVersion-alpine"
+    "mcr.microsoft.com/dotnet/sdk:$sdkVersion-alpine3.23-aot"
 } else {
-    "mcr.microsoft.com/dotnet/sdk:$sdkVersion"
+    "mcr.microsoft.com/dotnet/sdk:$sdkVersion-noble-aot"
 }
 
 Write-Host "Preparing binfmt for multi-architecture builds" -ForegroundColor Cyan
@@ -78,17 +78,6 @@ RID="${TYPESHIM_RID}"
 
 echo "dotnet in image:"
 dotnet --info
-
-echo "Installing NativeAOT toolchain prerequisites..."
-if command -v apk >/dev/null 2>&1; then
-  apk add --no-cache clang lld build-base musl-dev zlib-dev
-else
-  apt-get update
-  apt-get install -y --no-install-recommends \
-    clang lld gcc g++ make \
-    libc6-dev zlib1g-dev
-  rm -rf /var/lib/apt/lists/*
-fi
 
 OUTDIR="/repo/src/TypeShim/bin/pack/build/${RID}"
 mkdir -p "$OUTDIR"
