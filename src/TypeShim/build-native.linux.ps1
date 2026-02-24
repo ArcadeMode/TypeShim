@@ -17,7 +17,7 @@ $muslRids = @(
 )
 
 # Read required SDK version from src/global.json (repo-root global.json)
-$globalJsonPath = Join-Path $RepoRoot "global.json"
+$globalJsonPath = Join-Path $RepoRoot "src/global.json"
 if (!(Test-Path $globalJsonPath)) {
     throw "global.json not found at '$globalJsonPath'"
 }
