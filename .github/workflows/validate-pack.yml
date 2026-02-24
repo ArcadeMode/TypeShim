@@ -76,12 +76,22 @@ jobs:
           working-directory: src/TypeShim.E2E/vitest
           artifact-name: test-results-e2e
           rid: ${{ matrix.rid }}
-
+      
+      - name: Determine Artifact Path
+        id: artifact-path
+        shell: pwsh
+        run: |
+          if ("${{ matrix.rid }}" -eq "managed") {
+            echo "artifact-path=src/TypeShim/bin/pack/build/**" >> "$GITHUB_OUTPUT"
+          } else {
+            echo "artifact-path=src/TypeShim/bin/pack/build/${{ matrix.rid }}/**" >> "$GITHUB_OUTPUT"
+          }
+      
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: pack-build-${{ matrix.rid }}
-          path: src/TypeShim/bin/pack/build/${{ matrix.rid == 'managed' && '' || matrix.rid }}**
+          path: ${{ steps.artifact-path.outputs.artifact-path }}
           if-no-files-found: error
           retention-days: 1
 
