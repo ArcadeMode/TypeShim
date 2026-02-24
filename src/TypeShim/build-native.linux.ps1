@@ -9,7 +9,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$RepoRoot = Resolve-Path (Join-Path $ScriptDir "..") | Select-Object -ExpandProperty Path
+$RepoRoot = Resolve-Path (Join-Path $ScriptDir "../..") | Select-Object -ExpandProperty Path
 
 $muslRids = @(
     "linux-musl-x64",
@@ -79,10 +79,10 @@ fi
 echo "Using dotnet:"
 dotnet --info
 
-OUTDIR="/repo/TypeShim/bin/pack/build/${RID}"
+OUTDIR="/repo/src/TypeShim/bin/pack/build/${RID}"
 mkdir -p "$OUTDIR"
 
-dotnet publish "/repo/TypeShim.Generator/TypeShim.Generator.csproj" \
+dotnet publish "/repo/src/TypeShim.Generator/TypeShim.Generator.csproj" \
   -c Release \
   -o "$OUTDIR" \
   /p:NativeMode=true \
