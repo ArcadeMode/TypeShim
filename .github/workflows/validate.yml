@@ -17,30 +17,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup and Build
+        uses: ./.github/actions/setup-build
         with:
-          global-json-file: src/global.json
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-          cache-dependency-path: src/TypeShim.E2E/vitest/package-lock.json
-
-      - name: Restore
-        working-directory: src
-        run: >
-          dotnet nuget disable source LocalDev &&
-          dotnet restore TypeShim.slnx
-
-      - name: Build
-        working-directory: src/TypeShim
-        shell: pwsh
-        run: |
-          ./build.ps1
-          ./build-native.ps1 -RID linux-x64
+          rid: linux-x64
 
       - name: Run Unit Tests
         id: unit-tests

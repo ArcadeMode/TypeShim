@@ -46,5 +46,4 @@ runs:
         name: ${{ inputs.artifact-name }}-${{ inputs.rid }}
         if-no-files-found: warn
         path: |
-          ${{ inputs.working-directory }}/**/TestResults/*.trx
           ${{ inputs.working-directory }}/**/*.trx

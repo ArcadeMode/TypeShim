@@ -13,28 +13,15 @@ permissions:
 
 jobs:
   build-managed:
-    name: Managed
+    name: 🛠️ Build Managed
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup and Build
+        uses: ./.github/actions/setup-build
         with:
-          global-json-file: src/global.json
-      
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-          cache-dependency-path: src/TypeShim.E2E/vitest/package-lock.json
-
-      - name: Build Core
-        shell: pwsh
-        working-directory: src
-        run: |
-          ./TypeShim/build.ps1
+          rid: managed
 
       - name: Run Unit Tests
         id: unit-tests
@@ -64,7 +51,7 @@ jobs:
           if-no-files-found: error
 
   build-native:
-    name: Native ${{ matrix.rid }}
+    name: 🛠️ Build Native (${{ matrix.rid }})
     strategy:
       fail-fast: false
       matrix:
@@ -100,33 +87,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup and Build
+        uses: ./.github/actions/setup-build
         with:
-          global-json-file: src/global.json
-      
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-          cache-dependency-path: src/TypeShim.E2E/vitest/package-lock.json
-
-      - name: Build Core
-        shell: pwsh
-        working-directory: src
-        run: |
-          ./TypeShim/build.ps1
-    
-      - name: Build Native
-        shell: pwsh
-        working-directory: src
-        run: |
-          if ("${{ runner.os }}" -eq "Linux") {
-            ./TypeShim/build-native.linux.ps1 -RID '${{ matrix.rid }}'
-          } else {
-            ./TypeShim/build-native.ps1 -RID '${{ matrix.rid }}'
-          }
+          rid: ${{ matrix.rid }}
 
       - name: Run E2E Tests
         if: ${{ !cancelled() && matrix.e2e }}
