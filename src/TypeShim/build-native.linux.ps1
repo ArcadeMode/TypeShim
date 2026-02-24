@@ -30,4 +30,4 @@ docker run --rm `
     -v "${RepoRoot}:/repo" `
     -w /repo `
     $image `
-    sh -lc "$install && pwsh -NoProfile -File /repo/TypeShim/build-native.ps1 -RID $RID"
+    sh -lc "$install && pwsh -NoProfile -File /repo/src/TypeShim/build-native.ps1 -RID $RID"
