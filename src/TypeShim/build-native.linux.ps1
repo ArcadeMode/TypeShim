@@ -16,18 +16,72 @@ $muslRids = @(
     "linux-musl-arm64"
 )
 
-if ($muslRids -contains $RID) {
-    $image = "mcr.microsoft.com/dotnet/sdk:10.0-alpine"
-    $install = "apk add --no-cache powershell git ca-certificates"
-} else {
-    $image = "mcr.microsoft.com/dotnet/sdk:10.0"
-    $install = "apt-get update && apt-get install -y --no-install-recommends powershell git ca-certificates && rm -rf /var/lib/apt/lists/*"
+# Read required SDK version from src/global.json (repo-root global.json)
+$globalJsonPath = Join-Path $RepoRoot "global.json"
+if (!(Test-Path $globalJsonPath)) {
+    throw "global.json not found at '$globalJsonPath'"
+}
+$sdkVersion = (Get-Content $globalJsonPath -Raw | ConvertFrom-Json).sdk.version
+if ([string]::IsNullOrWhiteSpace($sdkVersion)) {
+    throw "Failed to read sdk.version from '$globalJsonPath'"
 }
 
-Write-Host "Building RID $RID using Docker image $image" -ForegroundColor Cyan
+$image = if ($muslRids -contains $RID) { "mcr.microsoft.com/dotnet/sdk:10.0-alpine" } else { "mcr.microsoft.com/dotnet/sdk:10.0" }
 
+Write-Host "Building RID $RID using Docker image $image (SDK required: $sdkVersion)" -ForegroundColor Cyan
+
+# Run publish directly (no PowerShell in-container), and ensure the requested SDK exists (global.json compliance).
 docker run --rm `
+    -e "TYPESHIM_SDK_VERSION=$sdkVersion" `
+    -e "TYPESHIM_RID=$RID" `
+    -e "DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1" `
+    -e "DOTNET_CLI_TELEMETRY_OPTOUT=1" `
+    -e "DOTNET_MULTILEVEL_LOOKUP=0" `
     -v "${RepoRoot}:/repo" `
     -w /repo `
     $image `
-    sh -lc "$install && pwsh -NoProfile -File /repo/src/TypeShim/build-native.ps1 -RID $RID"
+    sh -lc @'
+set -euo pipefail
+
+SDK_VERSION="${TYPESHIM_SDK_VERSION}"
+RID="${TYPESHIM_RID}"
+
+echo "Container dotnet:"
+dotnet --info || true
+
+need_install=1
+if dotnet --list-sdks >/dev/null 2>&1; then
+  if dotnet --list-sdks | grep -q "^${SDK_VERSION}"; then
+    need_install=0
+  fi
+fi
+
+if [ "$need_install" -ne 0 ]; then
+  echo "Installing .NET SDK ${SDK_VERSION} to satisfy global.json..."
+
+  # Ensure curl + bash exist (dotnet-install.sh is bash)
+  if command -v apk >/dev/null 2>&1; then
+    apk add --no-cache bash curl ca-certificates
+  else
+    apt-get update
+    apt-get install -y --no-install-recommends bash curl ca-certificates
+    rm -rf /var/lib/apt/lists/*
+  fi
+
+  curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh
+  bash /tmp/dotnet-install.sh --version "${SDK_VERSION}" --install-dir /tmp/dotnet
+  export PATH="/tmp/dotnet:${PATH}"
+fi
+
+echo "Using dotnet:"
+dotnet --info
+
+OUTDIR="/repo/TypeShim/bin/pack/build/${RID}"
+mkdir -p "$OUTDIR"
+
+dotnet publish "/repo/TypeShim.Generator/TypeShim.Generator.csproj" \
+  -c Release \
+  -o "$OUTDIR" \
+  /p:NativeMode=true \
+  -r "$RID"
+'@
