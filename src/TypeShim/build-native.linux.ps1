@@ -41,7 +41,10 @@ docker run --rm `
     -w /repo `
     $image `
     sh -lc @'
-set -euo pipefail
+set -eu
+
+# Enable pipefail if the shell supports it (dash doesn't).
+(set -o pipefail) 2>/dev/null && set -o pipefail || true
 
 SDK_VERSION="${TYPESHIM_SDK_VERSION}"
 RID="${TYPESHIM_RID}"
