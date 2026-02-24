@@ -23,7 +23,7 @@ export default defineConfig({
     },
     reporters: isCI ? [['junit', { suiteName: isBrowserMode ? 'E2E (Browser)' : 'E2E (Node)' }]] : ['default'],
     outputFile: {
-       junit: isBrowserMode ? '../e2e-report-browser.xml' : '../e2e-report-node.xml' 
+       junit: isBrowserMode ? './e2e-report-browser.xml' : './e2e-report-node.xml' 
     }
   }
 });
