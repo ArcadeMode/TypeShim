@@ -1,0 +1,41 @@
+name: Run E2E (initialize + node + browser)
+description: Runs TypeShim E2E tests and uploads XML reports as an artifact.
+
+inputs:
+  working-directory:
+    description: Working directory containing the E2E package.json (e.g. src/TypeShim.E2E/vitest)
+    required: true
+  artifact-name:
+    description: Base artifact name (RID will be appended)
+    required: true
+  rid:
+    description: RID to include in the artifact name
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Initialize E2E
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm run initialize
+
+    - name: Run E2E (Node)
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm run test:node
+
+    - name: Run E2E (Browser)
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npm run test:browser
+
+    - name: Upload E2E report artifact
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}-${{ inputs.rid }}
+        if-no-files-found: warn
+        path: |
+          ${{ inputs.working-directory }}/e2e-report-*.xml
+          ${{ inputs.working-directory }}/**/e2e-report-*.xml

@@ -37,6 +37,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: src/global.json
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: src/TypeShim.E2E/vitest/package-lock.json
+
+      - name: Build core
+        shell: pwsh
+        working-directory: src
+        run: |
+          ./TypeShim/build.ps1
+    
       - name: Build native generator
         shell: pwsh
         working-directory: src
@@ -47,17 +65,25 @@ jobs:
             ./TypeShim/build-native.ps1 -RID '${{ matrix.rid }}'
           }
 
+      - name: Run E2E
+        if: !cancelled()
+        uses: ./.github/actions/run-e2e
+        with:
+          working-directory: src/TypeShim.E2E/vitest
+          artifact-name: e2e-report
+          rid: ${{ matrix.rid }}
+
       - name: Upload RID artifact
         uses: actions/upload-artifact@v4
         with:
           name: pack-build-${{ matrix.rid }}
-          path: src/TypeShim/bin/pack/**
+          path: src/TypeShim/bin/pack/build/${{ matrix.rid }}**
+          if-no-files-found: error
 
   combine:
     name: combine-pack
     needs: build
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 

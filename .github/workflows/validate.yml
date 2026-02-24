@@ -16,12 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           global-json-file: src/global.json
-      
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -42,39 +42,66 @@ jobs:
           ./build.ps1
           ./build-native.ps1 -RID linux-x64
 
-      - name: Initialize E2E
-        working-directory: src/TypeShim.E2E/vitest
-        run: npm run initialize
-
       - name: Run Unit Tests
+        id: unit-tests
+        continue-on-error: true
         working-directory: src
         run: >
-          dotnet test TypeShim.slnx 
-          --configuration Release 
+          dotnet test TypeShim.slnx
+          --configuration Release
           --verbosity normal
           --logger "trx;LogFileName=test-results.trx"
 
-      - name: Run E2E (Node)
+      - name: Run E2E
+        id: e2e
         if: (!cancelled())
-        working-directory: src/TypeShim.E2E/vitest
-        run: npm run test:node
+        continue-on-error: true
+        uses: ./.github/actions/run-e2e
+        with:
+          working-directory: src/TypeShim.E2E/vitest
+          artifact-name: e2e-report
+          rid: linux-x64
 
-      - name: Run E2E (Browser)
-        if: (!cancelled())
-        working-directory: src/TypeShim.E2E/vitest
-        run: npm run test:browser
+      - name: Upload TRX reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results-linux-x64
+          if-no-files-found: warn
+          path: |
+            src/**/TestResults/*.trx
+            src/**/*.trx
+
+      - name: Fail if tests failed
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          if [ "${{ steps.unit-tests.outcome }}" != "success" ] || [ "${{ steps.e2e.outcome }}" != "success" ]; then
+            echo "One or more test steps failed."
+            exit 1
+          fi
+
+  publish-results:
+    name: 🧾 Publish Results
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: ${{ always() && !cancelled() }}
+    steps:
+      - name: Download all report artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
 
       - name: Publish Test Results
         id: test-results
         uses: EnricoMi/publish-unit-test-result-action@v2
-        if: (!cancelled())
         with:
           files: |
-            **/*.trx
-            **/e2e-report-*.xml
-      
+            artifacts/**/*.trx
+            artifacts/**/e2e-report-*.xml
+
       - name: Determine badge content
-        if: ${{ !cancelled() && github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' }}
         shell: bash
         run: |
           conclusion='${{ fromJSON(steps.test-results.outputs.json).conclusion }}'
@@ -87,7 +114,7 @@ jobs:
           fi
 
       - name: Update badge
-        if: ${{ !cancelled() && github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' }}
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
