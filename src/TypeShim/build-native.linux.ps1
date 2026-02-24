@@ -41,14 +41,9 @@ function Get-DockerPlatformForRid([string]$rid) {
     switch -Wildcard ($rid) {
         "linux-x64" { return "linux/amd64" }
         "linux-musl-x64" { return "linux/amd64" }
-
         "linux-arm64" { return "linux/arm64" }
         "linux-musl-arm64" { return "linux/arm64" }
-
-        "linux-arm" { return "linux/arm/v7" }
-        "linux-musl-arm" { return "linux/arm/v7" }
-
-        default { return "" }
+        default { throw "Unsupported RID '$rid' for platform mapping." }
     }
 }
 
