@@ -41,6 +41,7 @@ jobs:
 
       - name: Build native generator
         shell: pwsh
+        working-directory: src
         run: |
           if ("${{ runner.os }}" -eq "Linux") {
             ./TypeShim/build-native.linux.ps1 -RID '${{ matrix.rid }}'
@@ -52,7 +53,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pack-build-${{ matrix.rid }}
-          path: TypeShim/bin/pack/build/${{ matrix.rid }}/**
+          path: src/TypeShim/bin/pack/**
 
   combine:
     name: combine-pack
@@ -66,11 +67,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: pack-build-*
-          path: TypeShim/bin/pack/build
+          path: pack
           merge-multiple: true
 
       - name: Upload combined pack directory
         uses: actions/upload-artifact@v4
         with:
-          name: pack-build-all
-          path: TypeShim/bin/pack/build/**
+          name: typeshim-pack
+          path: pack/**
