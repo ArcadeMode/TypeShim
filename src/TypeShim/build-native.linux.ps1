@@ -35,7 +35,6 @@ $image = if ($muslRids -contains $RID) {
 Write-Host "Preparing binfmt for multi-architecture builds" -ForegroundColor Cyan
 docker run --privileged --rm tonistiigi/binfmt --install all
 
-Write-Host "Building RID $RID using Docker image $image (SDK required: $sdkVersion)" -ForegroundColor Cyan
 
 function Get-DockerPlatformForRid([string]$rid) {
     switch -Wildcard ($rid) {
@@ -48,12 +47,10 @@ function Get-DockerPlatformForRid([string]$rid) {
 }
 
 $platform = Get-DockerPlatformForRid $RID
-if ([string]::IsNullOrWhiteSpace($platform)) {
-    throw "Unknown/unsupported RID '$RID' for platform mapping."
-}
 
 Write-Host "Docker platform: $platform" -ForegroundColor DarkCyan
 
+Write-Host "Building RID $RID using Docker image $image (SDK required: $sdkVersion)" -ForegroundColor Cyan
 docker run --rm `
     --platform $platform `
     -e "TYPESHIM_SDK_VERSION=$sdkVersion" `
