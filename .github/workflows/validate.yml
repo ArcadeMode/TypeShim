@@ -59,14 +59,14 @@ jobs:
         uses: ./.github/actions/run-e2e
         with:
           working-directory: src/TypeShim.E2E/vitest
-          artifact-name: e2e-report
+          artifact-name: test-results-e2e
           rid: linux-x64
 
       - name: Upload TRX reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: unit-test-results-linux-x64
+          name: test-results-unit-linux-x64
           if-no-files-found: warn
           path: |
             src/**/TestResults/*.trx
@@ -87,12 +87,13 @@ jobs:
     needs: build-and-test
     if: ${{ always() && !cancelled() }}
     steps:
-      - name: Download all report artifacts
+      - name: Download test results
         uses: actions/download-artifact@v4
         with:
+          pattern: test-results-*
           path: artifacts
 
-      - name: Publish Test Results
+      - name: Publish test results
         id: test-results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
