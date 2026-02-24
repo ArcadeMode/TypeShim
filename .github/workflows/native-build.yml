@@ -1,0 +1,76 @@
+name: native-generator
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ship-native-binaries
+
+jobs:
+  build:
+    name: ${{ matrix.rid }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: ubuntu-latest
+            rid: linux-musl-x64
+          - os: ubuntu-latest
+            rid: linux-musl-arm64
+          - os: ubuntu-latest
+            rid: linux-arm
+          - os: ubuntu-latest
+            rid: linux-arm64
+          - os: windows-latest
+            rid: win-x64
+          - os: windows-latest
+            rid: win-x86
+          - os: windows-latest
+            rid: win-arm64
+          - os: macos-latest
+            rid: osx-x64
+          - os: macos-latest
+            rid: osx-arm64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build native generator
+        shell: pwsh
+        run: |
+          if ("${{ runner.os }}" -eq "Linux") {
+            ./TypeShim/build-native.linux.ps1 -RID '${{ matrix.rid }}'
+          } else {
+            ./TypeShim/build-native.ps1 -RID '${{ matrix.rid }}'
+          }
+
+      - name: Upload RID artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pack-build-${{ matrix.rid }}
+          path: TypeShim/bin/pack/build/${{ matrix.rid }}/**
+
+  combine:
+    name: combine-pack
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all RID artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pack-build-*
+          path: TypeShim/bin/pack/build
+          merge-multiple: true
+
+      - name: Upload combined pack directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: pack-build-all
+          path: TypeShim/bin/pack/build/**
