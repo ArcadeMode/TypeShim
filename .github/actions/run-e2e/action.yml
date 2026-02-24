@@ -19,23 +19,26 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: npm run initialize
+      continue-on-error: false
 
     - name: Run E2E (Node)
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: npm run test:node
+      continue-on-error: true
 
     - name: Run E2E (Browser)
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: npm run test:browser
+      continue-on-error: true
 
     - name: Upload E2E report artifact
-      if: ${{ always() }}
+      if: ${{ !cancelled() }}
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.artifact-name }}-${{ inputs.rid }}
-        if-no-files-found: warn
+        if-no-files-found: error
         path: |
           ${{ inputs.working-directory }}/e2e-report-*.xml
           ${{ inputs.working-directory }}/**/e2e-report-*.xml
