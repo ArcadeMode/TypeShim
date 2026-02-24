@@ -10,7 +10,8 @@ inputs:
     required: true
   rid:
     description: RID to include in the artifact name
-    required: true
+    required: false
+    default: ''
 
 runs:
   using: composite

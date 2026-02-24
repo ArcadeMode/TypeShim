@@ -1,0 +1,50 @@
+name: Run Unit Tests (TRX)
+description: Runs dotnet unit tests and uploads TRX results as an artifact.
+
+inputs:
+  working-directory:
+    description: Working directory to run dotnet test from
+    required: false
+    default: .
+  test-target:
+    description: Solution/project to test (relative to working-directory)
+    required: false
+    default: TypeShim.slnx
+  configuration:
+    description: Build configuration
+    required: false
+    default: Release
+  verbosity:
+    description: dotnet test verbosity
+    required: false
+    default: normal
+  artifact-name:
+    description: Base artifact name (RID will be appended)
+    required: true
+  rid:
+    description: RID to include in the artifact name
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Run Unit Tests
+      shell: pwsh
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        $target = "${{ inputs.test-target }}"
+        if ([string]::IsNullOrWhiteSpace($target)) {
+          $target = "."
+        }
+
+        dotnet test $target --configuration "${{ inputs.configuration }}" --verbosity "${{ inputs.verbosity }}" --logger "trx;LogFileName=test-results.trx"
+
+    - name: Upload TRX reports
+      if: ${{ always() && !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}-${{ inputs.rid }}
+        if-no-files-found: warn
+        path: |
+          ${{ inputs.working-directory }}/**/TestResults/*.trx
+          ${{ inputs.working-directory }}/**/*.trx
