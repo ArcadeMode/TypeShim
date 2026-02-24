@@ -27,9 +27,9 @@ if ([string]::IsNullOrWhiteSpace($sdkVersion)) {
 }
 
 $image = if ($muslRids -contains $RID) {
-    "mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.20"
+    "mcr.microsoft.com/dotnet/sdk:$sdkVersion-alpine"
 } else {
-    "mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-22.04"
+    "mcr.microsoft.com/dotnet/sdk:$sdkVersion"
 }
 
 Write-Host "Preparing binfmt for multi-architecture builds" -ForegroundColor Cyan
@@ -59,7 +59,6 @@ if ([string]::IsNullOrWhiteSpace($platform)) {
 
 Write-Host "Docker platform: $platform" -ForegroundColor DarkCyan
 
-# Run publish directly (no PowerShell in-container), and ensure the requested SDK exists (global.json compliance).
 docker run --rm `
     --platform $platform `
     -e "TYPESHIM_SDK_VERSION=$sdkVersion" `
@@ -72,30 +71,24 @@ docker run --rm `
     $image `
     sh -lc @'
 set -eu
-
-# Enable pipefail if the shell supports it (dash doesn't).
 (set -o pipefail) 2>/dev/null && set -o pipefail || true
 
 SDK_VERSION="${TYPESHIM_SDK_VERSION}"
 RID="${TYPESHIM_RID}"
 
-echo "Installing .NET SDK ${SDK_VERSION} to satisfy global.json..."
+echo "dotnet in image:"
+dotnet --info
 
-# Ensure curl + bash exist (dotnet-install.sh is bash)
+echo "Installing NativeAOT toolchain prerequisites..."
 if command -v apk >/dev/null 2>&1; then
-  apk add --no-cache bash curl ca-certificates
+  apk add --no-cache clang lld build-base musl-dev zlib-dev
 else
   apt-get update
-  apt-get install -y --no-install-recommends bash curl ca-certificates
+  apt-get install -y --no-install-recommends \
+    clang lld gcc g++ make \
+    libc6-dev zlib1g-dev
   rm -rf /var/lib/apt/lists/*
 fi
-
-curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh
-bash /tmp/dotnet-install.sh --version "${SDK_VERSION}" --install-dir /tmp/dotnet
-export PATH="/tmp/dotnet:${PATH}"
-
-echo "Using dotnet:"
-dotnet --info
 
 OUTDIR="/repo/src/TypeShim/bin/pack/build/${RID}"
 mkdir -p "$OUTDIR"
