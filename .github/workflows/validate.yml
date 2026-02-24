@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build:
-    name: Build ${{ (matrix.unit || matrix.e2e) && '& Test ' || '' }}(${{ matrix.rid }})
+    name: 🛠️ Build ${{ (matrix.unit || matrix.e2e) && '& Test ' || '' }}(${{ matrix.rid }})
     strategy:
       fail-fast: false
       matrix:
