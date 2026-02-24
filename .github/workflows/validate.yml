@@ -1,6 +1,7 @@
 name: Validate
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
     branches:
@@ -11,19 +12,54 @@ permissions:
   pull-requests: write
 
 jobs:
-  build-and-test:
-    name: 🔎 Test Solution
-    runs-on: ubuntu-latest
+  build:
+    name: Build ${{ (matrix.unit || matrix.e2e) && '& Test ' }}(${{ matrix.rid }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            rid: managed
+            e2e: true
+            unit: true # only run unit tests once
+          - os: ubuntu-24.04
+            rid: linux-x64
+            e2e: true
+          - os: ubuntu-24.04-arm
+            rid: linux-arm64
+            e2e: true
+          - os: ubuntu-24.04
+            rid: linux-musl-x64
+            e2e: false # linux-musl-x64 runners are not available on GHA
+          - os: ubuntu-24.04-arm
+            rid: linux-musl-arm64
+            e2e: false # linux-musl-arm64 runners are not available on GHA
+          - os: windows-latest
+            rid: win-x64
+            e2e: true 
+          - os: windows-latest
+            rid: win-x86
+            e2e: false # win-x86 runners are not available on GHA
+          - os: windows-latest
+            rid: win-arm64
+            e2e: false # win-arm64 runners are not available on GHA
+          - os: macos-latest
+            rid: osx-x64
+            e2e: false # osx-x64 runners are not available on GHA
+          - os: macos-latest
+            rid: osx-arm64
+            e2e: true
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup and Build
         uses: ./.github/actions/setup-build
         with:
-          rid: linux-x64
-
+          rid: ${{ matrix.rid }}
+      
       - name: Run Unit Tests
-        id: unit-tests
+        if: ${{ matrix.unit }}
         continue-on-error: true
         uses: ./.github/actions/run-unit-tests
         with:
@@ -31,46 +67,73 @@ jobs:
           test-target: TypeShim.slnx
           configuration: Release
           artifact-name: test-results-unit
-          rid: linux-x64
+          rid: managed
 
       - name: Run E2E Tests
-        id: e2e
-        if: (!cancelled())
-        continue-on-error: true
+        if: ${{ !cancelled() && matrix.e2e }}
         uses: ./.github/actions/run-e2e-tests
         with:
           working-directory: src/TypeShim.E2E/vitest
           artifact-name: test-results-e2e
-          rid: linux-x64
-
-      - name: Fail if tests failed
-        if: ${{ always() }}
-        shell: bash
+          rid: ${{ matrix.rid }}
+      
+      - name: Determine Artifact Path
+        id: artifact-path
+        shell: pwsh
         run: |
-          if [ "${{ steps.unit-tests.outcome }}" != "success" ] || [ "${{ steps.e2e.outcome }}" != "success" ]; then
-            echo "One or more test steps failed."
-            exit 1
-          fi
+          if ("${{ matrix.rid }}" -eq "managed") {
+            echo "artifact-path=src/TypeShim/bin/pack/build/**" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          } else {
+            echo "artifact-path=src/TypeShim/bin/pack/build/${{ matrix.rid }}/**" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          }
+      
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pack-build-${{ matrix.rid }}
+          path: ${{ steps.artifact-path.outputs.artifact-path }}
+          if-no-files-found: error
+          retention-days: 1
 
+  combine:
+    name: 📦 Publish Artifacts
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all RID artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pack-build-*
+          path: pack
+          merge-multiple: true
+
+      - name: Upload combined pack directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: typeshim-pack
+          path: pack/**
+  
   publish-results:
     name: 🧾 Publish Results
     runs-on: ubuntu-latest
-    needs: build-and-test
+    needs: build
     if: ${{ always() && !cancelled() }}
     steps:
       - name: Download test results
         uses: actions/download-artifact@v4
         with:
           pattern: test-results-*
-          path: artifacts
+          path: results
 
       - name: Publish test results
         id: test-results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           files: |
-            artifacts/**/*.trx
-            artifacts/**/e2e-report-*.xml
+            results/**/*.trx
+            results/**/e2e-report-*.xml
 
       - name: Determine badge content
         if: ${{ github.event_name == 'push' }}
@@ -100,7 +163,7 @@ jobs:
     name: 🏁 Benchmark Generator
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && !cancelled()
-    needs: build-and-test
+    needs: build
     steps:
       - uses: actions/checkout@v4
 
@@ -109,18 +172,11 @@ jobs:
         with:
           global-json-file: src/global.json
 
-      - name: Restore
-        working-directory: src
-        run: >
-          dotnet nuget disable source LocalDev &&
-          dotnet restore TypeShim.Benchmarks/TypeShim.Benchmarks.csproj
-
       - name: Build
         working-directory: src
         run: >
           dotnet build TypeShim.Benchmarks/TypeShim.Benchmarks.csproj
           --configuration Release
-          --no-restore
 
       - name: Build Generators
         working-directory: src/TypeShim.Benchmarks
@@ -132,7 +188,6 @@ jobs:
         run: dotnet run --configuration Release --project TypeShim.Benchmarks.csproj --no-build
 
       - name: Sticky PR Benchmark Comment
-        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: benchmark-results
