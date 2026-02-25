@@ -83,6 +83,7 @@ jobs:
         id: artifact-path
         shell: pwsh
         run: |
+          # Note: this preserves the same root (pack dir) to enable merging artifacts later. For native only upload the native build in de rid dir.
           $path = if ('${{ matrix.rid }}' -eq 'managed') { 'src/TypeShim/bin/pack/**' } else { "src/TypeShim/bin/pack/**/${{ matrix.rid }}/**" }
           "artifact-path=$path" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
       
@@ -92,7 +93,7 @@ jobs:
           name: pack-build-${{ matrix.rid }}
           path: |
             ${{ steps.artifact-path.outputs.artifact-path }}
-            !path/**/*.dSYM/**
+            !**/*.dSYM/**
           if-no-files-found: error
           retention-days: 1
 
