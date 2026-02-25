@@ -1,7 +1,8 @@
-name: Validate
+name: Main
 
 on:
   workflow_dispatch:
+  workflow_call:
   pull_request:
   push:
     branches:
@@ -91,6 +92,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pack-build-${{ matrix.rid }}
+          # Exclude .dSYM files for osx, keeps the package lean. Might upload
           path: |
             ${{ steps.artifact-path.outputs.artifact-path }}
             !**/*.dSYM/**
