@@ -83,11 +83,8 @@ jobs:
         id: artifact-path
         shell: pwsh
         run: |
-          if ("${{ matrix.rid }}" -eq "managed") {
-            echo "artifact-path=src/TypeShim/bin/pack/**" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          } else {
-            echo "artifact-path=src/TypeShim/bin/pack/build/**" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          }
+          $path = if ('${{ matrix.rid }}' -eq 'managed') { 'src/TypeShim/bin/pack/**' } else { "src/TypeShim/bin/pack/**/${{ matrix.rid }}/**" }
+          "artifact-path=$path" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
       
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
