@@ -1,5 +1,5 @@
-name: Setup and Build
-description: Sets up the environment and builds the project.
+name: Build
+description: Builds the project.
 
 inputs:
   rid:
@@ -9,18 +9,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        global-json-file: src/global.json
-    
-    - name: Setup Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: npm
-        cache-dependency-path: src/TypeShim.E2E/vitest/package-lock.json
-
     - name: Build Core
       shell: pwsh
       working-directory: src

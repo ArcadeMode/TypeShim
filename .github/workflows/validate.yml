@@ -36,7 +36,7 @@ jobs:
             e2e: false # linux-musl-arm64 runners are not available on GHA
           - os: windows-latest
             rid: win-x64
-            e2e: true 
+            e2e: false # playwright install takes forever on windows
           - os: windows-latest
             rid: win-x86
             e2e: false # win-x86 runners are not available on GHA
@@ -53,8 +53,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup and Build
-        uses: ./.github/actions/setup-build
+      - name: Setup 
+        uses: ./.github/actions/run-setup
+      
+      - name: Build
+        uses: ./.github/actions/run-build
         with:
           rid: ${{ matrix.rid }}
       
@@ -168,24 +171,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          global-json-file: src/global.json
+      - name: Setup 
+        uses: ./.github/actions/run-setup
 
       - name: Build
-        working-directory: src
-        run: >
-          dotnet build TypeShim.Benchmarks/TypeShim.Benchmarks.csproj
-          --configuration Release
-
-      - name: Build Generators
         working-directory: src/TypeShim.Benchmarks
         shell: pwsh
-        run: ./Scripts/build-generators.ps1
+        run: |
+          dotnet build TypeShim.Benchmarks.csproj --configuration Release
+          ./Scripts/build-generators.ps1
 
-      - name: Run Benchmarks
+      - name: Run
         working-directory: src/TypeShim.Benchmarks
+        shell: pwsh
         run: dotnet run --configuration Release --project TypeShim.Benchmarks.csproj --no-build
 
       - name: Sticky PR Benchmark Comment
