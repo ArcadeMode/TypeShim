@@ -1,0 +1,103 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <TypeShim_MSBuildMessagePriority Condition="$(TypeShim_MSBuildMessagePriority) == ''">Normal</TypeShim_MSBuildMessagePriority>
+    <TypeShim_GeneratedDir Condition="$(TypeShim_GeneratedDir) == ''">TypeShim</TypeShim_GeneratedDir>
+    <TypeShim_TypeScriptOutputDirectory Condition="$(TypeShim_TypeScriptOutputDirectory) == ''">wwwroot</TypeShim_TypeScriptOutputDirectory>
+    <TypeShim_TypeScriptOutputFileName Condition="$(TypeShim_TypeScriptOutputFileName) == ''">typeshim.ts</TypeShim_TypeScriptOutputFileName>
+  </PropertyGroup>
+
+  <Target Name="TypeShimCleanGeneratedCs" BeforeTargets="TypeShimGenerateInterop" Condition="'$(DesignTimeBuild)' != 'true'">
+    <RemoveDir Directories="$(IntermediateOutputPath)/$(TypeShim_GeneratedDir)" />
+  </Target>
+
+  <Target Name="TypeShimResolveTargetingPackRefDir" AfterTargets="ResolveAssemblyReferences">
+    <!-- Filter resolved compile-time references to find System.Runtime.dll (and with it, the current targeting pack dir) -->
+    <ItemGroup>
+      <_SystemRuntimeRef Include="@(ReferencePath)" Condition="$([System.String]::Equals('%(Filename)%(Extension)', 'System.Runtime.dll', System.StringComparison.OrdinalIgnoreCase))" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_SystemRuntimePath>%(_SystemRuntimeRef.FullPath)</_SystemRuntimePath>
+      <_TargetingPackRefDir Condition="'$(_SystemRuntimePath)' != ''" >$([System.IO.Path]::GetDirectoryName('$(_SystemRuntimePath)'))</_TargetingPackRefDir>
+    </PropertyGroup>
+
+    <Error Condition="'$(_TargetingPackRefDir)' == ''" Text="System.Runtime.dll is not referenced in compilation, without it TypeShim (and your project) wont be able to function." />
+  </Target>
+
+  <Target Name="TypeShimResolveGeneratorExecutable" BeforeTargets="TypeShimGenerateInterop" Condition="'$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <_TypeShimGeneratorRootDir>$(MSBuildThisFileDirectory)</_TypeShimGeneratorRootDir>
+      <_TypeShimGeneratorFileName Condition="'$(OS)' == 'Windows_NT'">TypeShim.Generator.exe</_TypeShimGeneratorFileName>
+      <_TypeShimGeneratorFileName Condition="'$(OS)' != 'Windows_NT'">TypeShim.Generator</_TypeShimGeneratorFileName>
+      <_TypeShimGeneratorFallbackPath>$([System.IO.Path]::Combine('$(_TypeShimGeneratorRootDir)', '$(_TypeShimGeneratorFileName)'))</_TypeShimGeneratorFallbackPath>
+      <_TypeShimRidFile>$([System.IO.Path]::Combine('$(IntermediateOutputPath)', 'typeshim.rid'))</_TypeShimRidFile>
+    </PropertyGroup>
+
+    <Exec
+        Condition="'$(OS)' == 'Windows_NT'"
+        Command="$(_TypeShimGeneratorRootDir)/print-rid.bat &gt; &quot;$(_TypeShimRidFile)&quot;"
+        WorkingDirectory="$(ProjectDir)"
+        IgnoreExitCode="false" />
+
+    <Exec
+        Condition="'$(OS)' != 'Windows_NT'"
+        Command="sh $(_TypeShimGeneratorRootDir)/print-rid.sh &gt; &quot;$(_TypeShimRidFile)&quot;"
+        WorkingDirectory="$(ProjectDir)"
+        IgnoreExitCode="false" />
+
+    <ReadLinesFromFile File="$(_TypeShimRidFile)">
+      <Output TaskParameter="Lines" PropertyName="_TypeShimRidRaw" />
+    </ReadLinesFromFile>
+
+    <PropertyGroup>
+      <_TypeShimRid>$([System.String]::Copy('$(_TypeShimRidRaw)').Trim())</_TypeShimRid>
+      <_TypeShimGeneratorRidPath Condition="'$(_TypeShimRid)' != ''">$([System.IO.Path]::Combine('$(_TypeShimGeneratorRootDir)', '$(_TypeShimRid)', '$(_TypeShimGeneratorFileName)'))</_TypeShimGeneratorRidPath>
+      <!-- Choose native build if exists, or fallback to non-native build -->
+      <_TypeShimGeneratorExePath Condition="'$(_TypeShimGeneratorRidPath)' != '' and Exists('$(_TypeShimGeneratorRidPath)')">$(_TypeShimGeneratorRidPath)</_TypeShimGeneratorExePath>
+      <_TypeShimGeneratorExePath Condition="'$(_TypeShimGeneratorExePath)' == ''">$(_TypeShimGeneratorFallbackPath)</_TypeShimGeneratorExePath>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="TypeShimGenerateInterop" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' != 'true'">
+    <Message Text="TypeShim .NET-TypeScript interop codegen starting" Importance="$(TypeShim_MSBuildMessagePriority)" />
+
+    <PropertyGroup>
+      <_TypeShim_TypeScriptOutputFilePathSegment>$([System.IO.Path]::Combine('$(TypeShim_TypeScriptOutputDirectory)', '$(TypeShim_TypeScriptOutputFileName)'))</_TypeShim_TypeScriptOutputFilePathSegment>
+      <_TypeShim_TypeScriptOutputFilePath>$([System.IO.Path]::Combine('$(OutDir)', '$(_TypeShim_TypeScriptOutputFilePathSegment)'))</_TypeShim_TypeScriptOutputFilePath>
+      <_TypeShim_CSharpOutputDirectoryPath>$([System.IO.Path]::Combine('$(IntermediateOutputPath)', '$(TypeShim_GeneratedDir)'))</_TypeShim_CSharpOutputDirectoryPath>
+    </PropertyGroup>
+
+    <Message Text="TypeShim resolved TypeScript target: $(_TypeShim_TypeScriptOutputFilePath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
+    <Message Text="TypeShim resolved CSharp target: $(_TypeShim_CSharpOutputDirectoryPath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
+    <Message Text="TypeShim resolved targeting pack: $(_TargetingPackRefDir)" Importance="$(TypeShim_MSBuildMessagePriority)" />
+    <Message Text="TypeShim resolved generator executable: $(_TypeShimGeneratorExePath)" Importance="$(TypeShim_MSBuildMessagePriority)"/>
+
+    <CreateProperty Value="$([System.DateTime]::UtcNow.Ticks)">
+      <Output TaskParameter="Value" PropertyName="StartTicks"/>
+    </CreateProperty>
+    <Exec
+      Command="&quot;$(_TypeShimGeneratorExePath)&quot; &quot;@(Compile->'%(FullPath)', ';')&quot; &quot;$(_TypeShim_CSharpOutputDirectoryPath)&quot; &quot;$(_TypeShim_TypeScriptOutputFilePath)&quot; &quot;$(_TargetingPackRefDir)&quot;"
+      WorkingDirectory="$(ProjectDir)"
+      IgnoreExitCode="false" />
+    <CreateProperty Value="$([System.TimeSpan]::FromTicks($([System.Convert]::ToInt64($([MSBuild]::Subtract($([System.DateTime]::UtcNow.Ticks), $([System.Int64]::Parse($(StartTicks)))))))).TotalMilliseconds)">
+      <Output TaskParameter="Value" PropertyName="ElapsedMs"/>
+    </CreateProperty>
+    
+    <Message Text="TypeShim codegen completed in ~$(ElapsedMs)ms" Importance="$(TypeShim_MSBuildMessagePriority)" />
+    
+    <ItemGroup>
+      <Compile Include="$(_TypeShim_CSharpOutputDirectoryPath)/*.cs" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="TypeShimCopyTsToPublish" AfterTargets="Publish">
+    <PropertyGroup>
+      <_TypeShim_TypeScriptOutputFilePath>$([System.IO.Path]::Combine('$(OutDir)', '$(TypeShim_TypeScriptOutputDirectory)', '$(TypeShim_TypeScriptOutputFileName)'))</_TypeShim_TypeScriptOutputFilePath>
+      <_TypeShim_TypeScriptPublishDirPath>$([System.IO.Path]::Combine('$(PublishDir)', '$(TypeShim_TypeScriptOutputDirectory)'))</_TypeShim_TypeScriptPublishDirPath>
+    </PropertyGroup>
+
+    <Copy SourceFiles="$(_TypeShim_TypeScriptOutputFilePath)" DestinationFolder="$(_TypeShim_TypeScriptPublishDirPath)" />
+    <Message Text="TypeShim .ts published to: $(_TypeShim_TypeScriptPublishDirPath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
+  </Target>
+</Project>

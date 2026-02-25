@@ -1,0 +1,27 @@
+name: Build
+description: Builds the project.
+
+inputs:
+  rid:
+    description: RID to include in the artifact name
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Build Core
+      shell: pwsh
+      working-directory: src
+      run: |
+        ./TypeShim/build.ps1
+  
+    - name: Build Native
+      shell: pwsh
+      if: ${{ inputs.rid != 'managed' }}
+      working-directory: src
+      run: |
+        if ("${{ runner.os }}" -eq "Linux") {
+          ./TypeShim/build-native.linux.ps1 -RID '${{ inputs.rid }}'
+        } else {
+          ./TypeShim/build-native.ps1 -RID '${{ inputs.rid }}'
+        }
