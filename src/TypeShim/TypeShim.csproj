@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="bin/pack/build/*.*" Pack="true" PackagePath="build" />
+    <Content Include="bin/pack/build/**/*.*" Pack="true" PackagePath="build" />
     <Content Include="bin/pack/analyzers/**/*.*" Pack="true" PackagePath="analyzers/dotnet/cs" />
   </ItemGroup>
 
