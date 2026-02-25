@@ -12,10 +12,10 @@
   </PropertyGroup>
 
   <!-- JIT build properties -->
-  <PropertyGroup Condition="'$(NativeMode)' != 'true'">
-    <PublishTrimmed>true</PublishTrimmed>
-    <TrimMode>link</TrimMode>
+  <PropertyGroup Condition="'$(NativeMode)' != 'true'">    
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <SelfContained>false</SelfContained>
   </PropertyGroup>
 
   <!-- AOT build properties -->
@@ -26,6 +26,7 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <StripSymbols>true</StripSymbols>
     <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>link</TrimMode>
   </PropertyGroup>
 
   <ItemGroup>
