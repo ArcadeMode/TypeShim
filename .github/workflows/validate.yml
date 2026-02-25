@@ -60,7 +60,6 @@ jobs:
       
       - name: Run Unit Tests
         if: ${{ matrix.unit }}
-        continue-on-error: true
         uses: ./.github/actions/run-unit-tests
         with:
           working-directory: src
@@ -82,9 +81,9 @@ jobs:
         shell: pwsh
         run: |
           if ("${{ matrix.rid }}" -eq "managed") {
-            echo "artifact-path=src/TypeShim/bin/pack/build/**" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            echo "artifact-path=src/TypeShim/bin/pack/**" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           } else {
-            echo "artifact-path=src/TypeShim/bin/pack/build/${{ matrix.rid }}/**" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            echo "artifact-path=src/TypeShim/bin/pack/build/**" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           }
       
       - name: Upload Build Artifact
