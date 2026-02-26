@@ -83,14 +83,12 @@ jobs:
           path: src/TypeShim/bin/pack
 
       - name: Pack TypeShim
-        env:
-          PKG_VERSION: ${{ needs.version.outputs.version }}
         run: >
           dotnet pack src/TypeShim/TypeShim.csproj 
           -c Release 
           -o .\.artifacts 
           --no-build 
-          -p:Version=$env:PKG_VERSION 
+          -p:Version=${{ needs.version.outputs.version }}
           -p:ContinuousIntegrationBuild=true
 
       - name: Push to GitHub Packages
