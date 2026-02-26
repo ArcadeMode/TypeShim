@@ -4,12 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Tag to publish v[0-9]+.[0-9]+.[0-9]+*'
+        description: 'Tag to publish v1.2.3[-prerelease]'
         required: true
         default: ''
         type: string
       dry-run:
-        description: 'Perform a dry run without pushing to NuGet'
+        description: 'Dry run'
         required: false
         default: false
         type: boolean
