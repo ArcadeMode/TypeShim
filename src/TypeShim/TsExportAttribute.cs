@@ -23,6 +23,8 @@
 ///     console.log(counter.Count); // 0
 ///     console.log(counter.Increment()); // "Hello from C#, Count is now 1"
 ///     console.log(counter.Count); // 1
+///     const counter2: MyCounter = new MyCounter();
+///     console.log(counter.EqualsCount(counter2)); // false
 /// </code>
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
