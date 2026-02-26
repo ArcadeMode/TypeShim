@@ -114,7 +114,7 @@ jobs:
           path: TypeShim.${{ needs.version.outputs.version }}.nupkg
   
   badge:
-    name: 🏷️ Update Version Badge
+    name: 🏷️ Update Readme Badge
     needs: build
     runs-on: ubuntu-latest
     steps:

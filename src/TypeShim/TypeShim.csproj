@@ -21,9 +21,11 @@
     <RepositoryUrl>https://github.com/ArcadeMode/TypeShim</RepositoryUrl>
     <PackageProjectUrl>https://github.com/ArcadeMode/TypeShim</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="../../README.md" Pack="true" PackagePath="" />
     <Content Include="bin/pack/build/**/*.*" Pack="true" PackagePath="build" />
     <Content Include="bin/pack/analyzers/**/*.*" Pack="true" PackagePath="analyzers/dotnet/cs" />
   </ItemGroup>
