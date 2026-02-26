@@ -1,23 +1,23 @@
 <h1 align=center tabindex=-1>TypeShim</h1>
 <p align=center tabindex=-1>
-  <i>.NET WebAssembly meets TypeScript</i>
+  <i>Bridge .NET WebAssembly and TypeScript with fast, reliable, and type-safe codegen.</i>
 </p>
 
 <img align="right" tabindex=-1 src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ArcadeMode/0f24ed28316a25f6293d5771a247f19d/raw/typeshim-tests-badge.json" alt="Test status" />
 
 ## Why TypeShim
-With TypeShim you can use your .NET WebAssembly project with TypeScript without having to write any interop code. All interop code (C# & TS) is generated at build-time to provide reliability and type safety. TypeShim's class level exports make for a natural programming experience with familiar syntax. It just makes your .NET classes available in TypeScript before you even had a chance to snap your fingers.
+With TypeShim you can interop between .NET WebAssembly and TypeScript with class level exports. It takes just one `[TSExport]` to bring your class to TypeScript with all its constructors, methods and properties. TypeShim aims to provide a natural programming experience with familiar syntax, without any unnecessary bells and whistles. It just makes your .NET classes available in TypeScript, no hassle.
 
-Simply install TypeShim in your .NET WebAssembly project, drop a `[TSExport]` on your C# classes and _voilà_: .NET-JS interop is generated at build time including a powerful TypeScript library matching your C# classes exactly.
+The interop code on both the C# & TypeScript side is build-time generated in a flash to provide an up-to-date and type safe interop boundary that just _works_. Thoroughly tested from codegen to runtime to deliver reliability.
 
-## Features at a glance
+## At a glance
 
-- 🤖 Export full classes: constructors, methods and properties.
-- 💰 [Rich type support](#enriched-type-support).
-- 🏭 No-nonsense [interop](#concepts) generation.
-- 🛡 Type-safety by generating both sides of the interop boundary.
+- 📤 Class level exports.
+- 💎 [Rich type support](#enriched-type-support).
+- ✍ No-nonsense [interop](#concepts) codegen.
+- 🦾 Thoroughly validated for correctness
+- ⚡ Tuned for [high performance](#performance)
 - 👍 [Easy setup](#installing)
-- ⚡ _Fast_: AOT compiled, benchmarked and optimized.
 
 ## Samples
 Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your wasm browser app as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-). The runtime created by `dotnet.create()` can be passed directly into the provided `TypeShimInitializer`'s `initialize` method. The initializer exists so that helper functions for type marshalling can be set up and a reference to the assembly exports can be retrieved for the generated types to use internally.
