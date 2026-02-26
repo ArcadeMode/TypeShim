@@ -93,7 +93,7 @@ jobs:
         run: >
           dotnet pack src/TypeShim/TypeShim.csproj 
           -c Release 
-          -o .\.artifacts 
+          -o . 
           --no-build 
           -p:Version=${{ needs.version.outputs.version }}
           -p:ContinuousIntegrationBuild=true
@@ -101,7 +101,8 @@ jobs:
       - name: Push to GitHub Packages
         if: ${{ !inputs.dry-run }}
         run: >
-          dotnet nuget push .\.artifacts\*.nupkg
+          dotnet nuget push 
+          TypeShim.${{ needs.version.outputs.version }}.nupkg
           -k ${{ secrets.NUGET_KEY }} 
           -s https://api.nuget.org/v3/index.json
       
@@ -110,7 +111,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: typeshim-nupkg-${{ needs.version.outputs.version }}
-          path: .\.artifacts\*.nupkg
+          path: TypeShim.${{ needs.version.outputs.version }}.nupkg
   
   badge:
     name: 🏷️ Update Version Badge
