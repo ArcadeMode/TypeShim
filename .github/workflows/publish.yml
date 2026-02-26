@@ -76,11 +76,18 @@ jobs:
       - name: Restore
         run: dotnet restore src/TypeShim/TypeShim.csproj
 
-      - name: Download pack artifact
+      - name: Download all RID artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: typeshim-pack
-          path: src/TypeShim/bin/pack
+          pattern: pack-build-*
+          path: pack
+          merge-multiple: true
+      
+      - name: Build TypeShim library
+        run: >
+          dotnet build src/TypeShim/TypeShim.csproj 
+          -c Release 
+          --no-restore
 
       - name: Pack TypeShim
         run: >
