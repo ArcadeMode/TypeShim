@@ -1,4 +1,4 @@
-name: Publish NuGet
+name: Publish
 
 on:
   workflow_dispatch:
@@ -109,5 +109,20 @@ jobs:
         if: ${{ inputs.dry-run }}
         uses: actions/upload-artifact@v4
         with:
-          name: typeshim-nuget-package-${{ steps.ver.outputs.version }}
+          name: typeshim-nupkg-${{ needs.version.outputs.version }}
           path: .\.artifacts\*.nupkg
+  
+  badge:
+    name: 🏷️ Update Version Badge
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: '0f24ed28316a25f6293d5771a247f19d'
+          filename: typeshim-tests-badge.json
+          label: Tests
+          message: ${{ needs.build.outputs.badge-message }}
+          color: ${{ needs.build.outputs.badge-color }}
