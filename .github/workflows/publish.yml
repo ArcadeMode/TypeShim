@@ -80,7 +80,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: pack-build-*
-          path: pack
+          path: src/TypeShim/bin/pack
           merge-multiple: true
       
       - name: Build TypeShim library
