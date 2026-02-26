@@ -16,9 +16,6 @@ New-Item -ItemType Directory -Force -Path "$OutputDir\analyzers" | Out-Null
 New-Item -ItemType Directory -Force -Path "$OutputDir\build" | Out-Null
 
 Write-Host ""
-Write-Host "Building TypeShim" -ForegroundColor Yellow
-dotnet publish $TypeShimProject -c Release -o "$OutputDir\build"
-Write-Host ""
 Write-Host "Building Generator (JIT)" -ForegroundColor Yellow
 dotnet publish $GeneratorProject -c Release -o "$OutputDir\build" /p:NativeMode=false
 Write-Host ""
