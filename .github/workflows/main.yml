@@ -127,15 +127,12 @@ jobs:
 
       - name: Determine badge content
         id: badge
-        shell: bash
+        shell: pwsh
         run: |
-          if [ "${{ fromJSON(steps.test-results.outputs.json).conclusion }}" = "success" ]; then
-            "color=#26cc23" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-            "message=${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs_succ }} passing" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          else
-            "color=#cc5623" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-            "message=${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs_fail }}/${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} failing" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-          fi
+          $path = if ("${{ fromJSON(steps.test-results.outputs.json).conclusion }}" -eq "success") { '#26cc23' } else { '#cc5623' }
+          $message = if ("${{ fromJSON(steps.test-results.outputs.json).conclusion }}" -eq "success") { "${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs_succ }} passing" } else { "${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs_fail }}/${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} failing" }
+          "color=$path" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "message=$message" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
   benchmarks:
     name: 🏁 Benchmark Generator
