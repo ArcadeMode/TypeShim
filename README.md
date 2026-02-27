@@ -1,21 +1,21 @@
 <h1 align=center tabindex=-1>TypeShim</h1>
 <p align=center tabindex=-1>
-  <i>Bridge .NET WebAssembly and TypeScript with fast, reliable, and type-safe codegen.</i>
+  <i>Seamless, type-safe interop between .NET WebAssembly and TypeScript</i>
 </p>
 
 <img align="right" tabindex=-1 src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ArcadeMode/0f24ed28316a25f6293d5771a247f19d/raw/typeshim-tests-badge.json" alt="Test status" />
 
 ## Why TypeShim
-With TypeShim you can interop between .NET WebAssembly and TypeScript with class level exports. It takes just one `[TSExport]` to bring your class to TypeScript with all its constructors, methods and properties. TypeShim aims to provide a natural programming experience with familiar syntax, without any unnecessary bells and whistles. It just makes your .NET classes available in TypeScript, no hassle.
+TypeShim makes interop between .NET WebAssembly and TypeScript effortless. One `[TSExport]` projects an entire .NET class across the interop boundary, generating a fully-typed mirror in TypeScript. The result is a natural programming experience on both sides: static and instance members, constructors, properties, methods, object instances, reference equality and value types - it all just _works_.
 
-The interop code on both the C# & TypeScript side is build-time generated in a flash to provide an up-to-date and type safe interop boundary that just _works_. Thoroughly tested from codegen to runtime to deliver reliability.
+TypeShim generates strongly-typed interop code for both C# & TypeScript, tailored to your project, so the boundary remains type-safe without manual glue code. The implementation is verified by a comprehensive test suite covering the full pipeline, from code generation through multiple runtimes, ensuring consistent, reliable behavior. Optimized for minimal build impact, TypeShim achieves sub 100 millisecond codegen times even in large projects.
 
 ## At a glance
 
 - 📤 Class level exports.
 - 💎 [Rich type support](#enriched-type-support).
-- ✍ No-nonsense [interop](#concepts) codegen.
-- 🦾 Thoroughly validated for correctness
+- ✍ Powerful [concepts](#concepts).
+- 🦾 Thoroughly validated
 - ⚡ Tuned for [high performance](#performance)
 - 👍 [Easy setup](#installing)
 
