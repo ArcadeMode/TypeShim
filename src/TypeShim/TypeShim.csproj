@@ -7,7 +7,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-  </PropertyGroup>  
+    <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
+    <DebugSymbols Condition="'$(Configuration)' == 'Release'">false</DebugSymbols>
+  </PropertyGroup>
 
   <PropertyGroup>
     <PackageId>TypeShim</PackageId>
@@ -15,13 +17,15 @@
     <Authors>ArcadeMode</Authors>
     <Product>TypeShim</Product>
     <Description>Typesafe .NET ↔︎ TypeScript interop</Description>
-    <PackageTags>wasm, csharp, typescript, interop, generated</PackageTags>
+    <PackageTags>wasm, csharp, typescript, interop, generator</PackageTags>
     <RepositoryUrl>https://github.com/ArcadeMode/TypeShim</RepositoryUrl>
     <PackageProjectUrl>https://github.com/ArcadeMode/TypeShim</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="../../README.md" Pack="true" PackagePath="" />
     <Content Include="bin/pack/build/**/*.*" Pack="true" PackagePath="build" />
     <Content Include="bin/pack/analyzers/**/*.*" Pack="true" PackagePath="analyzers/dotnet/cs" />
   </ItemGroup>

@@ -1,12 +1,15 @@
 name: Main
 
 on:
-  workflow_dispatch:
   workflow_call:
+    outputs:
+      badge-color:
+        description: 'Color for the test results badge'
+        value: ${{ jobs.publish-results.outputs.badge-color }}
+      badge-message:
+        description: 'Text for the test results badge'
+        value: ${{ jobs.publish-results.outputs.badge-message }}
   pull_request:
-  push:
-    branches:
-      - master
 
 permissions:
   checks: write
@@ -98,32 +101,15 @@ jobs:
             !**/*.dSYM/**
           if-no-files-found: error
           retention-days: 1
-
-  combine:
-    name: 📦 Publish Artifacts
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download all RID artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: pack-build-*
-          path: pack
-          merge-multiple: true
-
-      - name: Upload combined pack directory
-        uses: actions/upload-artifact@v4
-        with:
-          name: typeshim-pack
-          path: pack/**
   
   publish-results:
     name: 🧾 Publish Results
     runs-on: ubuntu-latest
     needs: build
     if: ${{ always() && !cancelled() }}
+    outputs:
+      badge-color: ${{ steps.badge.outputs.color }}
+      badge-message: ${{ steps.badge.outputs.message }}
     steps:
       - name: Download test results
         uses: actions/download-artifact@v4
@@ -140,28 +126,13 @@ jobs:
             results/**/e2e-report-*.xml
 
       - name: Determine badge content
-        if: ${{ github.event_name == 'push' }}
-        shell: bash
+        id: badge
+        shell: pwsh
         run: |
-          conclusion='${{ fromJSON(steps.test-results.outputs.json).conclusion }}'
-          if [ "$conclusion" = "success" ]; then
-            echo "BADGE_COLOR=#26cc23" >> "$GITHUB_ENV"
-            echo "BADGE_MESSAGE=${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs_succ }} passing" >> "$GITHUB_ENV"
-          else
-            echo "BADGE_COLOR=#cc5623" >> "$GITHUB_ENV"
-            echo "BADGE_MESSAGE=${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs_fail }}/${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} failing" >> "$GITHUB_ENV"
-          fi
-
-      - name: Update badge
-        if: ${{ github.event_name == 'push' }}
-        uses: schneegans/dynamic-badges-action@v1.7.0
-        with:
-          auth: ${{ secrets.GIST_TOKEN }}
-          gistID: '0f24ed28316a25f6293d5771a247f19d'
-          filename: typeshim-tests-badge.json
-          label: Tests
-          message: ${{ env.BADGE_MESSAGE }}
-          color: ${{ env.BADGE_COLOR }}
+          $path = if ("${{ fromJSON(steps.test-results.outputs.json).conclusion }}" -eq "success") { '#26cc23' } else { '#cc5623' }
+          $message = if ("${{ fromJSON(steps.test-results.outputs.json).conclusion }}" -eq "success") { "${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs_succ }} passing" } else { "${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs_fail }}/${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} failing" }
+          "color=$path" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "message=$message" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
   benchmarks:
     name: 🏁 Benchmark Generator

@@ -60,7 +60,7 @@
   </Target>
 
   <Target Name="TypeShimGenerateInterop" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' != 'true'">
-    <Message Text="TypeShim .NET-TypeScript interop codegen starting" Importance="$(TypeShim_MSBuildMessagePriority)" />
+    <Message Text="TypeShim codegen starting" Importance="$(TypeShim_MSBuildMessagePriority)" />
 
     <PropertyGroup>
       <_TypeShim_TypeScriptOutputFilePathSegment>$([System.IO.Path]::Combine('$(TypeShim_TypeScriptOutputDirectory)', '$(TypeShim_TypeScriptOutputFileName)'))</_TypeShim_TypeScriptOutputFilePathSegment>
@@ -68,8 +68,8 @@
       <_TypeShim_CSharpOutputDirectoryPath>$([System.IO.Path]::Combine('$(IntermediateOutputPath)', '$(TypeShim_GeneratedDir)'))</_TypeShim_CSharpOutputDirectoryPath>
     </PropertyGroup>
 
-    <Message Text="TypeShim resolved TypeScript target: $(_TypeShim_TypeScriptOutputFilePath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
-    <Message Text="TypeShim resolved CSharp target: $(_TypeShim_CSharpOutputDirectoryPath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
+    <Message Text="TypeShim target TypeScript file: $(_TypeShim_TypeScriptOutputFilePath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
+    <Message Text="TypeShim target CSharp dir: $(_TypeShim_CSharpOutputDirectoryPath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
     <Message Text="TypeShim resolved targeting pack: $(_TargetingPackRefDir)" Importance="$(TypeShim_MSBuildMessagePriority)" />
     <Message Text="TypeShim resolved generator executable: $(_TypeShimGeneratorExePath)" Importance="$(TypeShim_MSBuildMessagePriority)"/>
 
@@ -80,11 +80,11 @@
       Command="&quot;$(_TypeShimGeneratorExePath)&quot; &quot;@(Compile->'%(FullPath)', ';')&quot; &quot;$(_TypeShim_CSharpOutputDirectoryPath)&quot; &quot;$(_TypeShim_TypeScriptOutputFilePath)&quot; &quot;$(_TargetingPackRefDir)&quot;"
       WorkingDirectory="$(ProjectDir)"
       IgnoreExitCode="false" />
-    <CreateProperty Value="$([System.TimeSpan]::FromTicks($([System.Convert]::ToInt64($([MSBuild]::Subtract($([System.DateTime]::UtcNow.Ticks), $([System.Int64]::Parse($(StartTicks)))))))).TotalMilliseconds)">
+    <CreateProperty Value="$([System.Convert]::ToInt32($([System.TimeSpan]::FromTicks($([System.Convert]::ToInt64($([MSBuild]::Subtract($([System.DateTime]::UtcNow.Ticks), $([System.Int64]::Parse($(StartTicks)))))))).TotalMilliseconds)))">
       <Output TaskParameter="Value" PropertyName="ElapsedMs"/>
     </CreateProperty>
     
-    <Message Text="TypeShim codegen completed in ~$(ElapsedMs)ms" Importance="$(TypeShim_MSBuildMessagePriority)" />
+    <Message Text="TypeShim codegen completed in $(ElapsedMs)ms" Importance="$(TypeShim_MSBuildMessagePriority)" />
     
     <ItemGroup>
       <Compile Include="$(_TypeShim_CSharpOutputDirectoryPath)/*.cs" />
@@ -98,6 +98,6 @@
     </PropertyGroup>
 
     <Copy SourceFiles="$(_TypeShim_TypeScriptOutputFilePath)" DestinationFolder="$(_TypeShim_TypeScriptPublishDirPath)" />
-    <Message Text="TypeShim .ts published to: $(_TypeShim_TypeScriptPublishDirPath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
+    <Message Text="TypeShim published TypeScript file: $(_TypeShim_TypeScriptPublishDirPath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
   </Target>
 </Project>

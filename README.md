@@ -1,22 +1,22 @@
 <h1 align=center tabindex=-1>TypeShim</h1>
 <p align=center tabindex=-1>
-  <i>Strongly-typed .NET-JS interop facade generation</i>
+  <i>Bridge .NET WebAssembly and TypeScript with fast, reliable, and type-safe codegen.</i>
 </p>
 
 <img align="right" tabindex=-1 src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ArcadeMode/0f24ed28316a25f6293d5771a247f19d/raw/typeshim-tests-badge.json" alt="Test status" />
 
 ## Why TypeShim
-With TypeShim you can use your .NET WASM project with TypeScript _without having to write a single JSExport yourself_. All interop code (C# & TS) is generated at build-time to provide reliability and type safety. TypeShim's class level exports make for a natural programming experience with familiar syntax. No bells and whistles, just your .NET WASM project accessible through a neat TypeScript facade.
+With TypeShim you can interop between .NET WebAssembly and TypeScript with class level exports. It takes just one `[TSExport]` to bring your class to TypeScript with all its constructors, methods and properties. TypeShim aims to provide a natural programming experience with familiar syntax, without any unnecessary bells and whistles. It just makes your .NET classes available in TypeScript, no hassle.
 
-Simply install TypeShim in your .NET WASM project, drop a `[TSExport]` on your C# classes and _voilà_: .NET-JS interop is generated at build time including a powerful TypeScript library matching your C# classes exactly.
+The interop code on both the C# & TypeScript side is build-time generated in a flash to provide an up-to-date and type safe interop boundary that just _works_. Thoroughly tested from codegen to runtime to deliver reliability.
 
-## Features at a glance
+## At a glance
 
-- 🏭 No-nonsense [interop](#concepts) generation.
-- 🌱 Opt-in with just one attribute.
-- 🤖 Export full classes: constructors, methods and properties.
-- 💰 [Enriched type marshalling](#enriched-type-support).
-- 🛡 Type-safety across the interop boundary.
+- 📤 Class level exports.
+- 💎 [Rich type support](#enriched-type-support).
+- ✍ No-nonsense [interop](#concepts) codegen.
+- 🦾 Thoroughly validated for correctness
+- ⚡ Tuned for [high performance](#performance)
 - 👍 [Easy setup](#installing)
 
 ## Samples
@@ -294,6 +294,8 @@ TypeShim aims to continue to broaden its type support. Suggestions and contribut
 | `Dictionary<TKey, TValue>` | `?`     | 💡     | under consideration |
 | `(T1, T2)` | `[T1, T2]`     | 💡     | under consideration |
 
+Table 1. TypeShim supported interop types
+
 | .NET Marshalled Type                  | Mapped Type | Support | Note |
 |----------------------|-------------|--------|------|
 | `Boolean`            | `Boolean`   | ✅     |      |
@@ -328,6 +330,8 @@ TypeShim aims to continue to broaden its type support. Suggestions and contribut
 | `Func<T1, T2, TResult>` | `Function`| ✅   |      |
 | `Func<T1, T2, T3, TResult>` | `Function` | ✅ |      |
 
+Table 2. TypeShim support for .NET-JS interop types
+
 *<sub>For `[TSExport]` classes</sub>
 
 ## Run the sample
@@ -357,6 +361,8 @@ TypeShim is configured through MSBuild properties, you may provide these through
 | `TypeShim_GeneratedDir`             | `TypeShim`  | Directory path (relative to `IntermediateOutputPath`) for generated `YourClass.Interop.g.cs` files.                                       | `TypeShim`                        |
 | `TypeShim_MSBuildMessagePriority`   | `Normal`    | MSBuild message priority. Set to High for debugging.                                                                                      | `Low`, `Normal`, `High`           |
 
+Table 3. Configuration options
+
 ### <a name="limitations"></a>Limitations
 
 TSExports are subject to minimal, but some, constraints. 
@@ -364,6 +370,35 @@ TSExports are subject to minimal, but some, constraints.
 - As overloading is not a real language feature in JavaScript nor TypeScript, this is currently not supported in TypeShim either. You can still define overloads that are not public. This goes for both constructors and methods.
 - By default, JSExport yields value semantics for Array instances, this is one reference type that is atypical. It is under consideration to be addressed but an effective alternative is to define your own List class to preserve reference semantics.
 - Classes with generic type parameters can not be part of interop codegen at this time.
+
+### <a name="performance"></a>Performance
+
+TypeShim has been optimized to achieve average codegen times of ~1 ms per class in a set of benchmarks going up to 200 classes. By optimizing the implementation and providing NativeAOT builds via the NuGet package, most users should see end-to-end codegen times of roughly 50–200 ms for projects with 25–200 classes. Every PR validates both AOT and JIT performance to help maintain these numbers.
+
+Performance is prioritized to minimize build-time impact and deliver the best possible experience for TypeShim users. Secondly it was a good excuse to play around with profiling tools and get some hands on experience with performance optimization and NativeAOT. 
+
+The earlier versions of TypeShim used regular JIT builds which suffered expensive runtime start times and an inability to warm-up so even smaller projects would require more than 1 second for codegen. Switching to NativeAOT brought this down to the quarterisecond range and after several optimizations has been reduced to below a tenth of a second in many cases.
+
+Results from the continuous benchmarking that is now part of every pull request are shown in Table 4. The 0 classes case demonstrates the overhead of starting the process without doing any work.
+
+| Method   | Compilation | ClassCount | Mean        | Error     | StdDev    |
+|--------- |------------ |-----------:|------------:|----------:|----------:|
+| **Generate** | **AOT**         | **0**          |    **14.02 ms** |  **1.319 ms** |  **0.873 ms** |
+| **Generate** | **AOT**         | **1**          |    **31.35 ms** |  **0.969 ms** |  **0.641 ms** |
+| **Generate** | **AOT**         | **10**         |    **31.82 ms** |  **1.683 ms** |  **1.113 ms** |
+| **Generate** | **AOT**         | **25**         |    **45.32 ms** |  **1.565 ms** |  **1.035 ms** |
+| **Generate** | **AOT**         | **50**         |    **56.50 ms** |  **1.103 ms** |  **0.730 ms** |
+| **Generate** | **AOT**         | **100**        |    **91.60 ms** |  **2.294 ms** |  **1.517 ms** |
+| **Generate** | **AOT**         | **200**        |    **93.92 ms** |  **1.553 ms** |  **1.027 ms** |
+| **Generate** | **JIT**         | **0**          |    **42.07 ms** |  **0.687 ms** |  **0.454 ms** |
+| **Generate** | **JIT**         | **1**          |   **813.62 ms** | **10.321 ms** |  **6.827 ms** |
+| **Generate** | **JIT**         | **10**         |   **814.93 ms** |  **9.107 ms** |  **6.024 ms** |
+| **Generate** | **JIT**         | **25**         |   **862.08 ms** | **11.549 ms** |  **7.639 ms** |
+| **Generate** | **JIT**         | **50**         |   **900.00 ms** | **14.144 ms** |  **9.355 ms** |
+| **Generate** | **JIT**         | **100**        | **1,014.10 ms** | **12.046 ms** |  **7.968 ms** |
+| **Generate** | **JIT**         | **200**        |   **986.96 ms** | **22.021 ms** | **14.565 ms** |
+
+Table 4. Benchmark results on an AMD EPYC 7763 2.45GHz Github Actions runner.
 
 ## Contributing
 
