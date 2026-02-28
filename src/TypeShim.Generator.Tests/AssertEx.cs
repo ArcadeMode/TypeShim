@@ -35,15 +35,6 @@ namespace TypeShim.Generator.Tests
             Assert.Fail(message);
         }
 
-        // Convenience for multi-line sequences (e.g., split lines and compare)
-        public static void EqualLinesOrDiff(IEnumerable<string> expectedLines, IEnumerable<string> actualLines, string? userMessage = null, int unifiedContext = 2)
-        {
-            var expected = string.Join("\n", expectedLines ?? Enumerable.Empty<string>());
-            var actual = string.Join("\n", actualLines ?? Enumerable.Empty<string>());
-            EqualOrDiff(expected, actual, normalizeLineEndings: true, trimTrailingWhitespace: false, scrubber: null, unifiedContext: unifiedContext, userMessage: userMessage);
-        }
-
-        // Preprocess input to reduce noise in diffs
         private static string Preprocess(string input, bool normalizeLineEndings, bool trimTrailingWhitespace, Func<string, string>? scrubber)
         {
             var s = input;
