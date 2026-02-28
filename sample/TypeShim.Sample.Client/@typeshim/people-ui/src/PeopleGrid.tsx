@@ -4,17 +4,18 @@ import React, { useEffect, useState } from 'react';
 import { PersonCard } from './PersonCard';
 import type { Person } from '@typeshim/wasm-exports';
 import { PeopleRepository } from './PeopleRepository';
+import AppContext from './appContext';
 
 export interface PeopleGridProps {
   emptyText?: string;
-  repository: PeopleRepository;
 }
 
-export const PeopleGrid: React.FC<PeopleGridProps> = ({ emptyText = 'No people found.', repository }) => {
+export const PeopleGrid: React.FC<PeopleGridProps> = ({ emptyText = 'No people found.' }) => {
   const [people, setPeople] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const app = React.useContext(AppContext);
+  const repository = new PeopleRepository(app.GetPeopleProvider());
   useEffect(() => {
     const fetchPeople = async () => {
       try {

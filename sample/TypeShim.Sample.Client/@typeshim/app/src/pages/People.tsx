@@ -5,7 +5,6 @@ import { PeopleRepository } from '@typeshim/people-ui';
 export default function People() {
     const [view, setView] = useState<'list' | 'grid'>('list');
     const toggle = () => setView(v => (v === 'list' ? 'grid' : 'list'));
-    const repository = new PeopleRepository();
     return (
     <div>
         <p>
@@ -14,7 +13,7 @@ export default function People() {
         </p>
         <p>
             There are ~1500 interop calls to methods on about 400 dotnet object instances made to render this page.
-            The impact of this many calls is not noticable (<i>credits to the dotnet/runtime team!</i>), try using your browser's devtools to profile the app.
+            The impact of this many calls is not noticable (<i>credits to the dotnet/runtime team!</i>).
         </p>
         <p
             style={{
@@ -48,9 +47,9 @@ export default function People() {
             {view === 'list' ? 'Switch to Grid' : 'Switch to List'}
         </button>
         {view === 'list' ? (
-        <PeopleList emptyText="No people yet." repository={repository} />
+        <PeopleList emptyText="No people yet." />
         ) : (
-        <PeopleGrid emptyText="No people yet." repository={repository} />
+        <PeopleGrid emptyText="No people yet." />
         )}
     </div>
     );

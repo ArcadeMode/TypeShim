@@ -17,18 +17,10 @@ public class PeopleProvider
         _apiClient = apiClient;
     }
 
-    public Person[]? PeopleCache => AllPeople;
-    public Task<TimeoutUnit?>? DelayTask { get; set; } = null;
-
     public async Task<People> FetchPeopleAsync()
     {
         try
         {
-            if (DelayTask != null)
-            {
-                await Task.Delay((await DelayTask)?.Timeout ?? 0);
-            }
-
             if (AllPeople == null)
             {
                 AllPeople = [.. await _apiClient.GetAllPeopleAsync()];
@@ -46,11 +38,4 @@ public class PeopleProvider
             throw; // hand over to js
         }
     }
-}
-
-
-[TSExport]
-public class TimeoutUnit
-{
-    public int Timeout { get; set; } = 0;
 }

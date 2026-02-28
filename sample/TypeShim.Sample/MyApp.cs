@@ -9,36 +9,21 @@ namespace TypeShim.Sample;
 [TSExport]
 public class MyApp
 {
-    private static IHost? _host;
+    private readonly IHost _host;
 
-    public static void Initialize(string baseAddress)
+    public MyApp(string baseAddress)
     {
-        if (_host != null)
-        {
-            throw new InvalidOperationException("Module already initialized.");
-        }
-
         Console.WriteLine($"Initializing {nameof(MyApp)} in .NET...");
-
-        IConfigurationRoot config = new ConfigurationBuilder()
-            // if desired, add configuration sources here, may also be passed through parameters
-            .Build();
-        _host = new HostBuilder()
-            .ConfigureAppConfiguration((context, builder) =>
-            {
-                builder.AddConfiguration(config);
-            })
-            .ConfigureServices(services =>
-            {
-                services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseAddress) });
-                services.AddSingleton<PeopleApiClient>();
-                services.AddSingleton<PeopleProvider>();
-            })
-            .Build();
+        _host = new HostBuilder().ConfigureServices(services =>
+        {
+            services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseAddress) });
+            services.AddSingleton<PeopleApiClient>();
+            services.AddSingleton<PeopleProvider>(sp => new PeopleProvider(sp.GetRequiredService<PeopleApiClient>()));
+        }).Build();
         Console.WriteLine($"Initialized {nameof(MyApp)} in .NET.");
     }
 
-    public static PeopleProvider GetPeopleProvider()
+    public PeopleProvider GetPeopleProvider()
     {
         if (_host == null)
         {

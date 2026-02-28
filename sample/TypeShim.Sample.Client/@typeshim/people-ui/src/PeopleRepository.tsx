@@ -1,22 +1,18 @@
-import { People, Person, PeopleProvider, TimeoutUnit, MyApp } from '@typeshim/wasm-exports';
+import { People, Person, PeopleProvider } from '@typeshim/wasm-exports';
 
 export class PeopleRepository {
 
-    public async getAllPeople(): Promise<Person[]> {
-        const peopleProvider: PeopleProvider = MyApp.GetPeopleProvider();
-        const people: People = await peopleProvider.FetchPeopleAsync();
-        return people.All;
+    constructor(private readonly peopleProvider: PeopleProvider) {
     }
 
-    public SetDelays(jsTimeout: number, csDelay: number) {
-        const peopleProvider: PeopleProvider = MyApp.GetPeopleProvider();
-        const timeoutUnit: TimeoutUnit.Initializer | null = { Timeout: csDelay };
-        peopleProvider.DelayTask = new Promise<TimeoutUnit.Initializer | null>((resolve) => setTimeout(() => resolve(timeoutUnit), jsTimeout));
+    public async getAllPeople(): Promise<Person[]> {
+        const people: People = await this.peopleProvider.FetchPeopleAsync();
+        return people.All;
     }
 
     private async PrintAgeMethodUsage() {
         console.log("Demonstrating Person.IsOlderThan method:");
-        const persons: Person[] = (await MyApp.GetPeopleProvider().FetchPeopleAsync()).All;
+        const persons: Person[] = (await this.peopleProvider.FetchPeopleAsync()).All;
         const person1 = persons[(Math.random() * persons.length) | 0];
         const person2 = persons[(Math.random() * persons.length) | 0];
         const p = Person.materialize(person2);
