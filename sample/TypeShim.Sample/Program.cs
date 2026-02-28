@@ -11,7 +11,7 @@ public partial class Program
 {
     public static void Main(string[] args)
     {
-        Console.WriteLine("WASM runtime is alive.");
+        Console.WriteLine(".NET Main method entered.");
 
         // You can put any startup logic here like any other .NET application
         // alternatively you could expose a class that embodies your app and treat the .NET code as a library.

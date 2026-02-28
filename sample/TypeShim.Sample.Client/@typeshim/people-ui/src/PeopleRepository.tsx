@@ -25,7 +25,7 @@ export class PeopleRepository {
         });
         person3.AdoptPet();
         console.log(person1.Name, person1.Age, "isOlderThan", person2.Name, person2.Age, ":", person1.IsOlderThan(person2));
-        console.log(person1.Name, person1.Age, "isOlderThan (snapshot)", jsPerson.Name, jsPerson.Age, ":", person1.IsOlderThan(jsPerson));
+        console.log(person1.Name, person1.Age, "isOlderThan (initializer)", jsPerson.Name, jsPerson.Age, ":", person1.IsOlderThan(jsPerson));
         console.log(person1.Name, person1.Age, "isOlderThan (constructor)", person3.Name, person3.Age, ":", person1.IsOlderThan(person3));
     }
 }
