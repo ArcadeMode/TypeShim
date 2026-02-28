@@ -58,7 +58,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
     internal DeferredExpressionRenderer RenderReturnTypeConversion(InteropTypeInfo returnType, DeferredExpressionRenderer valueExpressionRenderer)
     {
         if (!returnType.RequiresTypeConversion)
-            return valueExpressionRenderer; // DeferredExpressionRenderer.From(() => _ctx.Append(valueExpression));
+            return valueExpressionRenderer;
         
         if (returnType is { IsTaskType: true, TypeArgument.RequiresTypeConversion: true }) // Handle Task<T>
         {

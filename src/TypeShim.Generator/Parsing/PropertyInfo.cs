@@ -13,19 +13,4 @@ internal sealed class PropertyInfo
     internal required MethodInfo? InitMethod { get; init; }
     
     internal required CommentInfo? Comment { get; init; }
-
-    public PropertyInfo WithInteropTypeInfo()
-    {
-        return new PropertyInfo
-        {
-            Name = this.Name,
-            IsStatic = this.IsStatic,
-            IsRequired = this.IsRequired,
-            Type = this.Type.AsInteropTypeInfo(),
-            GetMethod = this.GetMethod.WithInteropTypeInfo(),
-            SetMethod = this.SetMethod?.WithInteropTypeInfo(),
-            InitMethod = this.InitMethod?.WithInteropTypeInfo(),
-            Comment = this.Comment,
-        };
-    }
 }

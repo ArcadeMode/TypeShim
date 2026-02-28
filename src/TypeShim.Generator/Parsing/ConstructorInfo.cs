@@ -19,16 +19,4 @@ internal sealed class ConstructorInfo
         }
         return Parameters;
     }
-
-    internal ConstructorInfo WithInteropTypeInfo()
-    {
-        return new ConstructorInfo()
-        {
-            Name = Name,
-            Parameters = [.. Parameters.Select(p => p.WithInteropTypeInfo())],
-            InitializerObject = InitializerObject?.WithInteropTypeInfo(),
-            MemberInitializers = [.. MemberInitializers.Select(p => p.WithInteropTypeInfo())],
-            Type = Type.AsInteropTypeInfo(),
-        };
-    }
 }

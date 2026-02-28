@@ -120,7 +120,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             ctx.Append(parameterInfo.Name).Append(": ");
 
             bool isDelegate = parameterInfo.Type.IsDelegateType() || (parameterInfo.Type.IsNullableType && parameterInfo.Type.TypeArgument!.IsDelegateType());
-            TypeShimSymbolType returnSymbolType = parameterInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true } && !isDelegate
+            TypeShimSymbolType returnSymbolType = !isDelegate && parameterInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true }
                 ? TypeShimSymbolType.ProxyInitializerUnion
                 : TypeShimSymbolType.None;
             TypeScriptSymbolNameRenderer.Render(parameterInfo.Type, ctx, returnSymbolType, parameterSymbolType: TypeShimSymbolType.Proxy, interop: false);
