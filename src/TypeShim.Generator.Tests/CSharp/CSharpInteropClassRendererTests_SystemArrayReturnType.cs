@@ -182,7 +182,7 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
+        AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
@@ -196,13 +196,7 @@ public partial class C1Interop
     public static Task<object> M1([JSMarshalAs<JSType.Any>] object instance)
     {
         C1 typed_instance = (C1)instance;
-        TaskCompletionSource<object> retValTcs = new();
-        (typed_instance.M1()).ContinueWith(t => {
-            if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) retValTcs.SetCanceled();
-            else retValTcs.SetResult((object)t.Result);
-        }, TaskContinuationOptions.ExecuteSynchronously);
-        return retValTcs.Task;
+        return typed_instance.M1().ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
     }
     public static C1 FromObject(object obj)
     {
@@ -214,7 +208,7 @@ public partial class C1Interop
     }
 }
 
-"""));
+""");
     }
 
     [TestCase("Version", "new Version(1,2,3,4)")]

@@ -119,38 +119,32 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-#nullable enable
-// TypeShim generated TypeScript interop definitions
-using System;
-using System.Runtime.InteropServices.JavaScript;
-using System.Threading.Tasks;
-namespace N1;
-public partial class C1Interop
-{
-    [JSExport]
-    [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
-    public static Task<object> M1()
-    {
-        TaskCompletionSource<object> retValTcs = new();
-        (C1.M1()).ContinueWith(t => {
-            if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) retValTcs.SetCanceled();
-            else retValTcs.SetResult((object)t.Result);
-        }, TaskContinuationOptions.ExecuteSynchronously);
-        return retValTcs.Task;
-    }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
+        AssertEx.EqualOrDiff(interopClass, """    
+        #nullable enable
+        // TypeShim generated TypeScript interop definitions
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        namespace N1;
+        public partial class C1Interop
         {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
-    }
-}
-
-"""));
+            [JSExport]
+            [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
+            public static Task<object> M1()
+            {
+                return C1.M1().ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
+            }
+            public static C1 FromObject(object obj)
+            {
+                return obj switch
+                {
+                    C1 instance => instance,
+                    _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+                };
+            }
+        }
+        
+        """);
     }
 
     [Test]
@@ -195,39 +189,33 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-#nullable enable
-// TypeShim generated TypeScript interop definitions
-using System;
-using System.Runtime.InteropServices.JavaScript;
-using System.Threading.Tasks;
-namespace N1;
-public partial class C1Interop
-{
-    [JSExport]
-    [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
-    public static Task<object> M1([JSMarshalAs<JSType.Any>] object instance)
-    {
-        C1 typed_instance = (C1)instance;
-        TaskCompletionSource<object> retValTcs = new();
-        (typed_instance.M1()).ContinueWith(t => {
-            if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) retValTcs.SetCanceled();
-            else retValTcs.SetResult((object)t.Result);
-        }, TaskContinuationOptions.ExecuteSynchronously);
-        return retValTcs.Task;
-    }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
+        AssertEx.EqualOrDiff(interopClass, """    
+        #nullable enable
+        // TypeShim generated TypeScript interop definitions
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        namespace N1;
+        public partial class C1Interop
         {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
-    }
-}
+            [JSExport]
+            [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
+            public static Task<object> M1([JSMarshalAs<JSType.Any>] object instance)
+            {
+                C1 typed_instance = (C1)instance;
+                return typed_instance.M1().ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
+            }
+            public static C1 FromObject(object obj)
+            {
+                return obj switch
+                {
+                    C1 instance => instance,
+                    _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+                };
+            }
+        }
 
-"""));
+        """);
     }
 
     [TestCase("Version", "new Version(1,2,3,4)")]
@@ -258,38 +246,32 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-#nullable enable
-// TypeShim generated TypeScript interop definitions
-using System;
-using System.Runtime.InteropServices.JavaScript;
-using System.Threading.Tasks;
-namespace N1;
-public partial class C1Interop
-{
-    [JSExport]
-    [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
-    public static Task<object> M1()
-    {
-        TaskCompletionSource<object> retValTcs = new();
-        (C1.M1()).ContinueWith(t => {
-            if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) retValTcs.SetCanceled();
-            else retValTcs.SetResult((object)t.Result);
-        }, TaskContinuationOptions.ExecuteSynchronously);
-        return retValTcs.Task;
-    }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
+        AssertEx.EqualOrDiff(interopClass, """    
+        #nullable enable
+        // TypeShim generated TypeScript interop definitions
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        namespace N1;
+        public partial class C1Interop
         {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
-    }
-}
-
-""".Replace("{{typeName}}", typeName)));
+            [JSExport]
+            [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
+            public static Task<object> M1()
+            {
+                return C1.M1().ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
+            }
+            public static C1 FromObject(object obj)
+            {
+                return obj switch
+                {
+                    C1 instance => instance,
+                    _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+                };
+            }
+        }
+        
+        """);
     }
 
     [Test]
@@ -320,33 +302,33 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-#nullable enable
-// TypeShim generated TypeScript interop definitions
-using System;
-using System.Runtime.InteropServices.JavaScript;
-using System.Threading.Tasks;
-namespace N1;
-public partial class C1Interop
-{
-    [JSExport]
-    [return: JSMarshalAs<JSType.Promise<JSType.Void>>]
-    public static Task M1([JSMarshalAs<JSType.Any>] object instance)
-    {
-        C1 typed_instance = (C1)instance;
-        return typed_instance.M1();
-    }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
+        AssertEx.EqualOrDiff(interopClass, """    
+        #nullable enable
+        // TypeShim generated TypeScript interop definitions
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        namespace N1;
+        public partial class C1Interop
         {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
-    }
-}
+            [JSExport]
+            [return: JSMarshalAs<JSType.Promise<JSType.Void>>]
+            public static Task M1([JSMarshalAs<JSType.Any>] object instance)
+            {
+                C1 typed_instance = (C1)instance;
+                return typed_instance.M1();
+            }
+            public static C1 FromObject(object obj)
+            {
+                return obj switch
+                {
+                    C1 instance => instance,
+                    _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+                };
+            }
+        }
 
-"""));
+        """);
     }
 
     [Test]
@@ -377,32 +359,32 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
-        Assert.That(interopClass, Is.EqualTo("""    
-#nullable enable
-// TypeShim generated TypeScript interop definitions
-using System;
-using System.Runtime.InteropServices.JavaScript;
-using System.Threading.Tasks;
-namespace N1;
-public partial class C1Interop
-{
-    [JSExport]
-    [return: JSMarshalAs<JSType.Promise<JSType.Void>>]
-    public static Task? M1([JSMarshalAs<JSType.Any>] object instance)
-    {
-        C1 typed_instance = (C1)instance;
-        return typed_instance.M1();
-    }
-    public static C1 FromObject(object obj)
-    {
-        return obj switch
+        AssertEx.EqualOrDiff(interopClass, """    
+        #nullable enable
+        // TypeShim generated TypeScript interop definitions
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        namespace N1;
+        public partial class C1Interop
         {
-            C1 instance => instance,
-            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
-        };
-    }
-}
+            [JSExport]
+            [return: JSMarshalAs<JSType.Promise<JSType.Void>>]
+            public static Task? M1([JSMarshalAs<JSType.Any>] object instance)
+            {
+                C1 typed_instance = (C1)instance;
+                return typed_instance.M1();
+            }
+            public static C1 FromObject(object obj)
+            {
+                return obj switch
+                {
+                    C1 instance => instance,
+                    _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+                };
+            }
+        }
 
-"""));
+        """);
     }
 }
