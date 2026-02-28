@@ -5,5 +5,4 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
-TSHIM006 | Usage | Error | TypeShimAnalyzer
 
