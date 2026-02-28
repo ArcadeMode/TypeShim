@@ -131,3 +131,4 @@ scripts/*.tmp
 # MSBuild / VS project outputs
 # -----------------------------
 obj/
+obj[\\]Debug/
