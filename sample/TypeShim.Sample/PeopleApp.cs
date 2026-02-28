@@ -7,28 +7,30 @@ using System.Net.Http;
 namespace TypeShim.Sample;
 
 [TSExport]
+public class PeopleAppOptions
+{
+    public required string BaseAddress { get; init; }
+}
+
+[TSExport]
 public class PeopleApp
 {
     private readonly IHost _host;
 
-    public PeopleApp(string baseAddress)
+    public PeopleApp(PeopleAppOptions options)
     {
-        Console.WriteLine($"Initializing {nameof(PeopleApp)} in .NET...");
+        // we dont -need- a servicecollection for this demo but its here to show you can use anything on the .net side
         _host = new HostBuilder().ConfigureServices(services =>
         {
-            services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseAddress) });
+            services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(options.BaseAddress) });
             services.AddSingleton<PeopleApiClient>();
             services.AddSingleton<PeopleProvider>(sp => new PeopleProvider(sp.GetRequiredService<PeopleApiClient>()));
         }).Build();
-        Console.WriteLine($"Initialized {nameof(PeopleApp)} in .NET.");
+        Console.WriteLine($".NET {nameof(PeopleApp)} Constructor completed");
     }
 
     public PeopleProvider GetPeopleProvider()
     {
-        if (_host == null)
-        {
-            throw new InvalidOperationException("Module not initialized.");
-        }
         return _host.Services.GetRequiredService<PeopleProvider>();
     }
 }
