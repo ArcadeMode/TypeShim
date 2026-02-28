@@ -146,7 +146,8 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
             return;
 
         string propertyName = property.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.NonPublicSetterRule, LocationFinder.GetDefaultLocation(property), propertyName));
+        string className = property.ContainingType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+        context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.NonPublicSetterRule, LocationFinder.GetDefaultLocation(property), propertyName, className));
     }
 
     private static void CheckInstanceFieldRequiredness(SymbolAnalysisContext context, IFieldSymbol field)
