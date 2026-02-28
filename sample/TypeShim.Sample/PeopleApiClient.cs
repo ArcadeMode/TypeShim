@@ -9,12 +9,6 @@ namespace TypeShim.Sample;
 
 public class PeopleApiClient(HttpClient httpClient)
 {
-    public async Task<IEnumerable<Person>> GetElderlyPeopleAsync()
-    {
-        PeopleDto? dto = await httpClient.GetFromJsonAsync("/people/elderly", typeof(PeopleDto), PersonDtoSerializerContext.Default) as PeopleDto;
-        return dto?.People?.Select(dto => dto.ToPerson()) ?? [];
-    }
-
     public async Task<IEnumerable<Person>> GetAllPeopleAsync()
     {
         PeopleDto? dto = await httpClient.GetFromJsonAsync("/people/all", typeof(PeopleDto), PersonDtoSerializerContext.Default) as PeopleDto;

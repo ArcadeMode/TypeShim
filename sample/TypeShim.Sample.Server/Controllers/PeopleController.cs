@@ -11,10 +11,10 @@ public class PeopleController(PersonRepository repository) : ControllerBase
     [Route("all")]
     public PeopleDto GetAll()
     {
-        IEnumerable<Person> elderlyPeople = repository.GetAll();
+        IEnumerable<Person> people = repository.GetAll();
         return new PeopleDto
         {
-            People = [.. elderlyPeople.Select(PersonDto.FromPerson)]
+            People = [.. people.Select(PersonDto.FromPerson)]
         };
     }
 }
