@@ -23,18 +23,6 @@ internal sealed class MethodInfo
         };
     }
 
-    public MethodInfo WithInteropTypeInfo()
-    {
-        return new MethodInfo
-        {
-            IsStatic = this.IsStatic,
-            Name = this.Name,
-            Parameters = [.. this.Parameters.Select(p => p.WithInteropTypeInfo())],
-            ReturnType = this.ReturnType.AsInteropTypeInfo(),
-            Comment = this.Comment,
-        };
-    }
-
     internal bool MatchesDisposeSignature()
     {
         return Name == "Dispose" && !Parameters.Any(p => !p.IsInjectedInstanceParameter) && ReturnType.ManagedType == KnownManagedType.Void;
