@@ -231,15 +231,9 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
     {
         using var _ = jsObject;
-        TaskCompletionSource<{{typeName}}> P1Tcs = new();
-        (jsObject.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
-            if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) P1Tcs.SetCanceled();
-            else P1Tcs.SetResult(({{typeName}})t.Result);
-        }, TaskContinuationOptions.ExecuteSynchronously);
         return new C1()
         {
-            P1 = P1Tcs.Task,
+            P1 = (jsObject.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously),
             P2 = jsObject.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
         };
     }
@@ -248,26 +242,14 @@ public partial class C1Interop
     public static Task<object> get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
         C1 typed_instance = (C1)instance;
-        TaskCompletionSource<object> retValTcs = new();
-        (typed_instance.P1).ContinueWith(t => {
-            if (t.IsFaulted) retValTcs.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) retValTcs.SetCanceled();
-            else retValTcs.SetResult((object)t.Result);
-        }, TaskContinuationOptions.ExecuteSynchronously);
-        return retValTcs.Task;
+        return typed_instance.P1.ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> value)
     {
         C1 typed_instance = (C1)instance;
-        TaskCompletionSource<{{typeName}}> valueTcs = new();
-        (value).ContinueWith(t => {
-            if (t.IsFaulted) valueTcs.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) valueTcs.SetCanceled();
-            else valueTcs.SetResult(({{typeName}})t.Result);
-        }, TaskContinuationOptions.ExecuteSynchronously);
-        Task<{{typeName}}> typed_value = valueTcs.Task;
+        Task<{{typeName}}> typed_value = value.ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
         typed_instance.P1 = typed_value;
     }
     [JSExport]
@@ -296,15 +278,9 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject jsObject)
     {
         using var _ = jsObject;
-        TaskCompletionSource<{{typeName}}> P1Tcs = new();
-        (jsObject.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => {
-            if (t.IsFaulted) P1Tcs.SetException(t.Exception.InnerExceptions);
-            else if (t.IsCanceled) P1Tcs.SetCanceled();
-            else P1Tcs.SetResult(({{typeName}})t.Result);
-        }, TaskContinuationOptions.ExecuteSynchronously);
         return new C1()
         {
-            P1 = P1Tcs.Task,
+            P1 = (jsObject.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject))).ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously),
             P2 = jsObject.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(jsObject)),
         };
     }

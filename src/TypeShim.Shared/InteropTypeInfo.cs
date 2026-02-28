@@ -32,7 +32,7 @@ internal sealed class InteropTypeInfo
     public required TypeSyntax CSharpInteropTypeSyntax { get; init; }
 
     /// <summary>
-    /// Tasks and Arrays _may_ have type arguments. Nullables always do.
+    /// Tasks and _may_ have type arguments. Arrays and Nullables always do.
     /// </summary>
     public required InteropTypeInfo? TypeArgument { get; init; }
 
@@ -61,33 +61,6 @@ internal sealed class InteropTypeInfo
         {
             return this;
         }
-    }
-
-    /// <summary>
-    /// Transforms this <see cref="InteropTypeInfo"/> into one suitable for interop method signatures.
-    /// </summary>
-    /// <returns></returns>
-    public InteropTypeInfo AsInteropTypeInfo()
-    {
-        return new InteropTypeInfo
-        {
-            IsTSExport = false,
-            ManagedType = this.ManagedType,
-            JSTypeSyntax = this.JSTypeSyntax,
-            CSharpTypeSyntax = this.CSharpInteropTypeSyntax, // essentially overwrite clr type with interop type
-            CSharpInteropTypeSyntax = this.CSharpInteropTypeSyntax,
-            IsTaskType = this.IsTaskType,
-            IsArrayType = this.IsArrayType,
-            IsNullableType = this.IsNullableType,
-            TypeArgument = TypeArgument?.AsInteropTypeInfo(),
-            ArgumentInfo = this.ArgumentInfo is not DelegateArgumentInfo argInfo ? null : new DelegateArgumentInfo() 
-            {
-                ParameterTypes = [.. argInfo.ParameterTypes.Select(argType => argType.AsInteropTypeInfo())],
-                ReturnType = argInfo.ReturnType.AsInteropTypeInfo()
-            },
-            RequiresTypeConversion = false,
-            SupportsTypeConversion = false,
-        };
     }
 
     public static readonly InteropTypeInfo JSObjectTypeInfo = new()

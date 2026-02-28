@@ -92,7 +92,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                 _conversionRenderer.RenderParameterTypeConversion(originalParamInfo);
             }
 
-            DeferredExpressionRenderer returnValueExpression = _conversionRenderer.RenderReturnTypeConversion(methodInfo.ReturnType, DeferredExpressionRenderer.From(RenderInvocationExpression));
+            DeferredExpressionRenderer returnValueExpression = _conversionRenderer.RenderReturnTypeConversion(methodInfo.ReturnType, DeferredExpressionRenderer.FromUnary(RenderInvocationExpression));
             if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void) _ctx.Append("return ");
             returnValueExpression.Render();
             _ctx.AppendLine(";");
@@ -143,7 +143,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             }
 
             string accessedObject = methodInfo.IsStatic ? _ctx.Class.Name : _ctx.LocalScope.GetAccessorExpression(methodInfo.Parameters.ElementAt(0));
-            DeferredExpressionRenderer untypedValueExpressionRenderer = DeferredExpressionRenderer.From(() => _ctx.Append(accessedObject).Append('.').Append(propertyInfo.Name));
+            DeferredExpressionRenderer untypedValueExpressionRenderer = DeferredExpressionRenderer.FromUnary(() => _ctx.Append(accessedObject).Append('.').Append(propertyInfo.Name));
             DeferredExpressionRenderer typedValueExpressionRenderer = _conversionRenderer.RenderReturnTypeConversion(methodInfo.ReturnType, untypedValueExpressionRenderer);
             if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void) // getter
             {
@@ -266,21 +266,25 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             Dictionary<PropertyInfo, DeferredExpressionRenderer> convertedTaskExpressionDict = [];
             foreach (PropertyInfo propertyInfo in properties)
             {
-                DeferredExpressionRenderer valueRetrievalExpressionRenderer = DeferredExpressionRenderer.From(() => {
+                DeferredExpressionRenderer valueRetrievalExpressionRenderer = DeferredExpressionRenderer.FromUnary(() => {
                     _ctx.Append("jsObject.").Append(_methodResolver.ResolveJSObjectMethodName(propertyInfo.Type))
                         .Append("(\"").Append(propertyInfo.Name).Append("\")");
-                    if (!propertyInfo.Type.IsNullableType)
-                    {
+                });
+
+                if (!propertyInfo.Type.IsNullableType)
+                {
+                    DeferredExpressionRenderer nonNullableExpressionRenderer = valueRetrievalExpressionRenderer;
+                    valueRetrievalExpressionRenderer = DeferredExpressionRenderer.FromBinary(() => {
+                        nonNullableExpressionRenderer.Render();
                         _ctx.Append(" ?? throw new ArgumentException(\"Non-nullable property '")
                             .Append(propertyInfo.Name)
                             .Append("' missing or of invalid type\", nameof(jsObject))");
-                    }
-                });
+                    });
+                }
 
                 if (!propertyInfo.Type.RequiresTypeConversion)
                 {
                     convertedTaskExpressionDict.Add(propertyInfo, valueRetrievalExpressionRenderer);
-
                 } 
                 else
                 {
@@ -290,7 +294,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                         _ctx.Append(propertyInfo.Type.CSharpInteropTypeSyntax).Append(" tmp").Append(propertyInfo.Name).Append(" = ");
                         valueRetrievalExpressionRenderer.Render();
                         _ctx.AppendLine(";");
-                        valueRetrievalExpressionRenderer = DeferredExpressionRenderer.From(() => {
+                        valueRetrievalExpressionRenderer = DeferredExpressionRenderer.FromUnary(() => {
                             _ctx.Append("tmp").Append(propertyInfo.Name);
                         });
                     }

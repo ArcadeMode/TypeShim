@@ -2,12 +2,9 @@
 
 internal class DeferredExpressionRenderer(Action renderAction)
 {
+    internal required bool IsBinary { get; init; }
     internal void Render() => renderAction();
-
-    public static implicit operator DeferredExpressionRenderer(Action renderAction)
-    {
-        return new DeferredExpressionRenderer(renderAction);
-    }
     
-    public static DeferredExpressionRenderer From(Action renderAction) => new(renderAction);
+    public static DeferredExpressionRenderer FromBinary(Action renderAction) => new(renderAction){ IsBinary = true };
+    public static DeferredExpressionRenderer FromUnary(Action renderAction) => new(renderAction){ IsBinary = false };
 }

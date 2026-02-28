@@ -38,11 +38,11 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, IEnumerable
 
     private void RenderExtensionMethodForType(JSObjectExtensionInfo extensionInfo)
     {
-        DeferredExpressionRenderer marshalAsMethodNameRenderer = DeferredExpressionRenderer.From(() =>
+        DeferredExpressionRenderer marshalAsMethodNameRenderer = DeferredExpressionRenderer.FromUnary(() =>
         {
             _ctx.Append("MarshalAs").Append(extensionInfo.Name);
         });
-        DeferredExpressionRenderer getPropertyAsMethodNameRenderer = DeferredExpressionRenderer.From(() =>
+        DeferredExpressionRenderer getPropertyAsMethodNameRenderer = DeferredExpressionRenderer.FromUnary(() =>
         {
             _ctx.Append("GetPropertyAs").Append(extensionInfo.Name).Append("Nullable");
         });
