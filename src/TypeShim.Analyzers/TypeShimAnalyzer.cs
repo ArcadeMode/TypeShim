@@ -17,7 +17,6 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
     [
         TypeShimDiagnostics.AttributeOnPublicClassOnlyRule,
-        TypeShimDiagnostics.NonPublicSetterRule,
         TypeShimDiagnostics.NoRequiredFieldsRule,
         TypeShimDiagnostics.NoOverloadsRule,
         TypeShimDiagnostics.UnsupportedTypeRule,
@@ -77,7 +76,6 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
                         CheckMethodParameterType(context, method, parameter);
                     break;
                 case IPropertySymbol prop:
-                    CheckInstancePropertySetterAccessibility(context, prop);
                     CheckPropertyType(context, prop);
                     break;
                 case IFieldSymbol field:
@@ -133,21 +131,6 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
             string typeName = property.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
             context.ReportDiagnostic(Diagnostic.Create(descriptor, location, typeName));
         }
-    }
-
-    private static void CheckInstancePropertySetterAccessibility(SymbolAnalysisContext context, IPropertySymbol property)
-    {
-        if (property.IsStatic || property.IsIndexer || property.SetMethod is not IMethodSymbol setter)
-            return;
-
-        Accessibility propertyAccessibility = property.DeclaredAccessibility is Accessibility.NotApplicable ? Accessibility.Private : property.DeclaredAccessibility;
-        Accessibility setterAccessibility = setter.DeclaredAccessibility is Accessibility.NotApplicable ? propertyAccessibility : setter.DeclaredAccessibility;
-        if (setterAccessibility is Accessibility.Public)
-            return;
-
-        string propertyName = property.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        string className = property.ContainingType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-        context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.NonPublicSetterRule, LocationFinder.GetDefaultLocation(property), propertyName, className));
     }
 
     private static void CheckInstanceFieldRequiredness(SymbolAnalysisContext context, IFieldSymbol field)

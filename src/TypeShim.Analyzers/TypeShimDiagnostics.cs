@@ -51,15 +51,6 @@ internal static class TypeShimDiagnostics
         isEnabledByDefault: true,
         description: "TypeShim does not support fields (yet), they're mostly ignored but required fields are banned to prevent invalid constructor initializers from being generated.");
 
-    internal static readonly DiagnosticDescriptor NonPublicSetterRule = new(
-        id: "TSHIM010",
-        title: "Non-public set/init will be skipped in 'Initializer' generation",
-        messageFormat: "Property '{0}' has a non-public set/init, it will not be available in the TypeScript constructor of class '{1}'",
-        category: "Usage",
-        defaultSeverity: DiagnosticSeverity.Info,
-        isEnabledByDefault: true,
-        description: "TypeShim generates initializer objects to use in conjuction with constructors and for automatic JSObject mapping. Properties with non-public set/init's are excluded from this feature.");
-
     internal static readonly DiagnosticDescriptor NoRequiredFieldsRule = new(
         id: "TSHIM011",
         title: "Required fields are not supported",
