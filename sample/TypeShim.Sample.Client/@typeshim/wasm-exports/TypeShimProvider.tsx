@@ -1,5 +1,5 @@
-import { createWasmRuntime, MyApp, TypeShimInitializer } from '@typeshim/wasm-exports';
-import { useMemo, ReactNode, useEffect, useState } from 'react';
+import { createWasmRuntime, TypeShimInitializer } from '@typeshim/wasm-exports';
+import { ReactNode, useEffect, useState } from 'react';
 
 export interface AppProviderProps {
     children: ReactNode;

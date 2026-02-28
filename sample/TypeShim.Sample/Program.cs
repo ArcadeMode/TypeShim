@@ -19,6 +19,6 @@ public partial class Program
         // this could then be combined with a static accessor to expose certain services to JS.
 
         // For this demo however, MyApp has been TSExport'ed and will be initialized from JS.
-        Console.WriteLine($"{nameof(MyApp)} can be initialized even without calling into Main");
+        Console.WriteLine($"{nameof(PeopleApp)} can be initialized even without calling into Main");
     }
 }

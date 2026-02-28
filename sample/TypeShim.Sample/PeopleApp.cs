@@ -7,20 +7,20 @@ using System.Net.Http;
 namespace TypeShim.Sample;
 
 [TSExport]
-public class MyApp
+public class PeopleApp
 {
     private readonly IHost _host;
 
-    public MyApp(string baseAddress)
+    public PeopleApp(string baseAddress)
     {
-        Console.WriteLine($"Initializing {nameof(MyApp)} in .NET...");
+        Console.WriteLine($"Initializing {nameof(PeopleApp)} in .NET...");
         _host = new HostBuilder().ConfigureServices(services =>
         {
             services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseAddress) });
             services.AddSingleton<PeopleApiClient>();
             services.AddSingleton<PeopleProvider>(sp => new PeopleProvider(sp.GetRequiredService<PeopleApiClient>()));
         }).Build();
-        Console.WriteLine($"Initialized {nameof(MyApp)} in .NET.");
+        Console.WriteLine($"Initialized {nameof(PeopleApp)} in .NET.");
     }
 
     public PeopleProvider GetPeopleProvider()

@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using TypeShim.Sample;
 
-namespace VisageNovel;
+namespace TypeShim.Sample;
 
 [JsonSourceGenerationOptions(
     GenerationMode = JsonSourceGenerationMode.Serialization | JsonSourceGenerationMode.Metadata,

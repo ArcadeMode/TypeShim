@@ -1,4 +1,4 @@
-import { MyApp } from '@typeshim/wasm-exports';
+import { PeopleApp } from '@typeshim/wasm-exports';
 import { useMemo, ReactNode } from 'react';
 import AppContext from './appContext';
 
@@ -7,7 +7,7 @@ export interface AppProviderProps {
 }
 
 export function AppProvider({ children }: AppProviderProps) {
-    const myApp = new MyApp(document.baseURI);
-    const value = useMemo(() => (myApp), [myApp]);
+    const peopleApp = new PeopleApp(document.baseURI);
+    const value = useMemo(() => (peopleApp), [peopleApp]);
     return <AppContext.Provider value={value}> {children} </AppContext.Provider>;
 }

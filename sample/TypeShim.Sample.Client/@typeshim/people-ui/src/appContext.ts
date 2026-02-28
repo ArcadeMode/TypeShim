@@ -1,5 +1,5 @@
-import { MyApp } from '@typeshim/wasm-exports';
+import { PeopleApp } from '@typeshim/wasm-exports';
 import React from 'react';
 
-const AppContext = React.createContext<MyApp>(undefined!);
+const AppContext = React.createContext<PeopleApp>(undefined!);
 export default AppContext;

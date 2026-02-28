@@ -17,7 +17,7 @@
   <PropertyGroup>
     <!--<TypeShim_GeneratedDir>../../../TypeShim</TypeShim_GeneratedDir>-->
     <TypeShim_TypeScriptOutputDirectory>../../../../TypeShim.Sample.Client/@typeshim/wasm-exports</TypeShim_TypeScriptOutputDirectory>
-    <TypeShim_MSBuildMessagePriority>High</TypeShim_MSBuildMessagePriority>
+    <!--<TypeShim_MSBuildMessagePriority>High</TypeShim_MSBuildMessagePriority>-->
   </PropertyGroup>
 
   <ItemGroup>
