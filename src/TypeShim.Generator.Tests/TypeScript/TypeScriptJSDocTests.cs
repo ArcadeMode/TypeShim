@@ -2136,4 +2136,54 @@ export class C1 extends ProxyBase {
 
 """);
     }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ConstructorWithCommentAndSettableProperty_RendersJSDocWithInsertedInitializerParam()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Initializes a new instance.
+                /// </summary>
+                public C1() {}
+                public string Name { get; set; }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  /**
+   * Initializes a new instance.
+   * @param jsObject - Property values to initialize the instance with
+   */
+  constructor(jsObject: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
+  }
+
+  public get Name(): string {
+    return TypeShimConfig.exports.N1.C1Interop.get_Name(this.instance);
+  }
+
+  public set Name(value: string) {
+    TypeShimConfig.exports.N1.C1Interop.set_Name(this.instance, value);
+  }
+}
+
+""");
+    }
 }
