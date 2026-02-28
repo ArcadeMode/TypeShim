@@ -5,7 +5,8 @@
     <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
     <Nullable>enable</Nullable>
 
-    <WasmFingerprintAssets>true</WasmFingerprintAssets>
+    <!-- When enabling fingerprints, be sure to add the importmap element to index.html -->
+    <WasmFingerprintAssets>false</WasmFingerprintAssets>
     <CompressionEnabled>false</CompressionEnabled>
   </PropertyGroup>
 

@@ -6,12 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@typeshim/app Demo</title>
 
-    <script type="importmap"></script>
-
-    <script>
-      // Expose methods JSImport'ed by dotnet wasm module (not needed for TypeShim itself)
-      // window.getBaseURI = () => document.baseURI;
-    </script>
+    <!-- enable when using WasmFingerprintAssets=true on the dotnet wasm project-->
+    <!-- <script type="importmap"></script> -->
   </head>
   <body>
     <div id="root"></div>
