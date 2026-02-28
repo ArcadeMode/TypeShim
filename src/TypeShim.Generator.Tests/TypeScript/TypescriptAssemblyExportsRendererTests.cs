@@ -902,4 +902,57 @@ export interface AssemblyExports{
 
         """.Replace("{{tsArrayType}}", tsArrayType));
     }
+
+    [Test]
+    public void TypeScriptInteropInterfaceRenderer_Constructor_WithUserClassWithRequiredPropertyParameterType_HasManagedObjectOrObjectType()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class UserClass
+            {
+                public int Id { get; init; }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1(UserClass uc)
+            {
+                public void DoStuff(UserClass u) {}
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+        INamedTypeSymbol userClassSymbol = exportedClasses[1];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(userClassSymbol, typeCache).Build();
+
+        ModuleHierarchyInfo hierarchyInfo = ModuleHierarchyInfo.FromClasses([classInfo]); //deliberate omit userClassInfo to reduce noise in baseline
+        RenderContext renderCtx = new(null, [classInfo, userClassInfo], RenderOptions.TypeScript);
+        new TypescriptAssemblyExportsRenderer(hierarchyInfo, renderCtx).Render();
+
+        AssertEx.EqualOrDiff(renderCtx.ToString(), """
+// TypeShim generated TypeScript module exports interface
+export interface AssemblyExports{
+  N1: {
+    C1Interop: {
+      ctor(uc: ManagedObject | object): ManagedObject;
+      DoStuff(instance: ManagedObject, u: ManagedObject | object): void;
+    };
+  };
+}
+
+""");
+    }
 }
