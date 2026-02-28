@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { PeopleList, PeopleGrid } from '@typeshim/people-ui';
-import { PeopleRepository } from '@typeshim/people-ui';
 
 export default function People() {
     const [view, setView] = useState<'list' | 'grid'>('list');
@@ -10,6 +9,8 @@ export default function People() {
         <p>
             All data on this screen is accessed through interop calls to the dotnet runtime. Getting the array of people, getting a <code>Person</code>'s name,
             getting their (optional) <code>Pet</code> or getting the <code>Pet</code>'s name, these are all examples of interop calls.
+
+            Try clicking the buttons and pet chips to see state being manipulated in .NET.
         </p>
         <p>
             There are ~1500 interop calls to methods on about 400 dotnet object instances made to render this page.

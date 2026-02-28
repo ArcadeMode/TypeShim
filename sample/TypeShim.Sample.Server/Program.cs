@@ -5,7 +5,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
     .AddApplicationPart(typeof(PeopleController).Assembly); ;
-builder.Services.AddSingleton<PersonRepository>();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
