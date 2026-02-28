@@ -1943,4 +1943,197 @@ export class C1 extends ProxyBase {
 
         """);
     }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ConstructorWithSummaryComment_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Initializes a new instance with <c>bold</c> formatting.
+                /// </summary>
+                public C1(string name) {}
+                public string Name => name;
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  /**
+   * Initializes a new instance with `bold` formatting.
+   */
+  constructor(name: string) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(name));
+  }
+
+  public get Name(): string {
+    return TypeShimConfig.exports.N1.C1Interop.get_Name(this.instance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ConstructorWithParams_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Initializes a new instance.
+                /// </summary>
+                /// <param name="name">The name of the instance</param>
+                /// <param name="value">The initial value</param>
+                public C1(string name, int value) {}
+                public string Name => name;
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  /**
+   * Initializes a new instance.
+   * @param name - The name of the instance
+   * @param value - The initial value
+   */
+  constructor(name: string, value: number) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(name, value));
+  }
+
+  public get Name(): string {
+    return TypeShimConfig.exports.N1.C1Interop.get_Name(this.instance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ConstructorWithRemarks_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Initializes a new instance.
+                /// </summary>
+                /// <remarks>
+                /// Use this constructor when you need a named instance.
+                /// </remarks>
+                public C1(string name) {}
+                public string Name => name;
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  /**
+   * Initializes a new instance.
+   * @remarks
+   * Use this constructor when you need a named instance.
+   */
+  constructor(name: string) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(name));
+  }
+
+  public get Name(): string {
+    return TypeShimConfig.exports.N1.C1Interop.get_Name(this.instance);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void TypeScriptUserClassProxy_ConstructorWithException_RendersJSDoc()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                /// <summary>
+                /// Initializes a new instance.
+                /// </summary>
+                /// <param name="name">The name of the instance</param>
+                /// <exception cref="System.ArgumentNullException">Thrown when name is null</exception>
+                public C1(string name) {}
+                public string Name => name;
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses[0];
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.TypeScript);
+        new TypescriptUserClassProxyRenderer(renderContext).Render();
+
+        AssertEx.EqualOrDiff(renderContext.ToString(), """
+export class C1 extends ProxyBase {
+  /**
+   * Initializes a new instance.
+   * @param name - The name of the instance
+   * @throws {System.ArgumentNullException} Thrown when name is null
+   */
+  constructor(name: string) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(name));
+  }
+
+  public get Name(): string {
+    return TypeShimConfig.exports.N1.C1Interop.get_Name(this.instance);
+  }
+}
+
+""");
+    }
 }

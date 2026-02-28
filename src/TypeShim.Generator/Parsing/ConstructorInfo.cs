@@ -1,4 +1,5 @@
-﻿using TypeShim.Shared;
+﻿using TypeShim.Generator.Parsing;
+using TypeShim.Shared;
 
 internal sealed class ConstructorInfo
 {
@@ -7,6 +8,7 @@ internal sealed class ConstructorInfo
     internal required MethodParameterInfo? InitializerObject { get; init; }
     internal required PropertyInfo[] MemberInitializers { get; init; }
     internal required InteropTypeInfo Type { get; init; }
+    internal required CommentInfo? Comment { get; init; }
     
     internal bool IsParameterless => Parameters.Length == 0;
     internal bool AcceptsInitializer => MemberInitializers.Length > 0;
