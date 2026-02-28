@@ -126,9 +126,3 @@ scripts/*.tmp
 # Git merge / rebase artifacts
 # -----------------------------
 *.orig
-
-# -----------------------------
-# MSBuild / VS project outputs
-# -----------------------------
-obj/
-obj[\\]Debug/

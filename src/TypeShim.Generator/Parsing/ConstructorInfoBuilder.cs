@@ -25,7 +25,7 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
             InitializerObject = initializersObjectParameter,
             Type = typeInfoBuilder.Build(),
             MemberInitializers = [.. initializerProperties],
-            Comment = new CommentInfoBuilder(memberMethod).Build(),
+            Comment = new CommentInfoBuilder(memberMethod).Build(initializersObjectParameter),
         };
     }
 }

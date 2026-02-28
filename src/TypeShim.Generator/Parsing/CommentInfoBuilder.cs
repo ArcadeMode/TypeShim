@@ -6,7 +6,7 @@ namespace TypeShim.Generator.Parsing;
 
 internal sealed partial class CommentInfoBuilder(ISymbol symbol)
 {
-    internal CommentInfo? Build()
+    internal CommentInfo? Build(MethodParameterInfo? initializerObject = null)
     {
         string? xmlCommentString = symbol.GetDocumentationCommentXml();
         
@@ -22,11 +22,20 @@ internal sealed partial class CommentInfoBuilder(ISymbol symbol)
             {
                 return null;
             }
+            List<ParameterCommentInfo> parameters = BuildParameters(root);
+            if (initializerObject is not null)
+            {
+                parameters.Add(new ParameterCommentInfo
+                {
+                    Name = initializerObject.Name,
+                    Description = "Property values to initialize the instance with"
+                });
+            }
             CommentInfo commentInfo = new()
             {
                 Description = BuildFormattedTextElement(root, "summary"),
                 Remarks = BuildFormattedTextElement(root, "remarks"),
-                Parameters = BuildParameters(root),
+                Parameters = parameters,
                 Returns = BuildReturns(root),
                 Throws = BuildThrows(root)
             };

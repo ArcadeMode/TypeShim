@@ -1954,7 +1954,7 @@ export class C1 extends ProxyBase {
             public class C1
             {
                 /// <summary>
-                /// Initializes a new instance with <c>bold</c> formatting.
+                /// Initializes a new instance with <b>bold</b> formatting.
                 /// </summary>
                 public C1(string name) {}
                 public string Name => name;
@@ -1975,7 +1975,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
   /**
-   * Initializes a new instance with `bold` formatting.
+   * Initializes a new instance with **bold** formatting.
    */
   constructor(name: string) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor(name));
