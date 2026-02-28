@@ -46,7 +46,6 @@ internal sealed class TypescriptAssemblyExportsRenderer(
     {
         if (classInfo.Constructor is ConstructorInfo constructorInfo)
         {
-            constructorInfo = constructorInfo.WithInteropTypeInfo();
             RenderInteropMethodSignature(constructorInfo.Name, constructorInfo.GetParametersIncludingInitializerObject(), constructorInfo.Type);
         }
         foreach (MethodInfo methodInfo in GetAllMethods(classInfo))
