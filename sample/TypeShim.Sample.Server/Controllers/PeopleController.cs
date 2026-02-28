@@ -5,16 +5,17 @@ namespace TypeShim.Sample.Server.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class PeopleController(PersonRepository repository) : ControllerBase
+public class PeopleController() : ControllerBase
 {
+    private readonly List<Person> _people = new RandomEntityGenerator().GeneratePersons(250);
+
     [HttpGet]
     [Route("all")]
     public PeopleDto GetAll()
     {
-        IEnumerable<Person> people = repository.GetAll();
         return new PeopleDto
         {
-            People = [.. people.Select(PersonDto.FromPerson)]
+            People = [.. _people.Select(PersonDto.FromPerson)]
         };
     }
 }

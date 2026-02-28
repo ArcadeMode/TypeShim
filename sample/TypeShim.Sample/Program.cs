@@ -13,12 +13,9 @@ public partial class Program
     {
         Console.WriteLine("WASM runtime is alive.");
 
-        // You can put any startup logic here if needed, like set up DI even a whole host builder.
-        // even make JSImport calls
-
-        // this could then be combined with a static accessor to expose certain services to JS.
-
-        // For this demo however, MyApp has been TSExport'ed and will be initialized from JS.
-        Console.WriteLine($"{nameof(PeopleApp)} can be initialized even without calling into Main");
+        // You can put any startup logic here like any other .NET application
+        // alternatively you could expose a class that embodies your app and treat the .NET code as a library.
+        // For this demo we'll go with the latter, PeopleApp will be constructed from the JS side.
+        Console.WriteLine($"{nameof(PeopleApp)} will be constructed from the JS side in this demo.");
     }
 }
