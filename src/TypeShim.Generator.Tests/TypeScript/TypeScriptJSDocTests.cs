@@ -228,10 +228,10 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Object with member-initializers
+   * @param initializer - Object with member-initializers
    */
-  constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
+  constructor(initializer: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
   }
 
   /**
@@ -2172,10 +2172,10 @@ export class C1 extends ProxyBase {
 export class C1 extends ProxyBase {
   /**
    * Initializes a new instance.
-   * @param jsObject - Object with member-initializers
+   * @param initializer - Object with member-initializers
    */
-  constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
+  constructor(initializer: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
   }
 
   public get Name(): string {

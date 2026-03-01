@@ -39,10 +39,10 @@ internal class TypeScriptUserClassProxyRendererTests_ParameterlessConstructors
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Object with member-initializers
+   * @param initializer - Object with member-initializers
    */
-  constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
+  constructor(initializer: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
   }
 
   public get P1(): {{typeScriptType}} {
@@ -99,10 +99,10 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Object with member-initializers
+   * @param initializer - Object with member-initializers
    */
-  constructor(jsObject: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 instanceof UserClass ? jsObject.P1.instance : jsObject.P1 }));
+  constructor(initializer: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: initializer.P1 instanceof UserClass ? initializer.P1.instance : initializer.P1 }));
   }
 
   public get P1(): UserClass {

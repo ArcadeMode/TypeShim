@@ -75,7 +75,7 @@ internal class SyntaxTreeParsingTests_Methods
         [TSExport]
         public class C1
         {
-            public void M1(JSObject jsObject)
+            public void M1(JSObject initializer)
             {
             }
         }
