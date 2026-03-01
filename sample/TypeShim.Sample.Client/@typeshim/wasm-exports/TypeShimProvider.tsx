@@ -18,7 +18,9 @@ export function TypeShimProvider({ children }: AppProviderProps) {
       try {
         const runtimeInfo = await createWasmRuntime();
         await TypeShimInitializer.initialize(runtimeInfo);
+        console.log("WASM Runtime initialized successfully.");
       } catch (err: any) {
+        console.error("Error loading WASM runtime:", err);
         if (!cancelled) {
           setError(err);
         }
@@ -30,11 +32,11 @@ export function TypeShimProvider({ children }: AppProviderProps) {
     }
     load();
 
-    return () => { cancelled = true; }; // cleanup
+    return () => { cancelled = true; console.log("CANCEL"); }; // cleanup
   }, []);
     return error 
       ? (<div>Error: {error}</div>) 
       : loading 
         ? (<div>Loading...</div>) 
-        : <>{children}</>;
+        : (<>{children}</>);
 }

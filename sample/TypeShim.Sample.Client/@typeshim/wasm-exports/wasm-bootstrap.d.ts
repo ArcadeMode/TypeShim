@@ -1,1 +1,0 @@
-export function createWasmRuntime(args?: string | undefined): Promise<any>;

@@ -5,10 +5,10 @@ export default defineConfig({
   plugins: [
     react()
   ],
-  assetsInclude: ['**/*.dat', '**/*.wasm'],
+  assetsInclude: ['**/*.dat', '**/*.wasm', '**/*.pdb'],
   build: {
     target: 'es2020',
-    outDir: '../../../TypeShim.Sample/wwwroot',
+    outDir: './dist',
     assetsDir: 'assets',
     rollupOptions: {
       external: ['webcil', '/_framework/dotnet.js'],

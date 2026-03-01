@@ -9,8 +9,12 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
-app.UseBlazorFrameworkFiles();
+//app.UseBlazorFrameworkFiles();
 app.UseWebAssemblyDebugging();
+//app.UseSpa(spa =>
+//{
+//    spa.Options.SourcePath = "ClientApp";
+//});
 
 app.UseDefaultFiles();
 app.UseStaticFiles();

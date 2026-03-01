@@ -1,3 +1,3 @@
-export * from './wasm-bootstrap.js'
+export * from './wasm-bootstrap'
 export * from './TypeShimProvider'
-export * from './typeshim'
+export * from './lib/wwwroot/typeshim'
