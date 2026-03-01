@@ -10,33 +10,22 @@ internal sealed partial class CommentInfoBuilder(ISymbol symbol)
     {
         string? xmlCommentString = symbol.GetDocumentationCommentXml() ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(xmlCommentString) && initializerObject is null)
+        if (string.IsNullOrWhiteSpace(xmlCommentString) && initializerObject == null)
         {
             return null;
         }
         try
         {
-            List<ParameterCommentInfo> parameters = [];
-            string description = string.Empty;
-            string remarks = string.Empty;
-            string? returns = null;
-            IReadOnlyCollection<ThrowsCommentInfo> throws = [];
-
-            if (!string.IsNullOrWhiteSpace(xmlCommentString))
+            XDocument xmlDoc = string.IsNullOrWhiteSpace(xmlCommentString)
+                ? new XDocument(new XElement("member"))
+                : XDocument.Parse(xmlCommentString.Replace("\n", " ").Replace("\r", " "));
+            XElement? root = xmlDoc.Root;
+            if (root == null)
             {
-                XDocument xmlDoc = XDocument.Parse(xmlCommentString.Replace("\n", " ").Replace("\r", " "));
-                XElement? root = xmlDoc.Root;
-                if (root != null)
-                {
-                    parameters = BuildParameters(root);
-                    description = BuildFormattedTextElement(root, "summary");
-                    remarks = BuildFormattedTextElement(root, "remarks");
-                    returns = BuildReturns(root);
-                    throws = BuildThrows(root);
-                }
+                return null;
             }
-
-            if (initializerObject is not null)
+            List<ParameterCommentInfo> parameters = BuildParameters(root);
+            if (initializerObject != null)
             {
                 parameters.Add(new ParameterCommentInfo
                 {
@@ -46,11 +35,11 @@ internal sealed partial class CommentInfoBuilder(ISymbol symbol)
             }
             CommentInfo commentInfo = new()
             {
-                Description = description,
-                Remarks = remarks,
+                Description = BuildFormattedTextElement(root, "summary"),
+                Remarks = BuildFormattedTextElement(root, "remarks"),
                 Parameters = parameters,
-                Returns = returns,
-                Throws = throws
+                Returns = BuildReturns(root),
+                Throws = BuildThrows(root)
             };
             return commentInfo.IsEmpty() ? null : commentInfo;
         }
