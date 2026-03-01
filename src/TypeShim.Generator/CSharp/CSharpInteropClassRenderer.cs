@@ -65,9 +65,9 @@ internal sealed class CSharpInteropClassRenderer
                 _methodRenderer.RenderFromObjectMapper();
             }
 
-            if (_classInfo.Constructor is { AcceptsInitializer: true, IsParameterless: true } constructorMethod)
+            if (_classInfo.Constructor is { AcceptsInitializer: true, IsParameterless: true, InitializerObject: { } initializerParameter } constructorMethod)
             {
-                _methodRenderer.RenderFromJSObjectMapper(constructorMethod);
+                _methodRenderer.RenderFromJSObjectMapper(constructorMethod, initializerParameter);
             }
         }
         

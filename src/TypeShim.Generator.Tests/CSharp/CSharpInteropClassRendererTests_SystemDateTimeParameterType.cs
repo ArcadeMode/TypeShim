@@ -112,7 +112,7 @@ public partial class C1Interop
 
     [TestCase("DateTime", "global::System.DateTime", "GetPropertyAsDateTimeNullable")]
     [TestCase("DateTimeOffset", "global::System.DateTimeOffset", "GetPropertyAsDateTimeOffsetNullable")]
-    public void CSharpInteropClass_InstanceProperty_ForDateTimeParameterType(string typeName, string interopTypeExpression, string jsObjectMethod)
+    public void CSharpInteropClass_InstanceProperty_ForDateTimeParameterType(string typeName, string interopTypeExpression, string initializerMethod)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
@@ -145,12 +145,12 @@ public partial class C1Interop
 {
     [JSExport]
     [return: JSMarshalAs<JSType.Any>]
-    public static object ctor([JSMarshalAs<JSType.Object>] JSObject jsObject)
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
-        using var _ = jsObject;
+        using var _ = initializer;
         return new C1()
         {
-            P1 = jsObject.{{jsObjectMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
+            P1 = initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
         };
     }
     [JSExport]
@@ -176,16 +176,16 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
-    public static C1 FromJSObject(JSObject jsObject)
+    public static C1 FromJSObject(JSObject initializer)
     {
-        using var _ = jsObject;
+        using var _ = initializer;
         return new C1()
         {
-            P1 = jsObject.{{jsObjectMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(jsObject)),
+            P1 = initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
         };
     }
 }
 
-""".Replace("{{typeExpression}}", interopTypeExpression).Replace("{{jsObjectMethod}}", jsObjectMethod));
+""".Replace("{{typeExpression}}", interopTypeExpression).Replace("{{initializerMethod}}", initializerMethod));
     }
 }

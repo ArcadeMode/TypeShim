@@ -58,7 +58,7 @@ export interface AssemblyExports{
     };
     N2: {
       UserClassInterop: {
-        ctor(jsObject: object): ManagedObject;
+        ctor(initializer: object): ManagedObject;
         get_Id(instance: ManagedObject): number;
         set_Id(instance: ManagedObject, value: number): void;
       };
@@ -177,7 +177,7 @@ export interface AssemblyExports{
     };
     N2: {
       UserClassInterop: {
-        ctor(jsObject: object): ManagedObject;
+        ctor(initializer: object): ManagedObject;
         get_Id(instance: ManagedObject): number;
         set_Id(instance: ManagedObject, value: number): void;
       };
@@ -238,7 +238,7 @@ export interface AssemblyExports{
     };
     N2: {
       UserClassInterop: {
-        ctor(nowYouCannotInitializeFromJS: number, jsObject: object): ManagedObject;
+        ctor(nowYouCannotInitializeFromJS: number, initializer: object): ManagedObject;
         get_Id(instance: ManagedObject): number;
         set_Id(instance: ManagedObject, value: number): void;
       };
@@ -339,7 +339,7 @@ export interface AssemblyExports{
       DoStuff(instance: ManagedObject, u: Promise<ManagedObject | object | null>): void;
     };
     UserClassInterop: {
-      ctor(jsObject: object): ManagedObject;
+      ctor(initializer: object): ManagedObject;
       get_Id(instance: ManagedObject): number;
       set_Id(instance: ManagedObject, value: number): void;
     };
@@ -397,7 +397,7 @@ export interface AssemblyExports{
       DoStuff(instance: ManagedObject, u: Array<ManagedObject | object | null>): void;
     };
     UserClassInterop: {
-      ctor(jsObject: object): ManagedObject;
+      ctor(initializer: object): ManagedObject;
       get_Id(instance: ManagedObject): number;
       set_Id(instance: ManagedObject, value: number): void;
     };
@@ -531,7 +531,7 @@ export interface AssemblyExports{
 export interface AssemblyExports{
   N1: {
     C1Interop: {
-      ctor(jsObject: object): ManagedObject;
+      ctor(initializer: object): ManagedObject;
       get_P1(instance: ManagedObject): string;
       set_P1(instance: ManagedObject, value: string): void;
     };
@@ -572,7 +572,7 @@ export interface AssemblyExports{
 export interface AssemblyExports{
   N1: {
     C1Interop: {
-      ctor(i: number, jsObject: object): ManagedObject;
+      ctor(i: number, initializer: object): ManagedObject;
       get_P1(instance: ManagedObject): string;
       set_P1(instance: ManagedObject, value: string): void;
     };
@@ -672,7 +672,7 @@ export interface AssemblyExports{
       M1(instance: ManagedObject, u: () => ManagedObject): void;
     };
     UserClassInterop: {
-      ctor(jsObject: object): ManagedObject;
+      ctor(initializer: object): ManagedObject;
       get_Id(instance: ManagedObject): number;
       set_Id(instance: ManagedObject, value: number): void;
     };
@@ -730,7 +730,7 @@ export interface AssemblyExports{
       M1(instance: ManagedObject, u: (arg0: ManagedObject) => ManagedObject): void;
     };
     UserClassInterop: {
-      ctor(jsObject: object): ManagedObject;
+      ctor(initializer: object): ManagedObject;
       get_Id(instance: ManagedObject): number;
       set_Id(instance: ManagedObject, value: number): void;
     };
@@ -788,7 +788,7 @@ export interface AssemblyExports{
       M1(instance: ManagedObject): () => ManagedObject;
     };
     UserClassInterop: {
-      ctor(jsObject: object): ManagedObject;
+      ctor(initializer: object): ManagedObject;
       get_Id(instance: ManagedObject): number;
       set_Id(instance: ManagedObject, value: number): void;
     };
@@ -846,7 +846,7 @@ export interface AssemblyExports{
       M1(instance: ManagedObject): (arg0: ManagedObject | object) => ManagedObject;
     };
     UserClassInterop: {
-      ctor(jsObject: object): ManagedObject;
+      ctor(initializer: object): ManagedObject;
       get_Id(instance: ManagedObject): number;
       set_Id(instance: ManagedObject, value: number): void;
     };
