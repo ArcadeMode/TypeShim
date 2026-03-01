@@ -41,7 +41,7 @@ internal class TypeScriptUserClassProxyRendererTests_Properties
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Property values to initialize the instance with
+   * @param jsObject - Object with member-initializers
    */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
@@ -89,7 +89,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Property values to initialize the instance with
+   * @param jsObject - Object with member-initializers
    */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
@@ -133,7 +133,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Property values to initialize the instance with
+   * @param jsObject - Object with member-initializers
    */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
@@ -254,7 +254,7 @@ export class C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Property values to initialize the instance with
+   * @param jsObject - Object with member-initializers
    */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 instanceof UserClass ? jsObject.P1.instance : jsObject.P1 }));
@@ -369,7 +369,7 @@ export class C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Property values to initialize the instance with
+   * @param jsObject - Object with member-initializers
    */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 ? jsObject.P1 instanceof UserClass ? jsObject.P1.instance : jsObject.P1 : null }));
@@ -429,7 +429,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Property values to initialize the instance with
+   * @param jsObject - Object with member-initializers
    */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.then(e => e instanceof UserClass ? e.instance : e) }));
@@ -489,7 +489,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Property values to initialize the instance with
+   * @param jsObject - Object with member-initializers
    */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
@@ -548,7 +548,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Property values to initialize the instance with
+   * @param jsObject - Object with member-initializers
    */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.map(e => e instanceof UserClass ? e.instance : e) }));
@@ -608,7 +608,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Property values to initialize the instance with
+   * @param jsObject - Object with member-initializers
    */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.map(e => e ? e instanceof UserClass ? e.instance : e : null) }));
@@ -668,7 +668,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Property values to initialize the instance with
+   * @param jsObject - Object with member-initializers
    */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 ? jsObject.P1.map(e => e instanceof UserClass ? e.instance : e) : null }));
@@ -728,7 +728,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Property values to initialize the instance with
+   * @param jsObject - Object with member-initializers
    */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 ? jsObject.P1.map(e => e ? e instanceof UserClass ? e.instance : e : null) : null }));
@@ -788,7 +788,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Property values to initialize the instance with
+   * @param jsObject - Object with member-initializers
    */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.then(e => e ? e instanceof UserClass ? e.instance : e : null) }));
@@ -848,7 +848,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
   /**
-   * @param jsObject - Property values to initialize the instance with
+   * @param jsObject - Object with member-initializers
    */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 ? jsObject.P1.then(e => e ? e instanceof UserClass ? e.instance : e : null) : null }));

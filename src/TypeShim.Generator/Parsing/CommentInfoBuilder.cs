@@ -74,7 +74,7 @@ internal sealed partial class CommentInfoBuilder(ISymbol symbol)
             ParameterCommentInfo initializerParamInfo = new()
             {
                 Name = initializerObject.Name,
-                Description = "Property values to initialize the instance with"
+                Description = "Object with member-initializers"
             };
             parameters.Add(initializerParamInfo);
         }
