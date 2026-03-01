@@ -45,3 +45,10 @@ public class ExportedClassActionConstructor(Action<ExportedClass> e)
 {
     public Action<ExportedClass> Value { get; } = e;
 }
+
+[TSExport]
+public class IntStringMixedConstructor(int i)
+{
+    public int Value { get; } = i;
+    public required string StringValue { get; set; }
+}

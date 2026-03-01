@@ -7,7 +7,8 @@ import {
     ExportedClassConstructor,
     ExportedClassMultipleConstructor,
     ExportedClassArrayConstructor,
-    ExportedClassActionConstructor
+    ExportedClassActionConstructor,
+    IntStringMixedConstructor
 } from '@typeshim/e2e-wasm-lib';
 
 describe('Constructors Test', () => {
@@ -112,4 +113,10 @@ describe('Constructors Test', () => {
         instance.Value(exported);
         expect(receivedValue).toBe(exported);
     });
+
+    test('IntStringMixedConstructor with int and string parameters', () =>{
+        const instance = new IntStringMixedConstructor(42, { StringValue: 'test' });
+        expect(instance.Value).toBe(42);
+        expect(instance.StringValue).toBe('test');
+    })
 });
