@@ -24,20 +24,12 @@ internal sealed partial class CommentInfoBuilder(ISymbol symbol)
             {
                 return null;
             }
-            List<ParameterCommentInfo> parameters = BuildParameters(root);
-            if (initializerObject != null)
-            {
-                parameters.Add(new ParameterCommentInfo
-                {
-                    Name = initializerObject.Name,
-                    Description = "Property values to initialize the instance with"
-                });
-            }
+            
             CommentInfo commentInfo = new()
             {
                 Description = BuildFormattedTextElement(root, "summary"),
                 Remarks = BuildFormattedTextElement(root, "remarks"),
-                Parameters = parameters,
+                Parameters = BuildParameters(root, initializerObject),
                 Returns = BuildReturns(root),
                 Throws = BuildThrows(root)
             };
@@ -58,7 +50,7 @@ internal sealed partial class CommentInfoBuilder(ISymbol symbol)
         return string.Empty;
     }
 
-    private static List<ParameterCommentInfo> BuildParameters(XElement root)
+    private static List<ParameterCommentInfo> BuildParameters(XElement root, MethodParameterInfo? initializerObject)
     {
         List<ParameterCommentInfo> parameters = [];
         foreach (XElement param in root.Elements("param"))
@@ -75,6 +67,16 @@ internal sealed partial class CommentInfoBuilder(ISymbol symbol)
                 Name = name,
                 Description = description
             });
+        }
+
+        if (initializerObject != null)
+        {
+            ParameterCommentInfo initializerParamInfo = new()
+            {
+                Name = initializerObject.Name,
+                Description = "Property values to initialize the instance with"
+            };
+            parameters.Add(initializerParamInfo);
         }
         return parameters;
     }
