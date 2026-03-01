@@ -13,7 +13,7 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
         
         MethodParameterInfo? initializersObjectParameter = initializerProperties.Length == 0 ? null : new()
         {
-            Name = "jsObject",
+            Name = "initializer",
             IsInjectedInstanceParameter = false,
             Type = InteropTypeInfo.JSObjectTypeInfo
         };

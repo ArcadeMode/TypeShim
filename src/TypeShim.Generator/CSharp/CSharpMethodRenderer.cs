@@ -214,14 +214,14 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         _ctx.AppendLine("}");
     }
 
-    internal void RenderFromJSObjectMapper(ConstructorInfo constructorInfo)
+    internal void RenderFromJSObjectMapper(ConstructorInfo constructorInfo, MethodParameterInfo initializerParameter)
     {
-        _ctx.Append("public static ").Append(_ctx.Class.Type.CSharpTypeSyntax).Append(' ').Append(RenderConstants.FromJSObject).AppendLine("(JSObject jsObject)")
+        _ctx.Append("public static ").Append(_ctx.Class.Type.CSharpTypeSyntax).Append(' ').Append(RenderConstants.FromJSObject).Append("(JSObject ").Append(initializerParameter.Name).AppendLine(")")
             .AppendLine("{");
 
         using (_ctx.Indent())
         {
-            _ctx.AppendLine("using var _ = jsObject;");
+            _ctx.Append("using var _ = ").Append(initializerParameter.Name).AppendLine(";");
             RenderConstructorInvocation(constructorInfo);
         }
         _ctx.AppendLine("}");
@@ -230,7 +230,9 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
     private void RenderConstructorInvocation(ConstructorInfo constructorInfo)
     {
         PropertyInfo[] propertiesInMapper = [.. constructorInfo.MemberInitializers];
-        Dictionary<PropertyInfo, DeferredExpressionRenderer> propertyToAccessorDict = RenderJSObjectPropertyRetrievalWithTypeConversions(propertiesInMapper);
+        Dictionary<PropertyInfo, DeferredExpressionRenderer> propertyToAccessorDict = constructorInfo.AcceptsInitializer && constructorInfo.InitializerObject is MethodParameterInfo initializerParameter
+                ? RenderJSObjectPropertyRetrievalWithTypeConversions(propertiesInMapper, initializerParameter)
+                : [];
         Debug.Assert(propertyToAccessorDict.Count == propertiesInMapper.Length, "Property count differs from renderer count");
 
         _ctx.Append("return new ").Append(constructorInfo.Type.CSharpTypeSyntax).Append('(');
@@ -261,13 +263,13 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         }
         _ctx.AppendLine("};");
 
-        Dictionary<PropertyInfo, DeferredExpressionRenderer> RenderJSObjectPropertyRetrievalWithTypeConversions(PropertyInfo[] properties)
+        Dictionary<PropertyInfo, DeferredExpressionRenderer> RenderJSObjectPropertyRetrievalWithTypeConversions(PropertyInfo[] properties, MethodParameterInfo initializerParameter)
         {
             Dictionary<PropertyInfo, DeferredExpressionRenderer> convertedTaskExpressionDict = [];
             foreach (PropertyInfo propertyInfo in properties)
             {
                 DeferredExpressionRenderer valueRetrievalExpressionRenderer = DeferredExpressionRenderer.FromUnary(() => {
-                    _ctx.Append("jsObject.").Append(_methodResolver.ResolveJSObjectMethodName(propertyInfo.Type))
+                    _ctx.Append(initializerParameter.Name).Append(".").Append(_methodResolver.ResolveJSObjectMethodName(propertyInfo.Type))
                         .Append("(\"").Append(propertyInfo.Name).Append("\")");
                 });
 
@@ -278,7 +280,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                         nonNullableExpressionRenderer.Render();
                         _ctx.Append(" ?? throw new ArgumentException(\"Non-nullable property '")
                             .Append(propertyInfo.Name)
-                            .Append("' missing or of invalid type\", nameof(jsObject))");
+                            .Append("' missing or of invalid type\", nameof(").Append(initializerParameter.Name).Append("))");
                     });
                 }
 
