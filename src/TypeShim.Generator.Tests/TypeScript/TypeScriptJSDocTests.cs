@@ -227,6 +227,9 @@ export class C1 extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
+  /**
+   * @param jsObject - Property values to initialize the instance with
+   */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
   }
