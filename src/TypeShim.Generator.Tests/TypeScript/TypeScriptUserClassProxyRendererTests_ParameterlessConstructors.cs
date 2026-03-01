@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
@@ -38,6 +38,9 @@ internal class TypeScriptUserClassProxyRendererTests_ParameterlessConstructors
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
+  /**
+   * @param jsObject - Object with member-initializers
+   */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
   }
@@ -95,6 +98,9 @@ export class C1 extends ProxyBase {
         // P2 is not mapped in the initializer ctor param since it has no setter.
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
+  /**
+   * @param jsObject - Object with member-initializers
+   */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 instanceof UserClass ? jsObject.P1.instance : jsObject.P1 }));
   }

@@ -6,27 +6,30 @@ namespace TypeShim.Generator.Parsing;
 
 internal sealed partial class CommentInfoBuilder(ISymbol symbol)
 {
-    internal CommentInfo? Build()
+    internal CommentInfo? Build(MethodParameterInfo? initializerObject = null)
     {
-        string? xmlCommentString = symbol.GetDocumentationCommentXml();
-        
-        if (string.IsNullOrWhiteSpace(xmlCommentString))
+        string? xmlCommentString = symbol.GetDocumentationCommentXml() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(xmlCommentString) && initializerObject == null)
         {
             return null;
         }
         try
         {
-            XDocument xmlDoc = XDocument.Parse(xmlCommentString.Replace("\n", " ").Replace("\r", " "));
+            XDocument xmlDoc = string.IsNullOrWhiteSpace(xmlCommentString)
+                ? new XDocument(new XElement("member"))
+                : XDocument.Parse(xmlCommentString.Replace("\n", " ").Replace("\r", " "));
             XElement? root = xmlDoc.Root;
             if (root == null)
             {
                 return null;
             }
+            
             CommentInfo commentInfo = new()
             {
                 Description = BuildFormattedTextElement(root, "summary"),
                 Remarks = BuildFormattedTextElement(root, "remarks"),
-                Parameters = BuildParameters(root),
+                Parameters = BuildParameters(root, initializerObject),
                 Returns = BuildReturns(root),
                 Throws = BuildThrows(root)
             };
@@ -47,7 +50,7 @@ internal sealed partial class CommentInfoBuilder(ISymbol symbol)
         return string.Empty;
     }
 
-    private static List<ParameterCommentInfo> BuildParameters(XElement root)
+    private static List<ParameterCommentInfo> BuildParameters(XElement root, MethodParameterInfo? initializerObject)
     {
         List<ParameterCommentInfo> parameters = [];
         foreach (XElement param in root.Elements("param"))
@@ -64,6 +67,16 @@ internal sealed partial class CommentInfoBuilder(ISymbol symbol)
                 Name = name,
                 Description = description
             });
+        }
+
+        if (initializerObject != null)
+        {
+            ParameterCommentInfo initializerParamInfo = new()
+            {
+                Name = initializerObject.Name,
+                Description = "Object with member-initializers"
+            };
+            parameters.Add(initializerParamInfo);
         }
         return parameters;
     }

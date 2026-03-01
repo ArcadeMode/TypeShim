@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
@@ -598,6 +598,9 @@ export class C1 extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export class C1 extends ProxyBase {
+  /**
+   * @param jsObject - Object with member-initializers
+   */
   constructor(jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject }));
   }
@@ -641,6 +644,9 @@ export class C1 extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export class C1 extends ProxyBase {
+  /**
+   * @param jsObject - Object with member-initializers
+   */
   constructor(i: number, jsObject: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor(i, { ...jsObject }));
   }

@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework.Internal;
 using TypeShim.Generator.CSharp;
@@ -1054,6 +1054,9 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export class C1 extends ProxyBase {
+          /**
+           * @param jsObject - Object with member-initializers
+           */
           constructor(jsObject: C1.Initializer) {
             super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: (arg0: number, arg1: ManagedObject) => jsObject.P1(String.fromCharCode(arg0), ProxyBase.fromHandle(UserClass, arg1)) }));
           }
@@ -1108,6 +1111,9 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export class C1 extends ProxyBase {
+          /**
+           * @param jsObject - Object with member-initializers
+           */
           constructor(jsObject: C1.Initializer) {
             super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: (arg0: number) => { const retVal = jsObject.P1(String.fromCharCode(arg0)); return retVal instanceof UserClass ? retVal.instance : retVal } }));
           }
@@ -1162,6 +1168,9 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export class C1 extends ProxyBase {
+          /**
+           * @param jsObject - Object with member-initializers
+           */
           constructor(jsObject: C1.Initializer) {
             super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: (arg0: number) => jsObject.P1(String.fromCharCode(arg0)) }));
           }
@@ -1216,6 +1225,9 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export class C1 extends ProxyBase {
+          /**
+           * @param jsObject - Object with member-initializers
+           */
           constructor(jsObject: C1.Initializer) {
             super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: (arg0: ManagedObject) => jsObject.P1(ProxyBase.fromHandle(UserClass, arg0)) }));
           }

@@ -28,6 +28,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         }
         else
         {
+            TypeScriptJSDocRenderer.RenderJSDoc(ctx, constructorInfo.Comment);
             RenderConstructorSignature();
             ctx.Append(' ');
             RenderConstructorBody();

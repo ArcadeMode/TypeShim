@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
@@ -157,6 +157,9 @@ export class C1 extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export class C1 extends ProxyBase {
+          /**
+           * @param jsObject - Object with member-initializers
+           */
           constructor(jsObject: C1.Initializer) {
             super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.charCodeAt(0) }));
           }
@@ -201,6 +204,9 @@ export class C1 extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export class C1 extends ProxyBase {
+          /**
+           * @param jsObject - Object with member-initializers
+           */
           constructor(jsObject: C1.Initializer) {
             super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 ? jsObject.P1.charCodeAt(0) : null }));
           }
@@ -245,6 +251,9 @@ export class C1 extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export class C1 extends ProxyBase {
+          /**
+           * @param jsObject - Object with member-initializers
+           */
           constructor(jsObject: C1.Initializer) {
             super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1.then(e => e.charCodeAt(0)) }));
           }
@@ -289,6 +298,9 @@ export class C1 extends ProxyBase {
 
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export class C1 extends ProxyBase {
+          /**
+           * @param jsObject - Object with member-initializers
+           */
           constructor(jsObject: C1.Initializer) {
             super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...jsObject, P1: jsObject.P1 ? jsObject.P1.then(e => e.charCodeAt(0)) : null }));
           }
