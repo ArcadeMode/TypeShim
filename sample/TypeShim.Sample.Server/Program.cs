@@ -14,6 +14,7 @@ app.UseEndpoints(ep => ep.MapControllers());
 #pragma warning restore ASP0014 // Suggest using top level route registrations
 app.UseSpa(spa =>
 {
+    // run 'npm start' or 'npm run dev' in TypeShim.Sample.Client to start the vite dev server
     spa.UseProxyToSpaDevelopmentServer("http://localhost:5173/");
 });
 
