@@ -11,10 +11,10 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 //app.UseBlazorFrameworkFiles();
 app.UseWebAssemblyDebugging();
-//app.UseSpa(spa =>
-//{
-//    spa.Options.SourcePath = "ClientApp";
-//});
+app.UseSpa(spa =>
+{
+    spa.UseProxyToSpaDevelopmentServer("http://localhost:5173/");
+});
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
