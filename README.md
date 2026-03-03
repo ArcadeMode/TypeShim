@@ -20,7 +20,10 @@ TypeShim generates strongly-typed interop code for both C# & TypeScript, tailore
 - 👍 [Easy setup](#installing)
 
 ## Samples
-Samples below demonstrate the same operations when interfacing with TypeShim generated code vs `JSExport` generated code. Either way you will load your wasm browser app as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-). The runtime created by `dotnet.create()` can be passed directly into the provided `TypeShimInitializer`'s `initialize` method. The initializer exists so that helper functions for type marshalling can be set up and a reference to the assembly exports can be retrieved for the generated types to use internally.
+
+[Check out the sample project](https://github.com/ArcadeMode/TypeShim/blob/master/sample/README.md) to see TypeShim in action. The snippets below also give a general idea of its capabilities.
+
+The snippets compare TypeShim vs manual `JSExport`. Whichever you use, you'll have load your wasm browser app as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-). The runtime created by `dotnet.create()` can be passed directly into the provided `TypeShimInitializer`'s `initialize` method. The initializer exists so that helper functions for type marshalling can be set up and a reference to the assembly exports can be retrieved for the generated types to use internally.
 
 ### TypeShim
 A simple example where we have an app about 'people', just to show basic language use powered by TypeShim.
@@ -95,13 +98,11 @@ public async UsingTypeShim() {
 ```
 
 #### 'Raw' JSExport
-Here you can see a quick demonstration of roughly the same behavior as the TypeShim sample, with handwritten JSExport. Certain parts enabled by TypeShim have not been replicated as the point may be clear at a glance: this is a large amount of difficult to maintain boilerplate if you have to write it yourself.
+Here you can see a quick demonstration of roughly the same behavior as the TypeShim sample, with handwritten JSExport. Certain parts enabled by TypeShim have not been replicated as the point may be clear at a glance: this is a large amount of difficult to maintain boilerplate if you have to write it yourself. The regression sensitivity of such code may also be noted.
 
 <details>
   <summary>See the 'Raw' <code>JSExport</code> implementation</summary>
 &nbsp;
-
-Note the error sensitivity of passing untyped objects across the interop boundary.
 
 ```ts
 public async UsingRawJSExport(exports: any) {
