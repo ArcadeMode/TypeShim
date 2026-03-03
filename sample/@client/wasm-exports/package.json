@@ -1,0 +1,13 @@
+{
+  "name": "@client/wasm-exports",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo \"exports require no build\""
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
