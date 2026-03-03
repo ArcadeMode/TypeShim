@@ -1,4 +1,4 @@
 <Solution>
   <Project Path="Server/Server.csproj" />
-  <Project Path="Client.Library/Client.Library.csproj" />
+  <Project Path="Library/Library.csproj" />
 </Solution>

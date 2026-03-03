@@ -15,7 +15,7 @@
   "license": "ISC",
   "private": "true",
   "workspaces": [
-    "Client.Library/bin/wwwroot",
+    "Library/bin/wwwroot",
     "app"
   ],
   "dependencies": {
