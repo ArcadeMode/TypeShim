@@ -16,8 +16,8 @@
     <Version>0.0.1</Version>
     <Authors>ArcadeMode</Authors>
     <Product>TypeShim</Product>
-    <Description>Typesafe .NET ↔︎ TypeScript interop</Description>
-    <PackageTags>wasm, csharp, typescript, interop, generator</PackageTags>
+    <Description>Seamless, type-safe interop between .NET WebAssembly and TypeScript</Description>
+    <PackageTags>wasm, csharp, typescript, interop, code-gen, code-generation, tooling, msbuild</PackageTags>
     <RepositoryUrl>https://github.com/ArcadeMode/TypeShim</RepositoryUrl>
     <PackageProjectUrl>https://github.com/ArcadeMode/TypeShim</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

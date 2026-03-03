@@ -1,8 +1,4 @@
 <Solution>
-  <Project Path="TypeShim.Sample.Server/TypeShim.Sample.Server.csproj" />
-  <Project Path="TypeShim.Sample/TypeShim.Sample.csproj" />
-  <Project Path="TypeShim.Sample.Client/TypeShim.Sample.Client.esproj">
-    <Build />
-    <Deploy />
-  </Project>
+  <Project Path="Server/Server.csproj" />
+  <Project Path="Library/Library.csproj" />
 </Solution>
