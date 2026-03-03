@@ -8,14 +8,15 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:exports": "npm run build -w @client/wasm-exports",
     "build:app": "npm run build -w @client/app",
-    "build": "npm run build:exports && npm run build:app"
+    "build": "dotnet build Client.Library/Client.Library.csproj && npm i && npm run build:exports && npm run build:app"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "private": "true",
   "workspaces": [
-    "@client/*"
+    "Client.Library/bin/wwwroot",
+    "app"
   ],
   "dependencies": {
     "react": "^18.3.1",

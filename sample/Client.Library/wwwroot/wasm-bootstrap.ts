@@ -1,4 +1,4 @@
-import { dotnet } from './lib/wwwroot/_framework/dotnet'
+import { dotnet } from './_framework/dotnet'
 
 let runtime: any = null;
 let runtimePromise: Promise<any> | null = null;

@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <OutputPath>../@client/wasm-exports/lib</OutputPath>
+    <OutputPath>./bin/</OutputPath>
     <!--<TypeShim_GeneratedDir>../../../TypeShim</TypeShim_GeneratedDir>-->
     <!--<TypeShim_TypeScriptOutputDirectory>wwwroot</TypeShim_TypeScriptOutputDirectory>-->
     <!--<TypeShim_MSBuildMessagePriority>High</TypeShim_MSBuildMessagePriority>-->
@@ -27,11 +27,12 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="TypeShim" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+  </PropertyGroup>
   <ItemGroup>
-    <Folder Include="wwwroot\_framework\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Update="wwwroot\_framework\dotnet.d.ts">
+    <Content Include="wwwroot\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
