@@ -334,14 +334,6 @@ Table 2. TypeShim support for .NET-JS interop types
 
 *<sub>For `[TSExport]` classes</sub>
 
-## Run the sample
-
-To build and run the project:
-```
-cd Sample/TypeShim.Sample.Client && npm install && npm run build && cd ../TypeShim.Sample.Server && dotnet run
-```
-The app should be available on [http://localhost:5012](http://localhost:5012)
-
 ## <a name="installing"></a>Installing
 
 To use TypeShim all you have to do is install it directly into your `Microsoft.NET.Sdk.WebAssembly`-powered project. Check the [configuration](#configuration) section for configuration you might want to adjust to your project.
