@@ -16,7 +16,7 @@ TypeShim generates strongly-typed interop code for both C# & TypeScript, tailore
 - 💎 [Rich type support](#enriched-type-support).
 - ✍ Powerful [concepts](#concepts).
 - 🦾 Thoroughly validated
-- ⚡ Tuned for [high performance](#performance)
+- ⚡ Tuned for [build performance](#performance)
 - 👍 [Easy setup](#installing)
 
 ## Samples
