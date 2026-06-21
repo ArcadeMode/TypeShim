@@ -27,13 +27,11 @@ internal class SyntaxTreeParsingTests_JSExport
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         INamedTypeSymbol classSymbol = exportedClasses[0];
 
-        // TODO: narrow this to a dedicated exception type (e.g. NotSupportedMixedExportException)
-        // once mixed TSExport+JSExport validation is implemented in the parsing pipeline.
-        Assert.Throws<TypeShimException>(() =>
+        Assert.Throws<NotSupportedMixedExportException>(() =>
         {
             InteropTypeInfoCache typeCache = new();
             _ = new ClassInfoBuilder(classSymbol, typeCache).Build();
-        }, "TODO: narrow to a dedicated exception type once mixed TSExport+JSExport validation is implemented.");
+        });
     }
 
     [Test]

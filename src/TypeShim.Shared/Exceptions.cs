@@ -27,6 +27,10 @@ public class NotSupportedMethodOverloadException(string message, Exception? inne
 {
 }
 
+public class NotSupportedMixedExportException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
+{
+}
+
 public class NotSupportedConstructorOverloadException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
 {
 }

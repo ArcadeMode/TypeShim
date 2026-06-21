@@ -17,10 +17,10 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
             Namespace = classSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
             Name = classSymbol.Name,
             IsTSExport = isTSExport,
-            IsStatic = isTSExport ? classSymbol.IsStatic : true,
+            IsStatic = !isTSExport || classSymbol.IsStatic,
             Type = new InteropTypeInfoBuilder(classSymbol, typeInfoCache).Build(),
             Constructor = isTSExport ? BuildConstructor(properties) : null,
-            Methods = BuildMethods(),
+            Methods = BuildMethods(isTSExport),
             Properties = properties,
             Comment = new CommentInfoBuilder(classSymbol).Build(),
         };
@@ -54,13 +54,18 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
         return propertyInfoBuilders;
     }
 
-    private List<MethodInfo> BuildMethods()
+    private List<MethodInfo> BuildMethods(bool isTSExport)
     {
         Dictionary<string, MethodInfo> methodInfos = [];
         IEnumerable<IMethodSymbol> methodSymbols = classSymbol.GetMembers().OfType<IMethodSymbol>()
             .Where(m => m.MethodKind == MethodKind.Ordinary && m.DeclaredAccessibility == Accessibility.Public);
         foreach (IMethodSymbol methodSymbol in methodSymbols)
         {
+            if (isTSExport && methodSymbol.GetAttributes().Any(a => a.AttributeClass?.Name is "JSExportAttribute" or "JSExport"))
+            {
+                throw new NotSupportedMixedExportException($"Method '{classSymbol.Name}.{methodSymbol.Name}' is marked with [JSExport] but its containing class '{classSymbol.Name}' is marked with [TSExport], which is not supported.");
+            }
+
             if (methodInfos.ContainsKey(methodSymbol.Name))
             {
                 throw new NotSupportedMethodOverloadException($"Method '{classSymbol.Name}.{methodSymbol.Name}' is overloaded, which is not supported.");
