@@ -31,6 +31,10 @@ public class NotSupportedMixedExportException(string message, Exception? innerEx
 {
 }
 
+public class NotSupportedJSExportReferenceException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
+{
+}
+
 public class NotSupportedConstructorOverloadException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
 {
 }

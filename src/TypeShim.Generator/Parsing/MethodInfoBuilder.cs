@@ -18,13 +18,31 @@ internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSym
             throw new NotSupportedMethodException($"Method {classSymbol}.{memberMethod} must be of kind 'Ordinary', 'PropertyGet', 'PropertySet' or 'Constructor' and have accessibility 'Public'.");
         }
 
+        bool isJSExport = memberMethod.GetAttributes().Any(a => a.AttributeClass?.Name is "JSExportAttribute" or "JSExport");
         IReadOnlyCollection<MethodParameterInfo> parameters = [.. parameterInfoBuilder.Build()];
+        InteropTypeInfo returnType = typeInfoBuilder.Build();
+
+        if (isJSExport)
+        {
+            foreach (MethodParameterInfo param in parameters)
+            {
+                if (param.Type.ManagedType == KnownManagedType.Object)
+                {
+                    throw new NotSupportedJSExportReferenceException($"JSExport methods '{classSymbol.Name}.{memberMethod.Name}' cannot reference classes in its parameter types.");
+                }
+            }
+            if (returnType.ManagedType == KnownManagedType.Object)
+            {
+                throw new NotSupportedJSExportReferenceException($"JSExport methods '{classSymbol.Name}.{memberMethod.Name}' cannot reference classes in its return type.");
+            }
+        }
+
         return new MethodInfo()
         {
             IsStatic = memberMethod.IsStatic,
             Name = memberMethod.Name,
             Parameters = parameters,
-            ReturnType = typeInfoBuilder.Build(),
+            ReturnType = returnType,
             Comment = new CommentInfoBuilder(memberMethod).Build(),
         };
     }

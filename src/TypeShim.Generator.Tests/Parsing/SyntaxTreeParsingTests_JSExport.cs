@@ -222,4 +222,111 @@ internal class SyntaxTreeParsingTests_JSExport
         Assert.That(exportedClasses, Has.Count.EqualTo(1));
         Assert.That(exportedClasses[0].Name, Is.EqualTo("C1"));
     }
+
+    [Test]
+    public void ClassInfoBuilder_JSExportMethod_WithTSExportClassParameter_Throws()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Runtime.InteropServices.JavaScript;
+
+            [TSExport]
+            public class TSClass { }
+
+            public partial class C1
+            {
+                [JSExport]
+                public static void M1(TSClass p1) { }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
+        var classSymbol = symbolExtractor.ExtractAllExportedSymbols().First(s => s.Name == "C1");
+
+        Assert.Throws<NotSupportedJSExportReferenceException>(() =>
+        {
+            InteropTypeInfoCache typeCache = new();
+            _ = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        });
+    }
+
+    [Test]
+    public void ClassInfoBuilder_JSExportMethod_ReturningTSExportClass_Throws()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Runtime.InteropServices.JavaScript;
+
+            [TSExport]
+            public class TSClass { }
+
+            public partial class C1
+            {
+                [JSExport]
+                public static TSClass M1() => null;
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
+        var classSymbol = symbolExtractor.ExtractAllExportedSymbols().First(s => s.Name == "C1");
+
+        Assert.Throws<NotSupportedJSExportReferenceException>(() =>
+        {
+            InteropTypeInfoCache typeCache = new();
+            _ = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        });
+    }
+
+    [Test]
+    public void ClassInfoBuilder_JSExportMethod_WithPlainClassParameter_Throws()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Runtime.InteropServices.JavaScript;
+
+            public class PlainClass { }
+
+            public partial class C1
+            {
+                [JSExport]
+                public static void M1(PlainClass p1) { }
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
+        var classSymbol = symbolExtractor.ExtractAllExportedSymbols().First(s => s.Name == "C1");
+        // Throws NotSupportedTypeException because PlainClass is filtered out in TypeShim compilation (performance), the exception type is not ideal but its enough to prevent invalid codegen.
+        Assert.Throws<NotSupportedTypeException>(() =>
+        {
+            InteropTypeInfoCache typeCache = new();
+            _ = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        });
+    }
+
+    [Test]
+    public void ClassInfoBuilder_JSExportMethod_ReturningPlainClass_Throws()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Runtime.InteropServices.JavaScript;
+
+            public class PlainClass { }
+
+            public partial class C1
+            {
+                [JSExport]
+                public static PlainClass M1() => null;
+            }
+        """);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
+        var classSymbol = symbolExtractor.ExtractAllExportedSymbols().First(s => s.Name == "C1");
+
+        // Throws NotSupportedTypeException because PlainClass is filtered out in TypeShim compilation (performance), the exception type is not ideal but its enough to prevent invalid codegen.
+        Assert.Throws<NotSupportedTypeException>(() =>
+        {
+            InteropTypeInfoCache typeCache = new();
+            _ = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        });
+    }
 }
