@@ -27,7 +27,7 @@ internal static class TypeShimDiagnostics
     internal static readonly DiagnosticDescriptor MixedExportRule = new(
         id: "TS003",
         title: "Mixed TSExport and JSExport attributes",
-        messageFormat: "Method '{0}' cannot be marked with [JSExport] because its containing class '{1}' is marked with [TSExport].",
+        messageFormat: "Method '{0}' cannot be marked with [JSExport] because its containing class '{1}' is marked with [TSExport]",
         category: "TypeShim.Usage",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
