@@ -26,12 +26,12 @@ internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSym
         {
             foreach (MethodParameterInfo param in parameters)
             {
-                if (param.Type.ManagedType == KnownManagedType.Object)
+                if (param.Type.RequiresTypeConversion)
                 {
                     throw new NotSupportedJSExportReferenceException($"JSExport methods '{classSymbol.Name}.{memberMethod.Name}' cannot reference classes in its parameter types.");
                 }
             }
-            if (returnType.ManagedType == KnownManagedType.Object)
+            if (returnType.RequiresTypeConversion)
             {
                 throw new NotSupportedJSExportReferenceException($"JSExport methods '{classSymbol.Name}.{memberMethod.Name}' cannot reference classes in its return type.");
             }

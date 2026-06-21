@@ -55,6 +55,10 @@ public static partial class JSExportClass
     public static Task<int> ReadIdentityIdAsync([JSMarshalAs<JSType.Any>] object obj) => Task.FromResult(((IdentityPayload)obj).Id);
 
     [JSExport]
+    [return: JSMarshalAs<JSType.Array<JSType.Number>>]
+    public static int[] ReadIdentityIds([JSMarshalAs<JSType.Array<JSType.Any>>] object[] objs) => objs.Select(obj => ((IdentityPayload)obj).Id).ToArray();
+
+    [JSExport]
     [return: JSMarshalAs<JSType.Boolean>]
     public static bool IsRememberedObject([JSMarshalAs<JSType.Any>] object obj) => ReferenceEquals(_identityObject, obj);
 

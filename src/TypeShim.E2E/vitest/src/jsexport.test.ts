@@ -59,6 +59,13 @@ describe('JSExportClass primitives and tasks', () => {
         expect(JSExportClass.IsRememberedObject(identityObject)).toBe(true);
     });
 
+    test('Object identity is preserved on C# side with async method', async () => {
+        const identityObject1 = JSExportClass.CreateIdentityObject(654);
+        const identityObject2 = JSExportClass.CreateIdentityObject(321);
+        const identityObjects = [identityObject1, identityObject2];
+        expect(JSExportClass.ReadIdentityIds(identityObjects)).toEqual(new Int32Array([654, 321]));
+    });
+
     test('Can pass string array around the boundary', () => {
         expect(JSExportClass.PrefixAll(['a', 'b', 'c'], 'pre-')).toEqual(['pre-a', 'pre-b', 'pre-c']);
     });
