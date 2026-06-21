@@ -6,6 +6,7 @@ internal sealed class ClassInfo
 {
     internal required string Namespace { get; init; }
     internal required string Name { get; init; }
+    internal required bool IsTSExport { get; init; }
     internal required bool IsStatic { get; init; }
     internal required InteropTypeInfo Type { get; init; }
     internal required ConstructorInfo? Constructor { get; init; }

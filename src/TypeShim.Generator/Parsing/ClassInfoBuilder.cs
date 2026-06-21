@@ -9,14 +9,17 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
     {
         ThrowIfContainsRequiredFields();
 
+        bool isTSExport = classSymbol.GetAttributes().Any(a => a.AttributeClass?.Name is "TSExportAttribute" or "TSExport");
+
         List<PropertyInfo> properties = BuildProperties();
         return new ClassInfo
         {
             Namespace = classSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
             Name = classSymbol.Name,
-            IsStatic = classSymbol.IsStatic,
+            IsTSExport = isTSExport,
+            IsStatic = isTSExport ? classSymbol.IsStatic : true,
             Type = new InteropTypeInfoBuilder(classSymbol, typeInfoCache).Build(),
-            Constructor = BuildConstructor(properties),
+            Constructor = isTSExport ? BuildConstructor(properties) : null,
             Methods = BuildMethods(),
             Properties = properties,
             Comment = new CommentInfoBuilder(classSymbol).Build(),
