@@ -23,7 +23,7 @@ internal class SymbolExtractor(CSharpFileInfo[] fileInfos, string runtimePackRef
     {
         foreach (CSharpFileInfo fileInfo in fileInfos)
         {
-            TSExportOnlySyntaxRewriter rewriter = new();
+            ExportOnlySyntaxRewriter rewriter = new();
             CompilationUnitSyntax root = fileInfo.SyntaxTree.GetCompilationUnitRoot();
             if (rewriter.Visit(root) is not CompilationUnitSyntax syntax)
             {
