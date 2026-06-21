@@ -5,4 +5,4 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
-
+TS003 | TypeShim.Usage | Error | New rule to detect mixed [TSExport] and [JSExport] attributes.
