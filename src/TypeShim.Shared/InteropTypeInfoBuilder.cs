@@ -10,7 +10,7 @@ namespace TypeShim.Shared;
 
 internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeInfoCache cache)
 {
-    private readonly bool IsTSExport = typeSymbol.GetAttributes().Any(attributeData => attributeData.AttributeClass?.Name is "TSExportAttribute" or "TSExport");
+    private readonly bool IsTSExport = typeSymbol.GetAttributes().Any(AttributeFacts.IsTSExportAttribute);
 
     public InteropTypeInfo Build()
     {

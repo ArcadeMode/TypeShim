@@ -25,10 +25,10 @@ internal static class TypeShimDiagnostics
         description: "TSExport public API should use supported .NET-JS interop types or (other) TSExport classes.");
 
     internal static readonly DiagnosticDescriptor MixedExportRule = new(
-        id: "TS003",
+        id: "TSHIM010",
         title: "Mixed TSExport and JSExport attributes",
         messageFormat: "Method '{0}' cannot be marked with [JSExport] because its containing class '{1}' is marked with [TSExport]",
-        category: "TypeShim.Usage",
+        category: "Usage",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "A class marked with [TSExport] cannot contain methods marked with [JSExport].");

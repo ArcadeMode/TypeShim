@@ -9,7 +9,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
     {
         ThrowIfContainsRequiredFields();
 
-        bool isTSExport = classSymbol.GetAttributes().Any(a => a.AttributeClass?.Name is "TSExportAttribute" or "TSExport");
+        bool isTSExport = classSymbol.GetAttributes().Any(AttributeFacts.IsTSExportAttribute);
 
         List<PropertyInfo> properties = BuildProperties();
         return new ClassInfo
@@ -61,7 +61,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
             .Where(m => m.MethodKind == MethodKind.Ordinary && m.DeclaredAccessibility == Accessibility.Public);
         foreach (IMethodSymbol methodSymbol in methodSymbols)
         {
-            if (isTSExport && methodSymbol.GetAttributes().Any(a => a.AttributeClass?.Name is "JSExportAttribute" or "JSExport"))
+            if (isTSExport && methodSymbol.GetAttributes().Any(AttributeFacts.IsJSExportAttribute))
             {
                 throw new NotSupportedMixedExportException($"Method '{classSymbol.Name}.{methodSymbol.Name}' is marked with [JSExport] but its containing class '{classSymbol.Name}' is marked with [TSExport], which is not supported.");
             }

@@ -59,7 +59,7 @@ describe('JSExportClass primitives and tasks', () => {
         expect(JSExportClass.IsRememberedObject(identityObject)).toBe(true);
     });
 
-    test('Object identity is preserved on C# side with async method', async () => {
+    test('ReadIdentityIds returns ids for all objects in array', async () => {
         const identityObject1 = JSExportClass.CreateIdentityObject(654);
         const identityObject2 = JSExportClass.CreateIdentityObject(321);
         const identityObjects = [identityObject1, identityObject2];

@@ -36,7 +36,7 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeMethodForMixedExport(SymbolAnalysisContext context)
     {
         IMethodSymbol methodSymbol = (IMethodSymbol)context.Symbol;
-        bool hasJSExport = methodSymbol.GetAttributes().Any(a => a.AttributeClass?.Name is "JSExportAttribute" or "JSExport");
+        bool hasJSExport = SymbolFacts.HasJSExportAttribute(methodSymbol);
         if (!hasJSExport) return;
 
         bool classHasTSExport = SymbolFacts.HasAttribute(methodSymbol.ContainingType, "TypeShim.TSExportAttribute");

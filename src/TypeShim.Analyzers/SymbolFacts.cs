@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TypeShim.Shared;
 
 namespace TypeShim.Analyzers;
 
@@ -15,6 +16,9 @@ internal static class SymbolFacts
         string globalFullName = $"global::{fullName}";
         return type.GetAttributes().Any(attr => attr.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == globalFullName);
     }
+
+    internal static bool HasJSExportAttribute(IMethodSymbol method)
+        => method.GetAttributes().Any(AttributeFacts.IsJSExportAttribute);
 
     internal static bool IsNullable(ITypeSymbol type)
     {
