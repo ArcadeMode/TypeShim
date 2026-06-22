@@ -17,10 +17,14 @@ export default defineConfig({
     hookTimeout: 10_000,
     browser: {
       enabled: isBrowserMode,
-      name: 'chromium',
-      provider: playwright,
-      headless: isCI,
-      screenshotFailures: false
+      provider: playwright(),
+      instances: [
+        {
+          browser: 'chromium',
+          headless: isCI,
+          screenshotFailures: false
+        }
+      ]
     },
     reporters: isCI ? [['junit', { suiteName: isBrowserMode ? 'E2E (Browser)' : 'E2E (Node)' }]] : ['default'],
     outputFile: {
