@@ -6,7 +6,7 @@
     "test:node": "cross-env VITE_BROWSER_MODE=false vitest run",
     "test:browser": "cross-env VITE_BROWSER_MODE=true vitest run",
     "bench:node": "cross-env NODE_OPTIONS=--expose-gc && vitest bench --run",
-    "initialize": "dotnet publish ../TypeShim.E2E.Wasm -c Release && node ./scripts/patch-warnings.mjs && npm ci && npx playwright install chromium --with-deps",
+    "initialize": "dotnet publish ../TypeShim.E2E.Wasm -c Release && node ./scripts/patch-warnings.mjs && npm ci && ./node_modules/.bin/playwright install chromium --with-deps",
     "build": "dotnet publish ../TypeShim.E2E.Wasm -c Release && node ./scripts/patch-warnings.mjs"
   },
   "dependencies": {
