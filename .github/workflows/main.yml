@@ -55,7 +55,7 @@ jobs:
             e2e: true
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup 
         uses: ./.github/actions/run-setup
@@ -92,7 +92,7 @@ jobs:
           "artifact-path=$path" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
       
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pack-build-${{ matrix.rid }}
           # Exclude .dSYM files for osx, keeps the package lean. Might upload
@@ -112,7 +112,7 @@ jobs:
       badge-message: ${{ steps.badge.outputs.message }}
     steps:
       - name: Download test results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: test-results-*
           path: results
@@ -140,7 +140,7 @@ jobs:
     if: github.event_name == 'pull_request' && !cancelled()
     needs: build
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup 
         uses: ./.github/actions/run-setup

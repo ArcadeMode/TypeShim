@@ -41,7 +41,7 @@ runs:
 
     - name: Upload TRX reports
       if: ${{ always() && !cancelled() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ inputs.artifact-name }}-${{ inputs.rid }}
         if-no-files-found: warn
