@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { playwright } from '@vitest/browser-playwright';
 
 const isBrowserMode = ((process.env.VITE_BROWSER_MODE ?? '').toLowerCase() === 'true');
 const isCI = ((process.env.CI ?? '').toLowerCase() === 'true');
@@ -17,7 +18,7 @@ export default defineConfig({
     browser: {
       enabled: isBrowserMode,
       name: 'chromium',
-      provider: 'playwright',
+      provider: playwright,
       headless: isCI,
       screenshotFailures: false
     },
