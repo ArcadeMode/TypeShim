@@ -18,7 +18,7 @@ internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSym
             throw new NotSupportedMethodException($"Method {classSymbol}.{memberMethod} must be of kind 'Ordinary', 'PropertyGet', 'PropertySet' or 'Constructor' and have accessibility 'Public'.");
         }
 
-        bool isJSExport = memberMethod.GetAttributes().Any(AttributeFacts.IsJSExportAttribute);
+        bool isJSExport = SymbolFacts.HasJSExportAttribute(memberMethod);
         IReadOnlyCollection<MethodParameterInfo> parameters = [.. parameterInfoBuilder.Build()];
         InteropTypeInfo returnType = typeInfoBuilder.Build();
 
