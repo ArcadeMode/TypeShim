@@ -16,7 +16,7 @@ internal sealed class CSharpInteropClassRenderer
     {
         ArgumentNullException.ThrowIfNull(classInfo);
         ArgumentNullException.ThrowIfNull(context);
-        if (!classInfo.Methods.Any() && !classInfo.Properties.Any())
+        if (classInfo.IsTSExport && !classInfo.Methods.Any() && !classInfo.Properties.Any())
         {
             throw new ArgumentException("Interop class must have at least one method or property to render.", nameof(classInfo));
         }
@@ -28,6 +28,11 @@ internal sealed class CSharpInteropClassRenderer
 
     internal string Render()
     {
+        if (!_classInfo.IsTSExport)
+        {
+            return string.Empty;
+        }
+
         _ctx.AppendLine("#nullable enable")
             .AppendLine("// TypeShim generated TypeScript interop definitions")
             .AppendLine("using System;")

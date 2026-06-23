@@ -4,9 +4,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using TypeShim.Shared;
 
 namespace TypeShim.Analyzers;
@@ -23,7 +21,8 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         TypeShimDiagnostics.NonExportedTypeInInteropApiRule,
         TypeShimDiagnostics.UnderDevelopmentTypeRule,
         TypeShimDiagnostics.NoGenericsTSExportRule,
-        TypeShimDiagnostics.NoGenericsPublicMethodRule
+        TypeShimDiagnostics.NoGenericsPublicMethodRule,
+        TypeShimDiagnostics.MixedExportRule
     ];
 
     public override void Initialize(AnalysisContext context)
@@ -31,6 +30,21 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterSymbolAction(AnalyzeClass, SymbolKind.NamedType);
+        context.RegisterSymbolAction(AnalyzeMethodForMixedExport, SymbolKind.Method);
+    }
+
+    private static void AnalyzeMethodForMixedExport(SymbolAnalysisContext context)
+    {
+        IMethodSymbol methodSymbol = (IMethodSymbol)context.Symbol;
+        bool hasJSExport = SymbolFacts.HasJSExportAttribute(methodSymbol);
+        if (!hasJSExport) return;
+
+        bool classHasTSExport = SymbolFacts.HasTSExportAttribute(methodSymbol.ContainingType);
+        if (classHasTSExport)
+        {
+            Diagnostic diagnostic = Diagnostic.Create(TypeShimDiagnostics.MixedExportRule, methodSymbol.Locations[0], methodSymbol.Name, methodSymbol.ContainingType.Name);
+            context.ReportDiagnostic(diagnostic);
+        }
     }
 
     private static void AnalyzeClass(SymbolAnalysisContext context)
@@ -38,7 +52,7 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         if (context.Symbol is not INamedTypeSymbol type || type.TypeKind != TypeKind.Class)
             return;
 
-        bool hasTSExport = SymbolFacts.HasAttribute(type, "TypeShim.TSExportAttribute");
+        bool hasTSExport = SymbolFacts.HasTSExportAttribute(type);
         if (!hasTSExport)
             return;
         //Debugger.Launch();

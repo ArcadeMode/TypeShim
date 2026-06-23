@@ -1,19 +1,34 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
-namespace TypeShim.Analyzers;
+namespace TypeShim.Shared;
 
 internal static class SymbolFacts
 {
+    private const string JSExportFqn = "global::System.Runtime.InteropServices.JavaScript.JSExportAttribute";
+    private const string TSExportFqn = "global::TypeShim.TSExportAttribute";
+
     internal static bool IsPublicClass(INamedTypeSymbol type)
         => type.TypeKind == TypeKind.Class && type.DeclaredAccessibility == Accessibility.Public;
 
-    internal static bool HasAttribute(INamedTypeSymbol type, string fullName)
+    internal static bool HasJSExportAttribute(ISymbol symbol)
+        => symbol.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == JSExportFqn);
+
+    internal static bool HasTSExportAttribute(ISymbol symbol)
     {
-        string globalFullName = $"global::{fullName}";
-        return type.GetAttributes().Any(attr => attr.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == globalFullName);
+        foreach (AttributeData attr in symbol.GetAttributes())
+        {
+            if (attr.AttributeClass is null) continue;
+            if (attr.AttributeClass.Kind == SymbolKind.ErrorType)
+            {
+                if (attr.AttributeClass.Name is "TSExportAttribute" or "TSExport")
+                    return true;
+            }
+            else if (attr.AttributeClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == TSExportFqn)
+                return true;
+        }
+        return false;
     }
 
     internal static bool IsNullable(ITypeSymbol type)

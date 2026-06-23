@@ -16,6 +16,6 @@ internal static class RenderConstants
     
     internal const string ManagedObject = "ManagedObject";
 
-    internal static string InteropClassName(ClassInfo classInfo) => $"{classInfo.Name}Interop";
+    internal static string InteropClassName(ClassInfo classInfo) => classInfo.IsTSExport ? $"{classInfo.Name}Interop" : classInfo.Name;
 
 }

@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { ExportedClass, SimpleReturnMethodsClass, TaskPropertiesClass } from '@typeshim/e2e-wasm-lib';
+import { ExportedClass, SimpleReturnMethodsClass } from '@typeshim/e2e-wasm-lib';
 import { dateOffsetHour, dateOnly } from './date';
 
 describe('Simple Functions Test', () => {
