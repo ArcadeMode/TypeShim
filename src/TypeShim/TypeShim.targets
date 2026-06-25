@@ -5,6 +5,14 @@
     <TypeShim_GeneratedDir Condition="$(TypeShim_GeneratedDir) == ''">TypeShim</TypeShim_GeneratedDir>
     <TypeShim_TypeScriptOutputDirectory Condition="$(TypeShim_TypeScriptOutputDirectory) == ''">wwwroot</TypeShim_TypeScriptOutputDirectory>
     <TypeShim_TypeScriptOutputFileName Condition="$(TypeShim_TypeScriptOutputFileName) == ''">typeshim.ts</TypeShim_TypeScriptOutputFileName>
+    <TypeShim_RegisterAsStaticWebAsset Condition="'$(TypeShim_RegisterAsStaticWebAsset)' == ''">true</TypeShim_RegisterAsStaticWebAsset>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TypeShim_RegisterAsStaticWebAsset)' != 'false'">
+    <GenerateComputedBuildStaticWebAssetsDependsOn>
+      $(GenerateComputedBuildStaticWebAssetsDependsOn);
+      TypeShimRegisterStaticWebAsset
+    </GenerateComputedBuildStaticWebAssetsDependsOn>
   </PropertyGroup>
 
   <Target Name="TypeShimCleanGeneratedCs" BeforeTargets="TypeShimGenerateInterop" Condition="'$(DesignTimeBuild)' != 'true'">
@@ -59,14 +67,20 @@
     </PropertyGroup>
   </Target>
 
+  <!--
+    Generate the CSharp & TypeScript files and include *.cs in compilation (*.ts in static web assets)
+  -->
   <Target Name="TypeShimGenerateInterop" BeforeTargets="CoreCompile" Condition="'$(DesignTimeBuild)' != 'true'">
     <Message Text="TypeShim codegen starting" Importance="$(TypeShim_MSBuildMessagePriority)" />
 
     <PropertyGroup>
       <_TypeShim_TypeScriptOutputFilePathSegment>$([System.IO.Path]::Combine('$(TypeShim_TypeScriptOutputDirectory)', '$(TypeShim_TypeScriptOutputFileName)'))</_TypeShim_TypeScriptOutputFilePathSegment>
-      <_TypeShim_TypeScriptOutputFilePath>$([System.IO.Path]::Combine('$(OutDir)', '$(_TypeShim_TypeScriptOutputFilePathSegment)'))</_TypeShim_TypeScriptOutputFilePath>
+      <_TypeShim_StaticWebAssetOutputRoot>$([System.IO.Path]::Combine('$(IntermediateOutputPath)', '$(TypeShim_GeneratedDir)', 'staticwebassets'))</_TypeShim_StaticWebAssetOutputRoot>
+      <_TypeShim_TypeScriptOutputFilePath>$([System.IO.Path]::Combine('$(_TypeShim_StaticWebAssetOutputRoot)', '$(_TypeShim_TypeScriptOutputFilePathSegment)'))</_TypeShim_TypeScriptOutputFilePath>
       <_TypeShim_CSharpOutputDirectoryPath>$([System.IO.Path]::Combine('$(IntermediateOutputPath)', '$(TypeShim_GeneratedDir)'))</_TypeShim_CSharpOutputDirectoryPath>
     </PropertyGroup>
+
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(_TypeShim_TypeScriptOutputFilePath)'))" />
 
     <Message Text="TypeShim target TypeScript file: $(_TypeShim_TypeScriptOutputFilePath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
     <Message Text="TypeShim target CSharp dir: $(_TypeShim_CSharpOutputDirectoryPath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
@@ -88,16 +102,45 @@
     
     <ItemGroup>
       <Compile Include="$(_TypeShim_CSharpOutputDirectoryPath)/*.cs" />
+      <FileWrites Include="$(_TypeShim_TypeScriptOutputFilePath)" />
     </ItemGroup>
   </Target>
 
-  <Target Name="TypeShimCopyTsToPublish" AfterTargets="Publish">
+  <!--
+    Register the generated TypeScript file as a Computed Static Web Asset
+  -->
+  <Target Name="TypeShimRegisterStaticWebAsset"
+          DependsOnTargets="TypeShimGenerateInterop"
+          Condition="'$(DesignTimeBuild)' != 'true' AND '$(TypeShim_RegisterAsStaticWebAsset)' != 'false' AND '$(_TypeShim_TypeScriptOutputFilePath)' != '' AND Exists('$(_TypeShim_TypeScriptOutputFilePath)')">
+
     <PropertyGroup>
-      <_TypeShim_TypeScriptOutputFilePath>$([System.IO.Path]::Combine('$(OutDir)', '$(TypeShim_TypeScriptOutputDirectory)', '$(TypeShim_TypeScriptOutputFileName)'))</_TypeShim_TypeScriptOutputFilePath>
-      <_TypeShim_TypeScriptPublishDirPath>$([System.IO.Path]::Combine('$(PublishDir)', '$(TypeShim_TypeScriptOutputDirectory)'))</_TypeShim_TypeScriptPublishDirPath>
+      <!-- Content root must be an absolute path ending with a directory separator. -->
+      <_TypeShim_StaticWebAssetContentRoot>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine("$(_TypeShim_StaticWebAssetOutputRoot)", "$(TypeShim_TypeScriptOutputDirectory)"))'))</_TypeShim_StaticWebAssetContentRoot>
+      <_TypeShim_StaticWebAssetContentRoot>$(_TypeShim_StaticWebAssetContentRoot)$([System.IO.Path]::DirectorySeparatorChar)</_TypeShim_StaticWebAssetContentRoot>
+      <_TypeShim_StaticWebAssetSourceId Condition="'$(PackageId)' != ''">$(PackageId)</_TypeShim_StaticWebAssetSourceId>
+      <_TypeShim_StaticWebAssetSourceId Condition="'$(_TypeShim_StaticWebAssetSourceId)' == ''">$(AssemblyName)</_TypeShim_StaticWebAssetSourceId>
+      <_TypeShim_StaticWebAssetSourceId Condition="'$(_TypeShim_StaticWebAssetSourceId)' == ''">$(MSBuildProjectName)</_TypeShim_StaticWebAssetSourceId>
+      <_TypeShim_StaticWebAssetBasePath Condition="'$(StaticWebAssetBasePath)' != ''">$(StaticWebAssetBasePath)</_TypeShim_StaticWebAssetBasePath>
+      <_TypeShim_StaticWebAssetBasePath Condition="'$(_TypeShim_StaticWebAssetBasePath)' == ''">/</_TypeShim_StaticWebAssetBasePath>
     </PropertyGroup>
 
-    <Copy SourceFiles="$(_TypeShim_TypeScriptOutputFilePath)" DestinationFolder="$(_TypeShim_TypeScriptPublishDirPath)" />
-    <Message Text="TypeShim published TypeScript file: $(_TypeShim_TypeScriptPublishDirPath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
+    <ItemGroup>
+      <_TypeShimStaticWebAssetCandidate Include="$(_TypeShim_TypeScriptOutputFilePath)">
+        <RelativePath>$(TypeShim_TypeScriptOutputFileName)</RelativePath>
+      </_TypeShimStaticWebAssetCandidate>
+    </ItemGroup>
+
+    <DefineStaticWebAssets
+        CandidateAssets="@(_TypeShimStaticWebAssetCandidate)"
+        SourceId="$(_TypeShim_StaticWebAssetSourceId)"
+        SourceType="Computed"
+        ContentRoot="$(_TypeShim_StaticWebAssetContentRoot)"
+        BasePath="$(_TypeShim_StaticWebAssetBasePath)"
+        CopyToOutputDirectory="Never"
+        CopyToPublishDirectory="PreserveNewest">
+      <Output TaskParameter="Assets" ItemName="StaticWebAsset" />
+    </DefineStaticWebAssets>
+
+    <Message Text="TypeShim registered Computed StaticWebAsset: ContentRoot=$(_TypeShim_StaticWebAssetContentRoot) RelativePath=$(TypeShim_TypeScriptOutputFileName) SourceId=$(_TypeShim_StaticWebAssetSourceId) BasePath=$(_TypeShim_StaticWebAssetBasePath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
   </Target>
 </Project>
