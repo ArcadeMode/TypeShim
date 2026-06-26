@@ -6,9 +6,9 @@
 <img align="right" tabindex=-1 src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/ArcadeMode/0f24ed28316a25f6293d5771a247f19d/raw/typeshim-tests-badge.json" alt="Test status" />
 
 ## Why TypeShim
-TypeShim makes interop between .NET WebAssembly and TypeScript effortless. One `[TSExport]` projects an entire .NET class across the interop boundary, generating a fully-typed mirror in TypeScript. The result is a natural programming experience on both sides: static and instance members, constructors, properties, methods, object instances, reference equality and value types - it all just _works_.
+TypeShim makes interop between .NET WebAssembly and TypeScript effortless. One `[TSExport]` projects an entire .NET class across the interop boundary, generating a fully-typed mirror in TypeScript. The result is a natural programming experience on both sides: static and instance members, constructors, properties, methods, object instances, reference equality and value types - it all just _works_. 
 
-TypeShim generates strongly-typed interop code for both C# & TypeScript, tailored to your project, so the boundary remains type-safe without manual glue code. The implementation is verified by a comprehensive test suite covering the full pipeline, from code generation through multiple runtimes, ensuring consistent, reliable behavior. Optimized for minimal build impact, TypeShim achieves sub 100 millisecond codegen times even in large projects.
+TypeShim generates strongly-typed interop code for both C# & TypeScript, tailored to your project, so the boundary remains type-safe without manual glue code. Your own `[JSExport]`s will also be included in the generated TypeScript code. The implementation is verified by a comprehensive test suite covering the full pipeline, from code generation through multiple runtimes, ensuring consistent, reliable behavior. Optimized for minimal build impact, TypeShim achieves sub 100 millisecond codegen times even in large projects.
 
 ## At a glance
 
