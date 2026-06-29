@@ -139,8 +139,14 @@
         CopyToOutputDirectory="Never"
         CopyToPublishDirectory="PreserveNewest">
       <Output TaskParameter="Assets" ItemName="StaticWebAsset" />
+      <Output TaskParameter="Assets" ItemName="_TypeShimDefinedStaticWebAsset" />
     </DefineStaticWebAssets>
 
-    <Message Text="TypeShim registered Computed StaticWebAsset: ContentRoot=$(_TypeShim_StaticWebAssetContentRoot) RelativePath=$(TypeShim_TypeScriptOutputFileName) SourceId=$(_TypeShim_StaticWebAssetSourceId) BasePath=$(_TypeShim_StaticWebAssetBasePath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
+    <DefineStaticWebAssetEndpoints
+        CandidateAssets="@(_TypeShimDefinedStaticWebAsset)"
+        ExistingEndpoints="@(StaticWebAssetEndpoint)"
+        ContentTypeMappings="@(StaticWebAssetContentTypeMapping)">
+      <Output TaskParameter="Endpoints" ItemName="StaticWebAssetEndpoint" />
+    </DefineStaticWebAssetEndpoints>
   </Target>
 </Project>
