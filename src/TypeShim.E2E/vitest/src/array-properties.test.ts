@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { ArrayPropertiesClass, ExportedClass } from "@typeshim/e2e-wasm-lib";
+import { ArrayPropertiesClass, ExportedClass } from "typeshim";
 
 describe('Array Properties Test', () => {
     let exportedClass: ExportedClass;

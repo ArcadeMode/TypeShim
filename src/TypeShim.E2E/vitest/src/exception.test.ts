@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { ExportedClass, SimplePropertiesTest, TaskPropertiesClass } from "@typeshim/e2e-wasm-lib";
+import { ExportedClass, SimplePropertiesTest, TaskPropertiesClass } from "typeshim";
 import { delay } from "./async";
 import { dateOnly, dateOffsetHour } from './date';
 import { isCI, skipInvalidPromiseResolveValueTests } from '../suite';

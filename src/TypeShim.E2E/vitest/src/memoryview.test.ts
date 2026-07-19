@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { MemoryViewMethodClass, MemoryViewPropertyClass } from "@typeshim/e2e-wasm-lib";
+import { MemoryViewMethodClass, MemoryViewPropertyClass } from "typeshim";
 
 type AnyTypedArray = Int32Array | Uint8Array | Float64Array;
 type AnyTypedArrayCtor = {
