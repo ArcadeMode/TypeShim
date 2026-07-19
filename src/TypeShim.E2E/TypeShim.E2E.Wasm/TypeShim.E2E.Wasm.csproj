@@ -10,7 +10,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PublishDir>../wasm-lib-publish</PublishDir>
     <TypeShim_TypeScriptOutputDirectory>wwwroot</TypeShim_TypeScriptOutputDirectory>
     <TypeShim_MSBuildMessagePriority>High</TypeShim_MSBuildMessagePriority>
   </PropertyGroup>
