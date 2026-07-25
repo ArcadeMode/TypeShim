@@ -10,6 +10,7 @@
     "build": "dotnet build ../TypeShim.E2E.Wasm"
   },
   "devDependencies": {
+    "@emnapi/runtime": "^1.11.3",
     "@types/node": "^26.0.0",
     "@vitest/browser": "^4.1.9",
     "@vitest/browser-playwright": "^4.1.9",
