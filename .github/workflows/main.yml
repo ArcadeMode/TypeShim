@@ -129,9 +129,9 @@ jobs:
         id: badge
         shell: pwsh
         run: |
-          $path = if ("${{ fromJSON(steps.test-results.outputs.json).conclusion }}" -eq "success") { '#26cc23' } else { '#cc5623' }
+          $color = if ("${{ fromJSON(steps.test-results.outputs.json).conclusion }}" -eq "success") { '#26cc23' } else { '#cc5623' }
           $message = if ("${{ fromJSON(steps.test-results.outputs.json).conclusion }}" -eq "success") { "${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs_succ }} passing" } else { "${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs_fail }}/${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.runs }} failing" }
-          "color=$path" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "color=$color" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           "message=$message" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
   benchmarks:
