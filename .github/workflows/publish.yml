@@ -98,7 +98,7 @@ jobs:
           -p:Version=${{ needs.version.outputs.version }}
           -p:ContinuousIntegrationBuild=true
 
-      - name: Push to GitHub Packages
+      - name: Push to NuGet.org
         if: ${{ !inputs.dry-run }}
         run: >
           dotnet nuget push 
@@ -119,7 +119,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Update badge
-        uses: schneegans/dynamic-badges-action@v1.7.0
+        uses: schneegans/dynamic-badges-action@v1.9.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
           gistID: '0f24ed28316a25f6293d5771a247f19d'

@@ -11,28 +11,14 @@ internal class TypeScriptPreambleRenderer(RenderContext ctx)
 
     private const string Preamble = """
 class TypeShimConfig {
-  private static _exports: AssemblyExports | null = null;
-
   static get exports() {
-    if (!TypeShimConfig._exports) {
+    const state = globalThis[Symbol.for("@typeshim")] as { exports: AssemblyExports } | undefined;
+    if (!state?.exports) {
       throw new Error("TypeShim has not been initialized.");
     }
-    return TypeShimConfig._exports;
-  }
-
-  static async initialize(runtimeInfo: any) {
-    if (TypeShimConfig._exports){
-      throw new Error("TypeShim has already been initialized.");
-    }
-
-    runtimeInfo.setModuleImports("@typeshim", { 
-      unwrapProperty: (obj: any, propertyName: string) => obj[propertyName],
-    });
-    TypeShimConfig._exports = await runtimeInfo.getAssemblyExports(runtimeInfo.getConfig().mainAssemblyName);
+    return state.exports;
   }
 }
-
-export const TypeShimInitializer = { initialize: TypeShimConfig.initialize };
 
 const proxyMap = new WeakMap<ManagedObject, ProxyBase>();
 abstract class ProxyBase {
