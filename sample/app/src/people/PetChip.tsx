@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dog } from '@client/wasm-exports';
+import { Dog } from 'typeshim';
 
 export interface PetChipProps {
   petProxy: Dog;

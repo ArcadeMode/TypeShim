@@ -1,4 +1,4 @@
-import { PeopleApp } from '@client/wasm-exports';
+import { PeopleApp } from 'typeshim';
 import { useMemo, ReactNode } from 'react';
 import AppContext from './appContext';
 

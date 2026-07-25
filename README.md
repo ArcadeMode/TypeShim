@@ -75,7 +75,7 @@ On the TypeScript side things look familiar, class names, properties, methods an
 import { PeopleRepository, Person } from './typeshim.ts';
 
 public async UsingTypeShim() {
-    const runtime = await dotnet.withApplicationArguments(args).create()
+    await dotnet.withApplicationArguments(args).create()
     const repository = new PeopleRepository();
     const alice: Person = repository.GetPerson(0);
     const bob = new Person({
@@ -340,6 +340,9 @@ To use TypeShim all you have to do is install it directly into your `Microsoft.N
 ```
 nuget install TypeShim
 ```
+
+> [!TIP]
+> TypeShim pairs especially well with [unplugin-dotnet-wasm](https://github.com/ArcadeMode/unplugin-dotnet-wasm) to make the npm project configuration a breeze.
 
 ## <a name="configuration"></a>Configuration
 

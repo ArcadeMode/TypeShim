@@ -1,5 +1,5 @@
 ﻿import React, { useState } from 'react';
-import { Person, Dog } from '@client/wasm-exports';
+import { Person } from 'typeshim';
 import { PetChip } from './PetChip';
 
 export interface PersonCardProps {

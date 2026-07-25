@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Home from './pages/Home';
 import People from './pages/People';
-import { TypeShimProvider } from '@client/wasm-exports';
+import { TypeShimProvider } from './TypeShimProvider';
 import { AppProvider } from './people/AppProvider';
 
 type Page = 'home' | 'people';
