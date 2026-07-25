@@ -23,7 +23,7 @@ TypeShim generates strongly-typed interop code for both C# & TypeScript, tailore
 
 [Check out the sample project](https://github.com/ArcadeMode/TypeShim/blob/master/sample/README.md) to see TypeShim in action. The snippets below also give a general idea of its capabilities.
 
-The snippets compare TypeShim vs manual `JSExport`. Whichever you use, you'll have load your wasm browser app as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-). The runtime created by `dotnet.create()` can be passed directly into the provided `TypeShimInitializer`'s `initialize` method. The initializer exists so that helper functions for type marshalling can be set up and a reference to the assembly exports can be retrieved for the generated types to use internally.
+The snippets compare TypeShim vs manual `JSExport`. Whichever you use, you'll have load your wasm browser app as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-).
 
 ### TypeShim
 A simple example where we have an app about 'people', just to show basic language use powered by TypeShim.
@@ -69,15 +69,13 @@ public class Person
 }
 ```
 
-On the TypeScript side things look familiar, class names, properties, methods and constructors all resemble the exported C# classes. Note the aforementioned TypeShimInitializer being called before engaging with the generated types. 
+On the TypeScript side things look familiar, class names, properties, methods and constructors all resemble the exported C# classes. 
 
 ```js
-import { TypeShimInitializer, PeopleRepository, Person } from './typeshim.ts';
+import { PeopleRepository, Person } from './typeshim.ts';
 
 public async UsingTypeShim() {
     const runtime = await dotnet.withApplicationArguments(args).create()
-    await TypeShimInitializer.initialize(runtime);
-
     const repository = new PeopleRepository();
     const alice: Person = repository.GetPerson(0);
     const bob = new Person({
