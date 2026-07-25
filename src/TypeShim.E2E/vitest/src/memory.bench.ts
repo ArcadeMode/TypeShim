@@ -1,5 +1,5 @@
 import { describe, bench } from 'vitest';
-import { ArrayPropertiesClass, ExportedClass } from '@typeshim/e2e-wasm-lib';
+import { ArrayPropertiesClass, ExportedClass } from 'typeshim';
 import { printSample, measureMemoryDelta } from './bench-utils';
 
 describe('bench: array-properties', () => {

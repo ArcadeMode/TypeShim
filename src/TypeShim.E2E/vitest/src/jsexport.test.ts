@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { JSExportClass } from '@typeshim/e2e-wasm-lib';
+import { JSExportClass } from 'typeshim';
 
 describe('JSExportClass primitives and tasks', () => {
     test('Add returns number', () => {

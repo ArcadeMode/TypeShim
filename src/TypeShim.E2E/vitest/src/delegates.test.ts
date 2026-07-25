@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { DelegatePropertyClass, DelegatesClass, ExportedClass } from '@typeshim/e2e-wasm-lib';
+import { DelegatePropertyClass, DelegatesClass, ExportedClass } from 'typeshim';
 
 describe('Delegates Test', () => {
     let exportedClass: ExportedClass;

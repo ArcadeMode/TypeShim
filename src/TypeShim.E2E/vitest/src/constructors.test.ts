@@ -9,7 +9,7 @@ import {
     ExportedClassArrayConstructor,
     ExportedClassActionConstructor,
     IntStringMixedConstructor
-} from '@typeshim/e2e-wasm-lib';
+} from 'typeshim';
 
 describe('Constructors Test', () => {
     test('IntConstructor with int parameter', async () => {

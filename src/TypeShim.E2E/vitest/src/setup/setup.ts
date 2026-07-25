@@ -1,13 +1,8 @@
-import { beforeAll, beforeEach } from 'vitest';
-import { dotnet } from '@typeshim/e2e-wasm-lib/dotnet';
-import { TypeShimInitializer } from '@typeshim/e2e-wasm-lib';
-import { isBrowserMode } from '../../suite';
+import { beforeAll } from 'vitest';
+import { dotnet } from '_framework/dotnet';
+import { TypeShimInitializer } from 'typeshim';
 
 beforeAll(async () => {
-  if (!isBrowserMode) {
-    const { serveFetchRequestsFromDisk } = await import('./fetch-from-disk.js');
-    serveFetchRequestsFromDisk();
-  }
   await initializeWASMRuntime();
 });
 

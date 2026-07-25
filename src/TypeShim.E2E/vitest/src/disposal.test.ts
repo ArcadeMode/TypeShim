@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { ExportedClass } from "@typeshim/e2e-wasm-lib";
+import { ExportedClass } from "typeshim";
 
 describe('Proxy Disposal Tests', () => {
 
