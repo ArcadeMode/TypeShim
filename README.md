@@ -341,6 +341,9 @@ To use TypeShim all you have to do is install it directly into your `Microsoft.N
 nuget install TypeShim
 ```
 
+> [!TIP]
+> TypeShim pairs especially well with [unplugin-dotnet-wasm](https://github.com/ArcadeMode/unplugin-dotnet-wasm) to make the npm project configuration a breeze.
+
 ## <a name="configuration"></a>Configuration
 
 TypeShim is configured through MSBuild properties, you may provide these through your `.csproj` file or from the `msbuild`/`dotnet` cli. 
