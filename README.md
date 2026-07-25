@@ -75,7 +75,7 @@ On the TypeScript side things look familiar, class names, properties, methods an
 import { PeopleRepository, Person } from './typeshim.ts';
 
 public async UsingTypeShim() {
-    const runtime = await dotnet.withApplicationArguments(args).create()
+    await dotnet.withApplicationArguments(args).create()
     const repository = new PeopleRepository();
     const alice: Person = repository.GetPerson(0);
     const bob = new Person({

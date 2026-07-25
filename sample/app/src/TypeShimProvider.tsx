@@ -6,7 +6,6 @@ export interface AppProviderProps {
 }
 
 export function TypeShimProvider({ children }: AppProviderProps) {
-  const [runtime, setRuntime] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -40,20 +39,14 @@ export function TypeShimProvider({ children }: AppProviderProps) {
         : (<>{children}</>);
 }
 
-
-let runtime: any = null;
 let runtimePromise: Promise<any> | null = null;
-export async function createWasmRuntime(): Promise<any> {
-    console.log("Creating WASM runtime...");
+export async function createWasmRuntime(): Promise<void> {
     if (runtimePromise) {
-        console.warn("WASM runtime is already started. Not creating a new instance.");
         return runtimePromise;
     } else {
         runtimePromise = dotnet.create();
     }
     const runtimeInfo = await runtimePromise;
-    console.log("WASM runtime info:", runtimeInfo);
     const { runMain } = runtimeInfo;
     runMain();
-    return runtime = runtimeInfo;
 };
