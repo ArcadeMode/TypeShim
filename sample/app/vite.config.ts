@@ -1,8 +1,16 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import DotnetAssets from 'unplugin-dotnet-wasm/vite';
 
 export default defineConfig({
   plugins: [
+    DotnetAssets({
+      projectName: 'Library',
+      projectRoot: '../Library',
+      configuration: 'Debug',
+      targetFramework: 'net10.0',
+      isPublish: false,
+    }),
     react()
   ],
   assetsInclude: ['**/*.dat', '**/*.wasm', '**/*.pdb'],

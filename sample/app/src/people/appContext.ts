@@ -1,4 +1,4 @@
-import { PeopleApp } from '@client/wasm-exports';
+import type { PeopleApp } from 'typeshim';
 import React from 'react';
 
 const AppContext = React.createContext<PeopleApp>(undefined!);

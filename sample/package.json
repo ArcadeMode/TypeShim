@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "npm run dev -w @client/app",
+    "start": "concurrently --kill-others \"npm run dev\" \"dotnet run --project Server\"",
     "dev": "npm run dev -w @client/app",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:exports": "npm run build -w @client/wasm-exports",
     "build:app": "npm run build -w @client/app",
-    "build": "dotnet build Library/Library.csproj && npm i && npm run build:exports && npm run build:app"
+    "build": "dotnet build Library/Library.csproj && npm i && npm run build:app"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +25,7 @@
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^10.0.4",
     "typescript": "^5.9.3",
     "vite": "7.2.4",
     "vite-plugin-top-level-await": "^1.6.0",

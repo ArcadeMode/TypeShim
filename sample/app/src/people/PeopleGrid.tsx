@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { PersonCard } from './PersonCard';
-import type { Person } from '@client/wasm-exports';
+import type { Person } from 'typeshim';
 import { PeopleRepository } from './PeopleRepository';
 import AppContext from './appContext';
 

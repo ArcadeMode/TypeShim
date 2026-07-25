@@ -1,4 +1,4 @@
-import { createWasmRuntime, TypeShimInitializer } from '@client/wasm-exports';
+import { dotnet } from '_framework/dotnet'
 import { ReactNode, useEffect, useState } from 'react';
 
 export interface AppProviderProps {
@@ -16,8 +16,7 @@ export function TypeShimProvider({ children }: AppProviderProps) {
     setError(null);
     async function load() {
       try {
-        const runtimeInfo = await createWasmRuntime();
-        await TypeShimInitializer.initialize(runtimeInfo);
+        await createWasmRuntime();
         console.log("WASM Runtime initialized successfully.");
       } catch (err: any) {
         console.error("Error loading WASM runtime:", err);
@@ -40,3 +39,21 @@ export function TypeShimProvider({ children }: AppProviderProps) {
         ? (<div>Loading...</div>) 
         : (<>{children}</>);
 }
+
+
+let runtime: any = null;
+let runtimePromise: Promise<any> | null = null;
+export async function createWasmRuntime(): Promise<any> {
+    console.log("Creating WASM runtime...");
+    if (runtimePromise) {
+        console.warn("WASM runtime is already started. Not creating a new instance.");
+        return runtimePromise;
+    } else {
+        runtimePromise = dotnet.create();
+    }
+    const runtimeInfo = await runtimePromise;
+    console.log("WASM runtime info:", runtimeInfo);
+    const { runMain } = runtimeInfo;
+    runMain();
+    return runtime = runtimeInfo;
+};

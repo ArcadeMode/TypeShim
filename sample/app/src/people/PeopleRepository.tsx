@@ -1,4 +1,4 @@
-import { People, Person, PeopleProvider } from '@client/wasm-exports';
+import { People, Person, PeopleProvider } from 'typeshim';
 
 export class PeopleRepository {
 
