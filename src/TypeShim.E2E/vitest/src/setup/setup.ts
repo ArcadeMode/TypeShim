@@ -1,7 +1,6 @@
 import { beforeAll } from 'vitest';
 import { dotnet } from '_framework/dotnet';
 import { TypeShimInitializer } from 'typeshim';
-import { isBrowserMode } from '../../suite';
 
 beforeAll(async () => {
   await initializeWASMRuntime();
