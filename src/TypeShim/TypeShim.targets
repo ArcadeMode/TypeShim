@@ -76,7 +76,9 @@
     <PropertyGroup>
       <_TypeShim_TypeScriptOutputFilePathSegment>$([System.IO.Path]::Combine('$(TypeShim_TypeScriptOutputDirectory)', '$(TypeShim_TypeScriptOutputFileName)'))</_TypeShim_TypeScriptOutputFilePathSegment>
       <_TypeShim_StaticWebAssetOutputRoot>$([System.IO.Path]::Combine('$(IntermediateOutputPath)', '$(TypeShim_GeneratedDir)', 'staticwebassets'))</_TypeShim_StaticWebAssetOutputRoot>
+      <_TypeShim_StaticWebAssetOutputRootTemp>$([System.IO.Path]::Combine('$(IntermediateOutputPath)', '$(TypeShim_GeneratedDir)', 'temp'))</_TypeShim_StaticWebAssetOutputRootTemp>
       <_TypeShim_TypeScriptOutputFilePath>$([System.IO.Path]::Combine('$(_TypeShim_StaticWebAssetOutputRoot)', '$(_TypeShim_TypeScriptOutputFilePathSegment)'))</_TypeShim_TypeScriptOutputFilePath>
+      <_TypeShim_TypeScriptOutputFilePathTemp>$([System.IO.Path]::Combine('$(_TypeShim_StaticWebAssetOutputRootTemp)', '$(_TypeShim_TypeScriptOutputFilePathSegment)'))</_TypeShim_TypeScriptOutputFilePathTemp>
       <_TypeShim_CSharpOutputDirectoryPath>$([System.IO.Path]::Combine('$(IntermediateOutputPath)', '$(TypeShim_GeneratedDir)'))</_TypeShim_CSharpOutputDirectoryPath>
     </PropertyGroup>
 
@@ -91,7 +93,7 @@
       <Output TaskParameter="Value" PropertyName="StartTicks"/>
     </CreateProperty>
     <Exec
-      Command="&quot;$(_TypeShimGeneratorExePath)&quot; &quot;@(Compile->'%(FullPath)', ';')&quot; &quot;$(_TypeShim_CSharpOutputDirectoryPath)&quot; &quot;$(_TypeShim_TypeScriptOutputFilePath)&quot; &quot;$(_TargetingPackRefDir)&quot;"
+      Command="&quot;$(_TypeShimGeneratorExePath)&quot; &quot;@(Compile->'%(FullPath)', ';')&quot; &quot;$(_TypeShim_CSharpOutputDirectoryPath)&quot; &quot;$(_TypeShim_TypeScriptOutputFilePathTemp)&quot; &quot;$(_TargetingPackRefDir)&quot;"
       WorkingDirectory="$(ProjectDir)"
       IgnoreExitCode="false" />
     <CreateProperty Value="$([System.Convert]::ToInt32($([System.TimeSpan]::FromTicks($([System.Convert]::ToInt64($([MSBuild]::Subtract($([System.DateTime]::UtcNow.Ticks), $([System.Int64]::Parse($(StartTicks)))))))).TotalMilliseconds)))">
@@ -102,7 +104,7 @@
     
     <ItemGroup>
       <Compile Include="$(_TypeShim_CSharpOutputDirectoryPath)/*.cs" />
-      <FileWrites Include="$(_TypeShim_TypeScriptOutputFilePath)" />
+      <FileWrites Include="$(_TypeShim_TypeScriptOutputFilePathTemp)" />
     </ItemGroup>
   </Target>
 
@@ -111,7 +113,7 @@
   -->
   <Target Name="TypeShimRegisterStaticWebAsset"
           DependsOnTargets="TypeShimGenerateInterop"
-          Condition="'$(DesignTimeBuild)' != 'true' AND '$(TypeShim_RegisterAsStaticWebAsset)' != 'false' AND '$(_TypeShim_TypeScriptOutputFilePath)' != '' AND Exists('$(_TypeShim_TypeScriptOutputFilePath)')">
+          Condition="'$(DesignTimeBuild)' != 'true' AND '$(TypeShim_RegisterAsStaticWebAsset)' != 'false' AND '$(_TypeShim_TypeScriptOutputFilePathTemp)' != '' AND Exists('$(_TypeShim_TypeScriptOutputFilePathTemp)')">
 
     <PropertyGroup>
       <!-- Content root must be an absolute path ending with a directory separator. -->
@@ -125,11 +127,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <_TypeShimStaticWebAssetCandidate Include="$(_TypeShim_TypeScriptOutputFilePath)">
+      <_TypeShimStaticWebAssetCandidate Include="$(_TypeShim_TypeScriptOutputFilePathTemp)">
         <RelativePath>$(TypeShim_TypeScriptOutputFileName)</RelativePath>
       </_TypeShimStaticWebAssetCandidate>
     </ItemGroup>
-
+    
     <DefineStaticWebAssets
         CandidateAssets="@(_TypeShimStaticWebAssetCandidate)"
         SourceId="$(_TypeShim_StaticWebAssetSourceId)"
@@ -148,5 +150,20 @@
         ContentTypeMappings="@(StaticWebAssetContentTypeMapping)">
       <Output TaskParameter="Endpoints" ItemName="StaticWebAssetEndpoint" />
     </DefineStaticWebAssetEndpoints>
+  </Target>
+
+  <!-- 
+     Copy the generated TypeScript file to the expected output directory. Aligns mtimes with the rest of the build to be friendly to file watchers / dev servers. 
+     Emitting the file during the CoreCompile step would cause a 1000+ ms difference, resulting in dev servers reloading mid-build.
+  -->
+  <Target Name="EmitGeneratedAssetToDisk" AfterTargets="CopyFilesToOutputDirectory">
+    <Copy
+      SourceFiles="$(_TypeShim_TypeScriptOutputFilePathTemp)"
+      DestinationFiles="$(_TypeShim_TypeScriptOutputFilePath)"
+      SkipUnchangedFiles="true"
+      OverwriteReadOnlyFiles="true" />
+    <ItemGroup>
+      <FileWrites Include="$(_TypeShim_TypeScriptOutputFilePath)" />
+    </ItemGroup>
   </Target>
 </Project>
