@@ -113,7 +113,7 @@
   -->
   <Target Name="TypeShimRegisterStaticWebAsset"
           DependsOnTargets="TypeShimGenerateInterop"
-          Condition="'$(DesignTimeBuild)' != 'true' AND '$(TypeShim_RegisterAsStaticWebAsset)' != 'false' AND '$(_TypeShim_TypeScriptOutputFilePath)' != '' AND Exists('$(_TypeShim_TypeScriptOutputFilePath)')">
+          Condition="'$(DesignTimeBuild)' != 'true' AND '$(TypeShim_RegisterAsStaticWebAsset)' != 'false' AND '$(_TypeShim_TypeScriptOutputFilePathTemp)' != '' AND Exists('$(_TypeShim_TypeScriptOutputFilePathTemp)')">
 
     <PropertyGroup>
       <!-- Content root must be an absolute path ending with a directory separator. -->
@@ -127,7 +127,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <_TypeShimStaticWebAssetCandidate Include="$(_TypeShim_TypeScriptOutputFilePath)">
+      <_TypeShimStaticWebAssetCandidate Include="$(_TypeShim_TypeScriptOutputFilePathTemp)">
         <RelativePath>$(TypeShim_TypeScriptOutputFileName)</RelativePath>
       </_TypeShimStaticWebAssetCandidate>
     </ItemGroup>
