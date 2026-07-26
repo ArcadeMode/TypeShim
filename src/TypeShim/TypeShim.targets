@@ -15,10 +15,6 @@
     </GenerateComputedBuildStaticWebAssetsDependsOn>
   </PropertyGroup>
 
-  <Target Name="TypeShimCleanGeneratedCs" BeforeTargets="TypeShimGenerateInterop" Condition="'$(DesignTimeBuild)' != 'true'">
-    <RemoveDir Directories="$(IntermediateOutputPath)/$(TypeShim_GeneratedDir)" />
-  </Target>
-
   <Target Name="TypeShimResolveTargetingPackRefDir" AfterTargets="ResolveAssemblyReferences">
     <!-- Filter resolved compile-time references to find System.Runtime.dll (and with it, the current targeting pack dir) -->
     <ItemGroup>
@@ -104,6 +100,7 @@
     
     <ItemGroup>
       <Compile Include="$(_TypeShim_CSharpOutputDirectoryPath)/*.cs" />
+      <FileWrites Include="$(_TypeShim_TypeScriptOutputFilePath)" />
       <FileWrites Include="$(_TypeShim_TypeScriptOutputFilePathTemp)" />
     </ItemGroup>
   </Target>
@@ -162,8 +159,5 @@
       DestinationFiles="$(_TypeShim_TypeScriptOutputFilePath)"
       SkipUnchangedFiles="true"
       OverwriteReadOnlyFiles="true" />
-    <ItemGroup>
-      <FileWrites Include="$(_TypeShim_TypeScriptOutputFilePath)" />
-    </ItemGroup>
   </Target>
 </Project>
