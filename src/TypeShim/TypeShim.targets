@@ -15,10 +15,6 @@
     </GenerateComputedBuildStaticWebAssetsDependsOn>
   </PropertyGroup>
 
-  <Target Name="TypeShimCleanGeneratedCs" BeforeTargets="TypeShimGenerateInterop" Condition="'$(DesignTimeBuild)' != 'true'">
-    <RemoveDir Directories="$(IntermediateOutputPath)/$(TypeShim_GeneratedDir)" />
-  </Target>
-
   <Target Name="TypeShimResolveTargetingPackRefDir" AfterTargets="ResolveAssemblyReferences">
     <!-- Filter resolved compile-time references to find System.Runtime.dll (and with it, the current targeting pack dir) -->
     <ItemGroup>
