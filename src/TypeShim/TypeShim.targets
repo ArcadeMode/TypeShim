@@ -104,6 +104,7 @@
     
     <ItemGroup>
       <Compile Include="$(_TypeShim_CSharpOutputDirectoryPath)/*.cs" />
+      <FileWrites Include="$(_TypeShim_TypeScriptOutputFilePath)" />
       <FileWrites Include="$(_TypeShim_TypeScriptOutputFilePathTemp)" />
     </ItemGroup>
   </Target>
@@ -162,8 +163,5 @@
       DestinationFiles="$(_TypeShim_TypeScriptOutputFilePath)"
       SkipUnchangedFiles="true"
       OverwriteReadOnlyFiles="true" />
-    <ItemGroup>
-      <FileWrites Include="$(_TypeShim_TypeScriptOutputFilePath)" />
-    </ItemGroup>
   </Target>
 </Project>
