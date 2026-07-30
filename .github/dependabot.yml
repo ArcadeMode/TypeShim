@@ -1,0 +1,76 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "03:00"
+      timezone: "UTC"
+    cooldown:
+      default-days: 2
+    open-pull-requests-limit: 6
+    labels:
+      - dependencies
+    groups:
+      dotnet-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+      dotnet-major:
+        patterns:
+          - "*"
+        update-types:
+          - major
+
+  - package-ecosystem: npm
+    directory: /Sample
+    schedule:
+      interval: weekly
+      day: monday
+      time: "03:15"
+      timezone: "UTC"
+    cooldown:
+      default-days: 2
+    open-pull-requests-limit: 6
+    labels:
+      - dependencies
+    groups:
+      npm-sample-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+      npm-sample-major:
+        patterns:
+          - "*"
+        update-types:
+          - major
+
+  - package-ecosystem: npm
+    directory: /src/TypeShim.E2E/vitest
+    schedule:
+      interval: weekly
+      day: monday
+      time: "03:30"
+      timezone: "UTC"
+    cooldown:
+      default-days: 2
+    open-pull-requests-limit: 6
+    labels:
+      - dependencies
+    groups:
+      npm-e2e-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+      npm-e2e-major:
+        patterns:
+          - "*"
+        update-types:
+          - major
