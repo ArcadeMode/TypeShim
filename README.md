@@ -19,6 +19,17 @@ TypeShim generates strongly-typed interop code for both C# & TypeScript, tailore
 - ⚡ Tuned for [build performance](#performance)
 - 👍 [Easy setup](#installing)
 
+## <a name="installing"></a>Installing
+
+To use TypeShim all you have to do is install it directly into your `Microsoft.NET.Sdk.WebAssembly`-powered project. Check the [configuration](#configuration) section for configuration you might want to adjust to your project.
+
+```
+nuget install TypeShim
+```
+
+> [!TIP]
+> TypeShim pairs great with [unplugin-dotnet-wasm](https://github.com/ArcadeMode/unplugin-dotnet-wasm) to make the TypeScript project configuration a breeze.
+
 ## Samples
 
 [Check out the sample project](https://github.com/ArcadeMode/TypeShim/blob/master/sample/README.md) to see TypeShim in action. The snippets below also give a general idea of its capabilities.
@@ -332,17 +343,6 @@ Table 1. TypeShim supported interop types
 Table 2. TypeShim support for .NET-JS interop types
 
 *<sub>For `[TSExport]` classes</sub>
-
-## <a name="installing"></a>Installing
-
-To use TypeShim all you have to do is install it directly into your `Microsoft.NET.Sdk.WebAssembly`-powered project. Check the [configuration](#configuration) section for configuration you might want to adjust to your project.
-
-```
-nuget install TypeShim
-```
-
-> [!TIP]
-> TypeShim pairs especially well with [unplugin-dotnet-wasm](https://github.com/ArcadeMode/unplugin-dotnet-wasm) to make the npm project configuration a breeze.
 
 ## <a name="configuration"></a>Configuration
 
