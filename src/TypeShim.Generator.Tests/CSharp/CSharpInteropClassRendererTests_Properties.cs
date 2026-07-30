@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Newtonsoft.Json.Linq;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
 using TypeShim.Shared;

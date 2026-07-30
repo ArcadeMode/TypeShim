@@ -158,7 +158,7 @@ jobs:
         run: dotnet run --configuration Release --project TypeShim.Benchmarks.csproj --no-build
 
       - name: Sticky PR Benchmark Comment
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           header: benchmark-results
           path: src/TypeShim.Benchmarks/BenchmarkDotNet.Artifacts/results/TypeShim.Benchmarks.GeneratorBenchmarks-report-github.md

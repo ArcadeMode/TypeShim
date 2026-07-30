@@ -13,6 +13,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "unplugin-dotnet-wasm": "^1.1.0"
+    "unplugin-dotnet-wasm": "^1.2.0"
   }
 }
