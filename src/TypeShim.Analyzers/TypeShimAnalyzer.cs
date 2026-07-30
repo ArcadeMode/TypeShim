@@ -39,7 +39,7 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         bool hasJSExport = SymbolFacts.HasJSExportAttribute(methodSymbol);
         if (!hasJSExport) return;
 
-        bool classHasTSExport = SymbolFacts.HasTSExportAttribute(methodSymbol.ContainingType);
+        bool classHasTSExport = SymbolFacts.HasAttribute(methodSymbol.ContainingType, "TypeShim.TSExportAttribute");
         if (classHasTSExport)
         {
             Diagnostic diagnostic = Diagnostic.Create(TypeShimDiagnostics.MixedExportRule, methodSymbol.Locations[0], methodSymbol.Name, methodSymbol.ContainingType.Name);
@@ -52,7 +52,7 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         if (context.Symbol is not INamedTypeSymbol type || type.TypeKind != TypeKind.Class)
             return;
 
-        bool hasTSExport = SymbolFacts.HasTSExportAttribute(type);
+        bool hasTSExport = SymbolFacts.HasAttribute(type, "TypeShim.TSExportAttribute");
         if (!hasTSExport)
             return;
         //Debugger.Launch();
