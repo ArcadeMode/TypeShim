@@ -84,7 +84,7 @@ On the TypeScript side things look familiar, class names, properties, methods an
 
 ```js
 import { dotnet } from '_framework/dotnet'
-import { PeopleRepository, Person } from './typeshim.ts';
+import { PeopleRepository, Person } from 'typeshim.ts';
 
 public async UsingTypeShim() {
     await dotnet.withApplicationArguments(args).create()
