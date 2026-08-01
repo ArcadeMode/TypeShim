@@ -83,6 +83,7 @@ public class Person
 On the TypeScript side things look familiar, class names, properties, methods and constructors all resemble the exported C# classes. 
 
 ```js
+import { dotnet } from '_framework/dotnet'
 import { PeopleRepository, Person } from './typeshim.ts';
 
 public async UsingTypeShim() {
@@ -114,6 +115,8 @@ Here you can see a quick demonstration of roughly the same behavior as the TypeS
 &nbsp;
 
 ```ts
+import { dotnet } from '_framework/dotnet'
+
 public async UsingRawJSExport(exports: any) {
     const runtime = await dotnet.withApplicationArguments(args).create();
     const exports = runtime.assemblyExports;
