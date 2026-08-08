@@ -10,9 +10,11 @@ internal class TypeScriptPreambleRenderer(RenderContext ctx)
     }
 
     private const string Preamble = """
+const typeshimSymbol = Symbol.for("@typeshim");
+const typedGlobalThis = globalThis as { [typeshimSymbol]?: { exports: AssemblyExports } };
 class TypeShimConfig {
   static get exports() {
-    const state = globalThis[Symbol.for("@typeshim")] as { exports: AssemblyExports } | undefined;
+    const state = typedGlobalThis[typeshimSymbol];
     if (!state?.exports) {
       throw new Error("TypeShim has not been initialized.");
     }
