@@ -28,7 +28,7 @@ nuget install TypeShim
 ```
 
 > [!TIP]
-> TypeShim pairs great with [unplugin-dotnet-wasm](https://github.com/ArcadeMode/unplugin-dotnet-wasm) for effortless JS bundler configuration a significantly faster inner development loop.
+> TypeShim pairs great with [unplugin-dotnet-wasm](https://github.com/ArcadeMode/unplugin-dotnet-wasm) for effortless JS bundler configuration and a significantly faster inner dev loop.
 
 ## Samples
 
