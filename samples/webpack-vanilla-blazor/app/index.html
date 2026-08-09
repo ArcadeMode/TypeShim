@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blazor in a bare Webpack app</title>
+    <base href="/" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+  </head>
+  <body>
+    <!--
+      Program.cs registers `App` against the `#app` selector (usual blazor setup)
+    -->
+    <div id="app">
+      <svg class="loading-progress">
+        <circle r="40%" cx="50%" cy="50%" />
+        <circle r="40%" cx="50%" cy="50%" />
+      </svg>
+      <div class="loading-progress-text"></div>
+    </div>
+
+    <div id="blazor-error-ui">
+      An unhandled error has occurred.
+      <a href="." class="reload">Reload</a>
+      <span class="dismiss">🗙</span>
+    </div>
+  </body>
+</html>
