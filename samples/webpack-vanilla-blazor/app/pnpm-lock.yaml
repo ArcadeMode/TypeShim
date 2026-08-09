@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      js-confetti:
+        specifier: ^0.13.1
+        version: 0.13.1
     devDependencies:
       css-loader:
         specifier: ^7.1.2
@@ -967,6 +971,9 @@ packages:
   jest-worker@27.5.1:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
+
+  js-confetti@0.13.1:
+    resolution: {integrity: sha512-Kau3apum0zYIvELfZv0lL5VY7dvzpbKi4Oq0XdfjDKdNZc/O+IeGRyLEej7GJ/1APbASvb+ZTWDxmTxxSFkTOg==}
 
   json-schema-traverse@1.0.0:
     resolution: {integrity: sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==}
@@ -2735,6 +2742,8 @@ snapshots:
       '@types/node': 26.2.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
+
+  js-confetti@0.13.1: {}
 
   json-schema-traverse@1.0.0: {}
 

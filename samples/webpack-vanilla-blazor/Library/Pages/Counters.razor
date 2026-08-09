@@ -1,0 +1,24 @@
+@page "/counter"
+
+<PageTitle>Counters</PageTitle>
+
+<h1>Counters</h1>
+
+<p>Each row is a Blazor counter bridged to JS via TypeShim. Clicks notify JS with count and cursor position.</p>
+
+<div class="counters-list">
+    @foreach (var id in _ids)
+    {
+        <Counter @key="id" OnClose="() => Remove(id)" />
+    }
+</div>
+
+<button class="btn btn-primary mt-3" @onclick="Add">Add counter</button>
+
+@code {
+    private readonly List<Guid> _ids = [Guid.NewGuid()];
+
+    private void Add() => _ids.Add(Guid.NewGuid());
+
+    private void Remove(Guid id) => _ids.Remove(id);
+}

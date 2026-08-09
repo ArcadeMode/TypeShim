@@ -1,18 +1,42 @@
-﻿@page "/counter"
+﻿@using Library.Interop
+@implements IDisposable
 
-<PageTitle>Counter</PageTitle>
-
-<h1>Counter</h1>
-
-<p role="status">Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<div class="counter-row">
+    <p class="counter-row-status" role="status">Current count: @currentCount</p>
+    <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+    <button type="button" class="btn-close counter-row-close" aria-label="Close" @onclick="CloseAsync"></button>
+</div>
 
 @code {
-    private int currentCount = 0;
+    private CounterBridge? _bridge;
+    private int currentCount;
 
-    private void IncrementCount()
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    public int Count => currentCount;
+
+    protected override void OnInitialized()
+    {
+        _bridge = CounterBridgeHub.Create(this);
+    }
+
+    private void IncrementCount(MouseEventArgs e)
     {
         currentCount++;
+        _bridge?.NotifyCountChanged(e.ClientX, e.ClientY);
+    }
+
+    private Task CloseAsync() => OnClose.InvokeAsync();
+
+    public void Dispose()
+    {
+        if (_bridge is null)
+        {
+            return;
+        }
+
+        CounterBridgeHub.Dispose(_bridge);
+        _bridge = null;
     }
 }

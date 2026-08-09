@@ -66,7 +66,7 @@ module.exports = (env, argv) => {
       new HtmlWebpackPlugin({
         template: './index.html',
         // If you load the entry as a module then Blazor's boot script does NOT auto-start
-        // scriptLoading: 'module',
+        scriptLoading: 'module',
       }),
     ],
     devServer: {
