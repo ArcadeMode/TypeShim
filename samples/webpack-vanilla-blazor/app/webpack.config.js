@@ -58,17 +58,15 @@ module.exports = (env, argv) => {
         configuration: isProduction ? 'Release' : 'Debug',
         targetFramework: 'net10.0',
         isPublish: isProduction,
-        logLevel: 'debug',
+        logLevel: 'info',
       }),
       new MiniCssExtractPlugin({
         filename: 'assets/[name].css',
       }),
       new HtmlWebpackPlugin({
         template: './index.html',
-        // Load the entry as an ES module so Blazor's boot script (bundled into it)
-        // sees `document.currentScript === null` and does NOT auto-start; we start it
-        // ourselves in src/index.ts so we can pass boot options.
-        scriptLoading: 'module',
+        // If you load the entry as a module then Blazor's boot script does NOT auto-start
+        // scriptLoading: 'module',
       }),
     ],
     devServer: {

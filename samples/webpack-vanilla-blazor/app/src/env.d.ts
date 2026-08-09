@@ -5,16 +5,7 @@
  */
 declare module '_framework/blazor.webassembly.js';
 
-/**
- * CSS is handled by webpack loaders, not TypeScript. This ambient declaration
- * gives `import './styles.css'` a type so the editor/`tsc` stop reporting the
- * import as an unresolved module.
- */
 declare module '*.css';
-
-/**
- * Binary assets resolved by unplugin-dotnet-wasm / webpack, not TypeScript.
- */
 declare module '*.png';
 
 interface BlazorStartOptions {

@@ -1,12 +1,7 @@
 /*
- * Single stylesheet entry for the sample. It pulls in the Blazor Library's own CSS
- * so the app looks identical to the default template, but delivered as one
- * webpack-managed stylesheet instead of several <link> tags in index.html.
- *
- * - bootstrap + app.css are plain static web assets under the Library's wwwroot.
- * - Library.styles.css is the component-scoped CSS bundle; unplugin-dotnet-wasm
- *   resolves it as a .NET static web asset.
+ * Import files relative to output dir (wwwroot) from dotnet Library project.
+ * unplugin-dotnet-wasm automatically resolves regardless of dotnet build or publish.
  */
-@import '../../Library/wwwroot/lib/bootstrap/dist/css/bootstrap.min.css';
-@import '../../Library/wwwroot/css/app.css';
+@import 'lib/bootstrap/dist/css/bootstrap.min.css';
+@import 'css/app.css';
 @import 'Library.styles.css';
