@@ -12,6 +12,11 @@ declare module '_framework/blazor.webassembly.js';
  */
 declare module '*.css';
 
+/**
+ * Binary assets resolved by unplugin-dotnet-wasm / webpack, not TypeScript.
+ */
+declare module '*.png';
+
 interface BlazorStartOptions {
   loadBootResource?: (
     type: string,

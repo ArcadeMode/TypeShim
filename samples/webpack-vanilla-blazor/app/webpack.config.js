@@ -40,6 +40,13 @@ module.exports = (env, argv) => {
           type: 'asset/resource',
           generator: { filename: 'sample-data/[name][ext]' },
         },
+        {
+          // favicon.png is a .NET static web asset resolved by unplugin-dotnet-wasm.
+          // Emit it at its plain name so the <link rel="icon"> in index.html resolves.
+          test: /\.png$/,
+          type: 'asset/resource',
+          generator: { filename: '[name][ext]' },
+        },
       ],
     },
     plugins: [

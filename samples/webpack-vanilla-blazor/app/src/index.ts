@@ -11,6 +11,10 @@ import './styles.css';
 // file into webpack's graph so it is emitted at a stable `/sample-data/weather.json`.
 import './sample-data/weather.json';
 
+// favicon.png is a .NET static web asset; importing it (bare specifier, resolved by
+// unplugin-dotnet-wasm) emits it so the <link rel="icon"> in index.html resolves.
+import 'favicon.png';
+
 async function boot(): Promise<void> {
   // The entry is loaded as a module script, so Blazor does not auto-start; we start
   // it ourselves. In a production/dist build the plugin resolves the runtime to
