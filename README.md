@@ -32,7 +32,7 @@ nuget install TypeShim
 
 ## Samples
 
-[Check out the sample project](https://github.com/ArcadeMode/TypeShim/blob/master/sample/README.md) to see TypeShim in action. The snippets below also give a general idea of its capabilities.
+[Check out the sample projects](https://github.com/ArcadeMode/TypeShim/blob/master/samples) to see TypeShim in action. The snippets below also give a general idea of its capabilities.
 
 The snippets compare TypeShim vs manual `JSExport`. Whichever you use, you'll have load your wasm browser app as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-).
 

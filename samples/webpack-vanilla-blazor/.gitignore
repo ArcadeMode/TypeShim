@@ -1,0 +1,106 @@
+# -----------------------------
+# Core Node / Workspace ignores
+# -----------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# If you later use Turborepo / Nx / build systems:
+.turbo/
+.nx/
+
+# -----------------------------
+# Build outputs (libraries & app)
+# -----------------------------
+dist/
+build/
+out/
+coverage/
+
+# -----------------------------
+# TypeScript
+# -----------------------------
+*.tsbuildinfo
+
+# -----------------------------
+# SWC / Babel / Caches
+# -----------------------------
+.swc/
+.cache/
+.cache-loader/
+
+# -----------------------------
+# Logs & diagnostics
+# -----------------------------
+*.log
+*.stackdump
+
+# -----------------------------
+# Environment / Secrets
+# -----------------------------
+# Keep example files (e.g. .env.example) committed; ignore real env files.
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*
+!.env.example
+
+# -----------------------------
+# OS / Editor junk
+# -----------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# VS Code settings (optional; keep if team standardizes via .vscode/)
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# JetBrains
+.idea/
+
+# Visual Studio
+.vs/
+
+# -----------------------------
+# Jest / Vitest / Playwright
+# -----------------------------
+*.snap
+playwright-report/
+test-results/
+
+# -----------------------------
+# Temp & lock artifacts
+# -----------------------------
+tmp/
+temp/
+*.tmp
+*.swp
+# Preserve root lock
+!package-lock.json
+# If individual workspace package-locks accidentally get created (npm -w install inside):
+app/package-lock.json
+
+# -----------------------------
+# Misc bundler artifacts
+# -----------------------------
+*.tgz
+*.zip
+
+# -----------------------------
+# ESLint / Type checking caches
+# -----------------------------
+.eslintcache
+tsconfig.tsbuildinfo
+
+# -----------------------------
+# Git merge / rebase artifacts
+# -----------------------------
+*.orig

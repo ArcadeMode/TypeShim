@@ -1,0 +1,33 @@
+{
+  "name": "@blazor-webpack/demo",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "npm run dev -w @blazor-webpack/app",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:app": "npm run build -w @blazor-webpack/app",
+    "build": "dotnet build Library/Library.csproj && npm i && npm run build:app"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "private": "true",
+  "workspaces": [
+    "Library/bin/wwwroot",
+    "app"
+  ],
+  "dependencies": {
+    "js-confetti": "^0.13.1"
+  },
+  "devDependencies": {
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.3",
+    "mini-css-extract-plugin": "^2.9.2",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.9.3",
+    "webpack": "^5.101.0",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.1"
+  }
+}

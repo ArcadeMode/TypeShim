@@ -14,17 +14,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "css-loader": "^7.1.2",
-    "html-webpack-plugin": "^5.6.3",
-    "mini-css-extract-plugin": "^2.9.2",
-    "ts-loader": "^9.5.2",
-    "typescript": "^5.9.3",
-    "unplugin-dotnet-wasm": "^1.2.0",
-    "webpack": "^5.101.0",
-    "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.1"
-  },
-  "dependencies": {
-    "js-confetti": "^0.13.1"
+    "unplugin-dotnet-wasm": "^1.2.0"
   }
 }
