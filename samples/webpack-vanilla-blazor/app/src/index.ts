@@ -14,8 +14,8 @@ await window.Blazor.start(); // not necessary if not module.
 const jsConfetti = new JSConfetti();
 const hub = CounterBridgeHub.Current;
 
-hub.SetOnCreate((bridge) => {
-  bridge.SetOnCountChange((count, x, y) => {
+hub.SetOnCreate((counter) => {
+  counter.SetOnCountChange((count, x, y) => {
     jsConfetti.addConfettiAtPosition({
       confettiNumber: count,
       confettiDispatchPosition: { x, y },
@@ -23,6 +23,6 @@ hub.SetOnCreate((bridge) => {
   });
 });
 
-hub.SetOnDispose((bridge) => {
-  bridge.instance.dispose();
+hub.SetOnDispose((counter) => {
+  counter.instance.dispose();
 });
