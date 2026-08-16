@@ -2,6 +2,7 @@
 _In the samples directory:_ start the vite dev server and the ASP.NET backend together with
 ```
 npm install
+npm run build
 npm start
 ```
 
