@@ -78,6 +78,16 @@
       <_TypeShim_CSharpOutputDirectoryPath>$([System.IO.Path]::Combine('$(IntermediateOutputPath)', '$(TypeShim_GeneratedDir)'))</_TypeShim_CSharpOutputDirectoryPath>
     </PropertyGroup>
 
+    <!--
+      Remove previously generated files so renamed/removed [TsExport] types don't leave stale *.g.cs behind.
+      Retain the generated .ts files: deleting/recreating them churns their mtime and trips up dev servers / file watchers (see https://github.com/ArcadeMode/TypeShim/pull/103).
+    -->
+    <ItemGroup>
+      <_TypeShim_StaleGenerated Include="$(_TypeShim_CSharpOutputDirectoryPath)/**/*"
+                               Exclude="$(_TypeShim_TypeScriptOutputFilePath);$(_TypeShim_TypeScriptOutputFilePathTemp)" />
+    </ItemGroup>
+    <Delete Files="@(_TypeShim_StaleGenerated)" />
+
     <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(_TypeShim_TypeScriptOutputFilePath)'))" />
 
     <Message Text="TypeShim target TypeScript file: $(_TypeShim_TypeScriptOutputFilePath)" Importance="$(TypeShim_MSBuildMessagePriority)" />
