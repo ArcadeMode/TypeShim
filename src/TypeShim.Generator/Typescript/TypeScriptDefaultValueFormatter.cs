@@ -27,8 +27,9 @@ internal static class TypeScriptDefaultValueFormatter
 
             if (type.ManagedType is KnownManagedType.DateTime or KnownManagedType.DateTimeOffset)
             {
-                throw new NotSupportedDefaultValueException(
-                    $"Default value 'default' for '{type.CSharpTypeSyntax}' is not yet supported (pending Date literal support).");
+                // DateTime/DateTimeOffset 'default' is DateTime.MinValue (0001-01-01). The .NET<->JS marshaller's
+                // representable floor is exactly that instant at UTC, so this literal round-trips to MinValue.
+                return "new Date(\"0001-01-01T00:00:00Z\")";
             }
 
             // Non-nullable reference types would produce 'x: T = null', which violates strictNullChecks.

@@ -140,10 +140,41 @@ export class C1 extends ProxyBase {
     }
 
     [Test]
-    public void DateTimeDefaultLiteral_ThrowsToHaltCodegen()
+    public void DateTimeDefaultLiteral_RendersMinValueDate()
     {
-        // DateTime 'default' requires a dedicated Date literal (handled in a later step); halt loudly until then.
-        Assert.Throws<NotSupportedDefaultValueException>(
-            () => Render("    public void M1(DateTime when = default) {}"));
+        // DateTime 'default' is DateTime.MinValue; the literal round-trips to MinValue across the marshaller.
+        string output = Render("    public void M1(DateTime when = default) {}");
+
+        AssertEx.EqualOrDiff(output, """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public M1(when: Date = new Date("0001-01-01T00:00:00Z")): void {
+    TypeShimConfig.exports.N1.C1Interop.M1(this.instance, when);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void DateTimeOffsetDefaultLiteral_RendersMinValueDate()
+    {
+        string output = Render("    public void M1(DateTimeOffset when = default) {}");
+
+        AssertEx.EqualOrDiff(output, """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public M1(when: Date = new Date("0001-01-01T00:00:00Z")): void {
+    TypeShimConfig.exports.N1.C1Interop.M1(this.instance, when);
+  }
+}
+
+""");
     }
 }
