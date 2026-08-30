@@ -125,6 +125,11 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                 ? TypeShimSymbolType.ProxyInitializerUnion
                 : TypeShimSymbolType.None;
             TypeScriptSymbolNameRenderer.Render(parameterInfo.Type, ctx, returnSymbolType, parameterSymbolType: TypeShimSymbolType.Proxy, interop: false);
+
+            if (parameterInfo.Default is ParameterDefaultInfo def)
+            {
+                ctx.Append(" = ").Append(TypeScriptDefaultValueFormatter.Format(parameterInfo.Type, def));
+            }
             isFirst = false;
         }
     }
