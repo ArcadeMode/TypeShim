@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
@@ -10,7 +11,7 @@ using TypeShim.Shared;
 namespace TypeShim.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
+public sealed class TypeShimAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
     [
@@ -22,7 +23,9 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         TypeShimDiagnostics.UnderDevelopmentTypeRule,
         TypeShimDiagnostics.NoGenericsTSExportRule,
         TypeShimDiagnostics.NoGenericsPublicMethodRule,
-        TypeShimDiagnostics.MixedExportRule
+        TypeShimDiagnostics.MixedExportRule,
+        TypeShimDiagnostics.UnresolvableDefaultConstRule,
+        TypeShimDiagnostics.NoOptionalMemoryViewRule
     ];
 
     public override void Initialize(AnalysisContext context)
@@ -31,6 +34,7 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context.RegisterSymbolAction(AnalyzeClass, SymbolKind.NamedType);
         context.RegisterSymbolAction(AnalyzeMethodForMixedExport, SymbolKind.Method);
+        context.RegisterSyntaxNodeAction(CheckOptionalParameterDefault, SyntaxKind.Parameter);
     }
 
     private static void AnalyzeMethodForMixedExport(SymbolAnalysisContext context)
@@ -135,6 +139,64 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
             string typeName = parameter.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
             context.ReportDiagnostic(Diagnostic.Create(descriptor, location, typeName));
         }
+    }
+
+    private static void CheckOptionalParameterDefault(SyntaxNodeAnalysisContext context)
+    {
+        var parameterNode = (ParameterSyntax)context.Node;
+        if (parameterNode.Default is not { Value: ExpressionSyntax defaultExpr })
+            return;
+
+        if (context.SemanticModel.GetDeclaredSymbol(parameterNode, context.CancellationToken) is not IParameterSymbol parameter)
+            return;
+
+        // Only public methods/constructors of [TSExport] classes render optional parameters.
+        if (parameter.ContainingSymbol is not IMethodSymbol method
+            || method.DeclaredAccessibility != Accessibility.Public
+            || method.MethodKind is not (MethodKind.Ordinary or MethodKind.Constructor)
+            || !SymbolFacts.HasTSExportAttribute(method.ContainingType))
+        {
+            return;
+        }
+
+        Location location = parameterNode.Type?.GetLocation() ?? parameterNode.GetLocation();
+
+        // Span/ArraySegment defaults cannot cross the interop boundary; they must be constructed on the C# side.
+        if (IsSpanOrArraySegment(parameter.Type))
+        {
+            string typeName = parameter.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+            context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.NoOptionalMemoryViewRule, location, parameter.Name, typeName));
+            return;
+        }
+
+        // The generator resolves defaults against a compilation that only preserves [TSExport] classes whole.
+        // A default referencing a user-declared constant outside that surface cannot be resolved.
+        foreach (SyntaxNode node in defaultExpr.DescendantNodesAndSelf())
+        {
+            if (node is not SimpleNameSyntax)
+                continue;
+
+            // Enum members are constants too but are handled by the type checks (enums are out of scope here).
+            if (context.SemanticModel.GetSymbolInfo(node, context.CancellationToken).Symbol is IFieldSymbol { IsConst: true } field
+                && field.ContainingType.TypeKind != TypeKind.Enum
+                && field.Locations.Any(l => l.IsInSource)
+                && !SymbolFacts.HasTSExportAttribute(field.ContainingType))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.UnresolvableDefaultConstRule, location, parameter.Name, field.Name));
+                return;
+            }
+        }
+    }
+
+    private static bool IsSpanOrArraySegment(ITypeSymbol type)
+    {
+        ITypeSymbol effective = type;
+        if (SymbolFacts.IsNullable(type) && type is INamedTypeSymbol { TypeArguments.Length: 1 } nullable)
+            effective = nullable.TypeArguments[0];
+
+        string fullName = effective.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        return fullName.StartsWith(Constants.SpanGlobal, StringComparison.Ordinal)
+            || fullName.StartsWith(Constants.ArraySegmentGlobal, StringComparison.Ordinal);
     }
 
     private static void CheckPropertyType(SymbolAnalysisContext context, IPropertySymbol property)

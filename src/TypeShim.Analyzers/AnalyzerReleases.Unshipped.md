@@ -6,3 +6,5 @@
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 TSHIM010 | Usage | Error | TypeShimAnalyzer
+TSHIM013 | Usage | Error | TypeShimAnalyzer
+TSHIM014 | Usage | Error | TypeShimAnalyzer
