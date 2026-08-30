@@ -197,4 +197,132 @@ public partial class C1Interop
 
 """);
     }
+
+    private static string RenderInteropClassWithInitializer(string members)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public enum Color { Red, Green, Blue }
+            [TSExport]
+            public class C1
+            {
+            {{members}}
+            }
+        """.Replace("{{members}}", members));
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
+        List<INamedTypeSymbol> exportedSymbols = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        INamedTypeSymbol classSymbol = exportedSymbols.First(s => s.Name == "C1");
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        return new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+    }
+
+    [Test]
+    public void CSharpInteropClass_EnumInitializerProperties_ParenthesizeScalarNullCoalesce()
+    {
+        // A public (implicit) constructor triggers the JSObject-initializer path. A non-nullable scalar enum
+        // must be cast as (Color)(getter ?? throw ...) - the parentheses are required because casting to a
+        // non-nullable value type would otherwise make "?? throw" invalid. Nullable/array enums use their
+        // own conversion shapes.
+        string interopClass = RenderInteropClassWithInitializer("""
+                public Color Scalar { get; set; }
+                public Color? Nullable { get; set; }
+                public Color[] Arr { get; set; }
+        """);
+
+        AssertEx.EqualOrDiff(interopClass, """
+#nullable enable
+// TypeShim generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
+    {
+        using var _ = initializer;
+        return new C1()
+        {
+            Scalar = (Color)(initializer.GetPropertyAsInt32Nullable("Scalar") ?? throw new ArgumentException("Non-nullable property 'Scalar' missing or of invalid type", nameof(initializer))),
+            Nullable = initializer.GetPropertyAsInt32Nullable("Nullable") is { } NullableVal ? (Color)NullableVal : null,
+            Arr = Array.ConvertAll(initializer.GetPropertyAsInt32ArrayNullable("Arr") ?? throw new ArgumentException("Non-nullable property 'Arr' missing or of invalid type", nameof(initializer)), e => (Color)e),
+        };
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static int get_Scalar([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return (int)typed_instance.Scalar;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_Scalar([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] int value)
+    {
+        C1 typed_instance = (C1)instance;
+        Color typed_value = (Color)value;
+        typed_instance.Scalar = typed_value;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static int? get_Nullable([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return (int?)typed_instance.Nullable;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_Nullable([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] int? value)
+    {
+        C1 typed_instance = (C1)instance;
+        Color? typed_value = value is { } valueVal ? (Color)valueVal : null;
+        typed_instance.Nullable = typed_value;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Array<JSType.Number>>]
+    public static int[] get_Arr([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = (C1)instance;
+        return Array.ConvertAll(typed_instance.Arr, e => (int)e);
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_Arr([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Array<JSType.Number>>] int[] value)
+    {
+        C1 typed_instance = (C1)instance;
+        Color[] typed_value = Array.ConvertAll(value, e => (Color)e);
+        typed_instance.Arr = typed_value;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject initializer)
+    {
+        using var _ = initializer;
+        return new C1()
+        {
+            Scalar = (Color)(initializer.GetPropertyAsInt32Nullable("Scalar") ?? throw new ArgumentException("Non-nullable property 'Scalar' missing or of invalid type", nameof(initializer))),
+            Nullable = initializer.GetPropertyAsInt32Nullable("Nullable") is { } NullableVal ? (Color)NullableVal : null,
+            Arr = Array.ConvertAll(initializer.GetPropertyAsInt32ArrayNullable("Arr") ?? throw new ArgumentException("Non-nullable property 'Arr' missing or of invalid type", nameof(initializer)), e => (Color)e),
+        };
+    }
+}
+
+""");
+    }
 }

@@ -107,7 +107,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         else if (typeInfo.IsEnum)
         {
             // Enums cross as their underlying integer; cast back to the CLR enum type.
-            RenderInlineCovariantTypeDownConversion(typeInfo, accessorExpressionRenderer);
+            RenderInlineEnumTypeDownConversion(typeInfo, accessorExpressionRenderer);
         }
         else if (typeInfo.IsDelegateType() && typeInfo.ArgumentInfo is DelegateArgumentInfo argumentInfo) // Action/Action<T1...Tn>/Func<T1...Tn>
         {
@@ -123,6 +123,16 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
     {
         _ctx.Append('(').Append(typeInfo.CSharpTypeSyntax.ToString()).Append(')');
         accessorExpressionRenderer.Render();
+    }
+
+    private void RenderInlineEnumTypeDownConversion(InteropTypeInfo typeInfo, DeferredExpressionRenderer accessorExpressionRenderer)
+    {
+        // Casting to a non-nullable enum yields a non-nullable value type, so a binary accessor (e.g. "x ?? throw")
+        // must be parenthesized: (Color)(x ?? throw ...), not (Color)x ?? throw ... which would not compile.
+        _ctx.Append('(').Append(typeInfo.CSharpTypeSyntax.ToString()).Append(')');
+        if (accessorExpressionRenderer.IsBinary) _ctx.Append('(');
+        accessorExpressionRenderer.Render();
+        if (accessorExpressionRenderer.IsBinary) _ctx.Append(')');
     }
     
     private void RenderInlineCovariantTypeUpConversion(InteropTypeInfo typeInfo, DeferredExpressionRenderer valueExpressionRenderer)
