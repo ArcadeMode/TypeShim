@@ -6,11 +6,11 @@ namespace TypeShim.Generator;
 
 internal sealed class SymbolMap(IEnumerable<ClassInfo> allClasses)
 {
-    private readonly Dictionary<InteropTypeInfo, ClassInfo> _typeToClassDict = allClasses.ToDictionary(c => c.Type);
+    private readonly Dictionary<InteropTypeInfo, NamedTypeInfo> _typeToNamedTypeDict = allClasses.ToDictionary(c => c.Type, c => (NamedTypeInfo)c);
 
     internal ClassInfo GetClassInfo(InteropTypeInfo type)
     {
-        _typeToClassDict.TryGetValue(type, out ClassInfo? info);
-        return info ?? throw new NotFoundClassInfoException($"Could not find ClassInfo for type: {type.CSharpTypeSyntax}");
+        _typeToNamedTypeDict.TryGetValue(type, out NamedTypeInfo? info);
+        return info as ClassInfo ?? throw new NotFoundClassInfoException($"Could not find ClassInfo for type: {type.CSharpTypeSyntax}");
     }
 }

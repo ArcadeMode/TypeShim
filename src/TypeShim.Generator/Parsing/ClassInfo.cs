@@ -1,16 +1,10 @@
-﻿using TypeShim.Shared;
+﻿namespace TypeShim.Generator.Parsing;
 
-namespace TypeShim.Generator.Parsing;
-
-internal sealed class ClassInfo
+internal sealed class ClassInfo : NamedTypeInfo
 {
-    internal required string Namespace { get; init; }
-    internal required string Name { get; init; }
     internal required bool IsTSExport { get; init; }
     internal required bool IsStatic { get; init; }
-    internal required InteropTypeInfo Type { get; init; }
     internal required ConstructorInfo? Constructor { get; init; }
     internal required IEnumerable<MethodInfo> Methods { get; init; }
     internal required IEnumerable<PropertyInfo> Properties { get; init; }
-    internal required CommentInfo? Comment { get; init; }
 }
