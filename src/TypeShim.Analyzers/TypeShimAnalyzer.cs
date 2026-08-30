@@ -11,7 +11,7 @@ using TypeShim.Shared;
 namespace TypeShim.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public sealed class TypeShimAnalyzer : DiagnosticAnalyzer
+internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
     [

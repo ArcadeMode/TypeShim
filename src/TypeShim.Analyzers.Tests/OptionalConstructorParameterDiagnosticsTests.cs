@@ -5,7 +5,7 @@ namespace TypeShim.Analyzers.Tests;
 
 internal class OptionalConstructorParameterDiagnosticsTests
 {
-    private const string RequiredInitializerId = "TSHIM015";
+    private static readonly string RequiredInitializerId = TypeShimDiagnostics.NoOptionalCtorParamWithRequiredInitializerRule.Id;
 
     [Test]
     public async Task OptionalCtorParam_WithNonNullableProperty_IsFlagged()

@@ -5,8 +5,8 @@ namespace TypeShim.Analyzers.Tests;
 
 internal class OptionalParameterDiagnosticsTests
 {
-    private const string ConstScopeId = "TSHIM013";
-    private const string OptionalMemoryViewId = "TSHIM014";
+    private static readonly string ConstScopeId = TypeShimDiagnostics.UnresolvableDefaultConstRule.Id;
+    private static readonly string OptionalMemoryViewId = TypeShimDiagnostics.NoOptionalMemoryViewRule.Id;
 
     [Test]
     public async Task CrossClassConstDefault_IsFlagged()
