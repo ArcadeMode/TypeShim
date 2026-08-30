@@ -170,12 +170,17 @@ internal static class TypeScriptSymbolNameResolver
                 => "ManagedObject",
             KnownManagedType.Char // chars are represented as numbers on the interop boundary (is intended: https://github.com/dotnet/runtime/issues/123187)
                 => "number",
+            _ when typeInfo.IsEnum => "number", // enums cross the interop boundary as number
             _ => ResolveSimpleTypeSymbol(typeInfo)
         };
     }
 
     internal static string ResolveSimpleTypeSymbol(InteropTypeInfo typeInfo)
     {
+        if (typeInfo.IsEnum)
+        {
+            return typeInfo.CSharpTypeSyntax.ToString();
+        }
         return typeInfo.ManagedType switch
         {
             KnownManagedType.Object when typeInfo.RequiresTypeConversion && typeInfo.SupportsTypeConversion
