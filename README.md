@@ -302,7 +302,7 @@ TypeShim aims to continue to broaden its type support. Suggestions and contribut
 | `Task<T[]>`            | `Promise<T[]>`| 💡     | under consideration (for all array-compatible `T`) |
 | `TClass[]`                | `TClass[]`       | ✅     | `TClass` generated in TypeScript* |
 | `JSObject`           | `TClass`         | ✅     | [Initializers](#initializers) |
-| `TEnum`      | `TEnum`       | 💡     | under consideration |
+| `TEnum`      | `TEnum`       | ✅     | `TEnum` generated in TypeScript* |
 | `IEnumerable<T>`     | `T[]`       | 💡     | under consideration |
 | `Dictionary<TKey, TValue>` | `?`     | 💡     | under consideration |
 | `(T1, T2)` | `[T1, T2]`     | 💡     | under consideration |
