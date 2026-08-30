@@ -14,8 +14,12 @@ internal class TypeScriptRenderer(List<NamedTypeInfo> namedTypeInfos, ModuleInfo
         };
         foreach (NamedTypeInfo namedType in namedTypeInfos)
         {
-            if (namedType is not ClassInfo classInfo) continue; // enum rendering is not implemented yet
-            renderContexts.Add(RenderUserClass(classInfo));
+            renderContexts.Add(namedType switch
+            {
+                ClassInfo classInfo => RenderUserClass(classInfo),
+                EnumInfo enumInfo => RenderUserEnum(enumInfo),
+                _ => throw new InvalidOperationException($"Unsupported named type: {namedType.GetType().Name}"),
+            });
         }
         return renderContexts;
     }
@@ -44,6 +48,15 @@ internal class TypeScriptRenderer(List<NamedTypeInfo> namedTypeInfos, ModuleInfo
         proxyRenderer.Render();
         TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(renderCtx);
         namespaceRenderer.Render();
+        return renderCtx;
+    }
+
+    private RenderContext RenderUserEnum(EnumInfo enumInfo)
+    {
+        RenderContext renderCtx = new(enumInfo, namedTypeInfos, RenderOptions.TypeScript);
+        renderCtx.AppendLine($"// TypeShim generated TypeScript definitions for enum: {enumInfo.Namespace}.{enumInfo.Name}");
+        TypeScriptEnumRenderer enumRenderer = new(renderCtx);
+        enumRenderer.Render();
         return renderCtx;
     }
 }
