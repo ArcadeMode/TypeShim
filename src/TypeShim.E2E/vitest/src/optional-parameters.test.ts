@@ -44,6 +44,36 @@ describe('Optional Parameters Test', () => {
         expect(instance.NullableWithDefault(9)).toBe(9);
     });
 
+    test('char default applied and overridden', () => {
+        expect(instance.CharOrDefault()).toBe('Z');
+        expect(instance.CharOrDefault('q')).toBe('q');
+    });
+
+    test('nullable char default applied and overridden', () => {
+        expect(instance.NullableCharOrFallback()).toBe('none');
+        expect(instance.NullableCharOrFallback('x')).toBe('x');
+    });
+
+    test('nullable int array default null applied and overridden', () => {
+        expect(instance.ArrayLengthOrFallback()).toBe(-1);
+        expect(instance.ArrayLengthOrFallback([1, 2, 3])).toBe(3);
+    });
+
+    test('nullable string array default (default literal) applied and overridden', () => {
+        expect(instance.JoinOrFallback()).toBe('none');
+        expect(instance.JoinOrFallback(['a', 'b'])).toBe('a,b');
+    });
+
+    test('nullable task default null applied and overridden', async () => {
+        await expect(instance.AwaitOrFallback()).resolves.toBe(-1);
+        await expect(instance.AwaitOrFallback(Promise.resolve(5))).resolves.toBe(5);
+    });
+
+    test('static method optional parameter applied and overridden', () => {
+        expect(OptionalParametersClass.StaticSum(1)).toBe(101);
+        expect(OptionalParametersClass.StaticSum(1, 2)).toBe(3);
+    });
+
     test('DateTime default omitted marshals to DateTime.MinValue', () => {
         expect(instance.DateIsMinValue()).toBe(true);
     });

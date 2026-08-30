@@ -19,40 +19,64 @@ internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodS
 
         foreach (IParameterSymbol parameterSymbol in memberMethod.Parameters)
         {
+            InteropTypeInfo type = new InteropTypeInfoBuilder(parameterSymbol.Type, typeInfoCache).Build();
             yield return new MethodParameterInfo
             {
                 Name = parameterSymbol.Name,
                 IsInjectedInstanceParameter = false,
-                Type = new InteropTypeInfoBuilder(parameterSymbol.Type, typeInfoCache).Build(),
-                Default = ResolveDefault(parameterSymbol),
+                Type = type,
+                Default = ResolveDefault(parameterSymbol, type),
             };
         }
     }
 
-    private static ParameterDefaultInfo? ResolveDefault(IParameterSymbol parameterSymbol)
+    private static ParameterDefaultInfo? ResolveDefault(IParameterSymbol parameterSymbol, InteropTypeInfo type)
     {
         if (!parameterSymbol.HasExplicitDefaultValue)
         {
             return null;
         }
 
-        return new ParameterDefaultInfo(parameterSymbol.ExplicitDefaultValue, IsDefaultLiteral(parameterSymbol));
+        // Span/ArraySegment values must be constructed on the C# side; they cannot cross the interop boundary as defaults.
+        if (IsSpanOrArraySegment(type))
+        {
+            throw new NotSupportedDefaultValueException(
+                $"Parameter '{parameterSymbol.Name}' of type '{parameterSymbol.Type}' cannot be optional because Span/ArraySegment values must be constructed on the C# side.");
+        }
+
+        ExpressionSyntax? defaultExpr = GetDefaultExpression(parameterSymbol);
+        bool isDefaultLiteral = defaultExpr is DefaultExpressionSyntax
+            || (defaultExpr?.IsKind(SyntaxKind.DefaultLiteralExpression) ?? false);
+
+        if (parameterSymbol.ExplicitDefaultValue is null
+            && defaultExpr is not null
+            && !isDefaultLiteral
+            && !defaultExpr.IsKind(SyntaxKind.NullLiteralExpression))
+        {
+            throw new NotSupportedDefaultValueException(
+                $"Optional parameter '{parameterSymbol.Name}' has a default referencing a constant that TypeShim cannot resolve. " +
+                "Only constants declared within [TSExport] classes are supported.");
+        }
+
+        return new ParameterDefaultInfo(parameterSymbol.ExplicitDefaultValue, isDefaultLiteral);
     }
 
-    private static bool IsDefaultLiteral(IParameterSymbol parameterSymbol)
+    private static bool IsSpanOrArraySegment(InteropTypeInfo type)
+    {
+        InteropTypeInfo effective = type.IsNullableType && type.TypeArgument is not null ? type.TypeArgument : type;
+        return effective.ManagedType is KnownManagedType.Span or KnownManagedType.ArraySegment;
+    }
+
+    private static ExpressionSyntax? GetDefaultExpression(IParameterSymbol parameterSymbol)
     {
         foreach (SyntaxReference syntaxRef in parameterSymbol.DeclaringSyntaxReferences)
         {
-            if (syntaxRef.GetSyntax() is not ParameterSyntax { Default.Value: ExpressionSyntax defaultExpr })
+            if (syntaxRef.GetSyntax() is ParameterSyntax { Default.Value: ExpressionSyntax defaultExpr })
             {
-                continue;
+                return defaultExpr;
             }
-
-            // 'default(T)' or a bare 'default' literal, as opposed to an explicit '= null'.
-            return defaultExpr is DefaultExpressionSyntax
-                || defaultExpr.IsKind(SyntaxKind.DefaultLiteralExpression);
         }
 
-        return false;
+        return null;
     }
 }

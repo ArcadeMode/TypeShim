@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace TypeShim.E2E.Wasm;
 
@@ -16,6 +17,18 @@ public class OptionalParametersClass
     // Nullable value-type defaults.
     public int NullableOrFallback(int? value = null) => value ?? -1;
     public int NullableWithDefault(int? value = 42) => value ?? -1;
+
+    // Char defaults.
+    public string CharOrDefault(char c = 'Z') => c.ToString();
+    public string NullableCharOrFallback(char? c = null) => c?.ToString() ?? "none";
+
+    // Nullable array/task defaults.
+    public int ArrayLengthOrFallback(int[]? values = null) => values?.Length ?? -1;
+    public string JoinOrFallback(string[]? values = default) => values is null ? "none" : string.Join(",", values);
+    public async Task<int> AwaitOrFallback(Task<int>? work = null) => work is null ? -1 : await work;
+
+    // Static method with an optional parameter.
+    public static int StaticSum(int a, int b = 100) => a + b;
 
     // DateTime / DateTimeOffset 'default' => DateTime.MinValue.
     public bool DateIsMinValue(DateTime when = default) => when == DateTime.MinValue;

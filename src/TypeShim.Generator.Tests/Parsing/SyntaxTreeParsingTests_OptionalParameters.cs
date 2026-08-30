@@ -111,4 +111,74 @@ internal class SyntaxTreeParsingTests_OptionalParameters
         Assert.That(parameter.Default!.Value, Is.Null);
         Assert.That(parameter.Default!.IsDefaultLiteral, Is.True);
     }
+
+    private static void Build(string source)
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        InteropTypeInfoCache typeCache = new();
+        foreach (INamedTypeSymbol classSymbol in exportedClasses)
+        {
+            new ClassInfoBuilder(classSymbol, typeCache).Build();
+        }
+    }
+
+    [Test]
+    public void OptionalOutOfScopeConstDefault_Throws()
+    {
+        Assert.Throws<NotSupportedDefaultValueException>(() => Build("""
+            using System;
+            namespace N1;
+            public static class Defaults { public const int Timeout = 30; }
+            [TSExport]
+            public class C1
+            {
+                public void M1(int timeout = Defaults.Timeout) { }
+            }
+        """));
+    }
+
+    [Test]
+    public void OptionalSameClassConstDefault_DoesNotThrow()
+    {
+        Assert.DoesNotThrow(() => Build("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public const int Timeout = 30;
+                public void M1(int timeout = Timeout) { }
+            }
+        """));
+    }
+
+    [Test]
+    public void OptionalSpanParameter_Throws()
+    {
+        Assert.Throws<NotSupportedDefaultValueException>(() => Build("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public void M1(Span<int> data = default) { }
+            }
+        """));
+    }
+
+    [Test]
+    public void OptionalArraySegmentParameter_Throws()
+    {
+        Assert.Throws<NotSupportedDefaultValueException>(() => Build("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public void M1(ArraySegment<int> data = default) { }
+            }
+        """));
+    }
 }

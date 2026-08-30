@@ -12,6 +12,7 @@ internal class TypeScriptUserClassProxyRendererTests_OptionalParameters
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText($$"""
             using System;
+            using System.Threading.Tasks;
             namespace N1;
             [TSExport]
             public class C1
@@ -172,6 +173,108 @@ export class C1 extends ProxyBase {
 
   public M1(when: Date = new Date("0001-01-01T00:00:00Z")): void {
     TypeShimConfig.exports.N1.C1Interop.M1(this.instance, when);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void CharDefault_RendersQuotedString()
+    {
+        string output = Render("    public void M1(char c = 'A') {}");
+
+        AssertEx.EqualOrDiff(output, """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public M1(c: string = "A"): void {
+    TypeShimConfig.exports.N1.C1Interop.M1(this.instance, c.charCodeAt(0));
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void NullableCharDefaultNull_RendersNull()
+    {
+        string output = Render("    public void M1(char? c = null) {}");
+
+        AssertEx.EqualOrDiff(output, """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public M1(c: string | null = null): void {
+    TypeShimConfig.exports.N1.C1Interop.M1(this.instance, c ? c.charCodeAt(0) : null);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void NullableIntArrayDefaultNull_RendersNull()
+    {
+        string output = Render("    public void M1(int[]? values = null) {}");
+
+        AssertEx.EqualOrDiff(output, """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public M1(values: Array<number> | null = null): void {
+    TypeShimConfig.exports.N1.C1Interop.M1(this.instance, values);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void NullableStringArrayDefaultLiteral_RendersNull()
+    {
+        string output = Render("    public void M1(string[]? values = default) {}");
+
+        AssertEx.EqualOrDiff(output, """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public M1(values: Array<string> | null = null): void {
+    TypeShimConfig.exports.N1.C1Interop.M1(this.instance, values);
+  }
+}
+
+""");
+    }
+
+    [Test]
+    public void NonNullableArrayDefault_Throws()
+    {
+        // Non-nullable reference type with a null default; rejected pending nullable widening.
+        Assert.Throws<NotSupportedDefaultValueException>(() => Render("    public void M1(int[] values = default) {}"));
+    }
+
+    [Test]
+    public void NullableTaskDefaultNull_RendersNull()
+    {
+        string output = Render("    public Task M1(Task<int>? work = null) => Task.CompletedTask;");
+
+        AssertEx.EqualOrDiff(output, """
+export class C1 extends ProxyBase {
+  constructor() {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor());
+  }
+
+  public async M1(work: Promise<number> | null = null): Promise<void> {
+    return TypeShimConfig.exports.N1.C1Interop.M1(this.instance, work);
   }
 }
 
