@@ -3,17 +3,18 @@ using TypeShim.Generator.Parsing;
 using TypeShim.Generator.Typescript;
 using TypeShim.Generator;
 
-internal class TypeScriptRenderer(List<ClassInfo> classInfos, ModuleInfo moduleInfo)
+internal class TypeScriptRenderer(List<NamedTypeInfo> namedTypeInfos, ModuleInfo moduleInfo)
 {
     internal List<RenderContext> Render()
     {
-        List<RenderContext> renderContexts = new(classInfos.Count + 2)
+        List<RenderContext> renderContexts = new(namedTypeInfos.Count + 2)
         {
             RenderTypeShimConfig(),
             RenderAssemblyExports()
         };
-        foreach (ClassInfo classInfo in classInfos)
+        foreach (NamedTypeInfo namedType in namedTypeInfos)
         {
+            if (namedType is not ClassInfo classInfo) continue; // enum rendering is not implemented yet
             renderContexts.Add(RenderUserClass(classInfo));
         }
         return renderContexts;
@@ -21,7 +22,7 @@ internal class TypeScriptRenderer(List<ClassInfo> classInfos, ModuleInfo moduleI
 
     private RenderContext RenderTypeShimConfig()
     {
-        RenderContext configCtx = new(null, classInfos, RenderOptions.TypeScript);
+        RenderContext configCtx = new(null, namedTypeInfos, RenderOptions.TypeScript);
         TypeScriptPreambleRenderer configRenderer = new(configCtx);
         configRenderer.Render();
         return configCtx;
@@ -29,7 +30,7 @@ internal class TypeScriptRenderer(List<ClassInfo> classInfos, ModuleInfo moduleI
 
     private RenderContext RenderAssemblyExports()
     {
-        RenderContext renderCtx = new(null, classInfos, RenderOptions.TypeScript);
+        RenderContext renderCtx = new(null, namedTypeInfos, RenderOptions.TypeScript);
         TypescriptAssemblyExportsRenderer moduleInterfaceRenderer = new(moduleInfo.HierarchyInfo, renderCtx);
         moduleInterfaceRenderer.Render();
         return renderCtx;
@@ -37,7 +38,7 @@ internal class TypeScriptRenderer(List<ClassInfo> classInfos, ModuleInfo moduleI
     
     private RenderContext RenderUserClass(ClassInfo classInfo)
     {
-        RenderContext renderCtx = new(classInfo, classInfos, RenderOptions.TypeScript);
+        RenderContext renderCtx = new(classInfo, namedTypeInfos, RenderOptions.TypeScript);
         renderCtx.AppendLine($"// TypeShim generated TypeScript definitions for class: {renderCtx.Class.Namespace}.{renderCtx.Class.Name}");
         TypescriptUserClassProxyRenderer proxyRenderer = new(renderCtx);
         proxyRenderer.Render();

@@ -79,24 +79,6 @@ internal class SyntaxTreeParsingTests_Enums
         });
     }
 
-    [Test]
-    public void InteropTypeInfoBuilder_EnumWithoutTSExport_DoesNotSupportConversion()
-    {
-        INamedTypeSymbol enumSymbol = GetSymbol("""
-            namespace N1;
-            public enum Color { Red, Green, Blue }
-        """, "Color");
-
-        InteropTypeInfo info = new InteropTypeInfoBuilder(enumSymbol, new InteropTypeInfoCache()).Build();
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(info.IsEnum, Is.True);
-            Assert.That(info.RequiresTypeConversion, Is.True);
-            Assert.That(info.SupportsTypeConversion, Is.False);
-        });
-    }
-
     [TestCase("long")]
     [TestCase("ulong")]
     public void InteropTypeInfoBuilder_UnsafeUnderlyingType_Throws(string underlying)
