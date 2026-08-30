@@ -75,6 +75,10 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
             _ctx.AppendLine(";");
             return DeferredExpressionRenderer.FromUnary(() => RenderInlineDelegateTypeUpConversion(returnType, "retVal", argumentInfo));
         }
+        else if (returnType is { IsArrayType: true, TypeArgument.IsEnum: true }) // Handle Color[] (value-type arrays are not covariant, so cast per element)
+        {
+            return DeferredExpressionRenderer.FromUnary(() => RenderInlineArrayTypeUpConversion(returnType, valueExpressionRenderer));
+        }
         else
         {
             return DeferredExpressionRenderer.FromUnary(() => RenderInlineCovariantTypeUpConversion(returnType, valueExpressionRenderer));
@@ -99,6 +103,11 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         else if (typeInfo.ManagedType is KnownManagedType.Object)
         {
             RenderInlineObjectTypeDownConversion(typeInfo, accessorExpressionRenderer);
+        }
+        else if (typeInfo.IsEnum)
+        {
+            // Enums cross as their underlying integer; cast back to the CLR enum type.
+            RenderInlineCovariantTypeDownConversion(typeInfo, accessorExpressionRenderer);
         }
         else if (typeInfo.IsDelegateType() && typeInfo.ArgumentInfo is DelegateArgumentInfo argumentInfo) // Action/Action<T1...Tn>/Func<T1...Tn>
         {
@@ -169,6 +178,16 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
             RenderInlineTypeDownConversion(typeInfo.TypeArgument, "e", DeferredExpressionRenderer.FromUnary(() => _ctx.Append("e")));
             _ctx.Append(')');
         }
+    }
+
+    private void RenderInlineArrayTypeUpConversion(InteropTypeInfo typeInfo, DeferredExpressionRenderer valueExpressionRenderer)
+    {
+        InteropTypeInfo elementType = typeInfo.TypeArgument ?? throw new InvalidOperationException("Array type must have a type argument.");
+        _ctx.Append("Array.ConvertAll(");
+        valueExpressionRenderer.Render();
+        _ctx.Append(", e => ");
+        RenderInlineCovariantTypeUpConversion(elementType, DeferredExpressionRenderer.FromUnary(() => _ctx.Append("e")));
+        _ctx.Append(')');
     }
 
     /// <summary>
