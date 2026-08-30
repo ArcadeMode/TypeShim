@@ -54,7 +54,8 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
         else
         {
             ctx.Append(GetSymbolName(typeInfo));
-            if (typeInfo.IsTSExport)
+            // Enums are TSExport but render as a plain leaf name (no Snapshot/Initializer suffix).
+            if (typeInfo.IsTSExport && !ctx.SymbolMap.IsEnumType(typeInfo))
             {
                 RenderSuffix(typeInfo, isDelegateParameter ? parameterSymbolType : returnSymbolType);
             }
