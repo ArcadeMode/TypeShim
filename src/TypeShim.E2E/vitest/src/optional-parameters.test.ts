@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { OptionalParametersClass } from 'typeshim';
+import { OptionalParametersClass, OptionalCtorParamClass } from 'typeshim';
 
 describe('Optional Parameters Test', () => {
     let instance: OptionalParametersClass;
@@ -55,5 +55,25 @@ describe('Optional Parameters Test', () => {
     test('explicitly passed DateTime is not treated as default', () => {
         expect(instance.DateIsMinValue(new Date(Date.UTC(2020, 0, 1)))).toBe(false);
         expect(instance.YearOf(new Date(Date.UTC(2020, 0, 1)))).toBe(2020);
+    });
+});
+
+describe('Optional Constructor Parameter Test', () => {
+    test('constructor default applied and initializer omitted', () => {
+        const obj = new OptionalCtorParamClass();
+        expect(obj.Seed).toBe(3);
+        expect(obj.Label).toBeNull();
+    });
+
+    test('constructor parameter overridden, initializer omitted', () => {
+        const obj = new OptionalCtorParamClass(9);
+        expect(obj.Seed).toBe(9);
+        expect(obj.Label).toBeNull();
+    });
+
+    test('constructor parameter overridden and initializer provided', () => {
+        const obj = new OptionalCtorParamClass(9, { Label: 'hello' });
+        expect(obj.Seed).toBe(9);
+        expect(obj.Label).toBe('hello');
     });
 });

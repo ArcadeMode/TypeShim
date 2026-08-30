@@ -24,3 +24,14 @@ public class OptionalParametersClass
     // Confirms an explicitly-passed DateTime still marshals correctly (not just the default path).
     public int YearOf(DateTime when) => when.Year;
 }
+
+[TSExport]
+public class OptionalCtorParamClass
+{
+    public OptionalCtorParamClass(int seed = 3) => Seed = seed;
+
+    public int Seed { get; }
+    // Nullable settable property => initializer object is omittable/optional.
+    public string? Label { get; set; }
+}
+

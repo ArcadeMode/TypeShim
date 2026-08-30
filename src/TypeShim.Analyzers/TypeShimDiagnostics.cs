@@ -105,4 +105,13 @@ internal static class TypeShimDiagnostics
         isEnabledByDefault: true,
         description: "Span and ArraySegment default values cannot cross the interop boundary and must be constructed on the C# side.");
 
+    internal static readonly DiagnosticDescriptor NoOptionalCtorParamWithRequiredInitializerRule = new(
+        id: "TSHIM015",
+        title: "Optional constructor parameters require an omittable initializer object",
+        messageFormat: "Optional constructor parameter '{0}' is not supported because class '{1}' has a non-nullable settable/init property that must be provided through the initializer object",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "A constructor's trailing initializer object can only be optional when every settable/init property is nullable, so it cannot follow an optional parameter otherwise.");
+
 }

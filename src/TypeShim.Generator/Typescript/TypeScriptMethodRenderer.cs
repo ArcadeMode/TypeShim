@@ -28,6 +28,15 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         }
         else
         {
+            if (constructorInfo.HasOptionalParameters
+                && constructorInfo.InitializerObject != null
+                && !InitializerIsOmittable(constructorInfo))
+            {
+                throw new NotSupportedOptionalParameterException(
+                    $"Class '{ctx.Class.Name}' cannot combine optional constructor parameters with a non-omittable initializer object. " +
+                    "Make the parameters required, or ensure every settable/init property is nullable so the initializer can be omitted.");
+            }
+
             TypeScriptJSDocRenderer.RenderJSDoc(ctx, constructorInfo.Comment);
             RenderConstructorSignature();
             ctx.Append(' ');
@@ -41,7 +50,9 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             if (constructorInfo.InitializerObject != null)
             {
                 if (constructorInfo.Parameters.Length != 0) ctx.Append(", ");
-                ctx.Append(constructorInfo.InitializerObject.Name).Append(": ");
+                ctx.Append(constructorInfo.InitializerObject.Name);
+                if (constructorInfo.HasOptionalParameters) ctx.Append('?');
+                ctx.Append(": ");
                 TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Initializer, interop: false);
             }
             ctx.Append(")");
@@ -437,5 +448,20 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             { ArgumentInfo: DelegateArgumentInfo argumentInfo } when (typeInfo.IsDelegateType()) => RequiresCharConversion(argumentInfo.ReturnType) || argumentInfo.ParameterTypes.Any(RequiresCharConversion),
             _ => false
         };
+    }
+
+    /// <summary>
+    /// A trailing initializer object can be rendered optional (and thus follow an optional parameter) only when it can be
+    /// safely omitted as an empty object. The generated C# interop emits a "?? throw" for every non-nullable member
+    /// (see CSharpMethodRenderer), so an omitted initializer only succeeds when every member is nullable.
+    /// </summary>
+    private static bool InitializerIsOmittable(ConstructorInfo constructorInfo)
+    {
+        if (constructorInfo.InitializerObject == null)
+        {
+            return true;
+        }
+
+        return constructorInfo.MemberInitializers.All(p => p.Type.IsNullableType);
     }
 }

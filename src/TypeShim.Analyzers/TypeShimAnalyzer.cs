@@ -25,7 +25,8 @@ public sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         TypeShimDiagnostics.NoGenericsPublicMethodRule,
         TypeShimDiagnostics.MixedExportRule,
         TypeShimDiagnostics.UnresolvableDefaultConstRule,
-        TypeShimDiagnostics.NoOptionalMemoryViewRule
+        TypeShimDiagnostics.NoOptionalMemoryViewRule,
+        TypeShimDiagnostics.NoOptionalCtorParamWithRequiredInitializerRule
     ];
 
     public override void Initialize(AnalysisContext context)
@@ -92,6 +93,8 @@ public sealed class TypeShimAnalyzer : DiagnosticAnalyzer
                     CheckNoGenericsInMethod(context, method);
                     foreach (IParameterSymbol parameter in method.Parameters)
                         CheckMethodParameterType(context, method, parameter);
+                    if (method.MethodKind is MethodKind.Constructor)
+                        CheckOptionalConstructorParameter(context, type, method);
                     break;
                 case IPropertySymbol prop:
                     CheckPropertyType(context, prop);
@@ -197,6 +200,34 @@ public sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         string fullName = effective.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         return fullName.StartsWith(Constants.SpanGlobal, StringComparison.Ordinal)
             || fullName.StartsWith(Constants.ArraySegmentGlobal, StringComparison.Ordinal);
+    }
+
+    private static void CheckOptionalConstructorParameter(SymbolAnalysisContext context, INamedTypeSymbol type, IMethodSymbol constructor)
+    {
+        IParameterSymbol? optionalParameter = constructor.Parameters.FirstOrDefault(p => p.HasExplicitDefaultValue);
+        if (optionalParameter is null)
+            return;
+
+        bool hasNonOmittableInitializerMember = type.GetMembers().OfType<IPropertySymbol>().Any(IsNonOmittableInitializerMember);
+        if (!hasNonOmittableInitializerMember)
+            return;
+
+        Location location = LocationFinder.GetMethodParameterLocation(constructor, optionalParameter, context.CancellationToken);
+        context.ReportDiagnostic(Diagnostic.Create(
+            TypeShimDiagnostics.NoOptionalCtorParamWithRequiredInitializerRule, location, optionalParameter.Name, type.Name));
+    }
+
+    private static bool IsNonOmittableInitializerMember(IPropertySymbol property)
+    {
+        // Matches the member-initializer set: public property with a public set/init accessor.
+        if (property.DeclaredAccessibility != Accessibility.Public
+            || property.SetMethod is not { DeclaredAccessibility: Accessibility.Public })
+        {
+            return false;
+        }
+
+        // Non-nullable members are mandatory in the generated interop; nullable ones can be omitted.
+        return property.Type.NullableAnnotation != NullableAnnotation.Annotated;
     }
 
     private static void CheckPropertyType(SymbolAnalysisContext context, IPropertySymbol property)

@@ -54,3 +54,7 @@ public class NotFoundClassInfoException(string message, Exception? innerExceptio
 public class NotSupportedDefaultValueException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
 {
 }
+
+public class NotSupportedOptionalParameterException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
+{
+}
