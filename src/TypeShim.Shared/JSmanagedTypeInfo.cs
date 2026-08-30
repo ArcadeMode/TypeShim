@@ -224,6 +224,10 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
                 }
                 return new JSFunctionTypeInfo(false, signatureTypes!);
 
+            // enum: marshalled as its underlying integer, widened to the nearest JS-safe signed integer.
+            case INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType:
+                return CreateEnumJSTypeInfo(enumType);
+
             // class
             case INamedTypeSymbol classType when classType.TypeKind == TypeKind.Class:
                 return new JSSimpleTypeInfo(KnownManagedType.Object)
@@ -236,6 +240,32 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
                 // disallow marshalling of structs with the InlineArrayAttribute
                 return new JSInvalidTypeInfo();
         }
+    }
+
+    private static JSTypeInfo CreateEnumJSTypeInfo(INamedTypeSymbol enumType)
+    {
+        // Marshal the enum as its underlying integer, widened to the nearest JS-safe signed integer:
+        //   byte/sbyte/short/ushort/int -> int (all fit exactly in Int32)
+        //   uint                        -> long (max ~4.3e9 exceeds Int32 but is exact within 2^53)
+        //   long/ulong                  -> rejected for now (values beyond 2^53 lose precision / equality)
+        return enumType.EnumUnderlyingType?.SpecialType switch
+        {
+            SpecialType.System_Byte
+            or SpecialType.System_SByte
+            or SpecialType.System_Int16
+            or SpecialType.System_UInt16
+            or SpecialType.System_Int32
+                => new JSSimpleTypeInfo(KnownManagedType.Int32)
+                {
+                    Syntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword))
+                },
+            SpecialType.System_UInt32
+                => new JSSimpleTypeInfo(KnownManagedType.Int64)
+                {
+                    Syntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.LongKeyword))
+                },
+            _ => new JSInvalidTypeInfo(),
+        };
     }
 }
 
