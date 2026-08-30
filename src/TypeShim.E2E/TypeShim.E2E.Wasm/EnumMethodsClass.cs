@@ -11,7 +11,8 @@ public enum Priority
 }
 
 /// <summary>
-/// A uint-backed enum: exercises the widening path where the enum crosses the boundary as a long.
+/// A uint-backed enum: exercises the widening path where the enum crosses the boundary as a long,
+/// including a value above Int32.MaxValue.
 /// </summary>
 [TSExport]
 public enum Season : uint
@@ -19,7 +20,18 @@ public enum Season : uint
     Spring = 1,
     Summer = 2,
     Autumn = 3,
-    Winter = 4
+    Winter = 4,
+    FarFuture = 4000000000
+}
+
+/// <summary>
+/// A long-backed enum with a member at the JS safe-integer boundary (2^53 - 1).
+/// </summary>
+[TSExport]
+public enum Magnitude : long
+{
+    Zero = 0,
+    Max = 9007199254740991
 }
 
 [TSExport]
@@ -34,6 +46,7 @@ public class EnumMethodsClass
     public Priority? EchoNullablePriority(Priority? priority) => priority;
     public Priority[] EchoPriorityArray(Priority[] priorities) => priorities;
     public Season EchoSeason(Season season) => season;
+    public Magnitude EchoMagnitude(Magnitude magnitude) => magnitude;
 
     public Task<Priority> HighestPriorityTask() => Task.FromResult(Priority.High);
 

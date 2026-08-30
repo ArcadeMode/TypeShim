@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { EnumMethodsClass, Priority, Season } from 'typeshim';
+import { EnumMethodsClass, Priority, Season, Magnitude } from 'typeshim';
 
 describe('Enum Test', () => {
     let testObject: EnumMethodsClass;
@@ -57,6 +57,18 @@ describe('Enum Test', () => {
     test('uint-backed enum round-trips through .NET', () => {
         expect(testObject.SeasonProperty).toBe(Season.Summer);
         expect(testObject.EchoSeason(Season.Winter)).toBe(Season.Winter);
+    });
+
+    test('uint-backed enum value above Int32.MaxValue round-trips exactly', () => {
+        expect(Season.FarFuture).toBe(4000000000);
+        expect(testObject.EchoSeason(Season.FarFuture)).toBe(Season.FarFuture);
+    });
+
+    test('long-backed enum round-trips value at the JS safe-integer boundary', () => {
+        expect(Magnitude.Max).toBe(9007199254740991);
+        expect(Number.isSafeInteger(Magnitude.Max)).toBe(true);
+        expect(testObject.EchoMagnitude(Magnitude.Max)).toBe(Magnitude.Max);
+        expect(testObject.EchoMagnitude(Magnitude.Zero)).toBe(Magnitude.Zero);
     });
 
     test('Task returning an enum resolves to the enum value', async () => {

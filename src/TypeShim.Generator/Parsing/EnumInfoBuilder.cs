@@ -12,13 +12,16 @@ internal sealed class EnumInfoBuilder(INamedTypeSymbol enumSymbol, InteropTypeIn
         {
             Namespace = enumSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty,
             Name = enumSymbol.Name,
-            // Throws NotSupportedTypeException for unsupported underlying types (long/ulong).
+            // Throws NotSupportedTypeException for unsupported underlying types (ulong).
             Type = new InteropTypeInfoBuilder(enumSymbol, typeInfoCache).Build(),
             UnderlyingType = enumSymbol.EnumUnderlyingType?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "int",
             Members = BuildMembers(),
             Comment = new CommentInfoBuilder(enumSymbol).Build(),
         };
     }
+
+    // JS numbers represent integers exactly only within +/-(2^53 - 1).
+    private const long MaxSafeInteger = 9007199254740991;
 
     private List<EnumMemberInfo> BuildMembers()
     {
@@ -30,10 +33,17 @@ internal sealed class EnumInfoBuilder(INamedTypeSymbol enumSymbol, InteropTypeIn
                 continue; // skip the synthesized value__ instance field
             }
 
+            long value = Convert.ToInt64(fieldSymbol.ConstantValue);
+            if (value > MaxSafeInteger || value < -MaxSafeInteger)
+            {
+                throw new NotSupportedTypeException(
+                    $"Enum member '{enumSymbol.Name}.{fieldSymbol.Name}' has value {value}, which is outside the JS safe-integer range (+/-2^53-1) and cannot be represented exactly.");
+            }
+
             members.Add(new EnumMemberInfo
             {
                 Name = fieldSymbol.Name,
-                Value = Convert.ToInt64(fieldSymbol.ConstantValue),
+                Value = value,
                 Comment = new CommentInfoBuilder(fieldSymbol).Build(),
             });
         }

@@ -91,27 +91,51 @@ internal class EnumDiscoveryTests
         Assert.That(enumInfo.Members.Select(m => m.Value), Is.EqualTo(new long[] { 0, 1, 2, 3 }));
     }
 
-    [Test]
-    public void EnumInfoBuilder_ReflectsUIntUnderlyingType()
+    [TestCase("uint", "uint")]
+    [TestCase("long", "long")]
+    public void EnumInfoBuilder_ReflectsWideUnderlyingType(string underlying, string expected)
     {
         EnumInfo enumInfo = BuildEnum("""
             namespace N1;
             [TSExport]
-            public enum Color : uint { Red, Green, Blue }
-        """);
+            public enum Color : {{underlying}} { Red, Green, Blue }
+        """.Replace("{{underlying}}", underlying));
 
-        Assert.That(enumInfo.UnderlyingType, Is.EqualTo("uint"));
+        Assert.That(enumInfo.UnderlyingType, Is.EqualTo(expected));
     }
 
-    [TestCase("long")]
-    [TestCase("ulong")]
-    public void EnumInfoBuilder_UnsupportedUnderlyingType_Throws(string underlying)
+    [Test]
+    public void EnumInfoBuilder_LongUnderlyingType_AllowsLargeInRangeMemberValue()
+    {
+        // 9007199254740991 == 2^53 - 1, the largest exactly-representable JS integer.
+        EnumInfo enumInfo = BuildEnum("""
+            namespace N1;
+            [TSExport]
+            public enum Color : long { Small = 0, Max = 9007199254740991 }
+        """);
+
+        Assert.That(enumInfo.Members.Select(m => m.Value), Is.EqualTo(new long[] { 0, 9007199254740991 }));
+    }
+
+    [Test]
+    public void EnumInfoBuilder_ULongUnderlyingType_Throws()
     {
         Assert.Throws<NotSupportedTypeException>(() => BuildEnum("""
             namespace N1;
             [TSExport]
-            public enum Color : {{underlying}} { Red, Green, Blue }
-        """.Replace("{{underlying}}", underlying)));
+            public enum Color : ulong { Red, Green, Blue }
+        """));
+    }
+
+    [TestCase("9007199254740992")]   // 2^53, first value above the safe range
+    [TestCase("-9007199254740992")]  // -2^53
+    public void EnumInfoBuilder_MemberValueOutsideSafeRange_Throws(string value)
+    {
+        Assert.Throws<NotSupportedTypeException>(() => BuildEnum("""
+            namespace N1;
+            [TSExport]
+            public enum Color : long { Big = {{value}} }
+        """.Replace("{{value}}", value)));
     }
 
     [Test]

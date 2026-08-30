@@ -78,6 +78,60 @@ public partial class C1Interop
     }
 
     [Test]
+    public void CSharpInteropClass_LongBackedEnum_CastsBetweenLongAndEnum()
+    {
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public enum Big : long { Zero = 0, Max = 9007199254740991 }
+            [TSExport]
+            public class C1
+            {
+                private C1() {}
+                public Big Echo(Big b) => b;
+            }
+        """);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
+        List<INamedTypeSymbol> exportedSymbols = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        INamedTypeSymbol classSymbol = exportedSymbols.First(s => s.Name == "C1");
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+
+        AssertEx.EqualOrDiff(interopClass, """
+#nullable enable
+// TypeShim generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static long Echo([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] long b)
+    {
+        C1 typed_instance = (C1)instance;
+        Big typed_b = (Big)b;
+        return (long)typed_instance.Echo(typed_b);
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+}
+
+""");
+    }
+
+    [Test]
     public void CSharpInteropClass_NullableEnum_CastsBetweenNullableIntAndNullableEnum()
     {
         string interopClass = RenderInteropClass("""

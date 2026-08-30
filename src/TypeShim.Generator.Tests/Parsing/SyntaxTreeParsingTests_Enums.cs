@@ -61,14 +61,15 @@ internal class SyntaxTreeParsingTests_Enums
         });
     }
 
-    [Test]
-    public void InteropTypeInfoBuilder_UIntUnderlyingType_MarshalsAsLong()
+    [TestCase("uint")]
+    [TestCase("long")]
+    public void InteropTypeInfoBuilder_WideUnderlyingType_MarshalsAsLong(string underlying)
     {
         INamedTypeSymbol enumSymbol = GetSymbol("""
             namespace N1;
             [TSExport]
-            public enum Color : uint { Red, Green, Blue }
-        """, "Color");
+            public enum Color : {{underlying}} { Red, Green, Blue }
+        """.Replace("{{underlying}}", underlying), "Color");
 
         InteropTypeInfo info = new InteropTypeInfoBuilder(enumSymbol, new InteropTypeInfoCache()).Build();
 
@@ -79,15 +80,14 @@ internal class SyntaxTreeParsingTests_Enums
         });
     }
 
-    [TestCase("long")]
-    [TestCase("ulong")]
-    public void InteropTypeInfoBuilder_UnsafeUnderlyingType_Throws(string underlying)
+    [Test]
+    public void InteropTypeInfoBuilder_ULongUnderlyingType_Throws()
     {
         INamedTypeSymbol enumSymbol = GetSymbol("""
             namespace N1;
             [TSExport]
-            public enum Color : {{underlying}} { Red, Green, Blue }
-        """.Replace("{{underlying}}", underlying), "Color");
+            public enum Color : ulong { Red, Green, Blue }
+        """, "Color");
 
         Assert.Throws<NotSupportedTypeException>(() =>
             _ = new InteropTypeInfoBuilder(enumSymbol, new InteropTypeInfoCache()).Build());

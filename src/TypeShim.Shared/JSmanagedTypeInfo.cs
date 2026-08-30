@@ -246,8 +246,7 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
     {
         // Marshal the enum as its underlying integer, widened to the nearest JS-safe signed integer:
         //   byte/sbyte/short/ushort/int -> int (all fit exactly in Int32)
-        //   uint                        -> long (max ~4.3e9 exceeds Int32 but is exact within 2^53)
-        //   long/ulong                  -> rejected for now (values beyond 2^53 lose precision / equality)
+        //   uint/long                   -> long (Int64 marshals to a JS number; member values are range-checked to 2^53)
         return enumType.EnumUnderlyingType?.SpecialType switch
         {
             SpecialType.System_Byte
@@ -260,6 +259,7 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
                     Syntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword))
                 },
             SpecialType.System_UInt32
+            or SpecialType.System_Int64
                 => new JSSimpleTypeInfo(KnownManagedType.Int64)
                 {
                     Syntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.LongKeyword))
