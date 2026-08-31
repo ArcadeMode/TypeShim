@@ -114,4 +114,13 @@ internal static class TypeShimDiagnostics
         isEnabledByDefault: true,
         description: "A constructor's trailing initializer object can only be optional when every settable/init property is nullable, so it cannot follow an optional parameter otherwise.");
 
+    internal static readonly DiagnosticDescriptor EnumMemberOutOfSafeRangeRule = new(
+        id: "TSHIM016",
+        title: "Enum member value is outside the JS number range",
+        messageFormat: "Enum member '{0}' has value {1}, which is outside the JS number range (+/-2^53-1)",
+        category: "TypeChecking",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "JS numbers represent integers exactly only within +/-(2^53-1); enum members outside that range cannot cross the .NET-JS boundary.");
+
 }
