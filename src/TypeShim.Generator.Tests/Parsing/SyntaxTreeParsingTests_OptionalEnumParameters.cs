@@ -29,7 +29,7 @@ internal class SyntaxTreeParsingTests_OptionalEnumParameters
         ClassInfo classInfo = new ClassInfoBuilder(exportedSymbols.Single(s => s.TypeKind == TypeKind.Class), typeCache).Build();
 
         MethodInfo method = classInfo.Methods.Single();
-        return method.Parameters.Single(p => !p.IsInjectedInstanceParameter && p.Name == parameterName);
+        return method.Parameters.Single(p => p.Name == parameterName);
     }
 
     [Test]
