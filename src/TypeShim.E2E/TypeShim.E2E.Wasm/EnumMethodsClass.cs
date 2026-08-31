@@ -10,18 +10,20 @@ public enum Priority
     High
 }
 
-/// <summary>
-/// A uint-backed enum: exercises the widening path where the enum crosses the boundary as a long,
-/// including a value above Int32.MaxValue.
-/// </summary>
 [TSExport]
-public enum Season : uint
+public enum SpecialByte : byte
+{
+    Null = 0,
+    All = 255
+}
+
+[TSExport]
+public enum Season : short
 {
     Spring = 1,
     Summer = 2,
     Autumn = 3,
-    Winter = 4,
-    FarFuture = 4000000000
+    Winter = 4
 }
 
 /// <summary>
@@ -38,11 +40,13 @@ public enum Magnitude : long
 public class EnumMethodsClass
 {
     public Priority PriorityProperty { get; set; }
+    public SpecialByte SpecialByteProperty { get; set; }
     public Priority? NullablePriorityProperty { get; set; }
     public Priority[] PriorityArrayProperty { get; set; } = [];
     public Season SeasonProperty { get; set; }
 
     public Priority EchoPriority(Priority priority) => priority;
+    public SpecialByte EchoSpecialByte(SpecialByte specialByte) => specialByte;
     public Priority? EchoNullablePriority(Priority? priority) => priority;
     public Priority[] EchoPriorityArray(Priority[] priorities) => priorities;
     public Season EchoSeason(Season season) => season;

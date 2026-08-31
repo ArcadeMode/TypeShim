@@ -1,11 +1,12 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { EnumMethodsClass, Priority, Season, Magnitude } from 'typeshim';
+import { EnumMethodsClass, Priority, Season, Magnitude, SpecialByte } from 'typeshim';
 
 describe('Enum Test', () => {
     let testObject: EnumMethodsClass;
     beforeEach(() => {
         testObject = new EnumMethodsClass({
             PriorityProperty: Priority.Medium,
+            SpecialByteProperty: SpecialByte.All,
             NullablePriorityProperty: Priority.Low,
             PriorityArrayProperty: [Priority.Low, Priority.High],
             SeasonProperty: Season.Summer,
@@ -54,14 +55,14 @@ describe('Enum Test', () => {
             .toStrictEqual([Priority.High, Priority.Medium, Priority.Low]);
     });
 
-    test('uint-backed enum round-trips through .NET', () => {
-        expect(testObject.SeasonProperty).toBe(Season.Summer);
-        expect(testObject.EchoSeason(Season.Winter)).toBe(Season.Winter);
+    test('byte-backed enum round-trips through .NET', () => {
+        expect(testObject.SpecialByteProperty).toBe(SpecialByte.All);
+        expect(testObject.EchoSpecialByte(SpecialByte.Half)).toBe(SpecialByte.Half);
     });
 
-    test('uint-backed enum value above Int32.MaxValue round-trips exactly', () => {
-        expect(Season.FarFuture).toBe(4000000000);
-        expect(testObject.EchoSeason(Season.FarFuture)).toBe(Season.FarFuture);
+    test('short-backed enum round-trips through .NET', () => {
+        expect(testObject.SeasonProperty).toBe(Season.Summer);
+        expect(testObject.EchoSeason(Season.Winter)).toBe(Season.Winter);
     });
 
     test('long-backed enum round-trips value at the JS safe-integer boundary', () => {

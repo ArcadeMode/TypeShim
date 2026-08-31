@@ -126,8 +126,6 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
 
     private void RenderInlineEnumTypeDownConversion(InteropTypeInfo typeInfo, DeferredExpressionRenderer accessorExpressionRenderer)
     {
-        // Casting to a non-nullable enum yields a non-nullable value type, so a binary accessor (e.g. "x ?? throw")
-        // must be parenthesized: (Color)(x ?? throw ...), not (Color)x ?? throw ... which would not compile.
         _ctx.Append('(').Append(typeInfo.CSharpTypeSyntax.ToString()).Append(')');
         if (accessorExpressionRenderer.IsBinary) _ctx.Append('(');
         accessorExpressionRenderer.Render();
