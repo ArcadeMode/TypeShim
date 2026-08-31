@@ -8,21 +8,25 @@ namespace TypeShim.Generator.Tests.CSharp;
 
 internal class CSharpInteropClassRendererTests_Enums
 {
-    private static string RenderInteropClass(string members)
+    private static string RenderInteropClass(string members, string? underlyingType = null)
     {
+        string enumDeclaration = underlyingType is null
+            ? "public enum Color { Red, Green, Blue }"
+            : $"public enum Color : {underlyingType} {{ Red, Green, Blue }}";
+
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             using System.Threading.Tasks;
             namespace N1;
             [TSExport]
-            public enum Color { Red, Green, Blue }
+            {{enum}}
             [TSExport]
             public class C1
             {
                 private C1() {}
             {{members}}
             }
-        """.Replace("{{members}}", members));
+        """.Replace("{{enum}}", enumDeclaration).Replace("{{members}}", members));
 
         SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedSymbols = [.. symbolExtractor.ExtractAllExportedSymbols()];
@@ -60,6 +64,178 @@ public partial class C1Interop
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void ScalarParam([JSMarshalAs<JSType.Number>] int c)
+    {
+        Color typed_c = (Color)c;
+        C1.ScalarParam(typed_c);
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+}
+
+""");
+    }
+
+    [Test]
+    public void CSharpInteropClass_ByteBackedEnum_CastsBetweenByteAndEnum()
+    {
+        string interopClass = RenderInteropClass("""
+                public static Color ScalarReturn() => Color.Red;
+                public static void ScalarParam(Color c) {}
+        """, "byte");
+
+        AssertEx.EqualOrDiff(interopClass, """
+#nullable enable
+// TypeShim generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static byte ScalarReturn()
+    {
+        return (byte)C1.ScalarReturn();
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void ScalarParam([JSMarshalAs<JSType.Number>] byte c)
+    {
+        Color typed_c = (Color)c;
+        C1.ScalarParam(typed_c);
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+}
+
+""");
+    }
+
+    [Test]
+    public void CSharpInteropClass_ShortBackedEnum_CastsBetweenShortAndEnum()
+    {
+        string interopClass = RenderInteropClass("""
+                public static Color ScalarReturn() => Color.Red;
+                public static void ScalarParam(Color c) {}
+        """, "short");
+
+        AssertEx.EqualOrDiff(interopClass, """
+#nullable enable
+// TypeShim generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static short ScalarReturn()
+    {
+        return (short)C1.ScalarReturn();
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void ScalarParam([JSMarshalAs<JSType.Number>] short c)
+    {
+        Color typed_c = (Color)c;
+        C1.ScalarParam(typed_c);
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+}
+
+""");
+    }
+
+    [Test]
+    public void CSharpInteropClass_IntBackedEnum_CastsBetweenIntAndEnum()
+    {
+        string interopClass = RenderInteropClass("""
+                public static Color ScalarReturn() => Color.Red;
+                public static void ScalarParam(Color c) {}
+        """, "int");
+
+        AssertEx.EqualOrDiff(interopClass, """
+#nullable enable
+// TypeShim generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static int ScalarReturn()
+    {
+        return (int)C1.ScalarReturn();
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void ScalarParam([JSMarshalAs<JSType.Number>] int c)
+    {
+        Color typed_c = (Color)c;
+        C1.ScalarParam(typed_c);
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+}
+
+""");
+    }
+
+    [Test]
+    public void CSharpInteropClass_LongBackedEnumViaHelper_CastsBetweenLongAndEnum()
+    {
+        string interopClass = RenderInteropClass("""
+                public static Color ScalarReturn() => Color.Red;
+                public static void ScalarParam(Color c) {}
+        """, "long");
+
+        AssertEx.EqualOrDiff(interopClass, """
+#nullable enable
+// TypeShim generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static long ScalarReturn()
+    {
+        return (long)C1.ScalarReturn();
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void ScalarParam([JSMarshalAs<JSType.Number>] long c)
     {
         Color typed_c = (Color)c;
         C1.ScalarParam(typed_c);

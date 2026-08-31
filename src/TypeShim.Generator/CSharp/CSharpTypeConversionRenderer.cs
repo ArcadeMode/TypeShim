@@ -106,7 +106,6 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         }
         else if (typeInfo.IsEnum)
         {
-            // Enums cross as their underlying integer; cast back to the CLR enum type.
             RenderInlineEnumTypeDownConversion(typeInfo, accessorExpressionRenderer);
         }
         else if (typeInfo.IsDelegateType() && typeInfo.ArgumentInfo is DelegateArgumentInfo argumentInfo) // Action/Action<T1...Tn>/Func<T1...Tn>
