@@ -139,7 +139,8 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
 
             if (parameterInfo.Default is ParameterDefaultInfo def)
             {
-                ctx.Append(" = ").Append(TypeScriptDefaultValueFormatter.Format(parameterInfo.Type, def));
+                ctx.Append(" = ");
+                new TypeScriptDefaultValueRenderer(ctx).Render(parameterInfo.Type, def);
             }
             isFirst = false;
         }

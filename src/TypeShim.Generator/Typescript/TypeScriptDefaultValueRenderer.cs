@@ -5,42 +5,42 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator.Typescript;
 
-/// <summary>
-/// Formats an optional parameter's default value as a TypeScript literal for the public proxy signature.
-/// </summary>
-internal static class TypeScriptDefaultValueFormatter
+internal sealed class TypeScriptDefaultValueRenderer(RenderContext ctx)
 {
     /// <summary>
-    /// Formats <paramref name="def"/> as a TypeScript literal.
-    /// Throws <see cref="NotSupportedDefaultValueException"/> when the default cannot be rendered as valid
-    /// TypeScript, so codegen halts loudly rather than silently emitting a parameter without its default.
+    /// Renders <paramref name="def"/> as a TypeScript literal
     /// </summary>
-    internal static string Format(InteropTypeInfo type, ParameterDefaultInfo def)
+    /// <exception cref="NotSupportedDefaultValueException">when the default cannot be rendered as valid TypeScript</exception>
+    internal void Render(InteropTypeInfo type, ParameterDefaultInfo def)
     {
         if (def.Value is null)
         {
-            // Only nullable value types (rendered as 'T | null') can safely take a 'null' default.
             if (type.IsNullableType)
             {
-                return "null";
+                ctx.Append("null");
             }
-
-            if (type.ManagedType is KnownManagedType.DateTime or KnownManagedType.DateTimeOffset)
+            else if (type.ManagedType is KnownManagedType.DateTime or KnownManagedType.DateTimeOffset)
             {
-                // DateTime/DateTimeOffset 'default' is DateTime.MinValue (0001-01-01). The .NET<->JS marshaller's
-                // representable floor is exactly that instant at UTC, so this literal round-trips to MinValue.
-                return "new Date(\"0001-01-01T00:00:00Z\")";
+                // Use .NET DateTime/DateTimeOffset default (0001-01-01) in TypeScript (no inconsistency with JS Date default starting in the year -271,821)
+                ctx.Append("new Date(\"0001-01-01T00:00:00Z\")");
+                return;
             }
 
-            // Non-nullable reference types would produce 'x: T = null', which violates strictNullChecks.
+            // 'x: T = null' would violate TypeScript strictNullChecks, user can fix themselves by making their type nullable.
             throw new NotSupportedDefaultValueException(
-                $"Null default values for reference type '{type.CSharpTypeSyntax}' are not yet supported (pending nullable type widening).");
+                $"Null default values for reference type '{type.CSharpTypeSyntax}' are yet supported.");
         }
 
-        // Unwrap nullable value types (e.g. 'int? = 5') to format the underlying value.
         InteropTypeInfo valueType = type.IsNullableType && type.TypeArgument is not null ? type.TypeArgument : type;
 
-        return valueType.ManagedType switch
+        if (valueType.IsEnum && ctx.SymbolMap.GetNamedTypeInfo(valueType) is EnumInfo enumInfo
+            && enumInfo.GetMemberByValue(Convert.ToInt64(def.Value, CultureInfo.InvariantCulture)) is string memberName)
+        {
+            ctx.Append(enumInfo.Name).Append('.').Append(memberName);
+            return;
+        }
+
+        string literal = valueType.ManagedType switch
         {
             KnownManagedType.Boolean => def.Value is true ? "true" : "false",
             KnownManagedType.String => QuoteString(def.Value.ToString() ?? string.Empty),
@@ -55,6 +55,8 @@ internal static class TypeScriptDefaultValueFormatter
             _ => throw new NotSupportedDefaultValueException(
                 $"Default values of type '{type.CSharpTypeSyntax}' are not supported."),
         };
+
+        ctx.Append(literal);
     }
 
     private static string FormatIntegral(object value) =>
