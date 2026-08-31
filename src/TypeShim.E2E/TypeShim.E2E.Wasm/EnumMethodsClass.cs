@@ -14,6 +14,7 @@ public enum Priority
 public enum SpecialByte : byte
 {
     Null = 0,
+    Half = 127,
     All = 255
 }
 
