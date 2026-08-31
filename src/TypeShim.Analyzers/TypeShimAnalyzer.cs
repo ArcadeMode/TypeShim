@@ -26,7 +26,8 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         TypeShimDiagnostics.MixedExportRule,
         TypeShimDiagnostics.UnresolvableDefaultConstRule,
         TypeShimDiagnostics.NoOptionalMemoryViewRule,
-        TypeShimDiagnostics.NoOptionalCtorParamWithRequiredInitializerRule
+        TypeShimDiagnostics.NoOptionalCtorParamWithRequiredInitializerRule,
+        TypeShimDiagnostics.EnumMemberOutOfSafeRangeRule
     ];
 
     public override void Initialize(AnalysisContext context)
@@ -34,6 +35,7 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterSymbolAction(AnalyzeClass, SymbolKind.NamedType);
+        context.RegisterSymbolAction(AnalyzeEnum, SymbolKind.NamedType);
         context.RegisterSymbolAction(AnalyzeMethodForMixedExport, SymbolKind.Method);
         context.RegisterSyntaxNodeAction(CheckOptionalParameterDefault, SyntaxKind.Parameter);
     }
@@ -247,6 +249,57 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         {
             string fieldName = field.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
             context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.NoRequiredFieldsRule, LocationFinder.GetDefaultLocation(field), fieldName));
+        }
+    }
+
+    // JS numbers represent integers exactly only within +/-(2^53 - 1).
+    private const long MaxSafeInteger = 9007199254740991;
+
+    private static void AnalyzeEnum(SymbolAnalysisContext context)
+    {
+        if (context.Symbol is not INamedTypeSymbol type || type.TypeKind != TypeKind.Enum)
+            return;
+
+        if (!SymbolFacts.HasTSExportAttribute(type))
+            return;
+
+        // An unsupported underlying type makes the whole enum unrepresentable, and its member values may
+        // not even fit in Int64, so report that and stop before inspecting members.
+        if (!UnderlyingTypeIsSupported(context, type))
+            return;
+
+        CheckEnumMemberRanges(context, type);
+    }
+
+    private static bool UnderlyingTypeIsSupported(SymbolAnalysisContext context, INamedTypeSymbol enumType)
+    {
+        try
+        {
+            _ = new InteropTypeInfoBuilder(enumType, new InteropTypeInfoCache()).Build();
+            return true;
+        }
+        catch (NotSupportedTypeException)
+        {
+            string underlying = enumType.EnumUnderlyingType?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "int";
+            string display = $"{enumType.Name} : {underlying}";
+            context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.UnsupportedTypeRule, LocationFinder.GetDefaultLocation(enumType), display));
+            return false;
+        }
+    }
+
+    private static void CheckEnumMemberRanges(SymbolAnalysisContext context, INamedTypeSymbol enumType)
+    {
+        foreach (IFieldSymbol field in enumType.GetMembers().OfType<IFieldSymbol>())
+        {
+            if (!field.IsConst || field.ConstantValue is null)
+                continue; // skip the synthesized value__ instance field
+
+            long value = Convert.ToInt64(field.ConstantValue);
+            if (value > MaxSafeInteger || value < -MaxSafeInteger)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    TypeShimDiagnostics.EnumMemberOutOfSafeRangeRule, LocationFinder.GetDefaultLocation(field), field.Name, value));
+            }
         }
     }
 
