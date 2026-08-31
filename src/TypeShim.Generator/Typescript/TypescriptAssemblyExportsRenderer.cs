@@ -46,25 +46,30 @@ internal sealed class TypescriptAssemblyExportsRenderer(
     {
         if (classInfo.Constructor is ConstructorInfo constructorInfo)
         {
-            RenderInteropMethodSignature(constructorInfo.Name, constructorInfo.GetParametersIncludingInitializerObject(), constructorInfo.Type);
+            RenderInteropMethodSignature(constructorInfo.Name, instanceParameter: null, constructorInfo.GetParametersIncludingInitializerObject(), constructorInfo.Type);
         }
         foreach (MethodInfo methodInfo in GetAllMethods(classInfo))
         {
-            RenderInteropMethodSignature(methodInfo.Name, methodInfo.Parameters, methodInfo.ReturnType);
+            RenderInteropMethodSignature(methodInfo.Name, methodInfo.InstanceParameter, methodInfo.Parameters, methodInfo.ReturnType);
         }
     }
 
-    private void RenderInteropMethodSignature(string name, IEnumerable<MethodParameterInfo> parameters, InteropTypeInfo returnType)
+    private void RenderInteropMethodSignature(string name, MethodParameterInfo? instanceParameter, IEnumerable<MethodParameterInfo> parameters, InteropTypeInfo returnType)
     {
         ctx.Append(name).Append('(');
         bool isFirst = true;
+        if (instanceParameter != null)
+        {
+            ctx.Append(instanceParameter.Name).Append(": ");
+            TypeScriptSymbolNameRenderer.Render(instanceParameter.Type, ctx, TypeShimSymbolType.Proxy, interop: true);
+            isFirst = false;
+        }
         foreach (MethodParameterInfo parameterInfo in parameters)
         {
             if (!isFirst) ctx.Append(", ");
 
             ctx.Append(parameterInfo.Name).Append(": ");
-            // TODO: remove IsInjectedInstanceParameter property and split into separate methodInfo property
-            TypeShimSymbolType symbolType = parameterInfo.IsInjectedInstanceParameter || parameterInfo.Type.IsDelegateType() ? TypeShimSymbolType.Proxy : TypeShimSymbolType.ProxyInitializerUnion;
+            TypeShimSymbolType symbolType = parameterInfo.Type.IsDelegateType() ? TypeShimSymbolType.Proxy : TypeShimSymbolType.ProxyInitializerUnion;
             TypeScriptSymbolNameRenderer.Render(parameterInfo.Type, ctx, symbolType, interop: true);
             isFirst = false;
         }

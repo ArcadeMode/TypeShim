@@ -5,25 +5,28 @@ using TypeShim.Shared;
 
 internal class MethodParameterInfoBuilder(INamedTypeSymbol classSymbol, IMethodSymbol memberMethod, InteropTypeInfoCache typeInfoCache)
 {
-    internal IEnumerable<MethodParameterInfo> Build()
+    internal MethodParameterInfo? BuildInstanceParameter()
     {
         if (!memberMethod.IsStatic && memberMethod.MethodKind is not MethodKind.Constructor)
         {
-            yield return new MethodParameterInfo
+            return new MethodParameterInfo
             {
                 Name = "instance",
-                IsInjectedInstanceParameter = true,
                 Type = new InteropTypeInfoBuilder(classSymbol, typeInfoCache).Build()
             };
         }
 
+        return null;
+    }
+
+    internal IEnumerable<MethodParameterInfo> Build()
+    {
         foreach (IParameterSymbol parameterSymbol in memberMethod.Parameters)
         {
             InteropTypeInfo type = new InteropTypeInfoBuilder(parameterSymbol.Type, typeInfoCache).Build();
             yield return new MethodParameterInfo
             {
                 Name = parameterSymbol.Name,
-                IsInjectedInstanceParameter = false,
                 Type = type,
                 Default = ResolveDefault(parameterSymbol, type),
             };

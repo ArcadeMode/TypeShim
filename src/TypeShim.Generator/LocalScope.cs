@@ -9,7 +9,7 @@ internal sealed class LocalScope
     
     internal LocalScope(MethodInfo methodInfo)
     {
-        paramNameDict = methodInfo.Parameters.ToDictionary(c => c, c => c.Name);
+        paramNameDict = methodInfo.GetParametersIncludingInstanceParameter().ToDictionary(c => c, c => c.Name);
     }
 
     internal LocalScope(ConstructorInfo constructorInfo)

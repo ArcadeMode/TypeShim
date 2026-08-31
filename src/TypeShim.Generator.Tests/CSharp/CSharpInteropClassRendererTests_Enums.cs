@@ -290,7 +290,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static long Echo([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] long b)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         Big typed_b = (Big)b;
         return (long)typed_instance.Echo(typed_b);
     }
@@ -491,14 +491,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static int get_Scalar([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return (int)typed_instance.Scalar;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_Scalar([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] int value)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         Color typed_value = (Color)value;
         typed_instance.Scalar = typed_value;
     }
@@ -506,14 +506,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static int? get_Nullable([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return (int?)typed_instance.Nullable;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_Nullable([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] int? value)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         Color? typed_value = value is { } valueVal ? (Color)valueVal : null;
         typed_instance.Nullable = typed_value;
     }
@@ -521,14 +521,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Array<JSType.Number>>]
     public static int[] get_Arr([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return Array.ConvertAll(typed_instance.Arr, e => (int)e);
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_Arr([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Array<JSType.Number>>] int[] value)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         Color[] typed_value = Array.ConvertAll(value, e => (Color)e);
         typed_instance.Arr = typed_value;
     }

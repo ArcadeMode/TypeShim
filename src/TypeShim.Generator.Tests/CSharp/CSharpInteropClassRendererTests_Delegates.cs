@@ -53,7 +53,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function>] Action callback)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         typed_instance.M1(callback);
     }
     public static C1 FromObject(object obj)
@@ -111,7 +111,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.String>>] Action<string> callback)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         typed_instance.M1(callback);
     }
     public static C1 FromObject(object obj)
@@ -169,7 +169,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.String, JSType.Number>>] Action<string, int> callback)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         typed_instance.M1(callback);
     }
     public static C1 FromObject(object obj)
@@ -227,7 +227,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.String, JSType.Number, JSType.Boolean>>] Action<string, int, bool> callback)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         typed_instance.M1(callback);
     }
     public static C1 FromObject(object obj)
@@ -285,7 +285,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.String>]
     public static string M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.String>>] Func<string> callback)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return typed_instance.M1(callback);
     }
     public static C1 FromObject(object obj)
@@ -343,7 +343,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.String>]
     public static string M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.String, JSType.Number>>] Func<string, int> callback)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return typed_instance.M1(callback);
     }
     public static C1 FromObject(object obj)
@@ -401,7 +401,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.String>]
     public static string M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.String, JSType.Number, JSType.Boolean>>] Func<string, int, bool> callback)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return typed_instance.M1(callback);
     }
     public static C1 FromObject(object obj)
@@ -470,7 +470,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Any>>] Action<object> callback)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         Action<MyClass> typed_callback = (MyClass arg0) => callback(arg0);
         typed_instance.M1(typed_callback);
     }
@@ -540,7 +540,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Function<JSType.Any>>]
     public static Action<object> M1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         Action<MyClass> retVal = typed_instance.M1();
         return (object arg0) => retVal(MyClassInterop.FromObject(arg0));
     }
@@ -610,7 +610,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Function<JSType.Any, JSType.Any>>]
     public static Func<object, object> M1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         Func<MyClass, MyClass> retVal = typed_instance.M1();
         return (object arg0) => (object)retVal(MyClassInterop.FromObject(arg0));
     }
@@ -680,7 +680,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Function<JSType.Number, JSType.Any>>]
     public static Func<int, object?> M1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         Func<int, MyClass?> retVal = typed_instance.M1();
         return (int arg0) => (object?)retVal(arg0);
     }
@@ -750,7 +750,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Function<JSType.Any>>]
     public static Func<object?> M1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         Func<MyClass?> retVal = typed_instance.M1();
         return () => (object?)retVal();
     }
@@ -820,7 +820,7 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Void>]
             public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Number, JSType.Any>>] Func<int, object?> func)
             {
-                C1 typed_instance = (C1)instance;
+                C1 typed_instance = C1Interop.FromObject(instance);
                 Func<int, MyClass?> typed_func = (int arg0) => func(arg0) is { } funcVal ? MyClassInterop.FromObject(funcVal) : null;
                 typed_instance.M1(typed_func);
             }
@@ -890,7 +890,7 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Void>]
             public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Any>>] Func<object?> func)
             {
-                C1 typed_instance = (C1)instance;
+                C1 typed_instance = C1Interop.FromObject(instance);
                 Func<MyClass?> typed_func = () => func() is { } funcVal ? MyClassInterop.FromObject(funcVal) : null;
                 typed_instance.M1(typed_func);
             }
@@ -963,7 +963,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Any, JSType.Any>>] Func<object, object> func, [JSMarshalAs<JSType.Function<JSType.Any>>] Func<object> paramFunc)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         Func<MyClass, MyClass> typed_func = (MyClass arg0) => MyClassInterop.FromObject(func(arg0));
         Func<MyClass> typed_paramFunc = () => MyClassInterop.FromObject(paramFunc());
         return (object)typed_instance.M1(typed_func, typed_paramFunc);
@@ -1039,7 +1039,7 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Function<JSType.Any, JSType.Any>>]
             public static Func<object, object> get_P1([JSMarshalAs<JSType.Any>] object instance)
             {
-                C1 typed_instance = (C1)instance;
+                C1 typed_instance = C1Interop.FromObject(instance);
                 Func<MyClass, MyClass> retVal = typed_instance.P1;
                 return (object arg0) => (object)retVal(MyClassInterop.FromObject(arg0));
             }
@@ -1047,7 +1047,7 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Void>]
             public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Any, JSType.Any>>] Func<object, object> value)
             {
-                C1 typed_instance = (C1)instance;
+                C1 typed_instance = C1Interop.FromObject(instance);
                 Func<MyClass, MyClass> typed_value = (MyClass arg0) => MyClassInterop.FromObject(value(arg0));
                 typed_instance.P1 = typed_value;
             }
@@ -1120,14 +1120,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Function>]
     public static Action get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return typed_instance.P1;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function>] Action value)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         typed_instance.P1 = value;
     }
     public static C1 FromObject(object obj)
@@ -1198,14 +1198,14 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Function<JSType.String>>]
             public static Action<char> get_P1([JSMarshalAs<JSType.Any>] object instance)
             {
-                C1 typed_instance = (C1)instance;
+                C1 typed_instance = C1Interop.FromObject(instance);
                 return typed_instance.P1;
             }
             [JSExport]
             [return: JSMarshalAs<JSType.Void>]
             public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.String>>] Action<char> value)
             {
-                C1 typed_instance = (C1)instance;
+                C1 typed_instance = C1Interop.FromObject(instance);
                 typed_instance.P1 = value;
             }
             public static C1 FromObject(object obj)
