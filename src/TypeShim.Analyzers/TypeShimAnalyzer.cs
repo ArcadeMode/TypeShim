@@ -153,7 +153,6 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         if (context.SemanticModel.GetDeclaredSymbol(parameterNode, context.CancellationToken) is not IParameterSymbol parameter)
             return;
 
-        // Only public methods/constructors of [TSExport] classes render optional parameters.
         if (parameter.ContainingSymbol is not IMethodSymbol method
             || method.DeclaredAccessibility != Accessibility.Public
             || method.MethodKind is not (MethodKind.Ordinary or MethodKind.Constructor)
@@ -164,7 +163,6 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
 
         Location location = parameterNode.Type?.GetLocation() ?? parameterNode.GetLocation();
 
-        // Span/ArraySegment defaults cannot cross the interop boundary; they must be constructed on the C# side.
         if (IsSpanOrArraySegment(parameter.Type))
         {
             string typeName = parameter.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
@@ -173,13 +171,13 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         }
 
         // The generator resolves defaults against a compilation that only preserves [TSExport] classes whole.
-        // A default referencing a user-declared constant outside that surface cannot be resolved.
+        // A default referencing a user-declared constant outside that surface cannot be resolved. Enum members
+        // are excluded because enums cross as their underlying value, which is always resolvable.
         foreach (SyntaxNode node in defaultExpr.DescendantNodesAndSelf())
         {
             if (node is not SimpleNameSyntax)
                 continue;
 
-            // Enum members are constants too but are handled by the type checks (enums are out of scope here).
             if (context.SemanticModel.GetSymbolInfo(node, context.CancellationToken).Symbol is IFieldSymbol { IsConst: true } field
                 && field.ContainingType.TypeKind != TypeKind.Enum
                 && field.Locations.Any(l => l.IsInSource)
@@ -259,6 +257,13 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
             InteropTypeInfoBuilder builder = new(type, new InteropTypeInfoCache());
             InteropTypeInfo info = builder.Build();
             if (info.RequiresTypeConversion && !info.SupportsTypeConversion)
+            {
+                return TypeShimDiagnostics.NonExportedTypeInInteropApiRule;
+            }
+
+            // A non-[TSExport] enum on the boundary is stripped from codegen and fails there, so flag it
+            // like a non-exported class. (Enums otherwise 'support' conversion since they cross as a number.)
+            if (info.GetInnermostType() is { IsEnum: true, IsTSExport: false })
             {
                 return TypeShimDiagnostics.NonExportedTypeInInteropApiRule;
             }

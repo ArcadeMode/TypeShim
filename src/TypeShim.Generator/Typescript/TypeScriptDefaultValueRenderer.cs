@@ -18,8 +18,10 @@ internal sealed class TypeScriptDefaultValueRenderer(RenderContext ctx)
             if (type.IsNullableType)
             {
                 ctx.Append("null");
+                return;
             }
-            else if (type.ManagedType is KnownManagedType.DateTime or KnownManagedType.DateTimeOffset)
+            
+            if (type.ManagedType is KnownManagedType.DateTime or KnownManagedType.DateTimeOffset)
             {
                 // Use .NET DateTime/DateTimeOffset default (0001-01-01) in TypeScript (no inconsistency with JS Date default starting in the year -271,821)
                 ctx.Append("new Date(\"0001-01-01T00:00:00Z\")");
@@ -28,7 +30,7 @@ internal sealed class TypeScriptDefaultValueRenderer(RenderContext ctx)
 
             // 'x: T = null' would violate TypeScript strictNullChecks, user can fix themselves by making their type nullable.
             throw new NotSupportedDefaultValueException(
-                $"Null default values for reference type '{type.CSharpTypeSyntax}' are yet supported.");
+                $"Null default values for reference type '{type.CSharpTypeSyntax}' are not yet supported.");
         }
 
         InteropTypeInfo valueType = type.IsNullableType && type.TypeArgument is not null ? type.TypeArgument : type;
