@@ -460,11 +460,6 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         };
     }
 
-    /// <summary>
-    /// A trailing initializer object can be rendered optional (and thus follow an optional parameter) only when it can be
-    /// safely omitted as an empty object. The generated C# interop emits a "?? throw" for every non-nullable member
-    /// (see CSharpMethodRenderer), so an omitted initializer only succeeds when every member is nullable.
-    /// </summary>
     private static bool InitializerIsOmittable(ConstructorInfo constructorInfo)
     {
         if (constructorInfo.InitializerObject == null)
@@ -472,6 +467,6 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             return true;
         }
 
-        return constructorInfo.MemberInitializers.All(p => p.Type.IsNullableType);
+        return constructorInfo.MemberInitializers.All(p => p.Type.IsNullableType); // TODO: swap for required check
     }
 }
