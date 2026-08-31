@@ -48,6 +48,9 @@ internal sealed class InteropTypeInfo
     public bool IsDelegateType() => ManagedType is KnownManagedType.Function or KnownManagedType.Action;
 
     public required bool IsTSExport { get; init; }
+
+    public bool IsEnum { get; init; }
+
     public required bool RequiresTypeConversion { get; init; }
     public required bool SupportsTypeConversion { get; init; }
 

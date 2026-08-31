@@ -14,12 +14,12 @@ try
 {
     SymbolExtractor symbolExtractor = new(parsedArgs.CsFileInfos, parsedArgs.RuntimePackRefDir);
     InteropTypeInfoCache typeInfoCache = new();
-    List<ClassInfo> classInfos = [.. symbolExtractor.ExtractAllExportedSymbols()
-        .Select(classSymbol => new ClassInfoBuilder(classSymbol, typeInfoCache).Build())
-        .Where(ci => ci.Methods.Any() || ci.Properties.Any())]; // dont bother with empty classes
+    List<NamedTypeInfo> namedTypeInfos = [.. symbolExtractor.ExtractAllExportedSymbols()
+        .Select(symbol => new NamedTypeInfoBuilder(symbol, typeInfoCache).Build())
+        .OfType<NamedTypeInfo>()]; // drops nulls
 
-    Task csIo = GenerateCSharpInteropCode(parsedArgs, classInfos);
-    Task tsIo = GenerateTypeScriptInteropCode(parsedArgs, classInfos);
+    Task csIo = GenerateCSharpInteropCode(parsedArgs, namedTypeInfos);
+    Task tsIo = GenerateTypeScriptInteropCode(parsedArgs, namedTypeInfos);
     await Task.WhenAll(csIo, tsIo);
 }
 catch (TypeShimException ex) // known exceptions warrant only an error message
@@ -29,31 +29,33 @@ catch (TypeShimException ex) // known exceptions warrant only an error message
 }
 // End of main program
 
-static Task GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)
+static Task GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<NamedTypeInfo> namedTypeInfos)
 {
     List<InteropTypeInfo> resolvedTypes = [];
     JSObjectMethodResolver methodResolver = new(resolvedTypes);
-    List<Task> ioTasks = new(classInfos.Count + 1);
-    foreach(ClassInfo classInfo in classInfos)
+    List<Task> ioTasks = new(namedTypeInfos.Count + 1);
+    foreach(NamedTypeInfo namedType in namedTypeInfos)
     {
-        RenderContext ctx = new(classInfo, classInfos, RenderOptions.CSharp);
+        if (namedType is not ClassInfo classInfo) continue;
+        RenderContext ctx = new(classInfo, namedTypeInfos, RenderOptions.CSharp);
         new CSharpInteropClassRenderer(classInfo, ctx, methodResolver).Render();
         ioTasks.Add(File.WriteAllTextAsync(Path.Combine(parsedArgs.CsOutputDir, $"{classInfo.Name}.g.cs"), ctx.ToString()));
     }
-    RenderContext jsObjRenderCtx = new(null, classInfos, RenderOptions.CSharp);
+    RenderContext jsObjRenderCtx = new(null, namedTypeInfos, RenderOptions.CSharp);
     new JSObjectExtensionsRenderer(jsObjRenderCtx, resolvedTypes).Render();
     ioTasks.Add(File.WriteAllTextAsync(Path.Combine(parsedArgs.CsOutputDir, "JSObjectExtensions.g.cs"), jsObjRenderCtx.ToString()));
     return Task.WhenAll(ioTasks);
 }
 
-static Task GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<ClassInfo> classInfos)
+static Task GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<NamedTypeInfo> namedTypeInfos)
 {
+    List<ClassInfo> classInfos = [.. namedTypeInfos.OfType<ClassInfo>()];
     ModuleInfo moduleInfo = new()
     {
         ExportedClasses = classInfos,
         HierarchyInfo = ModuleHierarchyInfo.FromClasses(classInfos)
     };
-    TypeScriptRenderer tsRenderer = new(classInfos, moduleInfo);
+    TypeScriptRenderer tsRenderer = new(namedTypeInfos, moduleInfo);
     return WriteFile(tsRenderer.Render());
 
     async Task WriteFile(List<RenderContext> ctxs)
