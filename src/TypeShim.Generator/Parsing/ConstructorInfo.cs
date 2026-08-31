@@ -1,4 +1,5 @@
-﻿using TypeShim.Generator.Parsing;
+using System.Linq;
+using TypeShim.Generator.Parsing;
 using TypeShim.Shared;
 
 internal sealed class ConstructorInfo
@@ -12,6 +13,7 @@ internal sealed class ConstructorInfo
     
     internal bool IsParameterless => Parameters.Length == 0;
     internal bool AcceptsInitializer => MemberInitializers.Length > 0;
+    internal bool HasOptionalParameters => Parameters.Any(p => p.Default != null);
 
     internal MethodParameterInfo[] GetParametersIncludingInitializerObject()
     {

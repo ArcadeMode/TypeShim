@@ -86,3 +86,36 @@ describe('Enum Test', () => {
         expect(testObject.NextPriority(Priority.High)).toBe(Priority.High);
     });
 });
+
+describe('Optional Enum Parameters', () => {
+    let testObject: EnumMethodsClass;
+    beforeEach(() => {
+        testObject = new EnumMethodsClass({
+            PriorityProperty: Priority.Medium,
+            SpecialByteProperty: SpecialByte.All,
+            NullablePriorityProperty: Priority.Low,
+            PriorityArrayProperty: [Priority.Low, Priority.High],
+            SeasonProperty: Season.Summer,
+        });
+    });
+
+    test('enum default applied when omitted and overridden when provided', () => {
+        expect(testObject.PriorityOrDefault()).toBe(Priority.Medium);
+        expect(testObject.PriorityOrDefault(Priority.High)).toBe(Priority.High);
+    });
+
+    test('enum default literal resolves to the zero member', () => {
+        expect(testObject.PriorityOrLiteralDefault()).toBe(Priority.Low);
+        expect(testObject.PriorityOrLiteralDefault(Priority.High)).toBe(Priority.High);
+    });
+
+    test('nullable enum null default applied and overridden', () => {
+        expect(testObject.NullablePriorityOrNull()).toBeNull();
+        expect(testObject.NullablePriorityOrNull(Priority.Medium)).toBe(Priority.Medium);
+    });
+
+    test('nullable enum value default applied and overridden', () => {
+        expect(testObject.NullablePriorityOrValue()).toBe(Priority.High);
+        expect(testObject.NullablePriorityOrValue(Priority.Low)).toBe(Priority.Low);
+    });
+});

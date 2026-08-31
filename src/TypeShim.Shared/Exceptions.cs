@@ -50,3 +50,11 @@ public class NotSupportedGenericMethodException(string message, Exception? inner
 public class NotFoundNamedTypeInfoException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
 {
 }
+
+public class NotSupportedDefaultValueException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
+{
+}
+
+public class NotSupportedOptionalParameterException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
+{
+}

@@ -57,5 +57,10 @@ public class EnumMethodsClass
 
     public Priority NextPriority(Priority priority) => priority == Priority.High ? Priority.High : priority + 1;
 
+    public Priority PriorityOrDefault(Priority p = Priority.Medium) => p;
+    public Priority PriorityOrLiteralDefault(Priority p = default) => p;
+    public Priority? NullablePriorityOrNull(Priority? p = null) => p;
+    public Priority? NullablePriorityOrValue(Priority? p = Priority.High) => p;
+
     public static Priority HighestPriority() => Priority.High;
 }
