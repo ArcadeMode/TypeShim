@@ -47,6 +47,6 @@ public class NotSupportedGenericMethodException(string message, Exception? inner
 {
 }
 
-public class NotFoundClassInfoException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
+public class NotFoundNamedTypeInfoException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
 {
 }

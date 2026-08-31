@@ -8,12 +8,6 @@ internal sealed class SymbolMap(IEnumerable<NamedTypeInfo> allNamedTypes)
 {
     private readonly Dictionary<InteropTypeInfo, NamedTypeInfo> _typeToNamedTypeDict = allNamedTypes.ToDictionary(n => n.Type);
 
-    internal ClassInfo GetClassInfo(InteropTypeInfo type)
-    {
-        _typeToNamedTypeDict.TryGetValue(type, out NamedTypeInfo? info);
-        return info as ClassInfo ?? throw new NotFoundClassInfoException($"Could not find ClassInfo for type: {type.CSharpTypeSyntax}");
-    }
-
     /// <summary>
     /// Resolves the exported named type (class or enum) for the given type. Callers should assert the type
     /// is TSExport (or its innermost type is) before calling; throws if the type is not a registered named type.
@@ -21,16 +15,7 @@ internal sealed class SymbolMap(IEnumerable<NamedTypeInfo> allNamedTypes)
     internal NamedTypeInfo GetNamedTypeInfo(InteropTypeInfo type)
     {
         _typeToNamedTypeDict.TryGetValue(type, out NamedTypeInfo? info);
-        return info ?? throw new NotFoundClassInfoException($"Could not find NamedTypeInfo for type: {type.CSharpTypeSyntax}");
-    }
-
-    /// <summary>
-    /// True when the given type is (directly) an exported enum. Does not unwrap arrays/tasks/nullables.
-    /// </summary>
-    internal bool IsEnumType(InteropTypeInfo type)
-    {
-        _typeToNamedTypeDict.TryGetValue(type, out NamedTypeInfo? info);
-        return info is EnumInfo;
+        return info ?? throw new NotFoundNamedTypeInfoException($"Could not find NamedTypeInfo for type: {type.CSharpTypeSyntax}");
     }
 
     /// <summary>

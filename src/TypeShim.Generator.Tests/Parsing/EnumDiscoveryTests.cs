@@ -139,7 +139,7 @@ internal class EnumDiscoveryTests
     }
 
     [Test]
-    public void SymbolMap_GetNamedTypeInfo_ResolvesEnum_ButGetClassInfoThrows()
+    public void SymbolMap_GetNamedTypeInfo_ResolvesEnum()
     {
         EnumInfo enumInfo = BuildEnum("""
             namespace N1;
@@ -148,11 +148,6 @@ internal class EnumDiscoveryTests
         """);
 
         SymbolMap symbolMap = new([enumInfo]);
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(symbolMap.GetNamedTypeInfo(enumInfo.Type), Is.SameAs(enumInfo));
-            Assert.Throws<NotFoundClassInfoException>(() => symbolMap.GetClassInfo(enumInfo.Type));
-        });
+        Assert.That(symbolMap.GetNamedTypeInfo(enumInfo.Type), Is.SameAs(enumInfo));
     }
 }

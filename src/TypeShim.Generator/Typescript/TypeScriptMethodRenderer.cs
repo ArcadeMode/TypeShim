@@ -293,23 +293,23 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             RenderInlineHandleExtraction(typeInfo.TypeArgument, () => ctx.Append("e"));
             ctx.Append(')');
         }
-        else if (ctx.SymbolMap.IsEnumType(typeInfo))
+        else if (typeInfo.IsTSExport && ctx.SymbolMap.GetNamedTypeInfo(typeInfo) is ClassInfo classInfo)
         {
-            // Enums cross as their underlying number; the value is passed through as-is.
-        }
-        else if (typeInfo.IsTSExport && ctx.SymbolMap.GetClassInfo(typeInfo) is { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
-        {
-            // accepts initializer or proxy, if proxy, extract handle, if init, pass as is
-            ctx.Append(" instanceof ");
-            TypeScriptSymbolNameRenderer.Render(typeInfo, ctx, TypeShimSymbolType.Proxy, interop: false);
-            ctx.Append(" ? ");
-            expressionRenderer();
-            ctx.Append(".instance : ");
-            expressionRenderer();
-        }
-        else if (typeInfo.IsTSExport) // simple proxy
-        {
-            ctx.Append(".instance");
+            if (classInfo is { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
+            {
+                // accepts initializer or proxy, if proxy, extract handle, if init, pass as is
+                ctx.Append(" instanceof ");
+                TypeScriptSymbolNameRenderer.Render(typeInfo, ctx, TypeShimSymbolType.Proxy, interop: false);
+                ctx.Append(" ? ");
+                expressionRenderer();
+                ctx.Append(".instance : ");
+                expressionRenderer();
+            } 
+            else
+            {
+                // simple proxy, extract handle
+                ctx.Append(".instance");
+            }
         }
     }
 

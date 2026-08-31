@@ -54,8 +54,7 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
         else
         {
             ctx.Append(GetSymbolName(typeInfo));
-            // Enums are TSExport but render as a plain leaf name (no Snapshot/Initializer suffix).
-            if (typeInfo.IsTSExport && !ctx.SymbolMap.IsEnumType(typeInfo))
+            if (typeInfo.IsTSExport && ctx.SymbolMap.GetNamedTypeInfo(typeInfo) is ClassInfo)
             {
                 RenderSuffix(typeInfo, isDelegateParameter ? parameterSymbolType : returnSymbolType);
             }
@@ -141,7 +140,12 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
 
         void RenderProxyInitializerSuffix(bool interop, InteropTypeInfo innerMostTSExport)
         {
-            if (ctx.SymbolMap.GetClassInfo(innerMostTSExport) is not { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
+            if (ctx.SymbolMap.GetNamedTypeInfo(innerMostTSExport) is not ClassInfo classInfo)
+            {
+                throw new InvalidOperationException($"Expected {innerMostTSExport.CSharpTypeSyntax} to be a class type.");
+            }
+
+            if (classInfo is not { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
             {
                 RenderSuffix(typeInfo, TypeShimSymbolType.Proxy); // initializer not supported, fall back to proxy only.
             }
