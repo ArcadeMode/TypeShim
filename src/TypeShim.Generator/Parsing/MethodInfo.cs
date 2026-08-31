@@ -7,24 +7,22 @@ internal sealed class MethodInfo
 {
     internal required bool IsStatic { get; init; }
     internal required string Name { get; init; }
+    internal required MethodParameterInfo? InstanceParameter { get; init; }
     internal required IReadOnlyCollection<MethodParameterInfo> Parameters { get; init; }
     internal required InteropTypeInfo ReturnType { get; init; }
     internal required CommentInfo? Comment { get; init; }
 
-    public MethodInfo WithoutInstanceParameter()
+    internal IReadOnlyCollection<MethodParameterInfo> GetParametersIncludingInstanceParameter()
     {
-        return new MethodInfo
+        if (InstanceParameter is MethodParameterInfo instanceParameter)
         {
-            IsStatic = this.IsStatic,
-            Name = this.Name,
-            Parameters = [.. this.Parameters.Where(p => !p.IsInjectedInstanceParameter)],
-            ReturnType = this.ReturnType,
-            Comment = this.Comment,
-        };
+            return [instanceParameter, .. Parameters];
+        }
+        return Parameters;
     }
 
     internal bool MatchesDisposeSignature()
     {
-        return Name == "Dispose" && !Parameters.Any(p => !p.IsInjectedInstanceParameter) && ReturnType.ManagedType == KnownManagedType.Void;
+        return Name == "Dispose" && Parameters.Count == 0 && ReturnType.ManagedType == KnownManagedType.Void;
     }
 }

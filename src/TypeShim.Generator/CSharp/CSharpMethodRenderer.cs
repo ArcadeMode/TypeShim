@@ -83,11 +83,11 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         marshalAsAttributeRenderer.RenderReturnAttribute(methodInfo.ReturnType.JSTypeSyntax);
         _ctx.AppendLine();
 
-        RenderMethodSignature(methodInfo.Name, methodInfo.ReturnType, methodInfo.Parameters);
+        RenderMethodSignature(methodInfo.Name, methodInfo.ReturnType, methodInfo.GetParametersIncludingInstanceParameter());
         _ctx.AppendLine("{");
         using (_ctx.Indent())
         {
-            foreach (MethodParameterInfo originalParamInfo in methodInfo.Parameters)
+            foreach (MethodParameterInfo originalParamInfo in methodInfo.GetParametersIncludingInstanceParameter())
             {
                 _conversionRenderer.RenderParameterTypeConversion(originalParamInfo);
             }
@@ -108,8 +108,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             }
             else
             {
-                _ctx.Append(_ctx.LocalScope.GetAccessorExpression(methodInfo.Parameters.First(p => p.IsInjectedInstanceParameter)));
-                parameters = [.. methodInfo.Parameters.Skip(1)];
+                _ctx.Append(_ctx.LocalScope.GetAccessorExpression(methodInfo.InstanceParameter!));
             }
 
             _ctx.Append('.').Append(methodInfo.Name).Append('(');
@@ -132,17 +131,17 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         marshalAsAttributeRenderer.RenderReturnAttribute(methodInfo.ReturnType.JSTypeSyntax);
         _ctx.AppendLine();
 
-        RenderMethodSignature(methodInfo.Name, methodInfo.ReturnType, methodInfo.Parameters);
+        RenderMethodSignature(methodInfo.Name, methodInfo.ReturnType, methodInfo.GetParametersIncludingInstanceParameter());
         _ctx.AppendLine("{");
 
         using (_ctx.Indent())
         {
-            foreach (MethodParameterInfo originalParamInfo in methodInfo.Parameters)
+            foreach (MethodParameterInfo originalParamInfo in methodInfo.GetParametersIncludingInstanceParameter())
             {
                 _conversionRenderer.RenderParameterTypeConversion(originalParamInfo);
             }
 
-            string accessedObject = methodInfo.IsStatic ? _ctx.Class.Name : _ctx.LocalScope.GetAccessorExpression(methodInfo.Parameters.ElementAt(0));
+            string accessedObject = methodInfo.IsStatic ? _ctx.Class.Name : _ctx.LocalScope.GetAccessorExpression(methodInfo.InstanceParameter!);
             DeferredExpressionRenderer untypedValueExpressionRenderer = DeferredExpressionRenderer.FromUnary(() => _ctx.Append(accessedObject).Append('.').Append(propertyInfo.Name));
             DeferredExpressionRenderer typedValueExpressionRenderer = _conversionRenderer.RenderReturnTypeConversion(methodInfo.ReturnType, untypedValueExpressionRenderer);
             if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void) // getter
@@ -153,7 +152,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             }
             else // setter
             {
-                string valueVarName = _ctx.LocalScope.GetAccessorExpression(methodInfo.Parameters.First(p => !p.IsInjectedInstanceParameter)); // TODO: get rid of IsInjectedInstanceParameter
+                string valueVarName = _ctx.LocalScope.GetAccessorExpression(methodInfo.Parameters.First());
                 typedValueExpressionRenderer.Render();
                 _ctx.Append(" = ").Append(valueVarName).AppendLine(";");                
             }

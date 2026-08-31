@@ -16,7 +16,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         string varName = _ctx.LocalScope.GetAccessorExpression(parameterInfo);
         string newVarName = $"typed_{_ctx.LocalScope.GetAccessorExpression(parameterInfo)}";
 
-        DeferredExpressionRenderer convertedValueAccessor = RenderTypeDownConversion(parameterInfo.Type, varName, DeferredExpressionRenderer.FromUnary(() => _ctx.Append(varName)), parameterInfo.IsInjectedInstanceParameter);
+        DeferredExpressionRenderer convertedValueAccessor = RenderTypeDownConversion(parameterInfo.Type, varName, DeferredExpressionRenderer.FromUnary(() => _ctx.Append(varName)));
         _ctx.Append(parameterInfo.Type.CSharpTypeSyntax.ToString()).Append(' ').Append(newVarName).Append(" = ");
         convertedValueAccessor.Render();
         _ctx.AppendLine(";");
@@ -25,10 +25,10 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
 
     internal DeferredExpressionRenderer RenderVarTypeConversion(InteropTypeInfo typeInfo, string varName, DeferredExpressionRenderer valueExpressionRenderer)
     {
-        return RenderTypeDownConversion(typeInfo, varName, valueExpressionRenderer, false);
+        return RenderTypeDownConversion(typeInfo, varName, valueExpressionRenderer);
     }
 
-    private DeferredExpressionRenderer RenderTypeDownConversion(InteropTypeInfo typeInfo, string accessorName, DeferredExpressionRenderer accessorExpressionRenderer, bool isInstanceParameter)
+    private DeferredExpressionRenderer RenderTypeDownConversion(InteropTypeInfo typeInfo, string accessorName, DeferredExpressionRenderer accessorExpressionRenderer)
     {
         if (!typeInfo.RequiresTypeConversion)
             return accessorExpressionRenderer;
@@ -43,7 +43,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         }
         else
         {
-            return DeferredExpressionRenderer.FromUnary(() => RenderInlineTypeDownConversion(typeInfo, accessorName, accessorExpressionRenderer, forceCovariantConversion: isInstanceParameter));
+            return DeferredExpressionRenderer.FromUnary(() => RenderInlineTypeDownConversion(typeInfo, accessorName, accessorExpressionRenderer));
         }
     }
 
@@ -85,14 +85,10 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         }
     }
 
-    private void RenderInlineTypeDownConversion(InteropTypeInfo typeInfo, string accessorName, DeferredExpressionRenderer accessorExpressionRenderer, bool forceCovariantConversion = false)
+    private void RenderInlineTypeDownConversion(InteropTypeInfo typeInfo, string accessorName, DeferredExpressionRenderer accessorExpressionRenderer)
     {
         ArgumentNullException.ThrowIfNull(typeInfo, nameof(typeInfo));
-        if (forceCovariantConversion)
-        {
-            RenderInlineCovariantTypeDownConversion(typeInfo, accessorExpressionRenderer);
-        }
-        else if (typeInfo.IsArrayType)
+        if (typeInfo.IsArrayType)
         {
             RenderInlineArrayTypeDownConversion(typeInfo, accessorExpressionRenderer);
         }

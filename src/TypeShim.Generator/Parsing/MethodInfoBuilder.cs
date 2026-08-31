@@ -19,6 +19,7 @@ internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSym
         }
 
         bool isJSExport = SymbolFacts.HasJSExportAttribute(memberMethod);
+        MethodParameterInfo? instanceParameter = parameterInfoBuilder.BuildInstanceParameter();
         IReadOnlyCollection<MethodParameterInfo> parameters = [.. parameterInfoBuilder.Build()];
         InteropTypeInfo returnType = typeInfoBuilder.Build();
 
@@ -41,6 +42,7 @@ internal sealed class MethodInfoBuilder(INamedTypeSymbol classSymbol, IMethodSym
         {
             IsStatic = memberMethod.IsStatic,
             Name = memberMethod.Name,
+            InstanceParameter = instanceParameter,
             Parameters = parameters,
             ReturnType = returnType,
             Comment = new CommentInfoBuilder(memberMethod).Build(),

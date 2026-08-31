@@ -53,7 +53,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             using (ctx.Indent())
             {
                 ctx.Append("super(");
-                RenderInteropInvocation(constructorInfo.Name, constructorInfo.Parameters, constructorInfo.InitializerObject);
+                RenderInteropInvocation(constructorInfo.Name, constructorInfo.Parameters, instanceParameter: null, constructorInfo.InitializerObject);
                 ctx.AppendLine(");");
             }
             ctx.AppendLine("}");
@@ -63,7 +63,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
     internal void RenderProxyMethod(MethodInfo methodInfo)
     {
         TypeScriptJSDocRenderer.RenderJSDoc(ctx, methodInfo.Comment);
-        RenderProxyMethodSignature(methodInfo.WithoutInstanceParameter());
+        RenderProxyMethodSignature(methodInfo);
         RenderMethodBody(methodInfo);
 
         void RenderProxyMethodSignature(MethodInfo methodInfo)
@@ -83,13 +83,13 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
     {
         TypeScriptJSDocRenderer.RenderJSDoc(ctx, propertyInfo.Comment);
         MethodInfo getterInfo = propertyInfo.GetMethod;
-        RenderProxyPropertyGetterSignature(getterInfo.WithoutInstanceParameter());
+        RenderProxyPropertyGetterSignature(getterInfo);
         RenderMethodBody(getterInfo);
 
         if (propertyInfo.SetMethod is MethodInfo setterInfo)
         {
             ctx.AppendLine();
-            RenderProxyPropertySetterSignature(setterInfo.WithoutInstanceParameter());
+            RenderProxyPropertySetterSignature(setterInfo);
             RenderMethodBody(setterInfo);
         }
 
@@ -151,7 +151,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             if (requiresProxyConversion || requiresCharConversion)
             {
                 ctx.Append("const res = ");
-                RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
+                RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters, methodInfo.InstanceParameter);
                 ctx.AppendLine(";");
 
                 ctx.Append($"return ");
@@ -161,7 +161,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             else
             {
                 ctx.Append(methodInfo.ReturnType.ManagedType == KnownManagedType.Void ? string.Empty : "return ");
-                RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters);
+                RenderInteropInvocation(methodInfo.Name, methodInfo.Parameters, methodInfo.InstanceParameter);
             }
             ctx.AppendLine(";");
 
@@ -369,27 +369,28 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         }
     }
 
-    private void RenderInteropInvocation(string methodName, IEnumerable<MethodParameterInfo> methodParameters, MethodParameterInfo? initializerObject = null)
+    private void RenderInteropInvocation(string methodName, IEnumerable<MethodParameterInfo> methodParameters, MethodParameterInfo? instanceParameter = null, MethodParameterInfo? initializerObject = null)
     {
         ctx.Append("TypeShimConfig.exports.");
         RenderInteropMethodAccessor(methodName);
         ctx.Append("(");
-        RenderMethodInvocationParameters("this.instance");
+        RenderMethodInvocationParameters();
         ctx.Append(")");
 
-        void RenderMethodInvocationParameters(string instanceParameterExpression)
+        void RenderMethodInvocationParameters()
         {
             bool isFirst = true;
+            if (instanceParameter != null)
+            {
+                ctx.Append("this.instance");
+                isFirst = false;
+            }
             foreach (MethodParameterInfo parameter in methodParameters)
             {
                 if (!isFirst) ctx.Append(", ");
 
                 void renderParameter() => ctx.Append(parameter.Name);
-                if (parameter.IsInjectedInstanceParameter)
-                {
-                    ctx.Append(instanceParameterExpression);
-                }
-                else if (ctx.SymbolMap.IsConversionRequiringClassOrDelegate(parameter.Type) || RequiresCharConversion(parameter.Type))
+                if (ctx.SymbolMap.IsConversionRequiringClassOrDelegate(parameter.Type) || RequiresCharConversion(parameter.Type))
                 {
                     RenderInlineHandleExtraction(parameter.Type, renderParameter);
                 }
