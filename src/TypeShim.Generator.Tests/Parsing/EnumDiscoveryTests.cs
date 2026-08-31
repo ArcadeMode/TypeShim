@@ -91,7 +91,7 @@ internal class EnumDiscoveryTests
         Assert.That(enumInfo.Members.Select(m => m.Value), Is.EqualTo(new long[] { 0, 1, 2, 3 }));
     }
 
-    [TestCase("uint", "uint")]
+    [TestCase("int", "int")]
     [TestCase("long", "long")]
     public void EnumInfoBuilder_ReflectsWideUnderlyingType(string underlying, string expected)
     {

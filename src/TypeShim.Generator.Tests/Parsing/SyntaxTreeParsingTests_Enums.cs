@@ -39,12 +39,11 @@ internal class SyntaxTreeParsingTests_Enums
         });
     }
 
-    [TestCase("byte")]
-    [TestCase("sbyte")]
-    [TestCase("short")]
-    [TestCase("ushort")]
-    [TestCase("int")]
-    public void InteropTypeInfoBuilder_SafeSmallUnderlyingType_MarshalsAsInt(string underlying)
+    [TestCase("byte", KnownManagedType.Byte, "byte")]
+    [TestCase("short", KnownManagedType.Int16, "short")]
+    [TestCase("int", KnownManagedType.Int32, "int")]
+    [TestCase("long", KnownManagedType.Int64, "long")]
+    public void InteropTypeInfoBuilder_SafeSmallUnderlyingType_MarshalsAsInt(string underlying, KnownManagedType expectedManagedType, string expectedCSharpInteropType)
     {
         INamedTypeSymbol enumSymbol = GetSymbol("""
             namespace N1;
@@ -56,14 +55,15 @@ internal class SyntaxTreeParsingTests_Enums
 
         Assert.Multiple(() =>
         {
-            Assert.That(info.ManagedType, Is.EqualTo(KnownManagedType.Int32));
-            Assert.That(info.CSharpInteropTypeSyntax.ToString(), Is.EqualTo("int"));
+            Assert.That(info.ManagedType, Is.EqualTo(expectedManagedType));
+            Assert.That(info.CSharpInteropTypeSyntax.ToString(), Is.EqualTo(expectedCSharpInteropType));
         });
     }
 
     [TestCase("uint")]
-    [TestCase("long")]
-    public void InteropTypeInfoBuilder_WideUnderlyingType_MarshalsAsLong(string underlying)
+    [TestCase("sbyte")]
+    [TestCase("ushort")]
+    public void InteropTypeInfoBuilder_UnsupportedUnderlyingType_Throws(string underlying)
     {
         INamedTypeSymbol enumSymbol = GetSymbol("""
             namespace N1;
@@ -71,13 +71,8 @@ internal class SyntaxTreeParsingTests_Enums
             public enum Color : {{underlying}} { Red, Green, Blue }
         """.Replace("{{underlying}}", underlying), "Color");
 
-        InteropTypeInfo info = new InteropTypeInfoBuilder(enumSymbol, new InteropTypeInfoCache()).Build();
-
-        Assert.Multiple(() =>
-        {
-            Assert.That(info.ManagedType, Is.EqualTo(KnownManagedType.Int64));
-            Assert.That(info.CSharpInteropTypeSyntax.ToString(), Is.EqualTo("long"));
-        });
+        Assert.Throws<NotSupportedTypeException>(() =>
+            _ = new InteropTypeInfoBuilder(enumSymbol, new InteropTypeInfoCache()).Build());
     }
 
     [Test]

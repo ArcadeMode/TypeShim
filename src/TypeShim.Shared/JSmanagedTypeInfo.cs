@@ -244,27 +244,14 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
 
     private static JSTypeInfo CreateEnumJSTypeInfo(INamedTypeSymbol enumType)
     {
-        // Marshal the enum as its underlying integer, widened to the nearest JS-safe signed integer:
-        //   byte/sbyte/short/ushort/int -> int (all fit exactly in Int32)
-        //   uint/long                   -> long (Int64 marshals to a JS number; member values are range-checked to 2^53)
-        return enumType.EnumUnderlyingType?.SpecialType switch
+        INamedTypeSymbol underlyingType = enumType.EnumUnderlyingType ?? throw new InvalidOperationException($"Enum type '{enumType}' does not have an underlying type.");
+        return underlyingType.SpecialType switch
         {
-            SpecialType.System_Byte
-            or SpecialType.System_SByte
-            or SpecialType.System_Int16
-            or SpecialType.System_UInt16
-            or SpecialType.System_Int32
-                => new JSSimpleTypeInfo(KnownManagedType.Int32)
-                {
-                    Syntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword))
-                },
-            SpecialType.System_UInt32
-            or SpecialType.System_Int64
-                => new JSSimpleTypeInfo(KnownManagedType.Int64)
-                {
-                    Syntax = SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.LongKeyword))
-                },
-            _ => new JSInvalidTypeInfo(),
+            SpecialType.System_SByte
+            or SpecialType.System_UInt16 
+            or SpecialType.System_UInt32
+            or SpecialType.System_UInt64 => new JSInvalidTypeInfo(),
+            _ => CreateJSTypeInfoForTypeSymbol(underlyingType),
         };
     }
 }

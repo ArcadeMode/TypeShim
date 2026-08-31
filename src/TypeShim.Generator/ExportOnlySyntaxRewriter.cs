@@ -20,8 +20,6 @@ public sealed class ExportOnlySyntaxRewriter : CSharpSyntaxRewriter
 
     public override SyntaxNode? VisitEnumDeclaration(EnumDeclarationSyntax node)
     {
-        // Only [TSExport] enums cross the boundary; drop the rest so referencing a non-exported enum
-        // is a hard error, symmetric with non-exported classes.
         return HasTSExportAttribute(node.AttributeLists) ? node : null;
     }
 

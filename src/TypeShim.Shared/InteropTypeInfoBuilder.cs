@@ -60,15 +60,9 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
 
         bool RequiresTypeConversion()
         {
-            // Enums cross the boundary as their underlying integer but must be cast back to the CLR enum type.
-            if (isEnum)
-            {
-                return true;
-            }
-            // If the type inherits from 'object' it requires conversion to its original type after crossing the interop boundary
             if (simpleTypeInfo.KnownType != KnownManagedType.Object)
             {
-                return false;
+                return isEnum; // only Enums are non-object types that require conversion after crossing the interop boundary
             }
             TypeSyntax unwrapped = clrTypeSyntax is NullableTypeSyntax n ? n.ElementType : clrTypeSyntax;
             // only 'object' itself requires no conversion, anything else does
@@ -77,10 +71,6 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
 
         bool SupportsTypeConversion()
         {
-            if (isEnum)
-            {
-                return IsTSExport;
-            }
             return simpleTypeInfo.KnownType != KnownManagedType.Object || IsTSExport;
         }
     }

@@ -16,7 +16,7 @@ try
     InteropTypeInfoCache typeInfoCache = new();
     List<NamedTypeInfo> namedTypeInfos = [.. symbolExtractor.ExtractAllExportedSymbols()
         .Select(symbol => new NamedTypeInfoBuilder(symbol, typeInfoCache).Build())
-        .OfType<NamedTypeInfo>()]; // drops nulls (non-projected symbols)
+        .OfType<NamedTypeInfo>()]; // drops nulls
 
     Task csIo = GenerateCSharpInteropCode(parsedArgs, namedTypeInfos);
     Task tsIo = GenerateTypeScriptInteropCode(parsedArgs, namedTypeInfos);
@@ -36,7 +36,7 @@ static Task GenerateCSharpInteropCode(ProgramArguments parsedArgs, List<NamedTyp
     List<Task> ioTasks = new(namedTypeInfos.Count + 1);
     foreach(NamedTypeInfo namedType in namedTypeInfos)
     {
-        if (namedType is not ClassInfo classInfo) continue; // enums produce no C# interop
+        if (namedType is not ClassInfo classInfo) continue;
         RenderContext ctx = new(classInfo, namedTypeInfos, RenderOptions.CSharp);
         new CSharpInteropClassRenderer(classInfo, ctx, methodResolver).Render();
         ioTasks.Add(File.WriteAllTextAsync(Path.Combine(parsedArgs.CsOutputDir, $"{classInfo.Name}.g.cs"), ctx.ToString()));
