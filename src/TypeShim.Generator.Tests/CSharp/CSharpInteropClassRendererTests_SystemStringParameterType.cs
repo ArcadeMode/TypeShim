@@ -97,7 +97,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.String>] string p1)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         typed_instance.M1(p1);
     }
     public static C1 FromObject(object obj)
@@ -161,14 +161,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.String>]
     public static {{typeExpression}} get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return typed_instance.P1;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.String>] {{typeExpression}} value)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         typed_instance.P1 = value;
     }
     public static C1 FromObject(object obj)

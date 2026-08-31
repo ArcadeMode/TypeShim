@@ -61,8 +61,9 @@ public partial class C1Interop
             using System;
             namespace N1;
             [TSExport]
-            public static class C1
+            public class C1
             {
+                private C1() {}
                 public string M1()
                 {
                     return 1;
@@ -93,8 +94,16 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.String>]
     public static string M1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return typed_instance.M1();
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
     }
 }
 
