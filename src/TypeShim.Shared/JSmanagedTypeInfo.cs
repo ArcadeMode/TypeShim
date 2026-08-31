@@ -224,6 +224,10 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
                 }
                 return new JSFunctionTypeInfo(false, signatureTypes!);
 
+            // enum: marshalled as its underlying integer, widened to the nearest JS-safe signed integer.
+            case INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType:
+                return CreateEnumJSTypeInfo(enumType);
+
             // class
             case INamedTypeSymbol classType when classType.TypeKind == TypeKind.Class:
                 return new JSSimpleTypeInfo(KnownManagedType.Object)
@@ -236,6 +240,19 @@ internal abstract record JSTypeInfo(KnownManagedType KnownType)
                 // disallow marshalling of structs with the InlineArrayAttribute
                 return new JSInvalidTypeInfo();
         }
+    }
+
+    private static JSTypeInfo CreateEnumJSTypeInfo(INamedTypeSymbol enumType)
+    {
+        INamedTypeSymbol underlyingType = enumType.EnumUnderlyingType ?? throw new InvalidOperationException($"Enum type '{enumType}' does not have an underlying type.");
+        return underlyingType.SpecialType switch
+        {
+            SpecialType.System_SByte
+            or SpecialType.System_UInt16 
+            or SpecialType.System_UInt32
+            or SpecialType.System_UInt64 => new JSInvalidTypeInfo(),
+            _ => CreateJSTypeInfoForTypeSymbol(underlyingType),
+        };
     }
 }
 

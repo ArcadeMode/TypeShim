@@ -9,7 +9,7 @@ public sealed class ExportOnlySyntaxRewriter : CSharpSyntaxRewriter
 {
     public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node)
     {
-        if (HasTSExportAttribute(node))
+        if (HasTSExportAttribute(node.AttributeLists))
         {
             // TSExport classes are kept whole - downstream parsing already filters by accessibility/kind.
             return node;
@@ -18,9 +18,14 @@ public sealed class ExportOnlySyntaxRewriter : CSharpSyntaxRewriter
         return RewriteForJSExport(node);
     }
 
-    private static bool HasTSExportAttribute(ClassDeclarationSyntax node)
+    public override SyntaxNode? VisitEnumDeclaration(EnumDeclarationSyntax node)
     {
-        foreach (AttributeListSyntax attributeList in node.AttributeLists)
+        return HasTSExportAttribute(node.AttributeLists) ? node : null;
+    }
+
+    private static bool HasTSExportAttribute(SyntaxList<AttributeListSyntax> attributeLists)
+    {
+        foreach (AttributeListSyntax attributeList in attributeLists)
         {
             foreach (AttributeSyntax attribute in attributeList.Attributes)
             {

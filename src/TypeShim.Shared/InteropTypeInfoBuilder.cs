@@ -37,9 +37,10 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
 
     private InteropTypeInfo BuildSimpleTypeInfo(JSSimpleTypeInfo simpleTypeInfo, TypeSyntax clrTypeSyntax)
     {
+        bool isEnum = typeSymbol.TypeKind == TypeKind.Enum;
         bool requiresTypeConversion = RequiresTypeConversion();
         bool supportsTypeConversion = SupportsTypeConversion();
-        
+
         return new InteropTypeInfo
         {
             ManagedType = simpleTypeInfo.KnownType,
@@ -52,16 +53,16 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             IsArrayType = false,
             IsNullableType = clrTypeSyntax is NullableTypeSyntax,
             IsTSExport = IsTSExport,
+            IsEnum = isEnum,
             RequiresTypeConversion = requiresTypeConversion,
             SupportsTypeConversion = supportsTypeConversion,
         };
 
         bool RequiresTypeConversion()
         {
-            // If the type inherits from 'object' it requires conversion to its original type after crossing the interop boundary
             if (simpleTypeInfo.KnownType != KnownManagedType.Object)
             {
-                return false;
+                return isEnum; // only Enums are non-object types that require conversion after crossing the interop boundary
             }
             TypeSyntax unwrapped = clrTypeSyntax is NullableTypeSyntax n ? n.ElementType : clrTypeSyntax;
             // only 'object' itself requires no conversion, anything else does

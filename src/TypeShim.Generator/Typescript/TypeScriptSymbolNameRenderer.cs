@@ -54,7 +54,7 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
         else
         {
             ctx.Append(GetSymbolName(typeInfo));
-            if (typeInfo.IsTSExport)
+            if (typeInfo.IsTSExport && ctx.SymbolMap.GetNamedTypeInfo(typeInfo) is ClassInfo)
             {
                 RenderSuffix(typeInfo, isDelegateParameter ? parameterSymbolType : returnSymbolType);
             }
@@ -140,7 +140,12 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
 
         void RenderProxyInitializerSuffix(bool interop, InteropTypeInfo innerMostTSExport)
         {
-            if (ctx.SymbolMap.GetClassInfo(innerMostTSExport) is not { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
+            if (ctx.SymbolMap.GetNamedTypeInfo(innerMostTSExport) is not ClassInfo classInfo)
+            {
+                throw new InvalidOperationException($"Expected {innerMostTSExport.CSharpTypeSyntax} to be a class type.");
+            }
+
+            if (classInfo is not { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
             {
                 RenderSuffix(typeInfo, TypeShimSymbolType.Proxy); // initializer not supported, fall back to proxy only.
             }
@@ -157,71 +162,4 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
         }
     }
 
-}
-
-internal static class TypeScriptSymbolNameResolver
-{
-    internal static string ResolveSimpleInteropTypeSymbol(InteropTypeInfo typeInfo)
-    {
-        return typeInfo.ManagedType switch
-        {
-            KnownManagedType.Object // objects are represented differently on the interop boundary
-                => "ManagedObject",
-            KnownManagedType.Char // chars are represented as numbers on the interop boundary (is intended: https://github.com/dotnet/runtime/issues/123187)
-                => "number",
-            _ => ResolveSimpleTypeSymbol(typeInfo)
-        };
-    }
-
-    internal static string ResolveSimpleTypeSymbol(InteropTypeInfo typeInfo)
-    {
-        return typeInfo.ManagedType switch
-        {
-            KnownManagedType.Object when typeInfo.RequiresTypeConversion && typeInfo.SupportsTypeConversion
-                => typeInfo.CSharpTypeSyntax.ToString(),
-            KnownManagedType.Object when typeInfo.RequiresTypeConversion && !typeInfo.SupportsTypeConversion
-                => "ManagedObject",
-            KnownManagedType.Object when !typeInfo.RequiresTypeConversion
-                => "ManagedObject",
-
-            KnownManagedType.None => "undefined",
-            KnownManagedType.Void => "void",
-            KnownManagedType.JSObject
-                => "object",
-
-            KnownManagedType.Boolean => "boolean",
-            KnownManagedType.Char
-            or KnownManagedType.String => "string",
-            KnownManagedType.Byte
-            or KnownManagedType.Int16
-            or KnownManagedType.Int32
-            or KnownManagedType.Int64
-            or KnownManagedType.Double
-            or KnownManagedType.Single
-            or KnownManagedType.IntPtr
-                => "number",
-            KnownManagedType.DateTime
-            or KnownManagedType.DateTimeOffset => "Date",
-            KnownManagedType.Exception => "Error",
-
-            KnownManagedType.Unknown
-            or _ => "any",
-        };
-    }
-
-    internal static string ResolveMemoryViewTypeArgSymbol(InteropTypeInfo typeInfo)
-    {
-        if (typeInfo.ManagedType is not KnownManagedType.Span and not KnownManagedType.ArraySegment)
-        {
-            throw new InvalidOperationException($"Type '{typeInfo.ManagedType}' is not a valid MemoryView type.");
-        }
-
-        return typeInfo.TypeArgument switch
-        {
-            { ManagedType: KnownManagedType.Byte } => "Uint8Array",
-            { ManagedType: KnownManagedType.Int32 } => "Int32Array",
-            { ManagedType: KnownManagedType.Double } => "Float64Array",
-            _ => throw new InvalidOperationException($"Type argument '{typeInfo.TypeArgument?.ManagedType}' is not valid for MemoryView types.")
-        };
-    }
 }
