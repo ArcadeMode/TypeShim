@@ -648,7 +648,7 @@ public partial class C1Interop
             [TSExport]
             public class C1
             {
-                public Func<int, MyClass?> M1() {}
+                public Func<int, MyClass?> M1() { return default!; }
             }
         """);
         SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
@@ -718,7 +718,7 @@ public partial class C1Interop
             [TSExport]
             public class C1
             {
-                public Func<MyClass?> M1() {}
+                public Func<MyClass?> M1() { return default!; }
             }
         """);
         SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);

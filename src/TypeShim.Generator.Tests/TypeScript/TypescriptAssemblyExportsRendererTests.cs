@@ -761,7 +761,7 @@ export interface AssemblyExports{
             [TSExport]
             public class C1
             {
-                public Func<UserClass> M1() {}
+                public Func<UserClass> M1() { return default!; }
             }
         """);
 
@@ -819,7 +819,7 @@ export interface AssemblyExports{
             [TSExport]
             public class C1
             {
-                public Func<UserClass, UserClass> M1() {}
+                public Func<UserClass, UserClass> M1() { return default!; }
             }
         """);
 
@@ -871,7 +871,7 @@ export interface AssemblyExports{
             [TSExport]
             public class C1(int i)
             {
-                public {{typeName}} M1() {}
+                public {{typeName}} M1() { return default!; }
                 public void M2({{typeName}} span) {}
             }
         """.Replace("{{typeName}}", typeName));

@@ -21,7 +21,7 @@ internal class TypeScriptUserClassProxyRendererTests_Char
             [TSExport]
             public class C1
             {
-                public char M1() {}
+                public char M1() { return default!; }
             }
         """);
 

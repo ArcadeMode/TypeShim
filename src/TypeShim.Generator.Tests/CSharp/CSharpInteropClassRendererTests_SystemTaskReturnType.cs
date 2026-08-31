@@ -232,7 +232,7 @@ public partial class C1Interop
                 private C1() {}
                 public static Task<{{typeName}}> M1()
                 {
-                    return Task.FromResult({objectCreation});
+                    return Task.FromResult({{objectCreation}});
                 }
             }
         """.Replace("{{typeName}}", typeName).Replace("{{objectCreation}}", objectCreation));

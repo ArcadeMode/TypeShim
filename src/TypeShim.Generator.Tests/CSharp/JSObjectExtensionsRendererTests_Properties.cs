@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TypeShim.Generator.CSharp;
 using TypeShim.Generator.Parsing;
@@ -26,7 +26,7 @@ internal class JSObjectExtensionsRendererTests_Properties
             [TSExport]
             public class C1
             {
-                public {{type}} P1 { get; set; }
+                public {{type}} P1 { get => default; set { } }
             }
         """.Replace("{{type}}", csTypeName);
 
@@ -247,7 +247,7 @@ internal class JSObjectExtensionsRendererTests_Properties
             [TSExport]
             public class C1
             {
-                public {{type}} P1 { get; set; }
+                public {{type}} P1 { get => default; set { } }
             }
         """.Replace("{{type}}", csTypeName);
 
@@ -334,7 +334,7 @@ internal class JSObjectExtensionsRendererTests_Properties
             [TSExport]
             public class C1
             {
-                public {{type}} P1 { get; set; }
+                public {{type}} P1 { get => default; set { } }
             }
         """.Replace("{{type}}", exposedTypeName);
 
@@ -407,7 +407,7 @@ internal class JSObjectExtensionsRendererTests_Properties
             [TSExport]
             public class C1
             {
-                public {{type}} P1 { get; set; }
+                public {{type}} P1 { get => default; set { } }
             }
         """.Replace("{{type}}", exposedTypeName);
 

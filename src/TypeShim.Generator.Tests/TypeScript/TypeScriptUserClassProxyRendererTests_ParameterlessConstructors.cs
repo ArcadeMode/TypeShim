@@ -21,7 +21,7 @@ internal class TypeScriptUserClassProxyRendererTests_ParameterlessConstructors
             [TSExport]
             public class C1()
             {
-                public {{typeExpression}} P1 { get; set }
+                public {{typeExpression}} P1 { get; set; }
             }
         """.Replace("{{typeExpression}}", typeExpression));
 

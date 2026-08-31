@@ -125,7 +125,7 @@ public partial class C1Interop
             [TSExport]
             public class C1
             {
-                public {{typeName}} P1 { get; set }
+                public {{typeName}} P1 { get; set; }
             }
         """.Replace("{{typeName}}", typeName));
 
