@@ -28,7 +28,7 @@ internal class ExportedSignatureGateTests
             }
         """);
 
-        TypeShimException ex = Assert.Throws<TypeShimException>(() => extractor.ExtractAllExportedSymbols());
+        InvalidCodeException ex = Assert.Throws<InvalidCodeException>(() => extractor.ExtractAllExportedSymbols());
         Assert.That(ex!.Message, Does.Contain("CS0708"));
     }
 
@@ -49,7 +49,7 @@ internal class ExportedSignatureGateTests
             }
         """);
 
-        TypeShimException ex = Assert.Throws<TypeShimException>(() => extractor.ExtractAllExportedSymbols());
+        InvalidCodeException ex = Assert.Throws<InvalidCodeException>(() => extractor.ExtractAllExportedSymbols());
         Assert.That(ex!.Message, Does.Contain("invalid code"));
     }
 
