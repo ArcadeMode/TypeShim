@@ -113,13 +113,12 @@ internal static class ExportedSignatureGate
         }
     }
 
-    private static TypeShimException MakeException(Diagnostic diagnostic)
+    private static InvalidCodeException MakeException(Diagnostic diagnostic)
     {
         FileLinePositionSpan position = diagnostic.Location.GetLineSpan();
         int line = position.StartLinePosition.Line + 1;
         int column = position.StartLinePosition.Character + 1;
-        return new TypeShimException(
-            $"TypeShim found invalid code in '{position.Path}' ({line},{column}): {diagnostic.Id} {diagnostic.GetMessage()}. " +
-            "Fix the compile error and rebuild; no interop was generated.");
+        return new InvalidCodeException(
+            $"TypeShim codegen aborted: invalid code in '{position.Path}' ({line},{column}): {diagnostic.Id} {diagnostic.GetMessage()}.");
     }
 }

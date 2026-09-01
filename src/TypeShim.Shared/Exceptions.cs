@@ -58,3 +58,7 @@ public class NotSupportedDefaultValueException(string message, Exception? innerE
 public class NotSupportedOptionalParameterException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
 {
 }
+
+public class InvalidCodeException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
+{
+}
