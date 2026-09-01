@@ -20,6 +20,7 @@ internal class CSharpInteropClassRendererTests_SystemDateTimeReturnType
             {
                 public static {{typeName}} M1()
                 {
+                    return default!;
                 }
             }
         """.Replace("{{typeName}}", typeName));
@@ -67,6 +68,7 @@ public partial class C1Interop
                 private C1() {}
                 public {{typeName}} M1()
                 {
+                    return default!;
                 }
             }
         """.Replace("{{typeName}}", typeName));
@@ -94,7 +96,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Date>]
     public static global::System.{{typeName}} M1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return typed_instance.M1();
     }
     public static C1 FromObject(object obj)

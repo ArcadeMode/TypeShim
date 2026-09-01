@@ -22,7 +22,7 @@ internal class TypeScriptUserClassProxyRendererTests_Methods
             [TSExport]
             public class C1
             {
-                public {{typeExpression}} DoP1() {}
+                public {{typeExpression}} DoP1() { return default!; }
             }
         """.Replace("{{typeExpression}}", typeExpression));
 
@@ -63,7 +63,7 @@ export class C1 extends ProxyBase {
             [TSExport]
             public class C1
             {
-                public {{typeExpression}} DoP1() {}
+                public {{typeExpression}} DoP1() { return default!; }
             }
         """.Replace("{{typeExpression}}", typeExpression));
 
@@ -113,7 +113,7 @@ export class C1 extends ProxyBase {
             [TSExport]
             public class C1
             {
-                public UserClass[] GetAll() {}
+                public UserClass[] GetAll() { return default!; }
             }
         """);
 
@@ -166,7 +166,7 @@ export class C1 extends ProxyBase {
             [TSExport]
             public class C1
             {
-                public UserClass? GetMaybe() {}
+                public UserClass? GetMaybe() { return default!; }
             }
         """);
 
@@ -610,7 +610,7 @@ export class C1 extends ProxyBase {
             [TSExport]
             public class C1(int i)
             {
-                public {{typeName}} M1() {}
+                public {{typeName}} M1() { return default!; }
                 public void M2({{typeName}} span) {}
             }
         """.Replace("{{typeName}}", typeName));

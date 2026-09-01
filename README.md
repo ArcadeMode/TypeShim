@@ -34,198 +34,74 @@ nuget install TypeShim
 
 [Check out the sample projects](https://github.com/ArcadeMode/TypeShim/blob/master/samples) to see TypeShim in action. The snippets below also give a general idea of its capabilities.
 
-The snippets compare TypeShim vs manual `JSExport`. Whichever you use, you'll have load your wasm browser app as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-).
+You'll still need to load your wasm browser app as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-).
 
 ### TypeShim
-A simple example where we have an app about 'people', just to show basic language use powered by TypeShim.
-The C# implementation is just classes with the mentioned `[TSExport]` annotation.
+A small fantasy inspired demo to show language use powered by TypeShim. Notable aspects are that `[TSExport]` exports both `class` and `enum` to TypeScript, that `[JSExport]` is included (see `Dice`) and that parameters of class types take class instances or initializers (see `Recruit(..)` invocations)
 
 ```csharp
+using System.Runtime.InteropServices.JavaScript;
 using TypeShim;
 
-namespace Sample.People;
+namespace Sample.Adventure;
 
 [TSExport]
-public class PeopleRepository
+public enum Role { Mage, Rogue, Knight }
+
+[TSExport]
+public class Hero
 {
-    internal List<Person> People = [
-        new Person()
-        {
-            Name = "Alice",
-            Age = 26,
-        }
-    ];
+    public string Name { get; set; }
+    public Role Role { get; set; }
+    public int Hp { get; set; }
 
-    public Person GetPerson(int i)
+    public void Heal(Party party, int hp = 5)
     {
-        return People[i];
-    }
-
-    public void AddPerson(Person p)
-    {
-        People.Add(p);
+        foreach (var member in party.Members)
+            member.Hp += hp;
     }
 }
 
 [TSExport]
-public class Person
+public class Party
 {
-    public string Name { get; set; }
-    public int Age { get; set; }
-    
-    public bool IsOlderThan(Person p)
-    {
-        return Age > p.Age;
-    }
+    private readonly List<Hero> _members = [];
+    public Hero Leader { get; } = new() { Name = "Rook", Role = Role.Rogue, Hp = 12 };
+    public Hero[] Members => [Leader, .._members];
+    public void Recruit(Hero hero) => _members.Add(hero);
+}
+
+public static partial class Dice
+{
+    [JSExport]
+    public static int Roll(int sides) => Random.Shared.Next(1, sides + 1);
 }
 ```
 
-On the TypeScript side things look familiar, class names, properties, methods and constructors all resemble the exported C# classes. 
+On the TypeScript side things look familiar, class names, properties, methods and constructors all resemble the exported C# classes.
 
 ```js
 import { dotnet } from '_framework/dotnet'
-import { PeopleRepository, Person } from 'typeshim.ts';
+import { Party, Hero, Role, Dice } from 'typeshim.ts';
 
 public async UsingTypeShim() {
-    await dotnet.withApplicationArguments(args).create()
-    const repository = new PeopleRepository();
-    const alice: Person = repository.GetPerson(0);
-    const bob = new Person({
-      Name: 'Bob',
-      Age: 20
-    });
+    await dotnet.create()
+    const party = new Party();
+    console.log(party.Leader.Name); // "Rook"
 
-    console.log(alice.Name, bob.Name); // prints "Alice", "Bob"
-    console.log(alice.IsOlderThan(bob)) // prints false
-    alice.Age = 30;
-    console.log(alice.IsOlderThan(bob)) // prints true
+    const mage = new Hero({ Name: "Ivy", Role: Role.Mage, Hp: 8 });
+    party.Recruit(mage);
+    party.Recruit({ Name: "Ash", Role: Role.Knight, Hp: 16 });
+    console.log(party.Members.length); // 3
 
-    repository.AddPerson({ Name: "Charlie", Age: 40 });
-    const charlie: Person = repository.GetPerson(1);
-    console.log(alice.IsOlderThan(charlie)) // prints false
-    console.log(bob.IsOlderThan(charlie)) // prints true
+    mage.Heal(party); // +5
+    const amount = Dice.Roll(10);
+    mage.Heal(party, amount); // +[1,10]
+
+    for (const hero of party.Members)
+        console.log(`${hero.Name} ${hero.Hp}`); // Rook/Ivy/Ash each +5 +[1,10]
 }
 ```
-
-#### 'Raw' JSExport
-Here you can see a quick demonstration of roughly the same behavior as the TypeShim sample, with handwritten JSExport. Certain parts enabled by TypeShim have not been replicated as the point may be clear at a glance: this is a large amount of difficult to maintain boilerplate if you have to write it yourself. The regression sensitivity of such code may also be noted.
-
-<details>
-  <summary>See the 'Raw' <code>JSExport</code> implementation</summary>
-&nbsp;
-
-```ts
-import { dotnet } from '_framework/dotnet'
-
-public async UsingRawJSExport(exports: any) {
-    const runtime = await dotnet.withApplicationArguments(args).create();
-    const exports = runtime.assemblyExports;
-
-    const repository: any = exports.Sample.People.PeopleRepository.GetInstance(); 
-    const alice: any = exports.Sample.People.PeopleRepository.GetPerson(repository, 0);
-    const bob: any = exports.Sample.People.People.ConstructPerson("Bob", 20);
-    
-    console.log(exports.Sample.People.Person.GetName(alice), exports.Sample.People.Person.GetName(bob)); // prints "Alice", "Bob"
-    console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints false
-    exports.Sample.People.Person.SetAge(alice, 30);
-    console.log(exports.Sample.People.Person.IsOlderThan(alice, bob)); // prints true
-
-    exports.Sample.People.PeopleRepository.AddPerson(repository, "Charlie", 40);
-    const charlie: any = exports.Sample.People.PeopleRepository.GetPerson(repository, 1);
-    console.log(alice.IsOlderThan(charlie)) // prints false
-    console.log(bob.IsOlderThan(charlie)) // prints true
-}
-```
-
-```csharp
-namespace Sample.People;
-
-public class PeopleRepository
-{
-    internal List<Person> People = [
-        new Person()
-        {
-            Name = "Alice",
-            Age = 26,
-        }
-    ];
-
-    private static readonly PeopleRepository _instance = new();
-    [JSExport]
-    [return: JSMarshalAsType<JSType.Object>]
-    public static object GetInstance()
-    {
-        return _instance;
-    }
-
-    [JSExport]
-    [return: JSMarshalAsType<JSType.Object>]
-    public static object GetPerson([JSMarshalAsType<JSType.Object>] object repository, [JSMarshalAsType<JSType.Number>] int i)
-    {
-        PeopleRepository pr = (PeopleRepository)repository;
-        return pr.People[i];
-    }
-}
-
-public class Person
-{
-    public string Name { get; set; }
-    public int Age { get; set; }
-    
-    [JSExport]
-    [return: JSMarshalAsType<JSType.String>]
-    public static string ConstructPerson([JSMarshalAsType<JSType.Object>] JSObject obj)
-    {
-        return new Person() // Fragile
-        {
-            Name = obj.GetPropertyAsString("Name"),
-            Age = obj.GetPropertyAsInt32("Age")
-        }
-    }
-
-    [JSExport]
-    [return: JSMarshalAsType<JSType.String>]
-    public static string GetName([JSMarshalAsType<JSType.Object>] object instance)
-    {
-        Person p = (Person)instance;
-        return p.Name;
-    }
-
-    [JSExport]
-    [return: JSMarshalAsType<JSType.Void>]
-    public static void SetName([JSMarshalAsType<JSType.Object>] object instance, [JSMarshalAsType<JSType.String>] string name)
-    {
-        Person p = (Person)instance;
-        p.Name = name;
-    }
-
-    [JSExport]
-    [return: JSMarshalAsType<JSType.Number>]
-    public static int GetAge([JSMarshalAsType<JSType.Object>] object instance)
-    {
-        Person p = (Person)instance;
-        return p.Age;
-    }
-
-    [JSExport]
-    [return: JSMarshalAsType<JSType.Void>]
-    public static void SetAge([JSMarshalAsType<JSType.Object>] object instance, [JSMarshalAsType<JSType.Number>] int age)
-    {
-        Person p = (Person)instance;
-        p.Age = age;
-    }
-
-    [JSExport]
-    [return: JSMarshalAsType<JSType.Void>]
-    public static void IsOlderThan([JSMarshalAsType<JSType.Object>] object instance, [JSMarshalAsType<JSType.Object>] object other)
-    {
-        Person p = (Person)instance;
-        Person o = (Person)other;
-        return p.Age > o.Age;
-    }
-}
-```
-</details>
 
 ## <a name="concepts"></a> TypeShim Concepts
 
@@ -302,7 +178,7 @@ TypeShim aims to continue to broaden its type support. Suggestions and contribut
 | `Task<T[]>`            | `Promise<T[]>`| 💡     | under consideration (for all array-compatible `T`) |
 | `TClass[]`                | `TClass[]`       | ✅     | `TClass` generated in TypeScript* |
 | `JSObject`           | `TClass`         | ✅     | [Initializers](#initializers) |
-| `TEnum`      | `TEnum`       | 💡     | under consideration |
+| `TEnum`      | `TEnum`       | ✅     | `TEnum` generated in TypeScript* |
 | `IEnumerable<T>`     | `T[]`       | 💡     | under consideration |
 | `Dictionary<TKey, TValue>` | `?`     | 💡     | under consideration |
 | `(T1, T2)` | `[T1, T2]`     | 💡     | under consideration |

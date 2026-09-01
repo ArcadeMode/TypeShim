@@ -61,14 +61,14 @@ public partial class C1Interop
     [return: JSMarshalAs<{{jsType}}>]
     public static {{typeExpression}} get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return typed_instance.P1;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<{{jsType}}>] {{typeExpression}} value)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         typed_instance.P1 = value;
     }
     public static C1 FromObject(object obj)
@@ -144,14 +144,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static object[] get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return (object[])typed_instance.P1;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Array<JSType.Any>>] object[] value)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         {{typeName}}[] typed_value = ({{typeName}}[])value;
         typed_instance.P1 = typed_value;
     }
@@ -159,14 +159,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static int get_P2([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return typed_instance.P2;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P2([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] int value)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         typed_instance.P2 = value;
     }
     public static C1 FromObject(object obj)
@@ -241,14 +241,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
     public static Task<object> get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return typed_instance.P1.ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> value)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         Task<{{typeName}}> typed_value = value.ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
         typed_instance.P1 = typed_value;
     }
@@ -256,14 +256,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static int get_P2([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         return typed_instance.P2;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P2([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] int value)
     {
-        C1 typed_instance = (C1)instance;
+        C1 typed_instance = C1Interop.FromObject(instance);
         typed_instance.P2 = value;
     }
     public static C1 FromObject(object obj)

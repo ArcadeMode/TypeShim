@@ -17,7 +17,7 @@ internal sealed class TypeScriptUserClassShapesRenderer(RenderContext ctx)
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
                 ctx.Append(propertyInfo.Name).Append(": ");
-                if (propertyInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true })
+                if (ctx.SymbolMap.IsConversionRequiringClassOrDelegate(propertyInfo.Type))
                 {
                     TypeScriptSymbolNameRenderer.Render(propertyInfo.Type, ctx, TypeShimSymbolType.Snapshot, interop: false);
                 }
@@ -39,7 +39,7 @@ internal sealed class TypeScriptUserClassShapesRenderer(RenderContext ctx)
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
                 ctx.Append(propertyInfo.Name).Append(": ");
-                if (propertyInfo.Type is { RequiresTypeConversion: true, SupportsTypeConversion: true })
+                if (ctx.SymbolMap.IsConversionRequiringClassOrDelegate(propertyInfo.Type))
                 {
                     TypeShimSymbolType returnSymbolType = propertyInfo.Type.IsDelegateType() ? TypeShimSymbolType.Proxy : TypeShimSymbolType.ProxyInitializerUnion;
                     TypeScriptSymbolNameRenderer.Render(propertyInfo.Type, ctx, returnSymbolType, parameterSymbolType: TypeShimSymbolType.ProxyInitializerUnion, interop: false);
@@ -92,7 +92,7 @@ internal sealed class TypeScriptUserClassShapesRenderer(RenderContext ctx)
                 RenderPropertyValueExpression(innerTypeInfo, propertyAccessorExpression);
                 ctx.Append(" : null");
             }
-            else if (typeInfo.RequiresTypeConversion && typeInfo.SupportsTypeConversion)
+            else if (ctx.SymbolMap.IsConversionRequiringClassOrDelegate(typeInfo))
             {
                 if (typeInfo.IsArrayType || typeInfo.IsTaskType)
                 {

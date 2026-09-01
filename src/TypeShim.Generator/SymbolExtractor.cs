@@ -16,6 +16,7 @@ internal class SymbolExtractor(CSharpFileInfo[] fileInfos, string runtimePackRef
         CSharpCompilation compilation = CSharpPartialCompilation.CreatePartialCompilation(GetExportOnlyTrees(), runtimePackRefDir);
         List<INamedTypeSymbol> exportedSymbols = new(fileInfos.Length * 2); // should be enough space to avoid having to extend the list
         FindExports(compilation.Assembly.GlobalNamespace, exportedSymbols);
+        ExportedSignatureGate.ThrowIfExportedSurfaceHasCompileErrors(compilation, exportedSymbols);
         return exportedSymbols;
     }
 

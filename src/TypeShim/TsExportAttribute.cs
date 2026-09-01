@@ -27,7 +27,7 @@
 ///     console.log(counter.EqualsCount(counter2)); // false
 /// </code>
 /// </summary>
-[AttributeUsage(AttributeTargets.Class)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum)]
 public class TSExportAttribute : Attribute
 {
 }

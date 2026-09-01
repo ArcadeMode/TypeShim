@@ -8,11 +8,12 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator;
 
-internal sealed class RenderContext(ClassInfo? targetClass, IEnumerable<ClassInfo> allClasses, RenderOptions options)
+internal sealed class RenderContext(NamedTypeInfo? targetType, IEnumerable<NamedTypeInfo> allNamedTypes, RenderOptions options)
 {
-    internal ClassInfo Class => targetClass ?? throw new InvalidOperationException("Not class in RenderContext");
+    internal ClassInfo Class => targetType as ClassInfo ?? throw new InvalidOperationException("Current type in RenderContext is not a class");
+    internal NamedTypeInfo NamedType => targetType ?? throw new InvalidOperationException("No current type in RenderContext");
     internal LocalScope LocalScope => _localScope ?? throw new InvalidOperationException("No active method in context");
-    internal SymbolMap SymbolMap { get; } = new(allClasses);
+    internal SymbolMap SymbolMap { get; } = new(allNamedTypes);
 
     private readonly StringBuilder _sb = new(capacity: 16 * 1024);
 

@@ -643,7 +643,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         [TSExport]
         public class C1
         {
-            public Func<UserClass, UserClass?>? M1() {}
+            public Func<UserClass, UserClass?>? M1() { return default!; }
         }
         """);
 
@@ -694,7 +694,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         [TSExport]
         public class C1
         {
-            public Func<UserClass, UserClass>? M1() {}
+            public Func<UserClass, UserClass>? M1() { return default!; }
         }
         """);
 
@@ -772,7 +772,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         [TSExport]
         public class C1
         {
-            public Func<char> M1() {}
+            public Func<char> M1() { return default!; }
         }
         """);
 
@@ -811,7 +811,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         [TSExport]
         public class C1
         {
-            public Action<char> M1() {}
+            public Action<char> M1() { return default!; }
         }
         """);
 
@@ -987,7 +987,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
         [TSExport]
         public class C1
         {
-            public Action<char, UserClass> M1() {}
+            public Action<char, UserClass> M1() { return default!; }
         }
         """);
 
