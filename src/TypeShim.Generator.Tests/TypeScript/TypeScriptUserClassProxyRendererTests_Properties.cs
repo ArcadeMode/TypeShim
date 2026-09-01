@@ -166,7 +166,7 @@ export class C1 extends ProxyBase {
                 public static {{typeExpression}} P1 { get; set; }
                 public static {{typeExpression}} P2 { get; init; }
                 public static {{typeExpression}} P3 { get; }
-                public static {{typeExpression}} P4 => 1
+                public static {{typeExpression}} P4 => 1;
             }
         """.Replace("{{typeExpression}}", typeExpression));
 

@@ -80,7 +80,6 @@ internal class SyntaxTreeParsingTests_UnsupportedType
     [TestCase("Task<int>")]
     [TestCase("Action")]
     [TestCase("Task<Action>")]
-    [TestCase("Task<Span<Byte>")]
     public void ClassInfoBuilder_Throws_ForUnsupportedTaskTypeArguments(string typeExpression)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""

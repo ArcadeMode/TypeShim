@@ -20,6 +20,7 @@ internal class CSharpInteropClassRendererTests_SystemDateTimeReturnType
             {
                 public static {{typeName}} M1()
                 {
+                    return default!;
                 }
             }
         """.Replace("{{typeName}}", typeName));
@@ -67,6 +68,7 @@ public partial class C1Interop
                 private C1() {}
                 public {{typeName}} M1()
                 {
+                    return default!;
                 }
             }
         """.Replace("{{typeName}}", typeName));

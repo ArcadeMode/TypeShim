@@ -168,4 +168,38 @@ public partial class C1Interop
 
 """);
     }
+
+    [Test]
+    public void UnknownParameterAttribute_DoesNotAffectInterop()
+    {
+        string output = Render("    public void M1(string value, [UnknownParameterAttribute] string? expr = null) {}");
+
+        AssertEx.EqualOrDiff(output, """
+#nullable enable
+// TypeShim generated TypeScript interop definitions
+using System;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.String>] string value, [JSMarshalAs<JSType.String>] string? expr)
+    {
+        C1 typed_instance = C1Interop.FromObject(instance);
+        typed_instance.M1(value, expr);
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+}
+
+""");
+    }
 }
