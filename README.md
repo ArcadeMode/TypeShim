@@ -85,7 +85,7 @@ import { dotnet } from '_framework/dotnet'
 import { Party, Hero, Role, Dice } from 'typeshim.ts';
 
 public async UsingTypeShim() {
-    await dotnet.withApplicationArguments(args).create()
+    await dotnet.create()
     const party = new Party();
     console.log(party.Leader.Name); // "Rook"
 
