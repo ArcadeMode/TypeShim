@@ -54,7 +54,7 @@ internal class JSObjectExtensionsRendererTests_Properties
         {
             public static {{type}}? GetPropertyAs{{managed}}Nullable(this JSObject jsObject, string propertyName)
             {
-                return jsObject.HasProperty(propertyName) ? MarshalAs{{managed}}(jsObject, propertyName) : null;
+                return jsObject.HasProperty(propertyName) ? MarshalAs{{managed}}(jsObject, propertyName) : ({{type}}?)null;
             }
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<{{jstype}}>]
@@ -116,7 +116,7 @@ internal class JSObjectExtensionsRendererTests_Properties
         {
             public static object? GetPropertyAsObjectNullable(this JSObject jsObject, string propertyName)
             {
-                return jsObject.HasProperty(propertyName) ? MarshalAsObject(jsObject, propertyName) : null;
+                return jsObject.HasProperty(propertyName) ? MarshalAsObject(jsObject, propertyName) : (object?)null;
             }
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<JSType.Any>]
@@ -174,7 +174,7 @@ internal class JSObjectExtensionsRendererTests_Properties
         {
             public static object[]? GetPropertyAsObjectArrayNullable(this JSObject jsObject, string propertyName)
             {
-                return jsObject.HasProperty(propertyName) ? MarshalAsObjectArray(jsObject, propertyName) : null;
+                return jsObject.HasProperty(propertyName) ? MarshalAsObjectArray(jsObject, propertyName) : (object[]?)null;
             }
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<JSType.Array<JSType.Any>>]
@@ -220,7 +220,7 @@ internal class JSObjectExtensionsRendererTests_Properties
         {
             public static Action? GetPropertyAsVoidActionNullable(this JSObject jsObject, string propertyName)
             {
-                return jsObject.HasProperty(propertyName) ? MarshalAsVoidAction(jsObject, propertyName) : null;
+                return jsObject.HasProperty(propertyName) ? MarshalAsVoidAction(jsObject, propertyName) : (Action?)null;
             }
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<JSType.Function>]
@@ -275,7 +275,7 @@ internal class JSObjectExtensionsRendererTests_Properties
         {
             public static {{type}}? GetPropertyAs{{managed}}Nullable(this JSObject jsObject, string propertyName)
             {
-                return jsObject.HasProperty(propertyName) ? MarshalAs{{managed}}(jsObject, propertyName) : null;
+                return jsObject.HasProperty(propertyName) ? MarshalAs{{managed}}(jsObject, propertyName) : ({{type}}?)null;
             }
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<{{jstype}}>]
@@ -362,7 +362,7 @@ internal class JSObjectExtensionsRendererTests_Properties
         {
             public static {{type}}? GetPropertyAs{{managed}}Nullable(this JSObject jsObject, string propertyName)
             {
-                return jsObject.HasProperty(propertyName) ? MarshalAs{{managed}}(jsObject, propertyName) : null;
+                return jsObject.HasProperty(propertyName) ? MarshalAs{{managed}}(jsObject, propertyName) : ({{type}}?)null;
             }
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<{{jstype}}>]
@@ -434,7 +434,7 @@ internal class JSObjectExtensionsRendererTests_Properties
         {
             public static {{type}}? GetPropertyAs{{managed}}Nullable(this JSObject jsObject, string propertyName)
             {
-                return jsObject.HasProperty(propertyName) ? MarshalAs{{managed}}(jsObject, propertyName) : null;
+                return jsObject.HasProperty(propertyName) ? MarshalAs{{managed}}(jsObject, propertyName) : ({{type}}?)null;
             }
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<{{jstype}}>]
