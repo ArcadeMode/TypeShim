@@ -55,7 +55,9 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, IEnumerable
         {
             _ctx.Append("return jsObject.HasProperty(propertyName) ? ");
             marshalAsMethodNameRenderer.Render();
-            _ctx.AppendLine("(jsObject, propertyName) : null;");
+            _ctx.Append("(jsObject, propertyName) : (")
+                .Append(extensionInfo.TypeInfo.CSharpInteropTypeSyntax)
+                .AppendLine("?)null;");
         }
         _ctx.AppendLine("}");
 
