@@ -63,18 +63,15 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         bool hasTSExport = SymbolFacts.HasTSExportAttribute(type);
         if (!hasTSExport)
             return;
-
-        // Records synthesize an overloaded Equals method that TypeShim cannot support, so reject them
-        // outright with a dedicated diagnostic instead of surfacing a misleading overload error.
-        if (type.IsRecord)
-        {
-            context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.RecordNotSupportedRule, LocationFinder.GetDefaultLocation(type), type.Name));
-            return;
-        }
         //Debugger.Launch();
         if (TryGetTypeDiagnostic(type) is DiagnosticDescriptor descriptor)
         {
             context.ReportDiagnostic(Diagnostic.Create(descriptor, LocationFinder.GetDefaultLocation(type), type.Name));
+
+            // Records synthesize an overloaded Equals method; skip member analysis so the record rejection
+            // isn't accompanied by a misleading overload diagnostic.
+            if (ReferenceEquals(descriptor, TypeShimDiagnostics.RecordNotSupportedRule))
+                return;
         }
 
         AnalyzeClassAccessibility(context, type);
@@ -341,6 +338,10 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         catch (NotSupportedGenericClassException)
         {
             return TypeShimDiagnostics.NoGenericsTSExportRule;
+        }
+        catch (NotSupportedRecordException)
+        {
+            return TypeShimDiagnostics.RecordNotSupportedRule;
         }
         return null;
     }

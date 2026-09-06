@@ -14,6 +14,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
 
     public InteropTypeInfo Build()
     {
+        ThrowIfRecord();
         ThrowIfGenericTSExport();       
         return cache.GetOrAdd(typeSymbol, BuildInternal);
     }
@@ -400,6 +401,15 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         if (IsTSExport && typeSymbol is INamedTypeSymbol { Arity: not 0 })
         {
             throw new NotSupportedGenericClassException(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+        }
+    }
+
+    private void ThrowIfRecord()
+    {
+        // Records synthesize an overloaded Equals method that TypeShim cannot support.
+        if (IsTSExport && typeSymbol is INamedTypeSymbol { IsRecord: true })
+        {
+            throw new NotSupportedRecordException(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
         }
     }
 }

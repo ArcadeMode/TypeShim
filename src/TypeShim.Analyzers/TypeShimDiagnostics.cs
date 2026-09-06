@@ -126,10 +126,10 @@ internal static class TypeShimDiagnostics
     internal static readonly DiagnosticDescriptor RecordNotSupportedRule = new(
         id: "TSHIM020",
         title: "Records are not supported",
-        messageFormat: "Record '{0}' is not supported by TypeShim, consider using a regular class instead",
+        messageFormat: "TypeShim does not support Records, consider marking {0} as a regular class",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "Records synthesize an overloaded Equals method which TypeShim does not support; use a regular class instead.");
+        description: "Records synthesize an overloaded Equals method, TypeShim does not support overloads; use a regular class instead.");
 
 }
