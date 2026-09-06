@@ -10,3 +10,5 @@ TSHIM013 | Usage | Error | TypeShimAnalyzer
 TSHIM014 | Usage | Error | TypeShimAnalyzer
 TSHIM015 | Usage | Error | TypeShimAnalyzer
 TSHIM016 | TypeChecking | Error | TypeShimAnalyzer
+TSHIM017 | Usage | Error | TypeShimAnalyzer
+TSHIM018 | Usage | Error | TypeShimAnalyzer

@@ -79,7 +79,7 @@ internal static class TypeShimDiagnostics
         description: ".NET-JS interop and TypeShim neither support generic types.");
     
     internal static readonly DiagnosticDescriptor NoGenericsPublicMethodRule = new(
-        id: "TSHIM012",
+        id: "TSHIM017",
         title: "Public methods with type arguments are not supported",
         messageFormat: "Public methods with type arguments are not supported in TSExport classes",
         category: "Usage",
@@ -122,5 +122,14 @@ internal static class TypeShimDiagnostics
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "JS numbers represent integers exactly only within +/-(2^53-1); enum members outside that range cannot cross the .NET-JS boundary.");
+
+    internal static readonly DiagnosticDescriptor UnsupportedInheritanceRule = new(
+        id: "TSHIM018",
+        title: "Inheritance is not supported",
+        messageFormat: "TSExport class cannot inherit from '{0}' because TypeShim does not support inheritance (except System.IDisposable)",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "TypeShim does not project inherited members, so base classes and interfaces (other than System.IDisposable) are not supported on [TSExport] classes and can lead to invalid generated code.");
 
 }
