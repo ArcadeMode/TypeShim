@@ -62,3 +62,7 @@ public class NotSupportedOptionalParameterException(string message, Exception? i
 public class InvalidCodeException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
 {
 }
+
+public class NotSupportedRecordException(string message, Exception? innerException = null) : TypeShimException(message, innerException)
+{
+}

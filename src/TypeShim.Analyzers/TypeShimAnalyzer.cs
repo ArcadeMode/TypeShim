@@ -27,7 +27,8 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         TypeShimDiagnostics.UnresolvableDefaultConstRule,
         TypeShimDiagnostics.NoOptionalMemoryViewRule,
         TypeShimDiagnostics.NoOptionalCtorParamWithRequiredInitializerRule,
-        TypeShimDiagnostics.EnumMemberOutOfSafeRangeRule
+        TypeShimDiagnostics.EnumMemberOutOfSafeRangeRule,
+        TypeShimDiagnostics.RecordNotSupportedRule
     ];
 
     public override void Initialize(AnalysisContext context)
@@ -62,6 +63,14 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         bool hasTSExport = SymbolFacts.HasTSExportAttribute(type);
         if (!hasTSExport)
             return;
+
+        // Records synthesize an overloaded Equals method that TypeShim cannot support, so reject them
+        // outright with a dedicated diagnostic instead of surfacing a misleading overload error.
+        if (type.IsRecord)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.RecordNotSupportedRule, LocationFinder.GetDefaultLocation(type), type.Name));
+            return;
+        }
         //Debugger.Launch();
         if (TryGetTypeDiagnostic(type) is DiagnosticDescriptor descriptor)
         {

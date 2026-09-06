@@ -7,6 +7,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
 {
     internal ClassInfo Build()
     {
+        ThrowIfRecord();
         ThrowIfContainsRequiredFields();
 
         bool isTSExport = SymbolFacts.HasTSExportAttribute(classSymbol);
@@ -79,6 +80,15 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
         }
 
         return [.. methodInfos.Values];
+    }
+
+    private void ThrowIfRecord()
+    {
+        // Records synthesize an overloaded Equals method that TypeShim cannot support.
+        if (classSymbol.IsRecord)
+        {
+            throw new NotSupportedRecordException($"Class '{classSymbol.Name}' is a record. Records are not supported.");
+        }
     }
 
     private void ThrowIfContainsRequiredFields()

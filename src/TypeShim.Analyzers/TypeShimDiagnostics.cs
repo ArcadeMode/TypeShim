@@ -123,4 +123,13 @@ internal static class TypeShimDiagnostics
         isEnabledByDefault: true,
         description: "JS numbers represent integers exactly only within +/-(2^53-1); enum members outside that range cannot cross the .NET-JS boundary.");
 
+    internal static readonly DiagnosticDescriptor RecordNotSupportedRule = new(
+        id: "TSHIM020",
+        title: "Records are not supported",
+        messageFormat: "Record '{0}' is not supported by TypeShim, consider using a regular class instead",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "Records synthesize an overloaded Equals method which TypeShim does not support; use a regular class instead.");
+
 }
