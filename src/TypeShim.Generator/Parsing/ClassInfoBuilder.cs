@@ -87,7 +87,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
         if (InheritanceFacts.GetUnsupportedBaseOrInterface(classSymbol) is ISymbol unsupported)
         {
             string typeName = unsupported.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-            throw new NotSupportedInheritanceException($"Class '{classSymbol.Name}' inherits from '{typeName}', which is not supported. TypeShim does not support inheritance (except System.IDisposable).");
+            throw new NotSupportedInheritanceException($"TSExport '{classSymbol.Name}' invalidly inherits '{typeName}'; inheritance is not supported (yet), except for IDisposable.");
         }
     }
 

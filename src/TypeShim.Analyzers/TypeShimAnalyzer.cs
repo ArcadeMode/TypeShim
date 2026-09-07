@@ -79,9 +79,9 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         if (InheritanceFacts.GetUnsupportedBaseOrInterface(type) is not ISymbol unsupported)
             return;
 
-        string typeName = unsupported.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+        string baseName = unsupported.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
         context.ReportDiagnostic(Diagnostic.Create(
-            TypeShimDiagnostics.UnsupportedInheritanceRule, LocationFinder.GetBaseListLocation(type, context.CancellationToken), typeName));
+            TypeShimDiagnostics.UnsupportedInheritanceRule, LocationFinder.GetBaseListLocation(type, context.CancellationToken), type.Name, baseName));
     }
 
     private static void AnalyzeClassAccessibility(SymbolAnalysisContext context, INamedTypeSymbol classSymbol)
