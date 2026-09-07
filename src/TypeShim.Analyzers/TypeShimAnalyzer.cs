@@ -69,8 +69,6 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         {
             context.ReportDiagnostic(Diagnostic.Create(descriptor, LocationFinder.GetDefaultLocation(type), type.Name));
 
-            // Records synthesize an overloaded Equals method; skip member analysis so the record rejection
-            // isn't accompanied by a misleading overload diagnostic.
             if (ReferenceEquals(descriptor, TypeShimDiagnostics.RecordNotSupportedRule))
                 return;
         }

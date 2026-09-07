@@ -14,7 +14,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
 
     public InteropTypeInfo Build()
     {
-        ThrowIfRecord();
+        ThrowIfRecordTSExport();
         ThrowIfGenericTSExport();       
         return cache.GetOrAdd(typeSymbol, BuildInternal);
     }
@@ -404,7 +404,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         }
     }
 
-    private void ThrowIfRecord()
+    private void ThrowIfRecordTSExport()
     {
         // Records synthesize an overloaded Equals method that TypeShim cannot support.
         if (IsTSExport && typeSymbol is INamedTypeSymbol { IsRecord: true })

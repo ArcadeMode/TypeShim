@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace TypeShim.Analyzers.Tests;
@@ -20,7 +19,7 @@ internal class InheritanceDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == UnsupportedInheritanceId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, UnsupportedInheritanceId);
     }
 
     [Test]
@@ -36,7 +35,7 @@ internal class InheritanceDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == UnsupportedInheritanceId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, UnsupportedInheritanceId);
     }
 
     [Test]
@@ -53,7 +52,7 @@ internal class InheritanceDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Count(d => d.Id == UnsupportedInheritanceId), Is.EqualTo(1));
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, UnsupportedInheritanceId);
     }
 
     [Test]
@@ -69,7 +68,7 @@ internal class InheritanceDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == UnsupportedInheritanceId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, UnsupportedInheritanceId);
     }
 
     [Test]
@@ -86,7 +85,7 @@ internal class InheritanceDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == UnsupportedInheritanceId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, UnsupportedInheritanceId);
     }
 
     [Test]
@@ -103,7 +102,7 @@ internal class InheritanceDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == UnsupportedInheritanceId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, UnsupportedInheritanceId);
     }
 
     [Test]
@@ -117,7 +116,7 @@ internal class InheritanceDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == UnsupportedInheritanceId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 
     [Test]
@@ -132,6 +131,6 @@ internal class InheritanceDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == UnsupportedInheritanceId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 }

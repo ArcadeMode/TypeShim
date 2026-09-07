@@ -1,12 +1,10 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace TypeShim.Analyzers.Tests;
 
 internal class RecordDiagnosticsTests
 {
     private static readonly string RecordNotSupportedId = TypeShimDiagnostics.RecordNotSupportedRule.Id;
-    private static readonly string NoOverloadsId = TypeShimDiagnostics.NoOverloadsRule.Id;
 
     [Test]
     public async Task TSExportRecord_IsFlaggedAsUnsupported()
@@ -23,7 +21,7 @@ internal class RecordDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == RecordNotSupportedId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, RecordNotSupportedId);
     }
 
     [Test]
@@ -38,14 +36,13 @@ internal class RecordDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == RecordNotSupportedId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, RecordNotSupportedId);
     }
 
     [Test]
     public async Task TSExportRecord_IsNotFlaggedForSynthesizedEqualsOverload()
     {
-        // Rejecting the record up front must suppress the misleading overload diagnostic that the
-        // synthesized Equals method would otherwise trigger.
+        // A record must raise only the record diagnostic; the synthesized Equals overload must not add noise.
         string source = """
             using System;
             using TypeShim;
@@ -55,7 +52,7 @@ internal class RecordDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == NoOverloadsId), Is.False);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, RecordNotSupportedId);
     }
 
     [Test]
@@ -73,6 +70,6 @@ internal class RecordDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == RecordNotSupportedId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 }

@@ -7,8 +7,6 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
 {
     internal ClassInfo Build()
     {
-        // Building the interop type first triggers the shared record/generic rejections in
-        // InteropTypeInfoBuilder, so records are reported as records rather than as inheriting IEquatable<T>.
         InteropTypeInfo type = new InteropTypeInfoBuilder(classSymbol, typeInfoCache).Build();
         ThrowIfInheritsUnsupportedType();
         ThrowIfContainsRequiredFields();
