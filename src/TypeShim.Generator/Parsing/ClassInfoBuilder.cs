@@ -7,6 +7,10 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
 {
     internal ClassInfo Build()
     {
+        // Building the interop type first triggers the shared record/generic rejections in
+        // InteropTypeInfoBuilder, so records are reported as records rather than as inheriting IEquatable<T>.
+        InteropTypeInfo type = new InteropTypeInfoBuilder(classSymbol, typeInfoCache).Build();
+        ThrowIfInheritsUnsupportedType();
         ThrowIfContainsRequiredFields();
 
         bool isTSExport = SymbolFacts.HasTSExportAttribute(classSymbol);
@@ -18,7 +22,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
             Name = classSymbol.Name,
             IsTSExport = isTSExport,
             IsStatic = !isTSExport || classSymbol.IsStatic,
-            Type = new InteropTypeInfoBuilder(classSymbol, typeInfoCache).Build(),
+            Type = type,
             Constructor = isTSExport ? BuildConstructor(properties) : null,
             Methods = BuildMethods(isTSExport),
             Properties = properties,
@@ -79,6 +83,15 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
         }
 
         return [.. methodInfos.Values];
+    }
+
+    private void ThrowIfInheritsUnsupportedType()
+    {
+        if (InheritanceFacts.GetUnsupportedBaseOrInterface(classSymbol) is ISymbol unsupported)
+        {
+            string typeName = unsupported.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+            throw new NotSupportedInheritanceException($"TSExport '{classSymbol.Name}' invalidly inherits '{typeName}'; inheritance is not supported (yet), except for IDisposable.");
+        }
     }
 
     private void ThrowIfContainsRequiredFields()

@@ -79,7 +79,7 @@ internal static class TypeShimDiagnostics
         description: ".NET-JS interop and TypeShim neither support generic types.");
     
     internal static readonly DiagnosticDescriptor NoGenericsPublicMethodRule = new(
-        id: "TSHIM012",
+        id: "TSHIM013",
         title: "Public methods with type arguments are not supported",
         messageFormat: "Public methods with type arguments are not supported in TSExport classes",
         category: "Usage",
@@ -88,7 +88,7 @@ internal static class TypeShimDiagnostics
         description: ".NET-JS interop and TypeShim neither support generic types.");
 
     internal static readonly DiagnosticDescriptor UnresolvableDefaultConstRule = new(
-        id: "TSHIM013",
+        id: "TSHIM014",
         title: "Default value references an unsupported constant",
         messageFormat: "Optional parameter '{0}' has a default referencing constant '{1}' declared outside a [TSExport] class, which TypeShim cannot resolve",
         category: "Usage",
@@ -97,7 +97,7 @@ internal static class TypeShimDiagnostics
         description: "TypeShim only resolves default values that reference constants declared within [TSExport] classes.");
 
     internal static readonly DiagnosticDescriptor NoOptionalMemoryViewRule = new(
-        id: "TSHIM014",
+        id: "TSHIM015",
         title: "Span and ArraySegment parameters cannot be optional",
         messageFormat: "Parameter '{0}' of type '{1}' cannot be optional because Span/ArraySegment values must be constructed on the C# side",
         category: "Usage",
@@ -106,7 +106,7 @@ internal static class TypeShimDiagnostics
         description: "Span and ArraySegment default values cannot cross the interop boundary and must be constructed on the C# side.");
 
     internal static readonly DiagnosticDescriptor NoOptionalCtorParamWithRequiredInitializerRule = new(
-        id: "TSHIM015",
+        id: "TSHIM016",
         title: "Optional constructor parameters require an omittable initializer object",
         messageFormat: "Optional constructor parameter '{0}' is not supported because class '{1}' has a non-nullable settable/init property that must be provided through the initializer object",
         category: "Usage",
@@ -115,7 +115,7 @@ internal static class TypeShimDiagnostics
         description: "A constructor's trailing initializer object can only be optional when every settable/init property is nullable, so it cannot follow an optional parameter otherwise.");
 
     internal static readonly DiagnosticDescriptor EnumMemberOutOfSafeRangeRule = new(
-        id: "TSHIM016",
+        id: "TSHIM017",
         title: "Enum member value is outside the JS number range",
         messageFormat: "Enum member '{0}' has value {1}, which is outside the JS number range (+/-2^53-1)",
         category: "TypeChecking",
@@ -123,8 +123,17 @@ internal static class TypeShimDiagnostics
         isEnabledByDefault: true,
         description: "JS numbers represent integers exactly only within +/-(2^53-1); enum members outside that range cannot cross the .NET-JS boundary.");
 
+    internal static readonly DiagnosticDescriptor UnsupportedInheritanceRule = new(
+        id: "TSHIM018",
+        title: "Inheritance is not supported",
+        messageFormat: "TSExport '{0}' invalidly inherits '{1}'; inheritance is not supported (yet), except for IDisposable",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "Inheritance is not supported (yet).");
+
     internal static readonly DiagnosticDescriptor RecordNotSupportedRule = new(
-        id: "TSHIM020",
+        id: "TSHIM019",
         title: "Records are not supported",
         messageFormat: "TypeShim does not support Records, consider marking {0} as a regular class",
         category: "Usage",

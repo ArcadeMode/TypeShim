@@ -28,6 +28,7 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         TypeShimDiagnostics.NoOptionalMemoryViewRule,
         TypeShimDiagnostics.NoOptionalCtorParamWithRequiredInitializerRule,
         TypeShimDiagnostics.EnumMemberOutOfSafeRangeRule,
+        TypeShimDiagnostics.UnsupportedInheritanceRule,
         TypeShimDiagnostics.RecordNotSupportedRule
     ];
 
@@ -75,7 +76,18 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         }
 
         AnalyzeClassAccessibility(context, type);
+        AnalyzeInheritance(context, type);
         AnalyzeMembers(context, type);
+    }
+
+    private static void AnalyzeInheritance(SymbolAnalysisContext context, INamedTypeSymbol type)
+    {
+        if (InheritanceFacts.GetUnsupportedBaseOrInterface(type) is not ISymbol unsupported)
+            return;
+
+        string baseName = unsupported.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+        context.ReportDiagnostic(Diagnostic.Create(
+            TypeShimDiagnostics.UnsupportedInheritanceRule, LocationFinder.GetBaseListLocation(type, context.CancellationToken), type.Name, baseName));
     }
 
     private static void AnalyzeClassAccessibility(SymbolAnalysisContext context, INamedTypeSymbol classSymbol)

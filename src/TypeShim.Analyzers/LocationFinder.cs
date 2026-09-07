@@ -9,6 +9,16 @@ internal static class LocationFinder
     internal static Location GetDefaultLocation(ISymbol symbol)
             => symbol.Locations.Length > 0 ? symbol.Locations[0] : Location.None;
 
+    internal static Location GetBaseListLocation(INamedTypeSymbol type, CancellationToken t)
+    {
+        foreach (SyntaxReference syntaxRef in type.DeclaringSyntaxReferences)
+        {
+            if (syntaxRef.GetSyntax(t) is TypeDeclarationSyntax { BaseList: BaseListSyntax baseList })
+                return baseList.GetLocation();
+        }
+        return GetDefaultLocation(type);
+    }
+
     internal static Location GetMethodParameterLocation(IMethodSymbol method, IParameterSymbol parameter, CancellationToken t)
     {
         foreach (SyntaxReference syntaxRef in parameter.DeclaringSyntaxReferences)
