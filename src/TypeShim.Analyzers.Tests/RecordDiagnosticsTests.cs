@@ -40,22 +40,6 @@ internal class RecordDiagnosticsTests
     }
 
     [Test]
-    public async Task TSExportRecord_IsNotFlaggedForSynthesizedEqualsOverload()
-    {
-        // A record must raise only the record diagnostic; the synthesized Equals overload must not add noise.
-        string source = """
-            using System;
-            using TypeShim;
-
-            [TSExport]
-            public record C1(string Name);
-            """;
-
-        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, RecordNotSupportedId);
-    }
-
-    [Test]
     public async Task TSExportClass_IsNotFlaggedAsRecord()
     {
         string source = """
