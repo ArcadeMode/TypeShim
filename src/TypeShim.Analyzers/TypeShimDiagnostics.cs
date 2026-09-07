@@ -58,7 +58,7 @@ internal static class TypeShimDiagnostics
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "TypeShim does not support fields (yet), they're mostly ignored but required fields are banned to prevent invalid constructor initializers from being generated.");
+        description: "TypeShim does not support overloading of public members.");
 
     internal static readonly DiagnosticDescriptor NoRequiredFieldsRule = new(
         id: "TSHIM011",
