@@ -7,6 +7,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
 {
     internal ClassInfo Build()
     {
+        ThrowIfInheritsUnsupportedType();
         ThrowIfContainsRequiredFields();
 
         bool isTSExport = SymbolFacts.HasTSExportAttribute(classSymbol);
@@ -79,6 +80,15 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
         }
 
         return [.. methodInfos.Values];
+    }
+
+    private void ThrowIfInheritsUnsupportedType()
+    {
+        if (InheritanceFacts.GetUnsupportedBaseOrInterface(classSymbol) is ISymbol unsupported)
+        {
+            string typeName = unsupported.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+            throw new NotSupportedInheritanceException($"TSExport '{classSymbol.Name}' invalidly inherits '{typeName}'; inheritance is not supported (yet), except for IDisposable.");
+        }
     }
 
     private void ThrowIfContainsRequiredFields()
