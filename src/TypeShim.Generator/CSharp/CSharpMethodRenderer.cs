@@ -228,84 +228,109 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     private void RenderConstructorInvocation(ConstructorInfo constructorInfo)
     {
-        PropertyInfo[] propertiesInMapper = [.. constructorInfo.MemberInitializers];
-        Dictionary<PropertyInfo, DeferredExpressionRenderer> propertyToAccessorDict = constructorInfo.AcceptsInitializer && constructorInfo.InitializerObject is MethodParameterInfo initializerParameter
-                ? RenderJSObjectPropertyRetrievalWithTypeConversions(propertiesInMapper, initializerParameter)
-                : [];
-        Debug.Assert(propertyToAccessorDict.Count == propertiesInMapper.Length, "Property count differs from renderer count");
-
-        _ctx.Append("return new ").Append(constructorInfo.Type.CSharpTypeSyntax).Append('(');
-        bool isFirst = true;
-        foreach (MethodParameterInfo param in constructorInfo.Parameters)
+        if (!constructorInfo.AcceptsInitializer || constructorInfo.InitializerObject is not MethodParameterInfo initializerParameter)
         {
-            if (!isFirst) _ctx.Append(", ");
-            _ctx.Append(_ctx.LocalScope.GetAccessorExpression(param));
-            isFirst = false;
-        }
-
-        if (!constructorInfo.AcceptsInitializer)
-        {
+            _ctx.Append("return new ").Append(constructorInfo.Type.CSharpTypeSyntax).Append('(');
+            RenderPositionalArguments(constructorInfo);
             _ctx.AppendLine(");");
             return;
         }
 
-        _ctx.AppendLine(")");
-        _ctx.AppendLine("{");
-        using (_ctx.Indent())
+        // The initializer object is optional end-to-end: only 'required' members throw when absent.
+        // Object-initializer syntax cannot skip a member (it would clobber the C#-declared default), so we
+        // assign members imperatively behind per-member HasProperty guards, using UnsafeAccessor set methods
+        // so both 'set' and 'init' properties can be assigned through a single code path.
+        _ctx.Append("var instance = new ").Append(constructorInfo.Type.CSharpTypeSyntax).Append('(');
+        RenderPositionalArguments(constructorInfo);
+        _ctx.AppendLine(");");
+
+        foreach (PropertyInfo propertyInfo in constructorInfo.MemberInitializers)
         {
-            foreach ((PropertyInfo propertyInfo, DeferredExpressionRenderer expressionRenderer) in propertyToAccessorDict)
+            _ctx.Append("if (").Append(initializerParameter.Name).Append(".HasProperty(\"").Append(propertyInfo.Name).AppendLine("\"))");
+            _ctx.AppendLine("{");
+            using (_ctx.Indent())
             {
-                _ctx.Append(propertyInfo.Name).Append(" = ");
-                expressionRenderer.Render();
-                _ctx.AppendLine(",");
+                DeferredExpressionRenderer valueRenderer = RenderMemberValueExpression(propertyInfo, initializerParameter);
+                _ctx.Append(RenderConstants.UnsafeAccessorSetMethod(propertyInfo)).Append("(instance, ");
+                valueRenderer.Render();
+                _ctx.AppendLine(");");
+            }
+            _ctx.AppendLine("}");
+
+            if (propertyInfo.IsRequired)
+            {
+                _ctx.AppendLine("else");
+                _ctx.AppendLine("{");
+                using (_ctx.Indent())
+                {
+                    _ctx.Append("throw new ArgumentException(\"Required property '")
+                        .Append(propertyInfo.Name)
+                        .Append("' was not provided\", nameof(").Append(initializerParameter.Name).AppendLine("));");
+                }
+                _ctx.AppendLine("}");
             }
         }
-        _ctx.AppendLine("};");
 
-        Dictionary<PropertyInfo, DeferredExpressionRenderer> RenderJSObjectPropertyRetrievalWithTypeConversions(PropertyInfo[] properties, MethodParameterInfo initializerParameter)
+        _ctx.AppendLine("return instance;");
+
+        void RenderPositionalArguments(ConstructorInfo constructorInfo)
         {
-            Dictionary<PropertyInfo, DeferredExpressionRenderer> convertedTaskExpressionDict = [];
-            foreach (PropertyInfo propertyInfo in properties)
+            bool isFirst = true;
+            foreach (MethodParameterInfo param in constructorInfo.Parameters)
             {
-                DeferredExpressionRenderer valueRetrievalExpressionRenderer = DeferredExpressionRenderer.FromUnary(() => {
-                    _ctx.Append(initializerParameter.Name).Append(".").Append(_methodResolver.ResolveJSObjectMethodName(propertyInfo.Type))
-                        .Append("(\"").Append(propertyInfo.Name).Append("\")");
+                if (!isFirst) _ctx.Append(", ");
+                _ctx.Append(_ctx.LocalScope.GetAccessorExpression(param));
+                isFirst = false;
+            }
+        }
+
+        DeferredExpressionRenderer RenderMemberValueExpression(PropertyInfo propertyInfo, MethodParameterInfo initializerParameter)
+        {
+            DeferredExpressionRenderer valueRetrievalExpressionRenderer = DeferredExpressionRenderer.FromUnary(() => {
+                _ctx.Append(initializerParameter.Name).Append(".").Append(_methodResolver.ResolveJSObjectMethodName(propertyInfo.Type))
+                    .Append("(\"").Append(propertyInfo.Name).Append("\")");
+            });
+
+            if (!propertyInfo.Type.IsNullableType)
+            {
+                DeferredExpressionRenderer nonNullableExpressionRenderer = valueRetrievalExpressionRenderer;
+                valueRetrievalExpressionRenderer = DeferredExpressionRenderer.FromBinary(() => {
+                    nonNullableExpressionRenderer.Render();
+                    _ctx.Append(" ?? throw new ArgumentException(\"Non-nullable property '")
+                        .Append(propertyInfo.Name)
+                        .Append("' missing or of invalid type\", nameof(").Append(initializerParameter.Name).Append("))");
                 });
-
-                if (!propertyInfo.Type.IsNullableType)
-                {
-                    DeferredExpressionRenderer nonNullableExpressionRenderer = valueRetrievalExpressionRenderer;
-                    valueRetrievalExpressionRenderer = DeferredExpressionRenderer.FromBinary(() => {
-                        nonNullableExpressionRenderer.Render();
-                        _ctx.Append(" ?? throw new ArgumentException(\"Non-nullable property '")
-                            .Append(propertyInfo.Name)
-                            .Append("' missing or of invalid type\", nameof(").Append(initializerParameter.Name).Append("))");
-                    });
-                }
-
-                if (!propertyInfo.Type.RequiresTypeConversion)
-                {
-                    convertedTaskExpressionDict.Add(propertyInfo, valueRetrievalExpressionRenderer);
-                } 
-                else
-                {
-                    if (propertyInfo.Type.IsDelegateType())
-                    {
-                        // delegates with conversion requirements need to be stored in a temporary variable to avoid multiple invocations of the JSObject method from the wrapper delegate
-                        _ctx.Append(propertyInfo.Type.CSharpInteropTypeSyntax).Append(" tmp").Append(propertyInfo.Name).Append(" = ");
-                        valueRetrievalExpressionRenderer.Render();
-                        _ctx.AppendLine(";");
-                        valueRetrievalExpressionRenderer = DeferredExpressionRenderer.FromUnary(() => {
-                            _ctx.Append("tmp").Append(propertyInfo.Name);
-                        });
-                    }
-
-                    DeferredExpressionRenderer convertedValueAccessorRenderer = _conversionRenderer.RenderVarTypeConversion(propertyInfo.Type, propertyInfo.Name, valueRetrievalExpressionRenderer);
-                    convertedTaskExpressionDict.Add(propertyInfo, convertedValueAccessorRenderer);
-                }
             }
 
-            return convertedTaskExpressionDict;
+            if (!propertyInfo.Type.RequiresTypeConversion)
+            {
+                return valueRetrievalExpressionRenderer;
+            }
+
+            if (propertyInfo.Type.IsDelegateType())
+            {
+                // delegates with conversion requirements need to be stored in a temporary variable to avoid multiple invocations of the JSObject method from the wrapper delegate
+                _ctx.Append(propertyInfo.Type.CSharpInteropTypeSyntax).Append(" tmp").Append(propertyInfo.Name).Append(" = ");
+                valueRetrievalExpressionRenderer.Render();
+                _ctx.AppendLine(";");
+                valueRetrievalExpressionRenderer = DeferredExpressionRenderer.FromUnary(() => {
+                    _ctx.Append("tmp").Append(propertyInfo.Name);
+                });
+            }
+
+            return _conversionRenderer.RenderVarTypeConversion(propertyInfo.Type, propertyInfo.Name, valueRetrievalExpressionRenderer);
+        }
+    }
+
+    internal void RenderMemberInitializerAccessors(ConstructorInfo constructorInfo)
+    {
+        foreach (PropertyInfo propertyInfo in constructorInfo.MemberInitializers)
+        {
+            _ctx.Append("[System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = \"set_")
+                .Append(propertyInfo.Name).AppendLine("\")]");
+            _ctx.Append("private static extern void ").Append(RenderConstants.UnsafeAccessorSetMethod(propertyInfo)).Append('(')
+                .Append(constructorInfo.Type.CSharpTypeSyntax).Append(" target, ")
+                .Append(propertyInfo.Type.CSharpTypeSyntax).AppendLine(" value);");
         }
     }
 }

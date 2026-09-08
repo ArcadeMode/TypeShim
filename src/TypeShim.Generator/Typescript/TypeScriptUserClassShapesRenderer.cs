@@ -38,7 +38,9 @@ internal sealed class TypeScriptUserClassShapesRenderer(RenderContext ctx)
         {
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
-                ctx.Append(propertyInfo.Name).Append(": ");
+                ctx.Append(propertyInfo.Name);
+                if (!propertyInfo.IsRequired) ctx.Append('?');
+                ctx.Append(": ");
                 if (ctx.SymbolMap.IsConversionRequiringClassOrDelegate(propertyInfo.Type))
                 {
                     TypeShimSymbolType returnSymbolType = propertyInfo.Type.IsDelegateType() ? TypeShimSymbolType.Proxy : TypeShimSymbolType.ProxyInitializerUnion;

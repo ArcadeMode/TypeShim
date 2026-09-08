@@ -52,10 +52,12 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = new C1();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<{{jsType}}>]
@@ -83,11 +85,15 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = new C1();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+        }
+        return instance;
     }
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, {{typeExpression}} value);
 }
 
 """.Replace("{{typeExpression}}", interopTypeExpression)
@@ -134,11 +140,16 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = new C1();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = ({{typeName}}[])initializer.GetPropertyAsObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-            P2 = initializer.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, ({{typeName}}[])initializer.GetPropertyAsObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+        }
+        if (initializer.HasProperty("P2"))
+        {
+            SetP2(instance, initializer.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(initializer)));
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
@@ -181,12 +192,21 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = new C1();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = ({{typeName}}[])initializer.GetPropertyAsObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-            P2 = initializer.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, ({{typeName}}[])initializer.GetPropertyAsObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+        }
+        if (initializer.HasProperty("P2"))
+        {
+            SetP2(instance, initializer.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(initializer)));
+        }
+        return instance;
     }
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, {{typeName}}[] value);
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P2")]
+    private static extern void SetP2(C1 target, int value);
 }
 
 """.Replace("{{typeName}}", typeName));
@@ -231,11 +251,16 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = new C1();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = (initializer.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer))).ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously),
-            P2 = initializer.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, (initializer.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer))).ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+        }
+        if (initializer.HasProperty("P2"))
+        {
+            SetP2(instance, initializer.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(initializer)));
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
@@ -278,12 +303,21 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = new C1();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = (initializer.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer))).ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously),
-            P2 = initializer.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, (initializer.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer))).ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+        }
+        if (initializer.HasProperty("P2"))
+        {
+            SetP2(instance, initializer.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(initializer)));
+        }
+        return instance;
     }
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, Task<{{typeName}}> value);
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P2")]
+    private static extern void SetP2(C1 target, int value);
 }
 
 """.Replace("{{typeName}}", typeName));

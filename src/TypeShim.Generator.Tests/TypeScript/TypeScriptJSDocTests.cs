@@ -230,7 +230,7 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
+  constructor(initializer?: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
   }
 
@@ -2174,7 +2174,7 @@ export class C1 extends ProxyBase {
    * Initializes a new instance.
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
+  constructor(initializer?: C1.Initializer) {
     super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
   }
 

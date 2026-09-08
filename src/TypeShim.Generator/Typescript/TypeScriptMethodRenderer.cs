@@ -30,11 +30,11 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         {
             if (constructorInfo.HasOptionalParameters
                 && constructorInfo.InitializerObject != null
-                && !InitializerIsOmittable(constructorInfo))
+                && !CanOmitInitializerArgument(ctx, constructorInfo))
             {
                 throw new NotSupportedOptionalParameterException(
                     $"Class '{ctx.Class.Name}' cannot combine optional constructor parameters with a non-omittable initializer object. " +
-                    "Make the parameters required, or ensure every settable/init property is nullable so the initializer can be omitted.");
+                    "Make the parameters required, or ensure every initializer member is optional (non-required) and of a directly-marshalled type so the initializer can be omitted.");
             }
 
             TypeScriptJSDocRenderer.RenderJSDoc(ctx, constructorInfo.Comment);
@@ -51,7 +51,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             {
                 if (constructorInfo.Parameters.Length != 0) ctx.Append(", ");
                 ctx.Append(constructorInfo.InitializerObject.Name);
-                if (constructorInfo.HasOptionalParameters) ctx.Append('?');
+                if (CanOmitInitializerArgument(ctx, constructorInfo)) ctx.Append('?');
                 ctx.Append(": ");
                 TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Initializer, interop: false);
             }
@@ -461,13 +461,25 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         };
     }
 
-    private static bool InitializerIsOmittable(ConstructorInfo constructorInfo)
+    /// <summary>
+    /// Whether the initializer object argument can be omitted by the caller (rendered as an optional parameter).
+    /// An initializer is omittable when none of its members are <c>required</c> and none require a proxy/char
+    /// conversion. Conversion-requiring members inject an explicit override key into the initializer object, which
+    /// is incompatible with the "absent stays default" semantics until the null/undefined-vs-absent handling lands.
+    /// </summary>
+    private static bool CanOmitInitializerArgument(RenderContext ctx, ConstructorInfo constructorInfo)
     {
         if (constructorInfo.InitializerObject == null)
         {
             return true;
         }
 
-        return constructorInfo.MemberInitializers.All(p => p.Type.IsNullableType); // TODO: swap for required check
+        if (constructorInfo.HasRequiredMemberInitializers)
+        {
+            return false;
+        }
+
+        return !constructorInfo.MemberInitializers.Any(p =>
+            ctx.SymbolMap.IsConversionRequiringClassOrDelegate(p.Type) || RequiresCharConversion(p.Type));
     }
 }

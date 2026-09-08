@@ -81,7 +81,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
   export interface Initializer {
-    P1: string;
+    P1?: string;
   }
   export interface Snapshot {
     P1: string;
@@ -126,7 +126,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
   export interface Initializer {
-    P1: string;
+    P1?: string;
   }
   export interface Snapshot {
     P1: string;
@@ -171,7 +171,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """    
 export namespace C1 {
   export interface Initializer {
-    P1: ManagedObject;
+    P1?: ManagedObject;
   }
   export interface Snapshot {
     P1: ManagedObject;
@@ -214,7 +214,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
   export interface Initializer {
-    P1: ManagedObject;
+    P1?: ManagedObject;
   }
   export interface Snapshot {
     P1: ManagedObject;
@@ -299,7 +299,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
   export interface Initializer {
-    P1: UserClass;
+    P1?: UserClass;
   }
   export interface Snapshot {
     P1: UserClass.Snapshot;

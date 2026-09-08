@@ -152,10 +152,12 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = new C1();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.String>]
@@ -183,11 +185,15 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = new C1();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+        }
+        return instance;
     }
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, {{typeExpression}} value);
 }
 
 """.Replace("{{typeExpression}}", interopTypeExpression).Replace("{{initializerMethod}}", initializerMethod));

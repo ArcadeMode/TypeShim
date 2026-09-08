@@ -46,7 +46,7 @@ internal class TypeScriptUserClassNamespaceRendererTests
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
   export interface Initializer {
-    P1: {{typeScriptType}};
+    P1?: {{typeScriptType}};
   }
   export interface Snapshot {
     P1: {{typeScriptType}};
@@ -100,7 +100,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
   export interface Initializer {
-    P1: UserClass | UserClass.Initializer;
+    P1?: UserClass | UserClass.Initializer;
   }
   export interface Snapshot {
     P1: UserClass.Snapshot;
@@ -154,7 +154,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
   export interface Initializer {
-    P1: UserClass | UserClass.Initializer;
+    P1?: UserClass | UserClass.Initializer;
   }
   export interface Snapshot {
     P1: UserClass.Snapshot;
@@ -208,7 +208,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
   export interface Initializer {
-    P1: UserClass | UserClass.Initializer | null;
+    P1?: UserClass | UserClass.Initializer | null;
   }
   export interface Snapshot {
     P1: UserClass.Snapshot | null;
@@ -262,7 +262,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
   export interface Initializer {
-    P1: Promise<UserClass | UserClass.Initializer>;
+    P1?: Promise<UserClass | UserClass.Initializer>;
   }
   export interface Snapshot {
     P1: Promise<UserClass.Snapshot>;
@@ -316,7 +316,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
   export interface Initializer {
-    P1: Promise<UserClass | UserClass.Initializer | null>;
+    P1?: Promise<UserClass | UserClass.Initializer | null>;
   }
   export interface Snapshot {
     P1: Promise<UserClass.Snapshot | null>;
@@ -370,7 +370,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
   export interface Initializer {
-    P1: Promise<UserClass | UserClass.Initializer | null> | null;
+    P1?: Promise<UserClass | UserClass.Initializer | null> | null;
   }
   export interface Snapshot {
     P1: Promise<UserClass.Snapshot | null> | null;
@@ -424,7 +424,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
   export interface Initializer {
-    P1: Array<UserClass | UserClass.Initializer>;
+    P1?: Array<UserClass | UserClass.Initializer>;
   }
   export interface Snapshot {
     P1: Array<UserClass.Snapshot>;
@@ -478,7 +478,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
   export interface Initializer {
-    P1: Array<UserClass | UserClass.Initializer | null>;
+    P1?: Array<UserClass | UserClass.Initializer | null>;
   }
   export interface Snapshot {
     P1: Array<UserClass.Snapshot | null>;
@@ -532,7 +532,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
 export namespace C1 {
   export interface Initializer {
-    P1: Array<UserClass | UserClass.Initializer> | null;
+    P1?: Array<UserClass | UserClass.Initializer> | null;
   }
   export interface Snapshot {
     P1: Array<UserClass.Snapshot> | null;
@@ -657,7 +657,7 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export namespace C1 {
           export interface Initializer {
-            P1: (arg0: string) => UserClass;
+            P1?: (arg0: string) => UserClass;
           }
         }
 
@@ -703,8 +703,8 @@ export namespace C1 {
         AssertEx.EqualOrDiff(renderContext.ToString(), """
         export namespace C1 {
           export interface Initializer {
-            P1: (arg0: string) => UserClass;
-            P2: number;
+            P1?: (arg0: string) => UserClass;
+            P2?: number;
           }
           export interface Snapshot {
             P2: number;

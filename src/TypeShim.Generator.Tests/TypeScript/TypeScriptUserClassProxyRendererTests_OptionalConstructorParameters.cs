@@ -62,15 +62,35 @@ export class C1 extends ProxyBase {
     }
 
     [Test]
-    public void OptionalCtorParam_WithNonNullableInitializerMember_Throws()
+    public void OptionalCtorParam_WithNonNullableInitializerMember_RendersOptionalInitializer()
     {
-        Assert.Throws<NotSupportedOptionalParameterException>(() => Render("""
+        string output = Render("""
             public class C1
             {
                 public C1(int count = 5) {}
                 public string P1 { get; set; }
             }
-        """));
+        """);
+
+        AssertEx.EqualOrDiff(output, """
+export class C1 extends ProxyBase {
+  /**
+   * @param initializer - Object with member-initializers
+   */
+  constructor(count: number = 5, initializer?: C1.Initializer) {
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(count, { ...initializer }));
+  }
+
+  public get P1(): string {
+    return TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+  }
+
+  public set P1(value: string) {
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value);
+  }
+}
+
+""");
     }
 
     [Test]

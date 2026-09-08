@@ -480,12 +480,20 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = new C1();
+        if (initializer.HasProperty("Scalar"))
         {
-            Scalar = (Color)(initializer.GetPropertyAsInt32Nullable("Scalar") ?? throw new ArgumentException("Non-nullable property 'Scalar' missing or of invalid type", nameof(initializer))),
-            Nullable = initializer.GetPropertyAsInt32Nullable("Nullable") is { } NullableVal ? (Color)NullableVal : null,
-            Arr = Array.ConvertAll(initializer.GetPropertyAsInt32ArrayNullable("Arr") ?? throw new ArgumentException("Non-nullable property 'Arr' missing or of invalid type", nameof(initializer)), e => (Color)e),
-        };
+            SetScalar(instance, (Color)(initializer.GetPropertyAsInt32Nullable("Scalar") ?? throw new ArgumentException("Non-nullable property 'Scalar' missing or of invalid type", nameof(initializer))));
+        }
+        if (initializer.HasProperty("Nullable"))
+        {
+            SetNullable(instance, initializer.GetPropertyAsInt32Nullable("Nullable") is { } NullableVal ? (Color)NullableVal : null);
+        }
+        if (initializer.HasProperty("Arr"))
+        {
+            SetArr(instance, Array.ConvertAll(initializer.GetPropertyAsInt32ArrayNullable("Arr") ?? throw new ArgumentException("Non-nullable property 'Arr' missing or of invalid type", nameof(initializer)), e => (Color)e));
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Number>]
@@ -544,13 +552,27 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = new C1();
+        if (initializer.HasProperty("Scalar"))
         {
-            Scalar = (Color)(initializer.GetPropertyAsInt32Nullable("Scalar") ?? throw new ArgumentException("Non-nullable property 'Scalar' missing or of invalid type", nameof(initializer))),
-            Nullable = initializer.GetPropertyAsInt32Nullable("Nullable") is { } NullableVal ? (Color)NullableVal : null,
-            Arr = Array.ConvertAll(initializer.GetPropertyAsInt32ArrayNullable("Arr") ?? throw new ArgumentException("Non-nullable property 'Arr' missing or of invalid type", nameof(initializer)), e => (Color)e),
-        };
+            SetScalar(instance, (Color)(initializer.GetPropertyAsInt32Nullable("Scalar") ?? throw new ArgumentException("Non-nullable property 'Scalar' missing or of invalid type", nameof(initializer))));
+        }
+        if (initializer.HasProperty("Nullable"))
+        {
+            SetNullable(instance, initializer.GetPropertyAsInt32Nullable("Nullable") is { } NullableVal ? (Color)NullableVal : null);
+        }
+        if (initializer.HasProperty("Arr"))
+        {
+            SetArr(instance, Array.ConvertAll(initializer.GetPropertyAsInt32ArrayNullable("Arr") ?? throw new ArgumentException("Non-nullable property 'Arr' missing or of invalid type", nameof(initializer)), e => (Color)e));
+        }
+        return instance;
     }
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Scalar")]
+    private static extern void SetScalar(C1 target, Color value);
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Nullable")]
+    private static extern void SetNullable(C1 target, Color? value);
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Arr")]
+    private static extern void SetArr(C1 target, Color[] value);
 }
 
 """);

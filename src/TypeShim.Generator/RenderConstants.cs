@@ -18,4 +18,6 @@ internal static class RenderConstants
 
     internal static string InteropClassName(ClassInfo classInfo) => classInfo.IsTSExport ? $"{classInfo.Name}Interop" : classInfo.Name;
 
+    internal static string UnsafeAccessorSetMethod(PropertyInfo propertyInfo) => $"Set{propertyInfo.Name}";
+
 }
