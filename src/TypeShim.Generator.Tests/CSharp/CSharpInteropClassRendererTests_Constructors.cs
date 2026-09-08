@@ -164,7 +164,7 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        var instance = new C1();
+        var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
             SetP1(instance, initializer.GetPropertyAsInt32Nullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
@@ -197,13 +197,15 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        var instance = new C1();
+        var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
             SetP1(instance, initializer.GetPropertyAsInt32Nullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
         }
         return instance;
     }
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, int value);
 }
@@ -248,7 +250,7 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        var instance = new C1();
+        var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
             SetP1(instance, initializer.GetPropertyAsInt32Nullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
@@ -274,13 +276,15 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        var instance = new C1();
+        var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
             SetP1(instance, initializer.GetPropertyAsInt32Nullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
         }
         return instance;
     }
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, int value);
 }
@@ -325,7 +329,7 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Number>] int p1, [JSMarshalAs<JSType.Number>] double p2, [JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        var instance = new C1(p1, p2);
+        var instance = CreateInstance(p1, p2);
         if (initializer.HasProperty("P1"))
         {
             SetP1(instance, initializer.GetPropertyAsInt32Nullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
@@ -354,6 +358,8 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance(int p1, double p2);
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, int value);
 }
@@ -398,7 +404,7 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Number>] int p1, [JSMarshalAs<JSType.Number>] double p2, [JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        var instance = new C1(p1, p2);
+        var instance = CreateInstance(p1, p2);
         if (initializer.HasProperty("P1"))
         {
             SetP1(instance, initializer.GetPropertyAsInt32Nullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
@@ -420,6 +426,8 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance(int p1, double p2);
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, int value);
 }
@@ -623,7 +631,7 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        var instance = new C1();
+        var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
             SetP1(instance, UserClassInterop.FromObject(initializer.GetPropertyAsObjectNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer))));
@@ -657,13 +665,15 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        var instance = new C1();
+        var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
             SetP1(instance, UserClassInterop.FromObject(initializer.GetPropertyAsObjectNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer))));
         }
         return instance;
     }
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, UserClass value);
 }

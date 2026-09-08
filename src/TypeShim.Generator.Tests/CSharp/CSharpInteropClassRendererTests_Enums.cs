@@ -480,7 +480,7 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        var instance = new C1();
+        var instance = CreateInstance();
         if (initializer.HasProperty("Scalar"))
         {
             SetScalar(instance, (Color)(initializer.GetPropertyAsInt32Nullable("Scalar") ?? throw new ArgumentException("Non-nullable property 'Scalar' missing or of invalid type", nameof(initializer))));
@@ -552,7 +552,7 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        var instance = new C1();
+        var instance = CreateInstance();
         if (initializer.HasProperty("Scalar"))
         {
             SetScalar(instance, (Color)(initializer.GetPropertyAsInt32Nullable("Scalar") ?? throw new ArgumentException("Non-nullable property 'Scalar' missing or of invalid type", nameof(initializer))));
@@ -567,6 +567,8 @@ public partial class C1Interop
         }
         return instance;
     }
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Scalar")]
     private static extern void SetScalar(C1 target, Color value);
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Nullable")]
