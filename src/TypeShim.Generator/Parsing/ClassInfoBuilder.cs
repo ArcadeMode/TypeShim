@@ -7,6 +7,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
 {
     internal ClassInfo Build()
     {
+        InteropTypeInfo type = new InteropTypeInfoBuilder(classSymbol, typeInfoCache).Build();
         ThrowIfInheritsUnsupportedType();
         ThrowIfContainsRequiredFields();
 
@@ -19,7 +20,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
             Name = classSymbol.Name,
             IsTSExport = isTSExport,
             IsStatic = !isTSExport || classSymbol.IsStatic,
-            Type = new InteropTypeInfoBuilder(classSymbol, typeInfoCache).Build(),
+            Type = type,
             Constructor = isTSExport ? BuildConstructor(properties) : null,
             Methods = BuildMethods(isTSExport),
             Properties = properties,

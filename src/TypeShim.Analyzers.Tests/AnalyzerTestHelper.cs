@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -39,5 +40,31 @@ internal static class AnalyzerTestHelper
             ImmutableArray.Create<DiagnosticAnalyzer>(new TypeShimAnalyzer()));
 
         return await withAnalyzers.GetAnalyzerDiagnosticsAsync();
+    }
+
+    // Asserts the analyzer emitted no diagnostics at all, so a test can't silently pass while an
+    // unexpected diagnostic is also raised.
+    internal static void AssertNoDiagnostics(ImmutableArray<Diagnostic> diagnostics)
+    {
+        Assert.That(diagnostics.Select(d => d.Id), Is.Empty, () => Describe(diagnostics));
+    }
+
+    // Asserts the analyzer emitted exactly one diagnostic and that it has the expected id.
+    internal static void AssertSingleDiagnostic(ImmutableArray<Diagnostic> diagnostics, string expectedId)
+    {
+        Assert.That(diagnostics.Select(d => d.Id), Is.EqualTo(new[] { expectedId }), () => Describe(diagnostics));
+    }
+
+    // Asserts the analyzer emitted exactly the expected set of diagnostic ids (order-independent, counts matter).
+    internal static void AssertDiagnostics(ImmutableArray<Diagnostic> diagnostics, params string[] expectedIds)
+    {
+        Assert.That(diagnostics.Select(d => d.Id), Is.EquivalentTo(expectedIds), () => Describe(diagnostics));
+    }
+
+    private static string Describe(ImmutableArray<Diagnostic> diagnostics)
+    {
+        if (diagnostics.IsEmpty)
+            return "Expected diagnostics but none were emitted.";
+        return "Actual diagnostics: " + string.Join(", ", diagnostics.Select(d => $"{d.Id}: {d.GetMessage()}"));
     }
 }

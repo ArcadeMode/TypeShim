@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace TypeShim.Analyzers.Tests;
 
@@ -25,7 +24,7 @@ internal class OptionalParameterDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == ConstScopeId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, ConstScopeId);
     }
 
     [Test]
@@ -44,7 +43,7 @@ internal class OptionalParameterDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == ConstScopeId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 
     [Test]
@@ -65,7 +64,7 @@ internal class OptionalParameterDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == ConstScopeId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 
     [Test]
@@ -83,7 +82,7 @@ internal class OptionalParameterDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == ConstScopeId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 
     [Test]
@@ -101,7 +100,7 @@ internal class OptionalParameterDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == ConstScopeId || d.Id == OptionalMemoryViewId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 
     [Test]
@@ -119,7 +118,7 @@ internal class OptionalParameterDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == OptionalMemoryViewId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, OptionalMemoryViewId);
     }
 
     [Test]
@@ -137,7 +136,7 @@ internal class OptionalParameterDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == OptionalMemoryViewId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, OptionalMemoryViewId);
     }
 
     [Test]
@@ -155,6 +154,6 @@ internal class OptionalParameterDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == OptionalMemoryViewId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 }

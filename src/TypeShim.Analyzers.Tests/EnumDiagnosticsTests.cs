@@ -7,7 +7,6 @@ internal class EnumDiagnosticsTests
 {
     private static readonly string NonExportedTypeId = TypeShimDiagnostics.NonExportedTypeInInteropApiRule.Id;
     private static readonly string UnsupportedTypeId = TypeShimDiagnostics.UnsupportedTypeRule.Id;
-    private static readonly string ConstScopeId = TypeShimDiagnostics.UnresolvableDefaultConstRule.Id;
     private static readonly string MemberOutOfRangeId = TypeShimDiagnostics.EnumMemberOutOfSafeRangeRule.Id;
 
     [Test]
@@ -29,7 +28,7 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == NonExportedTypeId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, NonExportedTypeId);
     }
 
     [Test]
@@ -49,7 +48,7 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == NonExportedTypeId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, NonExportedTypeId);
     }
 
     [Test]
@@ -69,7 +68,7 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == NonExportedTypeId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, NonExportedTypeId);
     }
 
     [Test]
@@ -89,7 +88,7 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == NonExportedTypeId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, NonExportedTypeId);
     }
 
     [Test]
@@ -109,7 +108,7 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == NonExportedTypeId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, NonExportedTypeId);
     }
 
     [Test]
@@ -130,7 +129,7 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == NonExportedTypeId || d.Id == UnsupportedTypeId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 
     [Test]
@@ -151,7 +150,7 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == NonExportedTypeId || d.Id == UnsupportedTypeId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 
     [Test]
@@ -172,14 +171,14 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == ConstScopeId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 
     [Test]
     public async Task UnsupportedUnderlyingEnumParameter_IsFlaggedAsUnsupported()
     {
         // Unsigned underlying types cannot cross the .NET-JS boundary, so the enum itself is unsupported
-        // regardless of export status.
+        // regardless of export status. Both the declaration and the usage on the boundary are flagged.
         string source = """
             using System;
             using TypeShim;
@@ -195,7 +194,7 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == UnsupportedTypeId), Is.True);
+        AnalyzerTestHelper.AssertDiagnostics(diagnostics, UnsupportedTypeId, UnsupportedTypeId);
     }
 
     [Test]
@@ -212,7 +211,8 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == UnsupportedTypeId && d.GetMessage().Contains("ulong")), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, UnsupportedTypeId);
+        Assert.That(diagnostics.Single().GetMessage(), Does.Contain("ulong"));
     }
 
     [TestCase("ulong")]
@@ -230,7 +230,8 @@ internal class EnumDiagnosticsTests
             """.Replace("{{underlying}}", underlying);
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == UnsupportedTypeId && d.GetMessage().Contains(underlying)), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, UnsupportedTypeId);
+        Assert.That(diagnostics.Single().GetMessage(), Does.Contain(underlying));
     }
 
     [TestCase("byte")]
@@ -254,7 +255,7 @@ internal class EnumDiagnosticsTests
             """.Replace("{{underlying}}", underlying);
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == UnsupportedTypeId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 
     [Test]
@@ -270,7 +271,7 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == MemberOutOfRangeId), Is.False);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, UnsupportedTypeId);
     }
 
     [Test]
@@ -286,7 +287,8 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == MemberOutOfRangeId && d.GetMessage().Contains("Max")), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, MemberOutOfRangeId);
+        Assert.That(diagnostics.Single().GetMessage(), Does.Contain("Max"));
     }
 
     [Test]
@@ -301,7 +303,8 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == MemberOutOfRangeId && d.GetMessage().Contains("Min")), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, MemberOutOfRangeId);
+        Assert.That(diagnostics.Single().GetMessage(), Does.Contain("Min"));
     }
 
     [Test]
@@ -317,7 +320,7 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == MemberOutOfRangeId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 
     [Test]
@@ -332,7 +335,7 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Count(d => d.Id == MemberOutOfRangeId), Is.EqualTo(2));
+        AnalyzerTestHelper.AssertDiagnostics(diagnostics, MemberOutOfRangeId, MemberOutOfRangeId);
     }
 
     [Test]
@@ -347,7 +350,7 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == MemberOutOfRangeId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 
     [Test]
@@ -362,6 +365,6 @@ internal class EnumDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == MemberOutOfRangeId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 }

@@ -28,7 +28,8 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         TypeShimDiagnostics.NoOptionalMemoryViewRule,
         TypeShimDiagnostics.NoOptionalCtorParamWithRequiredInitializerRule,
         TypeShimDiagnostics.EnumMemberOutOfSafeRangeRule,
-        TypeShimDiagnostics.UnsupportedInheritanceRule
+        TypeShimDiagnostics.UnsupportedInheritanceRule,
+        TypeShimDiagnostics.RecordNotSupportedRule
     ];
 
     public override void Initialize(AnalysisContext context)
@@ -67,6 +68,9 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         if (TryGetTypeDiagnostic(type) is DiagnosticDescriptor descriptor)
         {
             context.ReportDiagnostic(Diagnostic.Create(descriptor, LocationFinder.GetDefaultLocation(type), type.Name));
+
+            if (ReferenceEquals(descriptor, TypeShimDiagnostics.RecordNotSupportedRule))
+                return;
         }
 
         AnalyzeClassAccessibility(context, type);
@@ -344,6 +348,10 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         catch (NotSupportedGenericClassException)
         {
             return TypeShimDiagnostics.NoGenericsTSExportRule;
+        }
+        catch (NotSupportedRecordException)
+        {
+            return TypeShimDiagnostics.RecordNotSupportedRule;
         }
         return null;
     }

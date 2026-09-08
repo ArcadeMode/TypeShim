@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace TypeShim.Analyzers.Tests;
 
@@ -23,7 +22,7 @@ internal class OptionalConstructorParameterDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == RequiredInitializerId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, RequiredInitializerId);
     }
 
     [Test]
@@ -42,7 +41,7 @@ internal class OptionalConstructorParameterDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == RequiredInitializerId), Is.True);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, RequiredInitializerId);
     }
 
     [Test]
@@ -62,7 +61,7 @@ internal class OptionalConstructorParameterDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == RequiredInitializerId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 
     [Test]
@@ -82,7 +81,7 @@ internal class OptionalConstructorParameterDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == RequiredInitializerId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 
     [Test]
@@ -101,7 +100,7 @@ internal class OptionalConstructorParameterDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == RequiredInitializerId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 
     [Test]
@@ -121,6 +120,6 @@ internal class OptionalConstructorParameterDiagnosticsTests
             """;
 
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
-        Assert.That(diagnostics.Any(d => d.Id == RequiredInitializerId), Is.False);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
 }
