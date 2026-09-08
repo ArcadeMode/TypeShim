@@ -135,7 +135,7 @@ internal static class TypeShimDiagnostics
     internal static readonly DiagnosticDescriptor RecordNotSupportedRule = new(
         id: "TSHIM019",
         title: "Records are not supported",
-        messageFormat: "TypeShim does not support Records, consider marking {0} as a regular class",
+        messageFormat: "TSExport '{0}' is invalidly declared a record; Records are not supported (yet), consider marking it as a regular class",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
