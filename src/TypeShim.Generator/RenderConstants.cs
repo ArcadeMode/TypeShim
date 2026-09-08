@@ -20,4 +20,6 @@ internal static class RenderConstants
 
     internal static string UnsafeAccessorSetMethod(PropertyInfo propertyInfo) => $"Set{propertyInfo.Name}";
 
+    internal const string UnsafeAccessorConstructorMethod = "CreateInstance";
+
 }

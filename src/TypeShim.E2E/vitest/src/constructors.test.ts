@@ -8,7 +8,8 @@ import {
     ExportedClassMultipleConstructor,
     ExportedClassArrayConstructor,
     ExportedClassActionConstructor,
-    IntStringMixedConstructor
+    IntStringMixedConstructor,
+    OptionalInitializerConstructor
 } from 'typeshim';
 
 describe('Constructors Test', () => {
@@ -119,4 +120,22 @@ describe('Constructors Test', () => {
         expect(instance.Value).toBe(42);
         expect(instance.StringValue).toBe('test');
     })
+
+    test('OptionalInitializerConstructor omitting non-required members keeps C# defaults', () => {
+        const instance = new OptionalInitializerConstructor({ Name: 'only-name' });
+        expect(instance.Name).toBe('only-name');
+        expect(instance.Count).toBe(42);
+        expect(instance.Label).toBe('default');
+    });
+
+    test('OptionalInitializerConstructor providing non-required members overrides defaults', () => {
+        const instance = new OptionalInitializerConstructor({ Name: 'full', Count: 7, Label: 'custom' });
+        expect(instance.Name).toBe('full');
+        expect(instance.Count).toBe(7);
+        expect(instance.Label).toBe('custom');
+    });
+
+    test('OptionalInitializerConstructor missing required member throws', () => {
+        expect(() => new OptionalInitializerConstructor({} as any)).toThrow();
+    });
 });

@@ -52,3 +52,11 @@ public class IntStringMixedConstructor(int i)
     public int Value { get; } = i;
     public required string StringValue { get; set; }
 }
+
+[TSExport]
+public class OptionalInitializerConstructor
+{
+    public int Count { get; set; } = 42;
+    public string Label { get; set; } = "default";
+    public required string Name { get; set; }
+}

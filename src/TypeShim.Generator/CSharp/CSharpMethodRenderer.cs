@@ -240,7 +240,17 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         // Object-initializer syntax cannot skip a member (it would clobber the C#-declared default), so we
         // assign members imperatively behind per-member HasProperty guards, using UnsafeAccessor set methods
         // so both 'set' and 'init' properties can be assigned through a single code path.
-        _ctx.Append("var instance = new ").Append(constructorInfo.Type.CSharpTypeSyntax).Append('(');
+        // When the type declares 'required' members, 'new T(...)' is a compile error (CS9035) because the
+        // required members are not set in the object initializer, so we construct through an UnsafeAccessor
+        // constructor which is exempt from the required-member enforcement.
+        if (constructorInfo.HasRequiredMemberInitializers)
+        {
+            _ctx.Append("var instance = ").Append(RenderConstants.UnsafeAccessorConstructorMethod).Append('(');
+        }
+        else
+        {
+            _ctx.Append("var instance = new ").Append(constructorInfo.Type.CSharpTypeSyntax).Append('(');
+        }
         RenderPositionalArguments(constructorInfo);
         _ctx.AppendLine(");");
 
@@ -324,6 +334,23 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     internal void RenderMemberInitializerAccessors(ConstructorInfo constructorInfo)
     {
+        if (constructorInfo.HasRequiredMemberInitializers)
+        {
+            // Required members make 'new T(...)' illegal (CS9035); an UnsafeAccessor constructor bypasses that
+            // enforcement while still invoking the real constructor (running field/property initializers).
+            _ctx.AppendLine("[System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]");
+            _ctx.Append("private static extern ").Append(constructorInfo.Type.CSharpTypeSyntax).Append(' ')
+                .Append(RenderConstants.UnsafeAccessorConstructorMethod).Append('(');
+            bool isFirst = true;
+            foreach (MethodParameterInfo param in constructorInfo.Parameters)
+            {
+                if (!isFirst) _ctx.Append(", ");
+                _ctx.Append(param.Type.CSharpTypeSyntax).Append(' ').Append(param.Name);
+                isFirst = false;
+            }
+            _ctx.AppendLine(");");
+        }
+
         foreach (PropertyInfo propertyInfo in constructorInfo.MemberInitializers)
         {
             _ctx.Append("[System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = \"set_")
