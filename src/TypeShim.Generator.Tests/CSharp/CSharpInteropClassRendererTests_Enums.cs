@@ -483,7 +483,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("Scalar"))
         {
-            SetScalar(instance, (Color)(initializer.GetPropertyAsInt32Nullable("Scalar") ?? throw new ArgumentException("Non-nullable property 'Scalar' missing or of invalid type", nameof(initializer))));
+            SetScalar(instance, (Color)initializer.GetPropertyAsInt32("Scalar")!);
         }
         if (initializer.HasProperty("Nullable"))
         {
@@ -491,7 +491,7 @@ public partial class C1Interop
         }
         if (initializer.HasProperty("Arr"))
         {
-            SetArr(instance, Array.ConvertAll(initializer.GetPropertyAsInt32ArrayNullable("Arr") ?? throw new ArgumentException("Non-nullable property 'Arr' missing or of invalid type", nameof(initializer)), e => (Color)e));
+            SetArr(instance, Array.ConvertAll(initializer.GetPropertyAsInt32Array("Arr")!, e => (Color)e));
         }
         return instance;
     }
@@ -555,7 +555,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("Scalar"))
         {
-            SetScalar(instance, (Color)(initializer.GetPropertyAsInt32Nullable("Scalar") ?? throw new ArgumentException("Non-nullable property 'Scalar' missing or of invalid type", nameof(initializer))));
+            SetScalar(instance, (Color)initializer.GetPropertyAsInt32("Scalar")!);
         }
         if (initializer.HasProperty("Nullable"))
         {
@@ -563,7 +563,7 @@ public partial class C1Interop
         }
         if (initializer.HasProperty("Arr"))
         {
-            SetArr(instance, Array.ConvertAll(initializer.GetPropertyAsInt32ArrayNullable("Arr") ?? throw new ArgumentException("Non-nullable property 'Arr' missing or of invalid type", nameof(initializer)), e => (Color)e));
+            SetArr(instance, Array.ConvertAll(initializer.GetPropertyAsInt32Array("Arr")!, e => (Color)e));
         }
         return instance;
     }

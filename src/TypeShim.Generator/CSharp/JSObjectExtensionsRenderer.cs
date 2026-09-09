@@ -27,7 +27,6 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, IEnumerable
             JSObjectExtensionInfo[] extensionInfos = [.. targetTypeInfos
                 .Select(typeInfo => new JSObjectExtensionInfo(typeInfo))
                 .DistinctBy(extInfo => extInfo.Name)];
-            HashSet<string> processedTypes = [];
             foreach (JSObjectExtensionInfo typeInfo in extensionInfos)
             {
                 RenderExtensionMethodForType(typeInfo);
@@ -44,20 +43,18 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, IEnumerable
         });
         DeferredExpressionRenderer getPropertyAsMethodNameRenderer = DeferredExpressionRenderer.FromUnary(() =>
         {
-            _ctx.Append("GetPropertyAs").Append(extensionInfo.Name).Append("Nullable");
+            _ctx.Append(extensionInfo.GetGetPropertyAsMethodName());
         });
 
-        _ctx.Append("public static ").Append(extensionInfo.TypeInfo.CSharpInteropTypeSyntax).Append("? ");
+        _ctx.Append("public static ").Append(extensionInfo.TypeInfo.CSharpInteropTypeSyntax).Append(' ');
         getPropertyAsMethodNameRenderer.Render();
         _ctx.AppendLine("(this JSObject jsObject, string propertyName)");
         _ctx.AppendLine("{");
         using (_ctx.Indent())
         {
-            _ctx.Append("return jsObject.HasProperty(propertyName) ? ");
+            _ctx.Append("return ");
             marshalAsMethodNameRenderer.Render();
-            _ctx.Append("(jsObject, propertyName) : (")
-                .Append(extensionInfo.TypeInfo.CSharpInteropTypeSyntax)
-                .AppendLine("?)null;");
+            _ctx.AppendLine("(jsObject, propertyName);");
         }
         _ctx.AppendLine("}");
 

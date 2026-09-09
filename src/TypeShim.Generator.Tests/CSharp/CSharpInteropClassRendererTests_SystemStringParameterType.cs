@@ -113,10 +113,10 @@ public partial class C1Interop
 """);
     }
 
-    [TestCase("string", "string", "GetPropertyAsStringNullable")]
-    [TestCase("String", "string", "GetPropertyAsStringNullable")]
-    [TestCase("char", "char", "GetPropertyAsCharNullable")]
-    [TestCase("Char", "char", "GetPropertyAsCharNullable")]
+    [TestCase("string", "string", "GetPropertyAsString")]
+    [TestCase("String", "string", "GetPropertyAsString")]
+    [TestCase("char", "char", "GetPropertyAsChar")]
+    [TestCase("Char", "char", "GetPropertyAsChar")]
     public void CSharpInteropClass_InstanceProperty_WithStringParameterType(string typeName, string interopTypeExpression, string initializerMethod)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -155,7 +155,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+            SetP1(instance, initializer.{{initializerMethod}}("P1")!);
         }
         return instance;
     }
@@ -188,7 +188,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+            SetP1(instance, initializer.{{initializerMethod}}("P1")!);
         }
         return instance;
     }

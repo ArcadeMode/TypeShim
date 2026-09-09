@@ -195,20 +195,20 @@ public partial class C1Interop
 """.Replace("{{typeExpression}}", interopTypeExpression)));
     }
 
-    [TestCase("Byte", "byte", "GetPropertyAsByteNullable")]
-    [TestCase("byte", "byte", "GetPropertyAsByteNullable")]
-    [TestCase("Int16", "short", "GetPropertyAsInt16Nullable")]
-    [TestCase("short", "short", "GetPropertyAsInt16Nullable")]
-    [TestCase("Int32", "int", "GetPropertyAsInt32Nullable")]
-    [TestCase("int", "int", "GetPropertyAsInt32Nullable")]
-    [TestCase("Int64", "long", "GetPropertyAsInt64Nullable")]
-    [TestCase("long", "long", "GetPropertyAsInt64Nullable")]
-    [TestCase("Single", "float", "GetPropertyAsSingleNullable")]
-    [TestCase("float", "float", "GetPropertyAsSingleNullable")]
-    [TestCase("Double", "double", "GetPropertyAsDoubleNullable")]
-    [TestCase("double", "double", "GetPropertyAsDoubleNullable")]
-    [TestCase("IntPtr", "nint", "GetPropertyAsIntPtrNullable")]
-    [TestCase("nint", "nint", "GetPropertyAsIntPtrNullable")]
+    [TestCase("Byte", "byte", "GetPropertyAsByte")]
+    [TestCase("byte", "byte", "GetPropertyAsByte")]
+    [TestCase("Int16", "short", "GetPropertyAsInt16")]
+    [TestCase("short", "short", "GetPropertyAsInt16")]
+    [TestCase("Int32", "int", "GetPropertyAsInt32")]
+    [TestCase("int", "int", "GetPropertyAsInt32")]
+    [TestCase("Int64", "long", "GetPropertyAsInt64")]
+    [TestCase("long", "long", "GetPropertyAsInt64")]
+    [TestCase("Single", "float", "GetPropertyAsSingle")]
+    [TestCase("float", "float", "GetPropertyAsSingle")]
+    [TestCase("Double", "double", "GetPropertyAsDouble")]
+    [TestCase("double", "double", "GetPropertyAsDouble")]
+    [TestCase("IntPtr", "nint", "GetPropertyAsIntPtr")]
+    [TestCase("nint", "nint", "GetPropertyAsIntPtr")]
     public void CSharpInteropClass_InstanceProperty_WithSupportedNumericParameterType(string typeExpression, string interopTypeExpression, string initializerMethod)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -248,7 +248,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+            SetP1(instance, initializer.{{initializerMethod}}("P1")!);
         }
         return instance;
     }
@@ -281,7 +281,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+            SetP1(instance, initializer.{{initializerMethod}}("P1")!);
         }
         return instance;
     }

@@ -110,8 +110,8 @@ public partial class C1Interop
 """.Replace("{{interopTypeExpression}}", interopTypeExpression)));
     }
 
-    [TestCase("DateTime", "global::System.DateTime", "GetPropertyAsDateTimeNullable")]
-    [TestCase("DateTimeOffset", "global::System.DateTimeOffset", "GetPropertyAsDateTimeOffsetNullable")]
+    [TestCase("DateTime", "global::System.DateTime", "GetPropertyAsDateTime")]
+    [TestCase("DateTimeOffset", "global::System.DateTimeOffset", "GetPropertyAsDateTimeOffset")]
     public void CSharpInteropClass_InstanceProperty_ForDateTimeParameterType(string typeName, string interopTypeExpression, string initializerMethod)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -151,7 +151,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+            SetP1(instance, initializer.{{initializerMethod}}("P1")!);
         }
         return instance;
     }
@@ -184,7 +184,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+            SetP1(instance, initializer.{{initializerMethod}}("P1")!);
         }
         return instance;
     }

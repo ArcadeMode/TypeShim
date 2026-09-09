@@ -12,9 +12,9 @@ namespace TypeShim.Generator.Tests.CSharp;
 
 internal class CSharpInteropClassRendererTests_Snapshots
 {
-    [TestCase("string", "string", "JSType.String", "GetPropertyAsStringNullable")]
-    [TestCase("double", "double", "JSType.Number", "GetPropertyAsDoubleNullable")]
-    [TestCase("bool", "bool", "JSType.Boolean", "GetPropertyAsBooleanNullable")]
+    [TestCase("string", "string", "JSType.String", "GetPropertyAsString")]
+    [TestCase("double", "double", "JSType.Number", "GetPropertyAsDouble")]
+    [TestCase("bool", "bool", "JSType.Boolean", "GetPropertyAsBoolean")]
     public void CSharpInteropClass_SupportedPropertyType_GeneratesFromJSObjectMethod(string typeExpression, string interopTypeExpression, string jsType, string initializerMethod)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -55,7 +55,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+            SetP1(instance, initializer.{{initializerMethod}}("P1")!);
         }
         return instance;
     }
@@ -88,7 +88,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+            SetP1(instance, initializer.{{initializerMethod}}("P1")!);
         }
         return instance;
     }
@@ -145,11 +145,11 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, ({{typeName}}[])initializer.GetPropertyAsObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+            SetP1(instance, ({{typeName}}[])initializer.GetPropertyAsObjectArray("P1")!);
         }
         if (initializer.HasProperty("P2"))
         {
-            SetP2(instance, initializer.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(initializer)));
+            SetP2(instance, initializer.GetPropertyAsInt32("P2")!);
         }
         return instance;
     }
@@ -197,11 +197,11 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, ({{typeName}}[])initializer.GetPropertyAsObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+            SetP1(instance, ({{typeName}}[])initializer.GetPropertyAsObjectArray("P1")!);
         }
         if (initializer.HasProperty("P2"))
         {
-            SetP2(instance, initializer.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(initializer)));
+            SetP2(instance, initializer.GetPropertyAsInt32("P2")!);
         }
         return instance;
     }
@@ -258,11 +258,11 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, (initializer.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer))).ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+            SetP1(instance, initializer.GetPropertyAsObjectTask("P1")!.ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
         }
         if (initializer.HasProperty("P2"))
         {
-            SetP2(instance, initializer.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(initializer)));
+            SetP2(instance, initializer.GetPropertyAsInt32("P2")!);
         }
         return instance;
     }
@@ -310,11 +310,11 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, (initializer.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer))).ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+            SetP1(instance, initializer.GetPropertyAsObjectTask("P1")!.ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
         }
         if (initializer.HasProperty("P2"))
         {
-            SetP2(instance, initializer.GetPropertyAsInt32Nullable("P2") ?? throw new ArgumentException("Non-nullable property 'P2' missing or of invalid type", nameof(initializer)));
+            SetP2(instance, initializer.GetPropertyAsInt32("P2")!);
         }
         return instance;
     }

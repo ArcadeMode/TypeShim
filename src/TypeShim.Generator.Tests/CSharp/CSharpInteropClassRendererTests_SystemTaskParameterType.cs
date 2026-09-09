@@ -377,7 +377,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+                    SetP1(instance, initializer.GetPropertyAsTask("P1")!);
                 }
                 return instance;
             }
@@ -410,7 +410,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)));
+                    SetP1(instance, initializer.GetPropertyAsTask("P1")!);
                 }
                 return instance;
             }

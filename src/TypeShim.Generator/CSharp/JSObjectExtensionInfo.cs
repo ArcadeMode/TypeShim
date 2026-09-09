@@ -8,7 +8,7 @@ internal record JSObjectExtensionInfo(InteropTypeInfo TypeInfo)
 
     internal string GetGetPropertyAsMethodName()
     {
-        return $"GetPropertyAs{Name}Nullable";
+        return $"GetPropertyAs{Name}";
     }
 
     private static IEnumerable<KnownManagedType> GetManagedTypeListForType(InteropTypeInfo typeInfo)
