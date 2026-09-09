@@ -42,7 +42,12 @@ export class C1 extends ProxyBase {
    * @param initializer - Object with member-initializers
    */
   constructor(initializer?: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
+    function renderInitializer(): C1.Initializer {
+      const o: Partial<Record<keyof C1.Initializer, unknown>> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1;
+      return o as C1.Initializer;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(renderInitializer()));
   }
 
   public get P1(): {{typeScriptType}} {
@@ -101,8 +106,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: initializer.P1 instanceof UserClass ? initializer.P1.instance : initializer.P1 }));
+  constructor(initializer?: C1.Initializer) {
+    function renderInitializer(): C1.Initializer {
+      const o: Partial<Record<keyof C1.Initializer, unknown>> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1 instanceof UserClass ? initializer.P1.instance : initializer.P1;
+      return o as C1.Initializer;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(renderInitializer()));
   }
 
   public get P1(): UserClass {

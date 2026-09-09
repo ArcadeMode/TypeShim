@@ -46,7 +46,12 @@ export class C1 extends ProxyBase {
    * @param initializer - Object with member-initializers
    */
   constructor(count: number = 5, initializer?: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(count, { ...initializer }));
+    function renderInitializer(): C1.Initializer {
+      const o: Partial<Record<keyof C1.Initializer, unknown>> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1;
+      return o as C1.Initializer;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(count, renderInitializer()));
   }
 
   public get P1(): string | null {
@@ -78,7 +83,12 @@ export class C1 extends ProxyBase {
    * @param initializer - Object with member-initializers
    */
   constructor(count: number = 5, initializer?: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(count, { ...initializer }));
+    function renderInitializer(): C1.Initializer {
+      const o: Partial<Record<keyof C1.Initializer, unknown>> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1;
+      return o as C1.Initializer;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(count, renderInitializer()));
   }
 
   public get P1(): string {
@@ -131,15 +141,41 @@ export class C1 extends ProxyBase {
     }
 
     [Test]
-    public void OptionalCtorParam_WithNonNullableCharMember_Throws()
+    public void OptionalCtorParam_WithNonNullableCharMember_RendersOptionalInitializer()
     {
-        Assert.Throws<NotSupportedOptionalParameterException>(() => Render("""
+        string output = Render("""
             public class C1
             {
                 public C1(int count = 5) {}
                 public char P1 { get; set; }
             }
-        """));
+        """);
+
+        AssertEx.EqualOrDiff(output, """
+export class C1 extends ProxyBase {
+  /**
+   * @param initializer - Object with member-initializers
+   */
+  constructor(count: number = 5, initializer?: C1.Initializer) {
+    function renderInitializer(): C1.Initializer {
+      const o: Partial<Record<keyof C1.Initializer, unknown>> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1.charCodeAt(0);
+      return o as C1.Initializer;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(count, renderInitializer()));
+  }
+
+  public get P1(): string {
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+    return String.fromCharCode(res);
+  }
+
+  public set P1(value: string) {
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value.charCodeAt(0));
+  }
+}
+
+""");
     }
 
     [Test]
@@ -159,7 +195,12 @@ export class C1 extends ProxyBase {
    * @param initializer - Object with member-initializers
    */
   constructor(count: number, initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(count, { ...initializer }));
+    function renderInitializer(): C1.Initializer {
+      const o: Partial<Record<keyof C1.Initializer, unknown>> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1;
+      return o as C1.Initializer;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(count, renderInitializer()));
   }
 
   public get P1(): string {

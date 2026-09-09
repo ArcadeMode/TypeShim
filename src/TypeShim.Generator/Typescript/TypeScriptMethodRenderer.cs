@@ -30,11 +30,11 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         {
             if (constructorInfo.HasOptionalParameters
                 && constructorInfo.InitializerObject != null
-                && !CanOmitInitializerArgument(ctx, constructorInfo))
+                && !CanOmitInitializerArgument(constructorInfo))
             {
                 throw new NotSupportedOptionalParameterException(
                     $"Class '{ctx.Class.Name}' cannot combine optional constructor parameters with a non-omittable initializer object. " +
-                    "Make the parameters required, or ensure every initializer member is optional (non-required) and of a directly-marshalled type so the initializer can be omitted.");
+                    "Make the parameters required, or ensure the initializer has no required members so it can be omitted.");
             }
 
             TypeScriptJSDocRenderer.RenderJSDoc(ctx, constructorInfo.Comment);
@@ -51,7 +51,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             {
                 if (constructorInfo.Parameters.Length != 0) ctx.Append(", ");
                 ctx.Append(constructorInfo.InitializerObject.Name);
-                if (CanOmitInitializerArgument(ctx, constructorInfo)) ctx.Append('?');
+                if (CanOmitInitializerArgument(constructorInfo)) ctx.Append('?');
                 ctx.Append(": ");
                 TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Initializer, interop: false);
             }
@@ -63,12 +63,66 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             ctx.AppendLine("{");
             using (ctx.Indent())
             {
+                if (constructorInfo.InitializerObject != null)
+                {
+                    RenderInitializerFunction(constructorInfo.InitializerObject);
+                }
+
                 ctx.Append("super(");
                 RenderInteropInvocation(constructorInfo.Name, constructorInfo.Parameters, instanceParameter: null, constructorInfo.InitializerObject);
                 ctx.AppendLine(");");
             }
             ctx.AppendLine("}");
         }
+    }
+
+    /// <summary>
+    /// Renders a <c>renderInitializer()</c> local function inside the constructor body. It closes over the
+    /// constructor's initializer parameter and builds the interop payload from an empty object, setting each
+    /// expected member only when it is not <c>undefined</c>. Omitting a member leaves its key absent so the
+    /// C# side keeps the declared default; an explicit <c>null</c> is preserved because the guard is a strict
+    /// <c>!== undefined</c> comparison rather than a truthiness check.
+    /// </summary>
+    private void RenderInitializerFunction(MethodParameterInfo initializerObject)
+    {
+        ConstructorInfo constructor = ctx.Class.Constructor
+            ?? throw new InvalidOperationException($"Can not render initializer function for class {ctx.Class.Name} with no constructor");
+
+        ctx.Append("function renderInitializer(): ");
+        TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Initializer, interop: false);
+        ctx.AppendLine(" {");
+        using (ctx.Indent())
+        {
+            // The payload carries interop-converted values (proxy handles, char codes, ...) which do not match
+            // the public initializer member types, so the values are typed as `unknown` and the object is cast
+            // to the initializer type on return.
+            ctx.Append("const o: Partial<Record<keyof ");
+            TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Initializer, interop: false);
+            ctx.AppendLine(", unknown>> = {};");
+
+            foreach (PropertyInfo propertyInfo in constructor.MemberInitializers)
+            {
+                void renderPropertyAccessorExpression() => ctx.Append(initializerObject.Name).Append('.').Append(propertyInfo.Name);
+
+                ctx.Append("if (").Append(initializerObject.Name).Append("?.").Append(propertyInfo.Name)
+                   .Append(" !== undefined) o.").Append(propertyInfo.Name).Append(" = ");
+
+                if (ctx.SymbolMap.IsConversionRequiringClassOrDelegate(propertyInfo.Type) || RequiresCharConversion(propertyInfo.Type))
+                {
+                    RenderInlineHandleExtraction(propertyInfo.Type, renderPropertyAccessorExpression);
+                }
+                else
+                {
+                    renderPropertyAccessorExpression();
+                }
+                ctx.AppendLine(";");
+            }
+
+            ctx.Append("return o as ");
+            TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Initializer, interop: false);
+            ctx.AppendLine(";");
+        }
+        ctx.AppendLine("}");
     }
 
     internal void RenderProxyMethod(MethodInfo methodInfo)
@@ -420,31 +474,12 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             if (initializerObject == null) return;
 
             if (!isFirst) ctx.Append(", ");
-            RenderInitializerParameter(initializerObject);
+            ctx.Append("renderInitializer()");
         }
 
         void RenderInteropMethodAccessor(string methodName)
         {
             ctx.Append(ctx.Class.Namespace).Append('.').Append(RenderConstants.InteropClassName(ctx.Class)).Append('.').Append(methodName);
-        }
-
-        void RenderInitializerParameter(MethodParameterInfo initializerObject)
-        {
-            ctx.Append("{ ...").Append(initializerObject.Name);
-            foreach (PropertyInfo propertyInfo in ctx.Class.Constructor?.MemberInitializers ?? throw new InvalidOperationException($"Can not render initializer parameter for class {ctx.Class.Name} with no constructor"))
-            {
-                bool requiresProxyConversion = ctx.SymbolMap.IsConversionRequiringClassOrDelegate(propertyInfo.Type);
-                bool requiresCharConversion = RequiresCharConversion(propertyInfo.Type);
-                if (!requiresCharConversion && !requiresProxyConversion)
-                {
-                    continue;
-                }
-
-                void renderPropertyAccessorExpression() => ctx.Append(initializerObject.Name).Append('.').Append(propertyInfo.Name);
-                ctx.Append(", ").Append(propertyInfo.Name).Append(": ");
-                RenderInlineHandleExtraction(propertyInfo.Type, renderPropertyAccessorExpression);
-            }
-            ctx.Append(" }");
         }
     }
 
@@ -463,23 +498,18 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
 
     /// <summary>
     /// Whether the initializer object argument can be omitted by the caller (rendered as an optional parameter).
-    /// An initializer is omittable when none of its members are <c>required</c> and none require a proxy/char
-    /// conversion. Conversion-requiring members inject an explicit override key into the initializer object, which
-    /// is incompatible with the "absent stays default" semantics until the null/undefined-vs-absent handling lands.
+    /// An initializer is omittable when none of its members are <c>required</c>. Conversion-requiring members
+    /// (proxy/char/delegate) no longer block omittability because <c>renderInitializer()</c> only sets a member
+    /// when the caller supplied it (<c>!== undefined</c>), leaving absent members' keys off the payload so the
+    /// C# side keeps their declared defaults.
     /// </summary>
-    private static bool CanOmitInitializerArgument(RenderContext ctx, ConstructorInfo constructorInfo)
+    private static bool CanOmitInitializerArgument(ConstructorInfo constructorInfo)
     {
         if (constructorInfo.InitializerObject == null)
         {
             return true;
         }
 
-        if (constructorInfo.HasRequiredMemberInitializers)
-        {
-            return false;
-        }
-
-        return !constructorInfo.MemberInitializers.Any(p =>
-            ctx.SymbolMap.IsConversionRequiringClassOrDelegate(p.Type) || RequiresCharConversion(p.Type));
+        return !constructorInfo.HasRequiredMemberInitializers;
     }
 }

@@ -231,7 +231,12 @@ export class C1 extends ProxyBase {
    * @param initializer - Object with member-initializers
    */
   constructor(initializer?: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
+    function renderInitializer(): C1.Initializer {
+      const o: Partial<Record<keyof C1.Initializer, unknown>> = {};
+      if (initializer?.Name !== undefined) o.Name = initializer.Name;
+      return o as C1.Initializer;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(renderInitializer()));
   }
 
   /**
@@ -2175,7 +2180,12 @@ export class C1 extends ProxyBase {
    * @param initializer - Object with member-initializers
    */
   constructor(initializer?: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
+    function renderInitializer(): C1.Initializer {
+      const o: Partial<Record<keyof C1.Initializer, unknown>> = {};
+      if (initializer?.Name !== undefined) o.Name = initializer.Name;
+      return o as C1.Initializer;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(renderInitializer()));
   }
 
   public get Name(): string {
