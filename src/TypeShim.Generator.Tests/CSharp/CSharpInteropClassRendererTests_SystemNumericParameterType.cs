@@ -195,20 +195,20 @@ public partial class C1Interop
 """.Replace("{{typeExpression}}", interopTypeExpression)));
     }
 
-    [TestCase("Byte", "byte", "GetPropertyAsByte")]
-    [TestCase("byte", "byte", "GetPropertyAsByte")]
-    [TestCase("Int16", "short", "GetPropertyAsInt16")]
-    [TestCase("short", "short", "GetPropertyAsInt16")]
-    [TestCase("Int32", "int", "GetPropertyAsInt32")]
-    [TestCase("int", "int", "GetPropertyAsInt32")]
-    [TestCase("Int64", "long", "GetPropertyAsInt64")]
-    [TestCase("long", "long", "GetPropertyAsInt64")]
-    [TestCase("Single", "float", "GetPropertyAsSingle")]
-    [TestCase("float", "float", "GetPropertyAsSingle")]
-    [TestCase("Double", "double", "GetPropertyAsDouble")]
-    [TestCase("double", "double", "GetPropertyAsDouble")]
-    [TestCase("IntPtr", "nint", "GetPropertyAsIntPtr")]
-    [TestCase("nint", "nint", "GetPropertyAsIntPtr")]
+    [TestCase("Byte", "byte", "GetByteProperty")]
+    [TestCase("byte", "byte", "GetByteProperty")]
+    [TestCase("Int16", "short", "GetInt16Property")]
+    [TestCase("short", "short", "GetInt16Property")]
+    [TestCase("Int32", "int", "GetInt32Property")]
+    [TestCase("int", "int", "GetInt32Property")]
+    [TestCase("Int64", "long", "GetInt64Property")]
+    [TestCase("long", "long", "GetInt64Property")]
+    [TestCase("Single", "float", "GetSingleProperty")]
+    [TestCase("float", "float", "GetSingleProperty")]
+    [TestCase("Double", "double", "GetDoubleProperty")]
+    [TestCase("double", "double", "GetDoubleProperty")]
+    [TestCase("IntPtr", "nint", "GetIntPtrProperty")]
+    [TestCase("nint", "nint", "GetIntPtrProperty")]
     public void CSharpInteropClass_InstanceProperty_WithSupportedNumericParameterType(string typeExpression, string interopTypeExpression, string initializerMethod)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -248,7 +248,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.{{initializerMethod}}("P1")!);
+            SetP1(instance, initializer.{{initializerMethod}}("P1"));
         }
         return instance;
     }
@@ -281,7 +281,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.{{initializerMethod}}("P1")!);
+            SetP1(instance, initializer.{{initializerMethod}}("P1"));
         }
         return instance;
     }

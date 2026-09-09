@@ -12,9 +12,9 @@ namespace TypeShim.Generator.Tests.CSharp;
 
 internal class CSharpInteropClassRendererTests_Snapshots
 {
-    [TestCase("string", "string", "JSType.String", "GetPropertyAsString")]
-    [TestCase("double", "double", "JSType.Number", "GetPropertyAsDouble")]
-    [TestCase("bool", "bool", "JSType.Boolean", "GetPropertyAsBoolean")]
+    [TestCase("string", "string", "JSType.String", "GetStringProperty")]
+    [TestCase("double", "double", "JSType.Number", "GetDoubleProperty")]
+    [TestCase("bool", "bool", "JSType.Boolean", "GetBooleanProperty")]
     public void CSharpInteropClass_SupportedPropertyType_GeneratesFromJSObjectMethod(string typeExpression, string interopTypeExpression, string jsType, string initializerMethod)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -55,7 +55,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.{{initializerMethod}}("P1")!);
+            SetP1(instance, initializer.{{initializerMethod}}("P1"));
         }
         return instance;
     }
@@ -88,7 +88,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.{{initializerMethod}}("P1")!);
+            SetP1(instance, initializer.{{initializerMethod}}("P1"));
         }
         return instance;
     }
@@ -145,11 +145,11 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, ({{typeName}}[])initializer.GetPropertyAsObjectArray("P1")!);
+            SetP1(instance, ({{typeName}}[])initializer.GetObjectArrayProperty("P1"));
         }
         if (initializer.HasProperty("P2"))
         {
-            SetP2(instance, initializer.GetPropertyAsInt32("P2")!);
+            SetP2(instance, initializer.GetInt32Property("P2"));
         }
         return instance;
     }
@@ -197,11 +197,11 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, ({{typeName}}[])initializer.GetPropertyAsObjectArray("P1")!);
+            SetP1(instance, ({{typeName}}[])initializer.GetObjectArrayProperty("P1"));
         }
         if (initializer.HasProperty("P2"))
         {
-            SetP2(instance, initializer.GetPropertyAsInt32("P2")!);
+            SetP2(instance, initializer.GetInt32Property("P2"));
         }
         return instance;
     }
@@ -258,11 +258,11 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsObjectTask("P1")!.ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+            SetP1(instance, initializer.GetObjectTaskProperty("P1").ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
         }
         if (initializer.HasProperty("P2"))
         {
-            SetP2(instance, initializer.GetPropertyAsInt32("P2")!);
+            SetP2(instance, initializer.GetInt32Property("P2"));
         }
         return instance;
     }
@@ -310,11 +310,11 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsObjectTask("P1")!.ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+            SetP1(instance, initializer.GetObjectTaskProperty("P1").ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
         }
         if (initializer.HasProperty("P2"))
         {
-            SetP2(instance, initializer.GetPropertyAsInt32("P2")!);
+            SetP2(instance, initializer.GetInt32Property("P2"));
         }
         return instance;
     }

@@ -292,12 +292,6 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             DeferredExpressionRenderer valueRetrievalExpressionRenderer = DeferredExpressionRenderer.FromUnary(() => {
                 _ctx.Append(initializerParameter.Name).Append(".").Append(_methodResolver.ResolveJSObjectMethodName(propertyInfo.Type))
                     .Append("(\"").Append(propertyInfo.Name).Append("\")");
-                if (!propertyInfo.Type.IsNullableType)
-                {
-                    // The property is guaranteed present by the enclosing HasProperty guard, and non-nullable members
-                    // carry a non-null contract, so suppress the interop marshaller's boundary nullability.
-                    _ctx.Append("!");
-                }
             });
 
             if (!propertyInfo.Type.RequiresTypeConversion)

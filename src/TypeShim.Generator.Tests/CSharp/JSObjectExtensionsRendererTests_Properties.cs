@@ -9,7 +9,6 @@ namespace TypeShim.Generator.Tests.CSharp;
 internal class JSObjectExtensionsRendererTests_Properties
 {
     [TestCase("bool", "Boolean", "JSType.Boolean")]
-    [TestCase("string", "String", "JSType.String")]
     [TestCase("char", "Char", "JSType.Number", Ignore = ".NET currently wrongly expects JSType.String for char, which indeed is marshalled as JSType.Number at runtime")]
     [TestCase("char", "Char", "JSType.String")]
     [TestCase("short", "Int16", "JSType.Number")]
@@ -50,15 +49,18 @@ internal class JSObjectExtensionsRendererTests_Properties
         using System;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
-        public static partial class JSObjectExtensions
+        public static class JSObjectExtensions
         {
-            public static {{type}} GetPropertyAs{{managed}}(this JSObject jsObject, string propertyName)
+            public static {{type}} Get{{managed}}Property(this JSObject jsObject, string propertyName)
             {
-                return MarshalAs{{managed}}(jsObject, propertyName);
+                return MarshallPropertyAs.{{managed}}(jsObject, propertyName);
             }
+        }
+        public static partial class MarshallPropertyAs
+        {
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<{{jstype}}>]
-            public static partial {{type}} MarshalAs{{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+            public static partial {{type}} {{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
         
         """
@@ -67,6 +69,57 @@ internal class JSObjectExtensionsRendererTests_Properties
         .Replace("{{jstype}}", jsType);
 
         AssertEx.EqualOrDiff(extensionsRenderContext.ToString(), expected);
+    }
+
+    [Test]
+    public void JSObjectExtensionsRendererTests_InstanceProperty_WithStringType()
+    {
+        string source = """
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public string P1 { get => default; set { } }
+            }
+        """;
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
+
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(1));
+        INamedTypeSymbol classSymbol = exportedClasses.First();
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+
+        List<InteropTypeInfo> types = [classInfo.Properties.First().Type];
+        RenderContext extensionsRenderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
+        new JSObjectExtensionsRenderer(extensionsRenderContext, types).Render();
+
+        AssertEx.EqualOrDiff(extensionsRenderContext.ToString(), """    
+        #nullable enable
+        // JSImports for the type marshalling process
+        using System;
+        using System.Runtime.InteropServices.JavaScript;
+        using System.Threading.Tasks;
+        public static class JSObjectExtensions
+        {
+            public static string GetStringProperty(this JSObject jsObject, string propertyName)
+            {
+                return MarshallPropertyAs.String(jsObject, propertyName) ?? throw new InvalidOperationException("Marshalling value for property '" + propertyName + "' yielded unexpected null value, expected non-nullable 'string'");
+            }
+        }
+        public static partial class MarshallPropertyAs
+        {
+            [JSImport("unwrapProperty", "@typeshim")]
+            [return: JSMarshalAs<JSType.String>]
+            public static partial string? String([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+        }
+        
+        """);
     }
 
     [Test]
@@ -112,17 +165,20 @@ internal class JSObjectExtensionsRendererTests_Properties
         using System;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
-        public static partial class JSObjectExtensions
+        public static class JSObjectExtensions
         {
-            public static object GetPropertyAsObject(this JSObject jsObject, string propertyName)
+            public static object GetObjectProperty(this JSObject jsObject, string propertyName)
             {
-                return MarshalAsObject(jsObject, propertyName);
+                return MarshallPropertyAs.Object(jsObject, propertyName) ?? throw new InvalidOperationException("Marshalling value for property '" + propertyName + "' yielded unexpected null value, expected non-nullable 'object'");
             }
+        }
+        public static partial class MarshallPropertyAs
+        {
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<JSType.Any>]
-            public static partial object MarshalAsObject([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+            public static partial object? Object([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
-
+        
         """);
     }
 
@@ -170,15 +226,18 @@ internal class JSObjectExtensionsRendererTests_Properties
         using System;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
-        public static partial class JSObjectExtensions
+        public static class JSObjectExtensions
         {
-            public static object[] GetPropertyAsObjectArray(this JSObject jsObject, string propertyName)
+            public static object[] GetObjectArrayProperty(this JSObject jsObject, string propertyName)
             {
-                return MarshalAsObjectArray(jsObject, propertyName);
+                return MarshallPropertyAs.ObjectArray(jsObject, propertyName) ?? throw new InvalidOperationException("Marshalling value for property '" + propertyName + "' yielded unexpected null value, expected non-nullable 'object[]'");
             }
+        }
+        public static partial class MarshallPropertyAs
+        {
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<JSType.Array<JSType.Any>>]
-            public static partial object[] MarshalAsObjectArray([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+            public static partial object[]? ObjectArray([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
         
         """);
@@ -216,15 +275,18 @@ internal class JSObjectExtensionsRendererTests_Properties
         using System;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
-        public static partial class JSObjectExtensions
+        public static class JSObjectExtensions
         {
-            public static Action GetPropertyAsVoidAction(this JSObject jsObject, string propertyName)
+            public static Action GetVoidActionProperty(this JSObject jsObject, string propertyName)
             {
-                return MarshalAsVoidAction(jsObject, propertyName);
+                return MarshallPropertyAs.VoidAction(jsObject, propertyName) ?? throw new InvalidOperationException("Marshalling value for property '" + propertyName + "' yielded unexpected null value, expected non-nullable 'Action'");
             }
+        }
+        public static partial class MarshallPropertyAs
+        {
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<JSType.Function>]
-            public static partial Action MarshalAsVoidAction([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+            public static partial Action? VoidAction([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
         
         """);
@@ -271,15 +333,18 @@ internal class JSObjectExtensionsRendererTests_Properties
         using System;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
-        public static partial class JSObjectExtensions
+        public static class JSObjectExtensions
         {
-            public static {{type}} GetPropertyAs{{managed}}(this JSObject jsObject, string propertyName)
+            public static {{type}} Get{{managed}}Property(this JSObject jsObject, string propertyName)
             {
-                return MarshalAs{{managed}}(jsObject, propertyName);
+                return MarshallPropertyAs.{{managed}}(jsObject, propertyName) ?? throw new InvalidOperationException("Marshalling value for property '" + propertyName + "' yielded unexpected null value, expected non-nullable '{{type}}'");
             }
+        }
+        public static partial class MarshallPropertyAs
+        {
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<{{jstype}}>]
-            public static partial {{type}} MarshalAs{{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+            public static partial {{type}}? {{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
         
         """
@@ -358,15 +423,18 @@ internal class JSObjectExtensionsRendererTests_Properties
         using System;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
-        public static partial class JSObjectExtensions
+        public static class JSObjectExtensions
         {
-            public static {{type}} GetPropertyAs{{managed}}(this JSObject jsObject, string propertyName)
+            public static {{type}} Get{{managed}}Property(this JSObject jsObject, string propertyName)
             {
-                return MarshalAs{{managed}}(jsObject, propertyName);
+                return MarshallPropertyAs.{{managed}}(jsObject, propertyName) ?? throw new InvalidOperationException("Marshalling value for property '" + propertyName + "' yielded unexpected null value, expected non-nullable '{{type}}'");
             }
+        }
+        public static partial class MarshallPropertyAs
+        {
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<{{jstype}}>]
-            public static partial {{type}} MarshalAs{{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+            public static partial {{type}}? {{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
         
         """
@@ -430,15 +498,18 @@ internal class JSObjectExtensionsRendererTests_Properties
         using System;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
-        public static partial class JSObjectExtensions
+        public static class JSObjectExtensions
         {
-            public static {{type}} GetPropertyAs{{managed}}(this JSObject jsObject, string propertyName)
+            public static {{type}} Get{{managed}}Property(this JSObject jsObject, string propertyName)
             {
-                return MarshalAs{{managed}}(jsObject, propertyName);
+                return MarshallPropertyAs.{{managed}}(jsObject, propertyName);
             }
+        }
+        public static partial class MarshallPropertyAs
+        {
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<{{jstype}}>]
-            public static partial {{type}} MarshalAs{{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
+            public static partial {{type}} {{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
         
         """

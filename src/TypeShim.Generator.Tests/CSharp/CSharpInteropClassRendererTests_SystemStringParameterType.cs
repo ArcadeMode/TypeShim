@@ -113,10 +113,10 @@ public partial class C1Interop
 """);
     }
 
-    [TestCase("string", "string", "GetPropertyAsString")]
-    [TestCase("String", "string", "GetPropertyAsString")]
-    [TestCase("char", "char", "GetPropertyAsChar")]
-    [TestCase("Char", "char", "GetPropertyAsChar")]
+    [TestCase("string", "string", "GetStringProperty")]
+    [TestCase("String", "string", "GetStringProperty")]
+    [TestCase("char", "char", "GetCharProperty")]
+    [TestCase("Char", "char", "GetCharProperty")]
     public void CSharpInteropClass_InstanceProperty_WithStringParameterType(string typeName, string interopTypeExpression, string initializerMethod)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -155,7 +155,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.{{initializerMethod}}("P1")!);
+            SetP1(instance, initializer.{{initializerMethod}}("P1"));
         }
         return instance;
     }
@@ -188,7 +188,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.{{initializerMethod}}("P1")!);
+            SetP1(instance, initializer.{{initializerMethod}}("P1"));
         }
         return instance;
     }

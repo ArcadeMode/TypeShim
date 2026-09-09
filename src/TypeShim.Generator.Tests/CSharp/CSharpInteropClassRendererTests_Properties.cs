@@ -62,7 +62,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, MyClassInterop.FromObject(initializer.GetPropertyAsObject("P1")!));
+            SetP1(instance, MyClassInterop.FromObject(initializer.GetObjectProperty("P1")));
         }
         return instance;
     }
@@ -96,7 +96,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, MyClassInterop.FromObject(initializer.GetPropertyAsObject("P1")!));
+            SetP1(instance, MyClassInterop.FromObject(initializer.GetObjectProperty("P1")));
         }
         return instance;
     }
@@ -227,7 +227,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsObjectNullable("P1") is { } P1Val ? MyClassInterop.FromObject(P1Val) : null);
+                    SetP1(instance, initializer.GetObjectNullableProperty("P1") is { } P1Val ? MyClassInterop.FromObject(P1Val) : null);
                 }
                 return instance;
             }
@@ -261,7 +261,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsObjectNullable("P1") is { } P1Val ? MyClassInterop.FromObject(P1Val) : null);
+                    SetP1(instance, initializer.GetObjectNullableProperty("P1") is { } P1Val ? MyClassInterop.FromObject(P1Val) : null);
                 }
                 return instance;
             }
@@ -314,7 +314,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsObject("P1")!);
+            SetP1(instance, initializer.GetObjectProperty("P1"));
         }
         return instance;
     }
@@ -347,7 +347,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsObject("P1")!);
+            SetP1(instance, initializer.GetObjectProperty("P1"));
         }
         return instance;
     }
@@ -400,7 +400,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsInt32Array("P1")!);
+            SetP1(instance, initializer.GetInt32ArrayProperty("P1"));
         }
         return instance;
     }
@@ -433,7 +433,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsInt32Array("P1")!);
+            SetP1(instance, initializer.GetInt32ArrayProperty("P1"));
         }
         return instance;
     }
@@ -486,7 +486,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsInt32ArraySegment("P1")!);
+                    SetP1(instance, initializer.GetInt32ArraySegmentProperty("P1"));
                 }
                 return instance;
             }
@@ -519,7 +519,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsInt32ArraySegment("P1")!);
+                    SetP1(instance, initializer.GetInt32ArraySegmentProperty("P1"));
                 }
                 return instance;
             }
@@ -586,7 +586,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, Array.ConvertAll(initializer.GetPropertyAsObjectArray("P1")!, e => MyClassInterop.FromObject(e)));
+            SetP1(instance, Array.ConvertAll(initializer.GetObjectArrayProperty("P1"), e => MyClassInterop.FromObject(e)));
         }
         return instance;
     }
@@ -620,7 +620,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, Array.ConvertAll(initializer.GetPropertyAsObjectArray("P1")!, e => MyClassInterop.FromObject(e)));
+            SetP1(instance, Array.ConvertAll(initializer.GetObjectArrayProperty("P1"), e => MyClassInterop.FromObject(e)));
         }
         return instance;
     }
@@ -687,7 +687,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, Array.ConvertAll(initializer.GetPropertyAsObjectNullableArray("P1")!, e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null));
+                    SetP1(instance, Array.ConvertAll(initializer.GetObjectNullableArrayProperty("P1"), e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null));
                 }
                 return instance;
             }
@@ -721,7 +721,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, Array.ConvertAll(initializer.GetPropertyAsObjectNullableArray("P1")!, e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null));
+                    SetP1(instance, Array.ConvertAll(initializer.GetObjectNullableArrayProperty("P1"), e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null));
                 }
                 return instance;
             }
@@ -787,7 +787,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsObjectArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => MyClassInterop.FromObject(e)) : null);
+                    SetP1(instance, initializer.GetObjectArrayNullableProperty("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => MyClassInterop.FromObject(e)) : null);
                 }
                 return instance;
             }
@@ -821,7 +821,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsObjectArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => MyClassInterop.FromObject(e)) : null);
+                    SetP1(instance, initializer.GetObjectArrayNullableProperty("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => MyClassInterop.FromObject(e)) : null);
                 }
                 return instance;
             }
@@ -888,7 +888,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsObjectNullableArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null) : null);
+            SetP1(instance, initializer.GetObjectNullableArrayNullableProperty("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null) : null);
         }
         return instance;
     }
@@ -922,7 +922,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsObjectNullableArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null) : null);
+            SetP1(instance, initializer.GetObjectNullableArrayNullableProperty("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null) : null);
         }
         return instance;
     }
@@ -989,7 +989,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsObjectTask("P1")!.ContinueWith(t => MyClassInterop.FromObject(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+            SetP1(instance, initializer.GetObjectTaskProperty("P1").ContinueWith(t => MyClassInterop.FromObject(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
         }
         return instance;
     }
@@ -1023,7 +1023,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsObjectTask("P1")!.ContinueWith(t => MyClassInterop.FromObject(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+            SetP1(instance, initializer.GetObjectTaskProperty("P1").ContinueWith(t => MyClassInterop.FromObject(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
         }
         return instance;
     }
@@ -1090,7 +1090,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsObjectNullableTask("P1")!.ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+                    SetP1(instance, initializer.GetObjectNullableTaskProperty("P1").ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
                 }
                 return instance;
             }
@@ -1124,7 +1124,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsObjectNullableTask("P1")!.ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+                    SetP1(instance, initializer.GetObjectNullableTaskProperty("P1").ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
                 }
                 return instance;
             }
@@ -1191,7 +1191,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsObjectNullableTaskNullable("P1")?.ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+                    SetP1(instance, initializer.GetObjectNullableTaskNullableProperty("P1")?.ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
                 }
                 return instance;
             }
@@ -1225,7 +1225,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsObjectNullableTaskNullable("P1")?.ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+                    SetP1(instance, initializer.GetObjectNullableTaskNullableProperty("P1")?.ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
                 }
                 return instance;
             }
@@ -1279,7 +1279,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, ({{typeName}}[])initializer.GetPropertyAsObjectArray("P1")!);
+            SetP1(instance, ({{typeName}}[])initializer.GetObjectArrayProperty("P1"));
         }
         return instance;
     }
@@ -1313,7 +1313,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, ({{typeName}}[])initializer.GetPropertyAsObjectArray("P1")!);
+            SetP1(instance, ({{typeName}}[])initializer.GetObjectArrayProperty("P1"));
         }
         return instance;
     }

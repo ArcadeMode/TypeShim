@@ -167,7 +167,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsInt32("P1")!);
+            SetP1(instance, initializer.GetInt32Property("P1"));
         }
         return instance;
     }
@@ -200,7 +200,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsInt32("P1")!);
+            SetP1(instance, initializer.GetInt32Property("P1"));
         }
         return instance;
     }
@@ -253,7 +253,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsInt32("P1")!);
+            SetP1(instance, initializer.GetInt32Property("P1"));
         }
         return instance;
     }
@@ -279,7 +279,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsInt32("P1")!);
+            SetP1(instance, initializer.GetInt32Property("P1"));
         }
         return instance;
     }
@@ -332,7 +332,7 @@ public partial class C1Interop
         var instance = CreateInstance(p1, p2);
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsInt32("P1")!);
+            SetP1(instance, initializer.GetInt32Property("P1"));
         }
         return instance;
     }
@@ -407,7 +407,7 @@ public partial class C1Interop
         var instance = CreateInstance(p1, p2);
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsInt32("P1")!);
+            SetP1(instance, initializer.GetInt32Property("P1"));
         }
         return instance;
     }
@@ -634,7 +634,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, UserClassInterop.FromObject(initializer.GetPropertyAsObject("P1")!));
+            SetP1(instance, UserClassInterop.FromObject(initializer.GetObjectProperty("P1")));
         }
         return instance;
     }
@@ -668,7 +668,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, UserClassInterop.FromObject(initializer.GetPropertyAsObject("P1")!));
+            SetP1(instance, UserClassInterop.FromObject(initializer.GetObjectProperty("P1")));
         }
         return instance;
     }
@@ -723,7 +723,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsInt32("P1")!);
+            SetP1(instance, initializer.GetInt32Property("P1"));
         }
         else
         {
@@ -731,7 +731,7 @@ public partial class C1Interop
         }
         if (initializer.HasProperty("P2"))
         {
-            SetP2(instance, initializer.GetPropertyAsString("P2")!);
+            SetP2(instance, initializer.GetStringProperty("P2"));
         }
         return instance;
     }
@@ -778,7 +778,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsInt32("P1")!);
+            SetP1(instance, initializer.GetInt32Property("P1"));
         }
         else
         {
@@ -786,7 +786,7 @@ public partial class C1Interop
         }
         if (initializer.HasProperty("P2"))
         {
-            SetP2(instance, initializer.GetPropertyAsString("P2")!);
+            SetP2(instance, initializer.GetStringProperty("P2"));
         }
         return instance;
     }

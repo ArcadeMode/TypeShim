@@ -483,15 +483,15 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("Scalar"))
         {
-            SetScalar(instance, (Color)initializer.GetPropertyAsInt32("Scalar")!);
+            SetScalar(instance, (Color)initializer.GetInt32Property("Scalar"));
         }
         if (initializer.HasProperty("Nullable"))
         {
-            SetNullable(instance, initializer.GetPropertyAsInt32Nullable("Nullable") is { } NullableVal ? (Color)NullableVal : null);
+            SetNullable(instance, initializer.GetInt32NullableProperty("Nullable") is { } NullableVal ? (Color)NullableVal : null);
         }
         if (initializer.HasProperty("Arr"))
         {
-            SetArr(instance, Array.ConvertAll(initializer.GetPropertyAsInt32Array("Arr")!, e => (Color)e));
+            SetArr(instance, Array.ConvertAll(initializer.GetInt32ArrayProperty("Arr"), e => (Color)e));
         }
         return instance;
     }
@@ -555,15 +555,15 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("Scalar"))
         {
-            SetScalar(instance, (Color)initializer.GetPropertyAsInt32("Scalar")!);
+            SetScalar(instance, (Color)initializer.GetInt32Property("Scalar"));
         }
         if (initializer.HasProperty("Nullable"))
         {
-            SetNullable(instance, initializer.GetPropertyAsInt32Nullable("Nullable") is { } NullableVal ? (Color)NullableVal : null);
+            SetNullable(instance, initializer.GetInt32NullableProperty("Nullable") is { } NullableVal ? (Color)NullableVal : null);
         }
         if (initializer.HasProperty("Arr"))
         {
-            SetArr(instance, Array.ConvertAll(initializer.GetPropertyAsInt32Array("Arr")!, e => (Color)e));
+            SetArr(instance, Array.ConvertAll(initializer.GetInt32ArrayProperty("Arr"), e => (Color)e));
         }
         return instance;
     }

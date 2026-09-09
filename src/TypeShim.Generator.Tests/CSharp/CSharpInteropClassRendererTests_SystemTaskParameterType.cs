@@ -377,7 +377,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsTask("P1")!);
+                    SetP1(instance, initializer.GetTaskProperty("P1"));
                 }
                 return instance;
             }
@@ -410,7 +410,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsTask("P1")!);
+                    SetP1(instance, initializer.GetTaskProperty("P1"));
                 }
                 return instance;
             }

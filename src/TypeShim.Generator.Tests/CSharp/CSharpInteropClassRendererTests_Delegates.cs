@@ -1032,7 +1032,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    Func<object, object> tmpP1 = initializer.GetPropertyAsObjectObjectFunction("P1")!;
+                    Func<object, object> tmpP1 = initializer.GetObjectObjectFunctionProperty("P1");
                     SetP1(instance, (MyClass arg0) => MyClassInterop.FromObject(tmpP1(arg0)));
                 }
                 return instance;
@@ -1068,7 +1068,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    Func<object, object> tmpP1 = initializer.GetPropertyAsObjectObjectFunction("P1")!;
+                    Func<object, object> tmpP1 = initializer.GetObjectObjectFunctionProperty("P1");
                     SetP1(instance, (MyClass arg0) => MyClassInterop.FromObject(tmpP1(arg0)));
                 }
                 return instance;
@@ -1122,7 +1122,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsVoidAction("P1")!);
+            SetP1(instance, initializer.GetVoidActionProperty("P1"));
         }
         return instance;
     }
@@ -1155,7 +1155,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetPropertyAsVoidAction("P1")!);
+            SetP1(instance, initializer.GetVoidActionProperty("P1"));
         }
         return instance;
     }
@@ -1208,7 +1208,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsCharVoidAction("P1")!);
+                    SetP1(instance, initializer.GetCharVoidActionProperty("P1"));
                 }
                 return instance;
             }
@@ -1241,7 +1241,7 @@ public partial class C1Interop
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
-                    SetP1(instance, initializer.GetPropertyAsCharVoidAction("P1")!);
+                    SetP1(instance, initializer.GetCharVoidActionProperty("P1"));
                 }
                 return instance;
             }
