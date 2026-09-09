@@ -9,7 +9,8 @@ import {
     ExportedClassArrayConstructor,
     ExportedClassActionConstructor,
     IntStringMixedConstructor,
-    OptionalInitializerConstructor
+    OptionalInitializerConstructor,
+    NonNullableInitializerConstructor
 } from 'typeshim';
 
 describe('Constructors Test', () => {
@@ -137,5 +138,40 @@ describe('Constructors Test', () => {
 
     test('OptionalInitializerConstructor missing required member throws', () => {
         expect(() => new OptionalInitializerConstructor({} as any)).toThrow();
+    });
+
+    test('NonNullableInitializerConstructor with valid members succeeds', () => {
+        const instance = new NonNullableInitializerConstructor({
+            Text: 'hello',
+            Reference: new ExportedClass({ Id: 1 }),
+            Numbers: [1, 2, 3]
+        });
+        expect(instance.Text).toBe('hello');
+        expect(instance.Reference.Id).toBe(1);
+        expect(Array.from(instance.Numbers)).toEqual([1, 2, 3]);
+    });
+
+    test('NonNullableInitializerConstructor throws when non-nullable string is null', () => {
+        expect(() => new NonNullableInitializerConstructor({
+            Text: null,
+            Reference: new ExportedClass({ Id: 1 }),
+            Numbers: [1, 2, 3]
+        } as any)).toThrow();
+    });
+
+    test('NonNullableInitializerConstructor throws when non-nullable object is null', () => {
+        expect(() => new NonNullableInitializerConstructor({
+            Text: 'hello',
+            Reference: null,
+            Numbers: [1, 2, 3]
+        } as any)).toThrow();
+    });
+
+    test('NonNullableInitializerConstructor throws when non-nullable array is null', () => {
+        expect(() => new NonNullableInitializerConstructor({
+            Text: 'hello',
+            Reference: new ExportedClass({ Id: 1 }),
+            Numbers: null
+        } as any)).toThrow();
     });
 });
