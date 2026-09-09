@@ -1058,12 +1058,12 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
            * @param initializer - Object with member-initializers
            */
           constructor(initializer?: C1.Initializer) {
-            function renderInitializer(): C1.Initializer {
-              const o: Partial<Record<keyof C1.Initializer, unknown>> = {};
+            function buildInitializer(): object {
+              const o: Record<string, unknown> = {};
               if (initializer?.P1 !== undefined) o.P1 = (arg0: number, arg1: ManagedObject) => initializer.P1(String.fromCharCode(arg0), ProxyBase.fromHandle(UserClass, arg1));
-              return o as C1.Initializer;
+              return o;
             }
-            super(TypeShimConfig.exports.N1.C1Interop.ctor(renderInitializer()));
+            super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
           }
 
           public get P1(): (arg0: string, arg1: UserClass | UserClass.Initializer) => void {
@@ -1120,12 +1120,12 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
            * @param initializer - Object with member-initializers
            */
           constructor(initializer?: C1.Initializer) {
-            function renderInitializer(): C1.Initializer {
-              const o: Partial<Record<keyof C1.Initializer, unknown>> = {};
+            function buildInitializer(): object {
+              const o: Record<string, unknown> = {};
               if (initializer?.P1 !== undefined) o.P1 = (arg0: number) => { const retVal = initializer.P1(String.fromCharCode(arg0)); return retVal instanceof UserClass ? retVal.instance : retVal };
-              return o as C1.Initializer;
+              return o;
             }
-            super(TypeShimConfig.exports.N1.C1Interop.ctor(renderInitializer()));
+            super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
           }
 
           public get P1(): (arg0: string) => UserClass {
@@ -1182,12 +1182,12 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
            * @param initializer - Object with member-initializers
            */
           constructor(initializer?: C1.Initializer) {
-            function renderInitializer(): C1.Initializer {
-              const o: Partial<Record<keyof C1.Initializer, unknown>> = {};
+            function buildInitializer(): object {
+              const o: Record<string, unknown> = {};
               if (initializer?.P1 !== undefined) o.P1 = (arg0: number) => initializer.P1(String.fromCharCode(arg0));
-              return o as C1.Initializer;
+              return o;
             }
-            super(TypeShimConfig.exports.N1.C1Interop.ctor(renderInitializer()));
+            super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
           }
 
           public get P1(): (arg0: string) => void {
@@ -1244,12 +1244,12 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
            * @param initializer - Object with member-initializers
            */
           constructor(initializer?: C1.Initializer) {
-            function renderInitializer(): C1.Initializer {
-              const o: Partial<Record<keyof C1.Initializer, unknown>> = {};
+            function buildInitializer(): object {
+              const o: Record<string, unknown> = {};
               if (initializer?.P1 !== undefined) o.P1 = (arg0: ManagedObject) => initializer.P1(ProxyBase.fromHandle(UserClass, arg0));
-              return o as C1.Initializer;
+              return o;
             }
-            super(TypeShimConfig.exports.N1.C1Interop.ctor(renderInitializer()));
+            super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
           }
 
           public get P1(): (arg0: UserClass | UserClass.Initializer) => void {

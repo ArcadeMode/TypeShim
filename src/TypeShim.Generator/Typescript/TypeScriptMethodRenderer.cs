@@ -77,7 +77,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
     }
 
     /// <summary>
-    /// Renders a <c>renderInitializer()</c> local function inside the constructor body. It closes over the
+    /// Renders a <c>buildInitializer()</c> local function inside the constructor body. It closes over the
     /// constructor's initializer parameter and builds the interop payload from an empty object, setting each
     /// expected member only when it is not <c>undefined</c>. Omitting a member leaves its key absent so the
     /// C# side keeps the declared default; an explicit <c>null</c> is preserved because the guard is a strict
@@ -88,17 +88,13 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         ConstructorInfo constructor = ctx.Class.Constructor
             ?? throw new InvalidOperationException($"Can not render initializer function for class {ctx.Class.Name} with no constructor");
 
-        ctx.Append("function renderInitializer(): ");
-        TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Initializer, interop: false);
-        ctx.AppendLine(" {");
+        // The interop constructor accepts the initializer payload as `object`, so the builder returns `object`.
+        // The payload carries interop-converted values (proxy handles, char codes, ...) which do not match the
+        // public initializer member types, so the object is typed as a loose record to allow member assignment.
+        ctx.AppendLine("function buildInitializer(): object {");
         using (ctx.Indent())
         {
-            // The payload carries interop-converted values (proxy handles, char codes, ...) which do not match
-            // the public initializer member types, so the values are typed as `unknown` and the object is cast
-            // to the initializer type on return.
-            ctx.Append("const o: Partial<Record<keyof ");
-            TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Initializer, interop: false);
-            ctx.AppendLine(", unknown>> = {};");
+            ctx.AppendLine("const o: Record<string, unknown> = {};");
 
             foreach (PropertyInfo propertyInfo in constructor.MemberInitializers)
             {
@@ -118,9 +114,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
                 ctx.AppendLine(";");
             }
 
-            ctx.Append("return o as ");
-            TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Initializer, interop: false);
-            ctx.AppendLine(";");
+            ctx.AppendLine("return o;");
         }
         ctx.AppendLine("}");
     }
@@ -474,7 +468,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             if (initializerObject == null) return;
 
             if (!isFirst) ctx.Append(", ");
-            ctx.Append("renderInitializer()");
+            ctx.Append("buildInitializer()");
         }
 
         void RenderInteropMethodAccessor(string methodName)
