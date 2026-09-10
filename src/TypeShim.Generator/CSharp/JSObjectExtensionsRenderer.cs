@@ -33,20 +33,27 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, IEnumerable
             .AppendLine("{");
         using (_ctx.Indent())
         {
+            bool isFirst = true;
             foreach (JSObjectExtensionInfo typeInfo in extensionInfos)
             {
+                if (!isFirst) _ctx.AppendLine();
                 RenderExtensionMethodForType(typeInfo);
+                isFirst = false;
             }
         }
         _ctx.AppendLine("}");
+        _ctx.AppendLine();
 
         _ctx.Append("public static partial class ").AppendLine(RenderConstants.MarshallPropertyAsClass)
             .AppendLine("{");
         using (_ctx.Indent())
         {
+            bool isFirst = true;
             foreach (JSObjectExtensionInfo typeInfo in extensionInfos)
             {
+                if (!isFirst) _ctx.AppendLine();
                 RenderMarshallerMethodForType(typeInfo);
+                isFirst = false;
             }
         }
         _ctx.AppendLine("}");
@@ -66,9 +73,7 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, IEnumerable
                 .Append(extensionInfo.GetMarshallerMethodName()).Append("(jsObject, propertyName)");
             if (RequiresNonNullableCoalesce(type))
             {
-                // The marshaller returns the interop type's honest (nullable) value; a non-nullable reference
-                // member must fail loudly rather than silently propagate a boundary null into the CLR object.
-                _ctx.Append(" ?? throw new InvalidOperationException(\"Marshalling value for property '\" + propertyName + \"' yielded unexpected null value, expected non-nullable '")
+                _ctx.Append(" ?? throw new InvalidOperationException($\"Marshalling value for property '{propertyName}' yielded unexpected null value, expected non-nullable '")
                     .Append(type.CSharpInteropTypeSyntax).Append("'\")");
             }
             _ctx.AppendLine(";");

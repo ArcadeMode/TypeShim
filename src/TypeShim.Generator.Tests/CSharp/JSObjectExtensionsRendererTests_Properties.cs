@@ -56,6 +56,7 @@ internal class JSObjectExtensionsRendererTests_Properties
                 return MarshallPropertyAs.{{managed}}(jsObject, propertyName);
             }
         }
+
         public static partial class MarshallPropertyAs
         {
             [JSImport("unwrapProperty", "@typeshim")]
@@ -109,16 +110,17 @@ internal class JSObjectExtensionsRendererTests_Properties
         {
             public static string GetStringProperty(this JSObject jsObject, string propertyName)
             {
-                return MarshallPropertyAs.String(jsObject, propertyName) ?? throw new InvalidOperationException("Marshalling value for property '" + propertyName + "' yielded unexpected null value, expected non-nullable 'string'");
+                return MarshallPropertyAs.String(jsObject, propertyName) ?? throw new InvalidOperationException($"Marshalling value for property '{propertyName}' yielded unexpected null value, expected non-nullable 'string'");
             }
         }
+
         public static partial class MarshallPropertyAs
         {
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<JSType.String>]
             public static partial string? String([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
-        
+
         """);
     }
 
@@ -169,16 +171,17 @@ internal class JSObjectExtensionsRendererTests_Properties
         {
             public static object GetObjectProperty(this JSObject jsObject, string propertyName)
             {
-                return MarshallPropertyAs.Object(jsObject, propertyName) ?? throw new InvalidOperationException("Marshalling value for property '" + propertyName + "' yielded unexpected null value, expected non-nullable 'object'");
+                return MarshallPropertyAs.Object(jsObject, propertyName) ?? throw new InvalidOperationException($"Marshalling value for property '{propertyName}' yielded unexpected null value, expected non-nullable 'object'");
             }
         }
+
         public static partial class MarshallPropertyAs
         {
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<JSType.Any>]
             public static partial object? Object([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
-        
+
         """);
     }
 
@@ -230,16 +233,17 @@ internal class JSObjectExtensionsRendererTests_Properties
         {
             public static object[] GetObjectArrayProperty(this JSObject jsObject, string propertyName)
             {
-                return MarshallPropertyAs.ObjectArray(jsObject, propertyName) ?? throw new InvalidOperationException("Marshalling value for property '" + propertyName + "' yielded unexpected null value, expected non-nullable 'object[]'");
+                return MarshallPropertyAs.ObjectArray(jsObject, propertyName) ?? throw new InvalidOperationException($"Marshalling value for property '{propertyName}' yielded unexpected null value, expected non-nullable 'object[]'");
             }
         }
+
         public static partial class MarshallPropertyAs
         {
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<JSType.Array<JSType.Any>>]
             public static partial object[]? ObjectArray([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
-        
+
         """);
     }
 
@@ -279,16 +283,17 @@ internal class JSObjectExtensionsRendererTests_Properties
         {
             public static Action GetVoidActionProperty(this JSObject jsObject, string propertyName)
             {
-                return MarshallPropertyAs.VoidAction(jsObject, propertyName) ?? throw new InvalidOperationException("Marshalling value for property '" + propertyName + "' yielded unexpected null value, expected non-nullable 'Action'");
+                return MarshallPropertyAs.VoidAction(jsObject, propertyName) ?? throw new InvalidOperationException($"Marshalling value for property '{propertyName}' yielded unexpected null value, expected non-nullable 'Action'");
             }
         }
+
         public static partial class MarshallPropertyAs
         {
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<JSType.Function>]
             public static partial Action? VoidAction([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
-        
+
         """);
     }
 
@@ -337,16 +342,17 @@ internal class JSObjectExtensionsRendererTests_Properties
         {
             public static {{type}} Get{{managed}}Property(this JSObject jsObject, string propertyName)
             {
-                return MarshallPropertyAs.{{managed}}(jsObject, propertyName) ?? throw new InvalidOperationException("Marshalling value for property '" + propertyName + "' yielded unexpected null value, expected non-nullable '{{type}}'");
+                return MarshallPropertyAs.{{managed}}(jsObject, propertyName) ?? throw new InvalidOperationException($"Marshalling value for property '{propertyName}' yielded unexpected null value, expected non-nullable '{{type}}'");
             }
         }
+
         public static partial class MarshallPropertyAs
         {
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<{{jstype}}>]
             public static partial {{type}}? {{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
-        
+
         """
         .Replace("{{type}}", csTypeName)
         .Replace("{{managed}}", managedSuffix)
@@ -427,16 +433,17 @@ internal class JSObjectExtensionsRendererTests_Properties
         {
             public static {{type}} Get{{managed}}Property(this JSObject jsObject, string propertyName)
             {
-                return MarshallPropertyAs.{{managed}}(jsObject, propertyName) ?? throw new InvalidOperationException("Marshalling value for property '" + propertyName + "' yielded unexpected null value, expected non-nullable '{{type}}'");
+                return MarshallPropertyAs.{{managed}}(jsObject, propertyName) ?? throw new InvalidOperationException($"Marshalling value for property '{propertyName}' yielded unexpected null value, expected non-nullable '{{type}}'");
             }
         }
+
         public static partial class MarshallPropertyAs
         {
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<{{jstype}}>]
             public static partial {{type}}? {{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
-        
+
         """
         .Replace("{{type}}", boundaryTypeName)
         .Replace("{{managed}}", managedSuffix)
@@ -505,13 +512,14 @@ internal class JSObjectExtensionsRendererTests_Properties
                 return MarshallPropertyAs.{{managed}}(jsObject, propertyName);
             }
         }
+
         public static partial class MarshallPropertyAs
         {
             [JSImport("unwrapProperty", "@typeshim")]
             [return: JSMarshalAs<{{jstype}}>]
             public static partial {{type}} {{managed}}([JSMarshalAs<JSType.Object>] JSObject obj, [JSMarshalAs<JSType.String>] string propertyName);
         }
-        
+
         """
         .Replace("{{type}}", boundaryTypeName)
         .Replace("{{managed}}", managedSuffix)

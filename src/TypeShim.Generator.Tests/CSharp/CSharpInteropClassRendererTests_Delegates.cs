@@ -47,7 +47,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor()
     {
-        return new C1();
+        var instance = CreateInstance();
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
@@ -64,6 +65,9 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
 }
 
 """);
@@ -105,7 +109,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor()
     {
-        return new C1();
+        var instance = CreateInstance();
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
@@ -122,6 +127,9 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
 }
 
 """);
@@ -163,7 +171,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor()
     {
-        return new C1();
+        var instance = CreateInstance();
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
@@ -180,6 +189,9 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
 }
 
 """);
@@ -221,7 +233,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor()
     {
-        return new C1();
+        var instance = CreateInstance();
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
@@ -238,6 +251,9 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
 }
 
 """);
@@ -279,7 +295,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor()
     {
-        return new C1();
+        var instance = CreateInstance();
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.String>]
@@ -296,6 +313,9 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
 }
 
 """);
@@ -337,7 +357,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor()
     {
-        return new C1();
+        var instance = CreateInstance();
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.String>]
@@ -354,6 +375,9 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
 }
 
 """);
@@ -395,7 +419,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor()
     {
-        return new C1();
+        var instance = CreateInstance();
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.String>]
@@ -412,6 +437,9 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
 }
 
 """);
@@ -464,7 +492,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor()
     {
-        return new C1();
+        var instance = CreateInstance();
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
@@ -482,6 +511,9 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
 }
 
 """);
@@ -534,7 +566,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor()
     {
-        return new C1();
+        var instance = CreateInstance();
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Function<JSType.Any>>]
@@ -552,6 +585,9 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
 }
 
 """);
@@ -604,7 +640,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor()
     {
-        return new C1();
+        var instance = CreateInstance();
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Function<JSType.Any, JSType.Any>>]
@@ -622,6 +659,9 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
 }
 
 """);
@@ -674,7 +714,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor()
     {
-        return new C1();
+        var instance = CreateInstance();
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Function<JSType.Number, JSType.Any>>]
@@ -692,6 +733,9 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
 }
 
 """);
@@ -744,7 +788,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor()
     {
-        return new C1();
+        var instance = CreateInstance();
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Function<JSType.Any>>]
@@ -762,6 +807,9 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
 }
 
 """);
@@ -814,7 +862,8 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Any>]
             public static object ctor()
             {
-                return new C1();
+                var instance = CreateInstance();
+                return instance;
             }
             [JSExport]
             [return: JSMarshalAs<JSType.Void>]
@@ -832,6 +881,9 @@ public partial class C1Interop
                     _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
                 };
             }
+
+            [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+            private static extern C1 CreateInstance();
         }
 
         """);
@@ -884,7 +936,8 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Any>]
             public static object ctor()
             {
-                return new C1();
+                var instance = CreateInstance();
+                return instance;
             }
             [JSExport]
             [return: JSMarshalAs<JSType.Void>]
@@ -902,6 +955,9 @@ public partial class C1Interop
                     _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
                 };
             }
+
+            [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+            private static extern C1 CreateInstance();
         }
 
         """);
@@ -957,7 +1013,8 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor()
     {
-        return new C1();
+        var instance = CreateInstance();
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Any>]
@@ -976,6 +1033,9 @@ public partial class C1Interop
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
+
+    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
 }
 
 """);
@@ -1073,8 +1133,10 @@ public partial class C1Interop
                 }
                 return instance;
             }
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
             private static extern C1 CreateInstance();
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
             private static extern void SetP1(C1 target, Func<MyClass, MyClass> value);
         }
@@ -1159,8 +1221,10 @@ public partial class C1Interop
         }
         return instance;
     }
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, Action value);
 }
@@ -1245,8 +1309,10 @@ public partial class C1Interop
                 }
                 return instance;
             }
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
             private static extern C1 CreateInstance();
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
             private static extern void SetP1(C1 target, Action<char> value);
         }

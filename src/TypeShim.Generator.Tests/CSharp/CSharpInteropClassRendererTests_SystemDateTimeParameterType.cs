@@ -157,14 +157,14 @@ public partial class C1Interop
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Date>]
-    public static {{typeExpression}} get_P1([JSMarshalAs<JSType.Any>] object instance)
+    public static global::System.{{managedTypeExpression}} get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
         C1 typed_instance = C1Interop.FromObject(instance);
         return typed_instance.P1;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
-    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Date>] {{typeExpression}} value)
+    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Date>] global::System.{{managedTypeExpression}} value)
     {
         C1 typed_instance = C1Interop.FromObject(instance);
         typed_instance.P1 = value;
@@ -188,8 +188,10 @@ public partial class C1Interop
         }
         return instance;
     }
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, {{managedTypeExpression}} value);
 }

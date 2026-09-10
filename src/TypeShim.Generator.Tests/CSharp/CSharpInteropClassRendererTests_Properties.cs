@@ -100,8 +100,10 @@ public partial class C1Interop
         }
         return instance;
     }
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, MyClass value);
 }
@@ -265,12 +267,14 @@ public partial class C1Interop
                 }
                 return instance;
             }
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
             private static extern C1 CreateInstance();
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
             private static extern void SetP1(C1 target, MyClass? value);
         }
-        
+
         """);
     }
 
@@ -351,8 +355,10 @@ public partial class C1Interop
         }
         return instance;
     }
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, object value);
 }
@@ -437,8 +443,10 @@ public partial class C1Interop
         }
         return instance;
     }
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, int[] value);
 }
@@ -523,8 +531,10 @@ public partial class C1Interop
                 }
                 return instance;
             }
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
             private static extern C1 CreateInstance();
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
             private static extern void SetP1(C1 target, ArraySegment<int> value);
         }
@@ -624,8 +634,10 @@ public partial class C1Interop
         }
         return instance;
     }
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, MyClass[] value);
 }
@@ -725,8 +737,10 @@ public partial class C1Interop
                 }
                 return instance;
             }
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
             private static extern C1 CreateInstance();
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
             private static extern void SetP1(C1 target, MyClass?[] value);
         }
@@ -825,8 +839,10 @@ public partial class C1Interop
                 }
                 return instance;
             }
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
             private static extern C1 CreateInstance();
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
             private static extern void SetP1(C1 target, MyClass[]? value);
         }
@@ -926,8 +942,10 @@ public partial class C1Interop
         }
         return instance;
     }
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, MyClass?[]? value);
 }
@@ -1027,8 +1045,10 @@ public partial class C1Interop
         }
         return instance;
     }
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, Task<MyClass> value);
 }
@@ -1128,12 +1148,14 @@ public partial class C1Interop
                 }
                 return instance;
             }
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
             private static extern C1 CreateInstance();
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
             private static extern void SetP1(C1 target, Task<MyClass?> value);
         }
-        
+
         """);
     }
 
@@ -1229,12 +1251,14 @@ public partial class C1Interop
                 }
                 return instance;
             }
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
             private static extern C1 CreateInstance();
+
             [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
             private static extern void SetP1(C1 target, Task<MyClass?>? value);
         }
-        
+
         """);
     }
 
@@ -1317,8 +1341,10 @@ public partial class C1Interop
         }
         return instance;
     }
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, {{typeName}}[] value);
 }

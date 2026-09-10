@@ -228,49 +228,37 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     private void RenderConstructorInvocation(ConstructorInfo constructorInfo)
     {
-        if (!constructorInfo.AcceptsInitializer || constructorInfo.InitializerObject is not MethodParameterInfo initializerParameter)
-        {
-            _ctx.Append("return new ").Append(constructorInfo.Type.CSharpTypeSyntax).Append('(');
-            RenderPositionalArguments(constructorInfo);
-            _ctx.AppendLine(");");
-            return;
-        }
-
-        // The initializer object is optional end-to-end: only 'required' members throw when absent.
-        // Object-initializer syntax cannot skip a member (it would clobber the C#-declared default), so we
-        // assign members imperatively behind per-member HasProperty guards, using UnsafeAccessor set methods
-        // so both 'set' and 'init' properties can be assigned through a single code path.
-        // Construction always goes through an UnsafeAccessor constructor: types with 'required' members
-        // otherwise make 'new T(...)' a compile error (CS9035), and using the accessor unconditionally keeps
-        // a single construction path regardless of whether the type declares required members.
         _ctx.Append("var instance = ").Append(RenderConstants.UnsafeAccessorConstructorMethod).Append('(');
         RenderPositionalArguments(constructorInfo);
         _ctx.AppendLine(");");
 
-        foreach (PropertyInfo propertyInfo in constructorInfo.MemberInitializers)
+        if (constructorInfo.AcceptsInitializer && constructorInfo.InitializerObject is MethodParameterInfo initializerParameter)
         {
-            _ctx.Append("if (").Append(initializerParameter.Name).Append(".HasProperty(\"").Append(propertyInfo.Name).AppendLine("\"))");
-            _ctx.AppendLine("{");
-            using (_ctx.Indent())
+            foreach (PropertyInfo propertyInfo in constructorInfo.MemberInitializers)
             {
-                DeferredExpressionRenderer valueRenderer = RenderMemberValueExpression(propertyInfo, initializerParameter);
-                _ctx.Append(RenderConstants.UnsafeAccessorSetMethod(propertyInfo)).Append("(instance, ");
-                valueRenderer.Render();
-                _ctx.AppendLine(");");
-            }
-            _ctx.AppendLine("}");
-
-            if (propertyInfo.IsRequired)
-            {
-                _ctx.AppendLine("else");
+                _ctx.Append("if (").Append(initializerParameter.Name).Append(".HasProperty(\"").Append(propertyInfo.Name).AppendLine("\"))");
                 _ctx.AppendLine("{");
                 using (_ctx.Indent())
                 {
-                    _ctx.Append("throw new ArgumentException(\"Required property '")
-                        .Append(propertyInfo.Name)
-                        .Append("' was not provided\", nameof(").Append(initializerParameter.Name).AppendLine("));");
+                    DeferredExpressionRenderer valueRenderer = RenderMemberValueExpression(propertyInfo, initializerParameter);
+                    _ctx.Append(RenderConstants.UnsafeAccessorSetMethod(propertyInfo)).Append("(instance, ");
+                    valueRenderer.Render();
+                    _ctx.AppendLine(");");
                 }
                 _ctx.AppendLine("}");
+
+                if (propertyInfo.IsRequired)
+                {
+                    _ctx.AppendLine("else");
+                    _ctx.AppendLine("{");
+                    using (_ctx.Indent())
+                    {
+                        _ctx.Append("throw new ArgumentException(\"Required property '")
+                            .Append(propertyInfo.Name)
+                            .Append("' was not provided\", nameof(").Append(initializerParameter.Name).AppendLine("));");
+                    }
+                    _ctx.AppendLine("}");
+                }
             }
         }
 
@@ -316,10 +304,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     internal void RenderMemberInitializerAccessors(ConstructorInfo constructorInfo)
     {
-        // Construction always goes through this UnsafeAccessor constructor. Types with 'required' members make
-        // 'new T(...)' illegal (CS9035); the accessor is exempt from that enforcement while still invoking the
-        // real constructor (running field/property initializers), and using it unconditionally keeps a single
-        // construction path for every initializer-accepting type.
+        _ctx.AppendLine();
         _ctx.AppendLine("[System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]");
         _ctx.Append("private static extern ").Append(constructorInfo.Type.CSharpTypeSyntax).Append(' ')
             .Append(RenderConstants.UnsafeAccessorConstructorMethod).Append('(');
@@ -334,6 +319,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
         foreach (PropertyInfo propertyInfo in constructorInfo.MemberInitializers)
         {
+            _ctx.AppendLine();
             _ctx.Append("[System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = \"set_")
                 .Append(propertyInfo.Name).AppendLine("\")]");
             _ctx.Append("private static extern void ").Append(RenderConstants.UnsafeAccessorSetMethod(propertyInfo)).Append('(')

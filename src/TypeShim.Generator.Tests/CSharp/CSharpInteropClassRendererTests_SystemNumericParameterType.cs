@@ -285,8 +285,10 @@ public partial class C1Interop
         }
         return instance;
     }
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, {{typeExpression}} value);
 }

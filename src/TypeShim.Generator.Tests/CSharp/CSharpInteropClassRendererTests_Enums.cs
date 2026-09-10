@@ -567,12 +567,16 @@ public partial class C1Interop
         }
         return instance;
     }
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Scalar")]
     private static extern void SetScalar(C1 target, Color value);
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Nullable")]
     private static extern void SetNullable(C1 target, Color? value);
+
     [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_Arr")]
     private static extern void SetArr(C1 target, Color[] value);
 }
