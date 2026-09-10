@@ -38,6 +38,7 @@ internal class CSharpInteropClassRendererTests_Constructors
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -47,8 +48,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor()
     {
-        var instance = CreateInstance();
-        return instance;
+        return CreateInstance();
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Number>]
@@ -66,7 +66,7 @@ public partial class C1Interop
         };
     }
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
 }
 
@@ -100,6 +100,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -109,8 +110,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object ctor([JSMarshalAs<JSType.Number>] int p1, [JSMarshalAs<JSType.Number>] double p2)
     {
-        var instance = CreateInstance(p1, p2);
-        return instance;
+        return CreateInstance(p1, p2);
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Number>]
@@ -128,7 +128,7 @@ public partial class C1Interop
         };
     }
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance(int p1, double p2);
 }
 
@@ -162,6 +162,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -213,10 +214,10 @@ public partial class C1Interop
         return instance;
     }
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, int value);
 }
 
@@ -250,6 +251,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -294,10 +296,10 @@ public partial class C1Interop
         return instance;
     }
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, int value);
 }
 
@@ -331,6 +333,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -371,10 +374,10 @@ public partial class C1Interop
         };
     }
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance(int p1, double p2);
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, int value);
 }
 
@@ -408,6 +411,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -441,10 +445,10 @@ public partial class C1Interop
         };
     }
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance(int p1, double p2);
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, int value);
 }
 
@@ -492,6 +496,7 @@ public partial class C1Interop
         #nullable enable
         // TypeShim generated TypeScript interop definitions
         using System;
+        using System.Runtime.CompilerServices;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
         namespace N1;
@@ -502,8 +507,7 @@ public partial class C1Interop
             public static object ctor([JSMarshalAs<JSType.Any>] object? p1)
             {
                 MyClass? typed_p1 = p1 is { } p1Val ? MyClassInterop.FromObject(p1Val) : null;
-                var instance = CreateInstance(typed_p1);
-                return instance;
+                return CreateInstance(typed_p1);
             }
             [JSExport]
             [return: JSMarshalAs<JSType.Number>]
@@ -521,7 +525,7 @@ public partial class C1Interop
                 };
             }
 
-            [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+            [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
             private static extern C1 CreateInstance(MyClass? p1);
         }
 
@@ -569,6 +573,7 @@ public partial class C1Interop
         #nullable enable
         // TypeShim generated TypeScript interop definitions
         using System;
+        using System.Runtime.CompilerServices;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
         namespace N1;
@@ -579,8 +584,7 @@ public partial class C1Interop
             public static object ctor([JSMarshalAs<JSType.Function<JSType.Any>>] Action<object> p1)
             {
                 Action<MyClass> typed_p1 = (MyClass arg0) => p1(arg0);
-                var instance = CreateInstance(typed_p1);
-                return instance;
+                return CreateInstance(typed_p1);
             }
             [JSExport]
             [return: JSMarshalAs<JSType.Number>]
@@ -598,7 +602,7 @@ public partial class C1Interop
                 };
             }
 
-            [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+            [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
             private static extern C1 CreateInstance(Action<MyClass> p1);
         }
 
@@ -645,6 +649,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -697,10 +702,10 @@ public partial class C1Interop
         return instance;
     }
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, UserClass value);
 }
 
@@ -736,6 +741,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -817,13 +823,13 @@ public partial class C1Interop
         return instance;
     }
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, int value);
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P2")]
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P2")]
     private static extern void SetP2(C1 target, string value);
 }
 

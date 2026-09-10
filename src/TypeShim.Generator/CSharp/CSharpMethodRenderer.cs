@@ -228,37 +228,42 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     private void RenderConstructorInvocation(ConstructorInfo constructorInfo)
     {
+        if (!(constructorInfo.AcceptsInitializer && constructorInfo.InitializerObject is MethodParameterInfo initializerParameter))
+        {
+            _ctx.Append("return ").Append(RenderConstants.UnsafeAccessorConstructorMethod).Append('(');
+            RenderPositionalArguments(constructorInfo);
+            _ctx.AppendLine(");");
+            return;
+        }
+
         _ctx.Append("var instance = ").Append(RenderConstants.UnsafeAccessorConstructorMethod).Append('(');
         RenderPositionalArguments(constructorInfo);
         _ctx.AppendLine(");");
 
-        if (constructorInfo.AcceptsInitializer && constructorInfo.InitializerObject is MethodParameterInfo initializerParameter)
+        foreach (PropertyInfo propertyInfo in constructorInfo.MemberInitializers)
         {
-            foreach (PropertyInfo propertyInfo in constructorInfo.MemberInitializers)
+            _ctx.Append("if (").Append(initializerParameter.Name).Append(".HasProperty(\"").Append(propertyInfo.Name).AppendLine("\"))");
+            _ctx.AppendLine("{");
+            using (_ctx.Indent())
             {
-                _ctx.Append("if (").Append(initializerParameter.Name).Append(".HasProperty(\"").Append(propertyInfo.Name).AppendLine("\"))");
+                DeferredExpressionRenderer valueRenderer = RenderMemberValueExpression(propertyInfo, initializerParameter);
+                _ctx.Append(RenderConstants.UnsafeAccessorSetMethod(propertyInfo)).Append("(instance, ");
+                valueRenderer.Render();
+                _ctx.AppendLine(");");
+            }
+            _ctx.AppendLine("}");
+
+            if (propertyInfo.IsRequired)
+            {
+                _ctx.AppendLine("else");
                 _ctx.AppendLine("{");
                 using (_ctx.Indent())
                 {
-                    DeferredExpressionRenderer valueRenderer = RenderMemberValueExpression(propertyInfo, initializerParameter);
-                    _ctx.Append(RenderConstants.UnsafeAccessorSetMethod(propertyInfo)).Append("(instance, ");
-                    valueRenderer.Render();
-                    _ctx.AppendLine(");");
+                    _ctx.Append("throw new ArgumentException(\"Required property '")
+                        .Append(propertyInfo.Name)
+                        .Append("' was not provided\", nameof(").Append(initializerParameter.Name).AppendLine("));");
                 }
                 _ctx.AppendLine("}");
-
-                if (propertyInfo.IsRequired)
-                {
-                    _ctx.AppendLine("else");
-                    _ctx.AppendLine("{");
-                    using (_ctx.Indent())
-                    {
-                        _ctx.Append("throw new ArgumentException(\"Required property '")
-                            .Append(propertyInfo.Name)
-                            .Append("' was not provided\", nameof(").Append(initializerParameter.Name).AppendLine("));");
-                    }
-                    _ctx.AppendLine("}");
-                }
             }
         }
 
@@ -305,7 +310,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
     internal void RenderMemberInitializerAccessors(ConstructorInfo constructorInfo)
     {
         _ctx.AppendLine();
-        _ctx.AppendLine("[System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]");
+        _ctx.AppendLine("[UnsafeAccessor(UnsafeAccessorKind.Constructor)]");
         _ctx.Append("private static extern ").Append(constructorInfo.Type.CSharpTypeSyntax).Append(' ')
             .Append(RenderConstants.UnsafeAccessorConstructorMethod).Append('(');
         bool isFirst = true;
@@ -320,7 +325,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         foreach (PropertyInfo propertyInfo in constructorInfo.MemberInitializers)
         {
             _ctx.AppendLine();
-            _ctx.Append("[System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = \"set_")
+            _ctx.Append("[UnsafeAccessor(UnsafeAccessorKind.Method, Name = \"set_")
                 .Append(propertyInfo.Name).AppendLine("\")]");
             _ctx.Append("private static extern void ").Append(RenderConstants.UnsafeAccessorSetMethod(propertyInfo)).Append('(')
                 .Append(constructorInfo.Type.CSharpTypeSyntax).Append(" target, ")

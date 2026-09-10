@@ -76,21 +76,11 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         }
     }
 
-    /// <summary>
-    /// Renders a <c>buildInitializer()</c> local function inside the constructor body. It closes over the
-    /// constructor's initializer parameter and builds the interop payload from an empty object, setting each
-    /// expected member only when it is not <c>undefined</c>. Omitting a member leaves its key absent so the
-    /// C# side keeps the declared default; an explicit <c>null</c> is preserved because the guard is a strict
-    /// <c>!== undefined</c> comparison rather than a truthiness check.
-    /// </summary>
     private void RenderInitializerFunction(MethodParameterInfo initializerObject)
     {
         ConstructorInfo constructor = ctx.Class.Constructor
             ?? throw new InvalidOperationException($"Can not render initializer function for class {ctx.Class.Name} with no constructor");
 
-        // The interop constructor accepts the initializer payload as `object`, so the builder returns `object`.
-        // The payload carries interop-converted values (proxy handles, char codes, ...) which do not match the
-        // public initializer member types, so the object is typed as a loose record to allow member assignment.
         ctx.AppendLine("function buildInitializer(): object {");
         using (ctx.Indent())
         {
@@ -490,13 +480,6 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         };
     }
 
-    /// <summary>
-    /// Whether the initializer object argument can be omitted by the caller (rendered as an optional parameter).
-    /// An initializer is omittable when none of its members are <c>required</c>. Conversion-requiring members
-    /// (proxy/char/delegate) no longer block omittability because <c>renderInitializer()</c> only sets a member
-    /// when the caller supplied it (<c>!== undefined</c>), leaving absent members' keys off the payload so the
-    /// C# side keeps their declared defaults.
-    /// </summary>
     private static bool CanOmitInitializerArgument(ConstructorInfo constructorInfo)
     {
         if (constructorInfo.InitializerObject == null)

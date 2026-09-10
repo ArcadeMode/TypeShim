@@ -36,6 +36,7 @@ internal sealed class CSharpInteropClassRenderer
         _ctx.AppendLine("#nullable enable")
             .AppendLine("// TypeShim generated TypeScript interop definitions")
             .AppendLine("using System;")
+            .AppendLine("using System.Runtime.CompilerServices;")
             .AppendLine("using System.Runtime.InteropServices.JavaScript;")
             .AppendLine("using System.Threading.Tasks;")
             .Append("namespace ").Append(_classInfo.Namespace).AppendLine(";")

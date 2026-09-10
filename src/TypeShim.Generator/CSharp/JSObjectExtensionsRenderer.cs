@@ -25,10 +25,6 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, IEnumerable
             .Select(typeInfo => new JSObjectExtensionInfo(typeInfo))
             .DistinctBy(extInfo => extInfo.Name)];
 
-        // The extension methods live in a plain (non-partial) static class so their names are free to differ
-        // from the built-in JSObject.GetPropertyAs* instance methods (which would otherwise shadow them at the
-        // call site). The actual [JSImport] marshallers are split into a separate partial class so the extension
-        // bodies can coalesce the marshaller's honest nullable return into a loud throw for non-nullable members.
         _ctx.AppendLine("public static class JSObjectExtensions")
             .AppendLine("{");
         using (_ctx.Indent())
@@ -93,7 +89,6 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, IEnumerable
         _ctx.Append("public static partial ").Append(type.CSharpInteropTypeSyntax);
         if (RequiresNonNullableCoalesce(type))
         {
-            // Reference-type marshallers genuinely return null at the JS boundary; annotate the return honestly.
             _ctx.Append('?');
         }
         _ctx.Append(' ').Append(extensionInfo.GetMarshallerMethodName()).Append('(');
@@ -105,8 +100,6 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, IEnumerable
             .AppendLine(");");
     }
 
-    // A non-nullable reference-typed member: the marshaller's return is nullable (boundary null is possible),
-    // but the extension exposes a non-nullable value, so the two must be bridged with a coalescing throw.
     private static bool RequiresNonNullableCoalesce(InteropTypeInfo type)
         => !type.IsNullableType && type.IsReferenceInteropType;
 }

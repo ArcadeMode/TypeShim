@@ -42,6 +42,7 @@ internal class CSharpInteropClassRendererTests_Snapshots
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -93,10 +94,10 @@ public partial class C1Interop
         return instance;
     }
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, {{typeExpression}} value);
 }
 
@@ -134,6 +135,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -208,13 +210,13 @@ public partial class C1Interop
         return instance;
     }
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, {{typeName}}[] value);
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P2")]
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P2")]
     private static extern void SetP2(C1 target, int value);
 }
 
@@ -250,6 +252,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -324,13 +327,13 @@ public partial class C1Interop
         return instance;
     }
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Constructor)]
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
     private static extern C1 CreateInstance();
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P1")]
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, Task<{{typeName}}> value);
 
-    [System.Runtime.CompilerServices.UnsafeAccessor(System.Runtime.CompilerServices.UnsafeAccessorKind.Method, Name = "set_P2")]
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P2")]
     private static extern void SetP2(C1 target, int value);
 }
 
