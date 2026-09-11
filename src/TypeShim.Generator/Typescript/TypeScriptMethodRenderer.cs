@@ -28,15 +28,6 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         }
         else
         {
-            if (constructorInfo.HasOptionalParameters
-                && constructorInfo.InitializerObject != null
-                && constructorInfo.HasRequiredMemberInitializers)
-            {
-                throw new NotSupportedOptionalParameterException(
-                    $"Class '{ctx.Class.Name}' cannot combine optional constructor parameters with a non-omittable initializer object. " +
-                    "Make the parameters required, or ensure the initializer has no required members so it can be omitted.");
-            }
-
             TypeScriptJSDocRenderer.RenderJSDoc(ctx, constructorInfo.Comment);
             RenderConstructorSignature();
             ctx.Append(' ');
