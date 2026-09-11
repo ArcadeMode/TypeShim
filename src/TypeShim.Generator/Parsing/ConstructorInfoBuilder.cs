@@ -31,9 +31,7 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
             && constructorInfo.InitializerObject != null
             && constructorInfo.HasRequiredMemberInitializers)
         {
-            throw new NotSupportedOptionalParameterException(
-                $"Class '{classSymbol.Name}' cannot combine optional constructor parameters with a non-omittable initializer object. " +
-                "Make the parameters required, or ensure the initializer has no required members so it can be omitted.");
+            throw new NotSupportedOptionalParameterException($"Class '{classSymbol.Name}' contains an illegal combination of required properties and optional constructor parameters. Ensure both are either required or optional.");
         }
 
         return constructorInfo;
