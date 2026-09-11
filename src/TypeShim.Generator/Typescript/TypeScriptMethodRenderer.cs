@@ -30,7 +30,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         {
             if (constructorInfo.HasOptionalParameters
                 && constructorInfo.InitializerObject != null
-                && !CanOmitInitializerArgument(constructorInfo))
+                && constructorInfo.HasRequiredMemberInitializers)
             {
                 throw new NotSupportedOptionalParameterException(
                     $"Class '{ctx.Class.Name}' cannot combine optional constructor parameters with a non-omittable initializer object. " +
@@ -51,7 +51,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             {
                 if (constructorInfo.Parameters.Length != 0) ctx.Append(", ");
                 ctx.Append(constructorInfo.InitializerObject.Name);
-                if (CanOmitInitializerArgument(constructorInfo)) ctx.Append('?');
+                if (!constructorInfo.HasRequiredMemberInitializers) ctx.Append('?');
                 ctx.Append(": ");
                 TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Initializer, interop: false);
             }
@@ -476,7 +476,4 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             _ => false
         };
     }
-
-    private static bool CanOmitInitializerArgument(ConstructorInfo constructorInfo)
-        => constructorInfo.InitializerObject is null || !constructorInfo.HasRequiredMemberInitializers;
 }
