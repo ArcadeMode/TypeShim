@@ -19,6 +19,13 @@ internal sealed class SymbolMap(IEnumerable<NamedTypeInfo> allNamedTypes)
     }
 
     /// <summary>
+    /// Attempts to resolve the exported named type (class or enum) for the given type, returning false when the
+    /// type is not a registered named type (e.g. a primitive, a framework type, or a composite such as an array).
+    /// </summary>
+    internal bool TryGetNamedTypeInfo(InteropTypeInfo type, out NamedTypeInfo? info)
+        => _typeToNamedTypeDict.TryGetValue(type, out info);
+
+    /// <summary>
     /// True when the type requires marshalling conversion and its innermost element type is an exported class or a delegate.
     /// Enums also require conversion but cross as their underlying number, so they are deliberately excluded.
     /// </summary>

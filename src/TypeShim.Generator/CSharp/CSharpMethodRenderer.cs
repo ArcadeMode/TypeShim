@@ -317,7 +317,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
         foreach (MethodParameterInfo param in constructorInfo.Parameters)
         {
             if (!isFirst) _ctx.Append(", ");
-            _ctx.Append(param.Type.CSharpTypeSyntax).Append(' ').Append(param.Name);
+            _ctx.Append(_ctx.ManagedTypeReference(param.Type)).Append(' ').Append(param.Name);
             isFirst = false;
         }
         _ctx.AppendLine(");");
@@ -329,7 +329,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                 .Append(propertyInfo.Name).AppendLine("\")]");
             _ctx.Append("private static extern void ").Append(RenderConstants.UnsafeAccessorSetMethod(propertyInfo)).Append('(')
                 .Append(constructorInfo.Type.CSharpTypeSyntax).Append(" target, ")
-                .Append(propertyInfo.Type.CSharpTypeSyntax).AppendLine(" value);");
+                .Append(_ctx.ManagedTypeReference(propertyInfo.Type)).AppendLine(" value);");
         }
     }
 }

@@ -24,6 +24,15 @@ internal sealed class InteropTypeInfo
     /// Syntax for writing the CLR type in C# (i.e. the user's original type)
     /// </summary>
     public required TypeSyntax CSharpTypeSyntax { get; init; }
+
+    /// <summary>
+    /// Fully-qualified (<c>global::</c>-prefixed) syntax for writing the CLR type in generated C#.<br/>
+    /// Used by the C# interop renderers so that references to types in other namespaces resolve
+    /// regardless of the generated file's namespace or using directives. This is deliberately kept
+    /// separate from <see cref="CSharpTypeSyntax"/> because the TypeScript renderers reuse the
+    /// minimally-qualified <see cref="CSharpTypeSyntax"/> to derive TS symbol names.
+    /// </summary>
+    public required TypeSyntax CSharpFullyQualifiedTypeSyntax { get; init; }
     
     /// <summary>
     /// Syntax for writing the CLR type on the interop method. This is usually equal to <see cref="CSharpTypeSyntax"/>,<br/>
@@ -83,6 +92,7 @@ internal sealed class InteropTypeInfo
         JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Object"),
         CSharpInteropTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
         CSharpTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
+        CSharpFullyQualifiedTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
         IsTaskType = false,
         IsArrayType = false,
         IsNullableType = false,

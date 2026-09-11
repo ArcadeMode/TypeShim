@@ -23,20 +23,21 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
     {
         JSTypeInfo jsTypeInfo = JSTypeInfo.CreateJSTypeInfoForTypeSymbol(typeSymbol);
         TypeSyntax clrTypeSyntax = SyntaxFactory.ParseTypeName(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
+        TypeSyntax fqTypeSyntax = SyntaxFactory.ParseTypeName(typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
 
         return jsTypeInfo switch
         {
-            JSSimpleTypeInfo simpleType => BuildSimpleTypeInfo(simpleType, clrTypeSyntax),
-            JSArrayTypeInfo arrayTypeInfo => BuildArrayTypeInfo(arrayTypeInfo, clrTypeSyntax),
-            JSTaskTypeInfo taskTypeInfo => BuildTaskTypeInfo(taskTypeInfo, clrTypeSyntax),
-            JSNullableTypeInfo nullableTypeInfo => BuildNullableTypeInfo(nullableTypeInfo, clrTypeSyntax),
-            JSSpanTypeInfo or JSArraySegmentTypeInfo => BuildSpanOrArraySegmentTypeInfo(jsTypeInfo, clrTypeSyntax),
-            JSFunctionTypeInfo functionTypeInfo => BuildFunctionTypeInfo(functionTypeInfo, clrTypeSyntax),
+            JSSimpleTypeInfo simpleType => BuildSimpleTypeInfo(simpleType, clrTypeSyntax, fqTypeSyntax),
+            JSArrayTypeInfo arrayTypeInfo => BuildArrayTypeInfo(arrayTypeInfo, clrTypeSyntax, fqTypeSyntax),
+            JSTaskTypeInfo taskTypeInfo => BuildTaskTypeInfo(taskTypeInfo, clrTypeSyntax, fqTypeSyntax),
+            JSNullableTypeInfo nullableTypeInfo => BuildNullableTypeInfo(nullableTypeInfo, clrTypeSyntax, fqTypeSyntax),
+            JSSpanTypeInfo or JSArraySegmentTypeInfo => BuildSpanOrArraySegmentTypeInfo(jsTypeInfo, clrTypeSyntax, fqTypeSyntax),
+            JSFunctionTypeInfo functionTypeInfo => BuildFunctionTypeInfo(functionTypeInfo, clrTypeSyntax, fqTypeSyntax),
             JSInvalidTypeInfo or _ => throw new NotSupportedTypeException(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)),
         };
     }
 
-    private InteropTypeInfo BuildSimpleTypeInfo(JSSimpleTypeInfo simpleTypeInfo, TypeSyntax clrTypeSyntax)
+    private InteropTypeInfo BuildSimpleTypeInfo(JSSimpleTypeInfo simpleTypeInfo, TypeSyntax clrTypeSyntax, TypeSyntax fqTypeSyntax)
     {
         bool isEnum = typeSymbol.TypeKind == TypeKind.Enum;
         bool requiresTypeConversion = RequiresTypeConversion();
@@ -48,6 +49,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSTypeSyntax = GetJSTypeSyntax(simpleTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = simpleTypeInfo.GetTypeSyntax(),
             CSharpTypeSyntax = clrTypeSyntax,
+            CSharpFullyQualifiedTypeSyntax = fqTypeSyntax,
             TypeArgument = null,
             ArgumentInfo = null,
             IsTaskType = false,
@@ -76,7 +78,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         }
     }
 
-    private InteropTypeInfo BuildArrayTypeInfo(JSArrayTypeInfo arrayTypeInfo, TypeSyntax clrTypeSyntax)
+    private InteropTypeInfo BuildArrayTypeInfo(JSArrayTypeInfo arrayTypeInfo, TypeSyntax clrTypeSyntax, TypeSyntax fqTypeSyntax)
     {
         ITypeSymbol? elementTypeSymbol = GetTypeArgument(typeSymbol) ?? throw new NotSupportedTypeException("Only arrays with one element type are supported");
         InteropTypeInfo elementTypeInfo = new InteropTypeInfoBuilder(elementTypeSymbol, cache).Build();
@@ -87,6 +89,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSTypeSyntax = GetJSTypeSyntax(arrayTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = arrayTypeInfo.GetTypeSyntax(),
             CSharpTypeSyntax = clrTypeSyntax,
+            CSharpFullyQualifiedTypeSyntax = fqTypeSyntax,
             TypeArgument = elementTypeInfo,
             ArgumentInfo = null,
             IsTaskType = false,
@@ -107,7 +110,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         }
     }
 
-    private InteropTypeInfo BuildTaskTypeInfo(JSTaskTypeInfo taskTypeInfo, TypeSyntax clrTypeSyntax)
+    private InteropTypeInfo BuildTaskTypeInfo(JSTaskTypeInfo taskTypeInfo, TypeSyntax clrTypeSyntax, TypeSyntax fqTypeSyntax)
     {
         ITypeSymbol? elementTypeSymbol = GetTypeArgument(typeSymbol);
         InteropTypeInfo? taskReturnTypeInfo = elementTypeSymbol != null ? new InteropTypeInfoBuilder(elementTypeSymbol, cache).Build() : null;
@@ -118,6 +121,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSTypeSyntax = GetJSTypeSyntax(taskTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = taskTypeInfo.GetTypeSyntax(),
             CSharpTypeSyntax = clrTypeSyntax,
+            CSharpFullyQualifiedTypeSyntax = fqTypeSyntax,
             TypeArgument = taskReturnTypeInfo,
             ArgumentInfo = null,
             IsTaskType = true,
@@ -141,7 +145,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         }
     }
 
-    private InteropTypeInfo BuildNullableTypeInfo(JSNullableTypeInfo nullableTypeInfo, TypeSyntax clrTypeSyntax)
+    private InteropTypeInfo BuildNullableTypeInfo(JSNullableTypeInfo nullableTypeInfo, TypeSyntax clrTypeSyntax, TypeSyntax fqTypeSyntax)
     {
         ITypeSymbol? innertypeSymbol = GetTypeArgument(typeSymbol) ?? throw new NotSupportedTypeException("Only nullables with one element type are supported");
         InteropTypeInfo innerTypeInfo = new InteropTypeInfoBuilder(innertypeSymbol, cache).Build();
@@ -152,6 +156,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSTypeSyntax = GetJSTypeSyntax(nullableTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = nullableTypeInfo.GetTypeSyntax(),
             CSharpTypeSyntax = clrTypeSyntax,
+            CSharpFullyQualifiedTypeSyntax = fqTypeSyntax,
             TypeArgument = innerTypeInfo,
             ArgumentInfo = null,
             IsTaskType = false,
@@ -179,7 +184,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         }
     }
 
-    private InteropTypeInfo BuildSpanOrArraySegmentTypeInfo(JSTypeInfo spanTypeInfo, TypeSyntax clrTypeSyntax)
+    private InteropTypeInfo BuildSpanOrArraySegmentTypeInfo(JSTypeInfo spanTypeInfo, TypeSyntax clrTypeSyntax, TypeSyntax fqTypeSyntax)
     {
         if (spanTypeInfo is not JSSpanTypeInfo && spanTypeInfo is not JSArraySegmentTypeInfo || GetTypeArgument(typeSymbol) is not ITypeSymbol innerTypeSymbol)
         {
@@ -198,6 +203,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSTypeSyntax = GetJSTypeSyntax(spanTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = spanTypeInfo.GetTypeSyntax(),
             CSharpTypeSyntax = clrTypeSyntax,
+            CSharpFullyQualifiedTypeSyntax = fqTypeSyntax,
             TypeArgument = innerTypeInfo,
             ArgumentInfo = null,
             IsTaskType = false,
@@ -218,7 +224,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         }
     }
 
-    private InteropTypeInfo BuildFunctionTypeInfo(JSFunctionTypeInfo functionTypeInfo, TypeSyntax clrTypeSyntax)
+    private InteropTypeInfo BuildFunctionTypeInfo(JSFunctionTypeInfo functionTypeInfo, TypeSyntax clrTypeSyntax, TypeSyntax fqTypeSyntax)
     {
         (InteropTypeInfo[] argTypeInfos, InteropTypeInfo returnTypeInfo) = GetArgumentTypeInfos(typeSymbol);
         InteropTypeInfo[] allArgTypeInfos = [.. argTypeInfos, returnTypeInfo];
@@ -235,6 +241,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             JSTypeSyntax = GetJSTypeSyntax(functionTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = functionTypeInfo.GetTypeSyntax(),
             CSharpTypeSyntax = clrTypeSyntax,
+            CSharpFullyQualifiedTypeSyntax = fqTypeSyntax,
             TypeArgument = null,
             ArgumentInfo = argumentInfo,
             IsTaskType = false,
@@ -257,11 +264,11 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         switch (typeSymbol)
         {
             case ITypeSymbol when fullTypeName == Constants.ActionGlobal:
-                return (Parameters: [], ReturnType: BuildSimpleTypeInfo(voidJSTypeInfo, voidSyntax));
+                return (Parameters: [], ReturnType: BuildSimpleTypeInfo(voidJSTypeInfo, voidSyntax, voidSyntax));
 
             case INamedTypeSymbol actionType when fullTypeName.StartsWith(Constants.ActionGlobal, StringComparison.Ordinal):
                 InteropTypeInfo[] argumentTypes = [.. actionType.TypeArguments.Select(arg => new InteropTypeInfoBuilder(arg, cache).Build())];
-                return (Parameters: argumentTypes, ReturnType: BuildSimpleTypeInfo(voidJSTypeInfo, voidSyntax));
+                return (Parameters: argumentTypes, ReturnType: BuildSimpleTypeInfo(voidJSTypeInfo, voidSyntax, voidSyntax));
 
             // function
             case INamedTypeSymbol funcType when fullTypeName.StartsWith(Constants.FuncGlobal, StringComparison.Ordinal):

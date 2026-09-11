@@ -15,6 +15,56 @@ internal sealed class RenderContext(NamedTypeInfo? targetType, IEnumerable<Named
     internal LocalScope LocalScope => _localScope ?? throw new InvalidOperationException("No active method in context");
     internal SymbolMap SymbolMap { get; } = new(allNamedTypes);
 
+    /// <summary>
+    /// Renders a managed-type reference for use in generated C#, qualifying it with <c>global::</c> only when the
+    /// type (or a nested type argument / delegate parameter) lives in a different namespace than the type currently
+    /// being rendered. Same-namespace references stay minimally qualified, matching hand-written C#.
+    /// </summary>
+    internal string ManagedTypeReference(InteropTypeInfo type)
+        => ReferencesTypeOutsideCurrentNamespace(type)
+            ? type.CSharpFullyQualifiedTypeSyntax.ToString()
+            : type.CSharpTypeSyntax.ToString();
+
+    /// <summary>
+    /// Renders a generated interop-class reference, qualifying it with <c>global::</c> only when the referenced
+    /// class lives in a different namespace than the type currently being rendered.
+    /// </summary>
+    internal string InteropClassReference(ClassInfo classInfo)
+        => classInfo.Namespace != NamedType.Namespace
+            ? RenderConstants.FullyQualifiedInteropClassName(classInfo)
+            : RenderConstants.InteropClassName(classInfo);
+
+    private bool ReferencesTypeOutsideCurrentNamespace(InteropTypeInfo type)
+    {
+        if (SymbolMap.TryGetNamedTypeInfo(type, out NamedTypeInfo? info) && info!.Namespace != NamedType.Namespace)
+        {
+            return true;
+        }
+
+        if (type.TypeArgument != null && ReferencesTypeOutsideCurrentNamespace(type.TypeArgument))
+        {
+            return true;
+        }
+
+        if (type.ArgumentInfo is DelegateArgumentInfo delegateArgumentInfo)
+        {
+            if (ReferencesTypeOutsideCurrentNamespace(delegateArgumentInfo.ReturnType))
+            {
+                return true;
+            }
+
+            foreach (InteropTypeInfo parameterType in delegateArgumentInfo.ParameterTypes)
+            {
+                if (ReferencesTypeOutsideCurrentNamespace(parameterType))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private readonly StringBuilder _sb = new(capacity: 16 * 1024);
 
     private int _currentDepth = 0;
