@@ -26,11 +26,7 @@ internal sealed class InteropTypeInfo
     public required TypeSyntax CSharpTypeSyntax { get; init; }
 
     /// <summary>
-    /// Fully-qualified (<c>global::</c>-prefixed) syntax for writing the CLR type in generated C#.<br/>
-    /// Used by the C# interop renderers so that references to types in other namespaces resolve
-    /// regardless of the generated file's namespace or using directives. This is deliberately kept
-    /// separate from <see cref="CSharpTypeSyntax"/> because the TypeScript renderers reuse the
-    /// minimally-qualified <see cref="CSharpTypeSyntax"/> to derive TS symbol names.
+    /// Fully-qualified (<c>global::</c>-prefixed) syntax for writing the CLR type in generated C#, so cross-namespace references resolve without using directives.
     /// </summary>
     public required TypeSyntax CSharpFullyQualifiedTypeSyntax { get; init; }
     

@@ -4,7 +4,7 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator;
 
-internal sealed class SymbolMap(IEnumerable<NamedTypeInfo> allNamedTypes)
+internal sealed class SymbolMap(NamedTypeInfo? currentType, IEnumerable<NamedTypeInfo> allNamedTypes)
 {
     private readonly Dictionary<InteropTypeInfo, NamedTypeInfo> _typeToNamedTypeDict = allNamedTypes.ToDictionary(n => n.Type);
 
@@ -19,11 +19,41 @@ internal sealed class SymbolMap(IEnumerable<NamedTypeInfo> allNamedTypes)
     }
 
     /// <summary>
-    /// Attempts to resolve the exported named type (class or enum) for the given type, returning false when the
-    /// type is not a registered named type (e.g. a primitive, a framework type, or a composite such as an array).
+    /// Resolves the managed and interop type names to emit in generated C# for the given type, qualifying them
+    /// with <c>global::</c> only when the type (or a nested type argument / delegate parameter) lives in a different
+    /// namespace than the type currently being rendered. Same-namespace references stay minimally qualified.
     /// </summary>
-    internal bool TryGetNamedTypeInfo(InteropTypeInfo type, out NamedTypeInfo? info)
-        => _typeToNamedTypeDict.TryGetValue(type, out info);
+    internal InteropTypeReference GetInteropTypeReference(InteropTypeInfo type)
+    {
+        string typeSyntax = ReferencesTypeOutsideCurrentNamespace(type)
+            ? type.CSharpFullyQualifiedTypeSyntax.ToString()
+            : type.CSharpTypeSyntax.ToString();
+        return new InteropTypeReference { TypeSyntax = typeSyntax };
+    }
+
+    private bool ReferencesTypeOutsideCurrentNamespace(InteropTypeInfo type)
+    {
+        if (_typeToNamedTypeDict.TryGetValue(type, out NamedTypeInfo? info) && info.Namespace != currentType?.Namespace)
+        {
+            return true;
+        }
+
+        if (type.TypeArgument is { } typeArgument && ReferencesTypeOutsideCurrentNamespace(typeArgument))
+        {
+            return true;
+        }
+
+        if (type.ArgumentInfo is DelegateArgumentInfo delegateArgumentInfo)
+        {
+            if (ReferencesTypeOutsideCurrentNamespace(delegateArgumentInfo.ReturnType)
+                || delegateArgumentInfo.ParameterTypes.Any(ReferencesTypeOutsideCurrentNamespace))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// True when the type requires marshalling conversion and its innermost element type is an exported class or a delegate.
