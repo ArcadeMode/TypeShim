@@ -51,6 +51,7 @@ internal class CSharpInteropClassRendererTests_SystemNumericParameterType
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -110,6 +111,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -170,6 +172,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -195,20 +198,20 @@ public partial class C1Interop
 """.Replace("{{typeExpression}}", interopTypeExpression)));
     }
 
-    [TestCase("Byte", "byte", "GetPropertyAsByteNullable")]
-    [TestCase("byte", "byte", "GetPropertyAsByteNullable")]
-    [TestCase("Int16", "short", "GetPropertyAsInt16Nullable")]
-    [TestCase("short", "short", "GetPropertyAsInt16Nullable")]
-    [TestCase("Int32", "int", "GetPropertyAsInt32Nullable")]
-    [TestCase("int", "int", "GetPropertyAsInt32Nullable")]
-    [TestCase("Int64", "long", "GetPropertyAsInt64Nullable")]
-    [TestCase("long", "long", "GetPropertyAsInt64Nullable")]
-    [TestCase("Single", "float", "GetPropertyAsSingleNullable")]
-    [TestCase("float", "float", "GetPropertyAsSingleNullable")]
-    [TestCase("Double", "double", "GetPropertyAsDoubleNullable")]
-    [TestCase("double", "double", "GetPropertyAsDoubleNullable")]
-    [TestCase("IntPtr", "nint", "GetPropertyAsIntPtrNullable")]
-    [TestCase("nint", "nint", "GetPropertyAsIntPtrNullable")]
+    [TestCase("Byte", "byte", "GetByteProperty")]
+    [TestCase("byte", "byte", "GetByteProperty")]
+    [TestCase("Int16", "short", "GetInt16Property")]
+    [TestCase("short", "short", "GetInt16Property")]
+    [TestCase("Int32", "int", "GetInt32Property")]
+    [TestCase("int", "int", "GetInt32Property")]
+    [TestCase("Int64", "long", "GetInt64Property")]
+    [TestCase("long", "long", "GetInt64Property")]
+    [TestCase("Single", "float", "GetSingleProperty")]
+    [TestCase("float", "float", "GetSingleProperty")]
+    [TestCase("Double", "double", "GetDoubleProperty")]
+    [TestCase("double", "double", "GetDoubleProperty")]
+    [TestCase("IntPtr", "nint", "GetIntPtrProperty")]
+    [TestCase("nint", "nint", "GetIntPtrProperty")]
     public void CSharpInteropClass_InstanceProperty_WithSupportedNumericParameterType(string typeExpression, string interopTypeExpression, string initializerMethod)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -235,6 +238,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -245,10 +249,12 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, initializer.{{initializerMethod}}("P1"));
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Number>]
@@ -276,11 +282,19 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, initializer.{{initializerMethod}}("P1"));
+        }
+        return instance;
     }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, {{typeExpression}} value);
 }
 
 """.Replace("{{typeExpression}}", interopTypeExpression).Replace("{{initializerMethod}}", initializerMethod));

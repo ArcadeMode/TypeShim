@@ -14,6 +14,7 @@ internal sealed class ConstructorInfo
     internal bool IsParameterless => Parameters.Length == 0;
     internal bool AcceptsInitializer => MemberInitializers.Length > 0;
     internal bool HasOptionalParameters => Parameters.Any(p => p.Default != null);
+    internal bool HasRequiredMemberInitializers => MemberInitializers.Any(p => p.IsRequired);
 
     internal MethodParameterInfo[] GetParametersIncludingInitializerObject()
     {

@@ -230,8 +230,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.Name !== undefined) o.Name = initializer.Name;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   /**
@@ -2174,8 +2179,13 @@ export class C1 extends ProxyBase {
    * Initializes a new instance.
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.Name !== undefined) o.Name = initializer.Name;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public get Name(): string {

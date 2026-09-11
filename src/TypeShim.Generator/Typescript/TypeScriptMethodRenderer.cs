@@ -30,11 +30,11 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         {
             if (constructorInfo.HasOptionalParameters
                 && constructorInfo.InitializerObject != null
-                && !InitializerIsOmittable(constructorInfo))
+                && constructorInfo.HasRequiredMemberInitializers)
             {
                 throw new NotSupportedOptionalParameterException(
                     $"Class '{ctx.Class.Name}' cannot combine optional constructor parameters with a non-omittable initializer object. " +
-                    "Make the parameters required, or ensure every settable/init property is nullable so the initializer can be omitted.");
+                    "Make the parameters required, or ensure the initializer has no required members so it can be omitted.");
             }
 
             TypeScriptJSDocRenderer.RenderJSDoc(ctx, constructorInfo.Comment);
@@ -51,7 +51,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             {
                 if (constructorInfo.Parameters.Length != 0) ctx.Append(", ");
                 ctx.Append(constructorInfo.InitializerObject.Name);
-                if (constructorInfo.HasOptionalParameters) ctx.Append('?');
+                if (!constructorInfo.HasRequiredMemberInitializers) ctx.Append('?');
                 ctx.Append(": ");
                 TypeScriptSymbolNameRenderer.Render(ctx.Class.Type, ctx, TypeShimSymbolType.Initializer, interop: false);
             }
@@ -63,12 +63,47 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             ctx.AppendLine("{");
             using (ctx.Indent())
             {
+                if (constructorInfo.InitializerObject != null)
+                {
+                    RenderInitializerFunction(constructorInfo, constructorInfo.InitializerObject);
+                }
+
                 ctx.Append("super(");
                 RenderInteropInvocation(constructorInfo.Name, constructorInfo.Parameters, instanceParameter: null, constructorInfo.InitializerObject);
                 ctx.AppendLine(");");
             }
             ctx.AppendLine("}");
         }
+    }
+
+    private void RenderInitializerFunction(ConstructorInfo constructor, MethodParameterInfo initializerObject)
+    {
+        ctx.AppendLine("function buildInitializer(): object {");
+        using (ctx.Indent())
+        {
+            ctx.AppendLine("const o: Record<string, unknown> = {};");
+
+            foreach (PropertyInfo propertyInfo in constructor.MemberInitializers)
+            {
+                void renderPropertyAccessorExpression() => ctx.Append(initializerObject.Name).Append('.').Append(propertyInfo.Name);
+
+                ctx.Append("if (").Append(initializerObject.Name).Append("?.").Append(propertyInfo.Name)
+                   .Append(" !== undefined) o.").Append(propertyInfo.Name).Append(" = ");
+
+                if (ctx.SymbolMap.IsConversionRequiringClassOrDelegate(propertyInfo.Type) || RequiresCharConversion(propertyInfo.Type))
+                {
+                    RenderInlineHandleExtraction(propertyInfo.Type, renderPropertyAccessorExpression);
+                }
+                else
+                {
+                    renderPropertyAccessorExpression();
+                }
+                ctx.AppendLine(";");
+            }
+
+            ctx.AppendLine("return o;");
+        }
+        ctx.AppendLine("}");
     }
 
     internal void RenderProxyMethod(MethodInfo methodInfo)
@@ -420,31 +455,12 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             if (initializerObject == null) return;
 
             if (!isFirst) ctx.Append(", ");
-            RenderInitializerParameter(initializerObject);
+            ctx.Append("buildInitializer()");
         }
 
         void RenderInteropMethodAccessor(string methodName)
         {
             ctx.Append(ctx.Class.Namespace).Append('.').Append(RenderConstants.InteropClassName(ctx.Class)).Append('.').Append(methodName);
-        }
-
-        void RenderInitializerParameter(MethodParameterInfo initializerObject)
-        {
-            ctx.Append("{ ...").Append(initializerObject.Name);
-            foreach (PropertyInfo propertyInfo in ctx.Class.Constructor?.MemberInitializers ?? throw new InvalidOperationException($"Can not render initializer parameter for class {ctx.Class.Name} with no constructor"))
-            {
-                bool requiresProxyConversion = ctx.SymbolMap.IsConversionRequiringClassOrDelegate(propertyInfo.Type);
-                bool requiresCharConversion = RequiresCharConversion(propertyInfo.Type);
-                if (!requiresCharConversion && !requiresProxyConversion)
-                {
-                    continue;
-                }
-
-                void renderPropertyAccessorExpression() => ctx.Append(initializerObject.Name).Append('.').Append(propertyInfo.Name);
-                ctx.Append(", ").Append(propertyInfo.Name).Append(": ");
-                RenderInlineHandleExtraction(propertyInfo.Type, renderPropertyAccessorExpression);
-            }
-            ctx.Append(" }");
         }
     }
 
@@ -459,15 +475,5 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             { ArgumentInfo: DelegateArgumentInfo argumentInfo } when (typeInfo.IsDelegateType()) => RequiresCharConversion(argumentInfo.ReturnType) || argumentInfo.ParameterTypes.Any(RequiresCharConversion),
             _ => false
         };
-    }
-
-    private static bool InitializerIsOmittable(ConstructorInfo constructorInfo)
-    {
-        if (constructorInfo.InitializerObject == null)
-        {
-            return true;
-        }
-
-        return constructorInfo.MemberInitializers.All(p => p.Type.IsNullableType); // TODO: swap for required check
     }
 }

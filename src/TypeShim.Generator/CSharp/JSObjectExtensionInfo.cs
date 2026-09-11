@@ -6,9 +6,14 @@ internal record JSObjectExtensionInfo(InteropTypeInfo TypeInfo)
 {
     internal string Name = string.Join("", GetManagedTypeListForType(TypeInfo));
 
-    internal string GetGetPropertyAsMethodName()
+    internal string GetExtensionMethodName()
     {
-        return $"GetPropertyAs{Name}Nullable";
+        return $"Get{Name}Property";
+    }
+
+    internal string GetMarshallerMethodName()
+    {
+        return Name;
     }
 
     private static IEnumerable<KnownManagedType> GetManagedTypeListForType(InteropTypeInfo typeInfo)

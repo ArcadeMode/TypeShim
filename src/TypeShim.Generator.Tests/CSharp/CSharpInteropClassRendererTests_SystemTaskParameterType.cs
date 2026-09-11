@@ -54,6 +54,7 @@ internal class CSharpInteropClassRendererTests_SystemTaskParameterType
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -126,6 +127,7 @@ public partial class C1Interop
         #nullable enable
         // TypeShim generated TypeScript interop definitions
         using System;
+        using System.Runtime.CompilerServices;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
         namespace N1;
@@ -196,6 +198,7 @@ public partial class C1Interop
         #nullable enable
         // TypeShim generated TypeScript interop definitions
         using System;
+        using System.Runtime.CompilerServices;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
         namespace N1;
@@ -255,6 +258,7 @@ public partial class C1Interop
         #nullable enable
         // TypeShim generated TypeScript interop definitions
         using System;
+        using System.Runtime.CompilerServices;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
         namespace N1;
@@ -311,6 +315,7 @@ public partial class C1Interop
         #nullable enable
         // TypeShim generated TypeScript interop definitions
         using System;
+        using System.Runtime.CompilerServices;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
         namespace N1;
@@ -364,6 +369,7 @@ public partial class C1Interop
         #nullable enable
         // TypeShim generated TypeScript interop definitions
         using System;
+        using System.Runtime.CompilerServices;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
         namespace N1;
@@ -374,10 +380,12 @@ public partial class C1Interop
             public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
             {
                 using var _ = initializer;
-                return new C1()
+                var instance = CreateInstance();
+                if (initializer.HasProperty("P1"))
                 {
-                    P1 = initializer.GetPropertyAsTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-                };
+                    SetP1(instance, initializer.GetTaskProperty("P1"));
+                }
+                return instance;
             }
             [JSExport]
             [return: JSMarshalAs<JSType.Promise<JSType.Void>>]
@@ -405,11 +413,19 @@ public partial class C1Interop
             public static C1 FromJSObject(JSObject initializer)
             {
                 using var _ = initializer;
-                return new C1()
+                var instance = CreateInstance();
+                if (initializer.HasProperty("P1"))
                 {
-                    P1 = initializer.GetPropertyAsTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-                };
+                    SetP1(instance, initializer.GetTaskProperty("P1"));
+                }
+                return instance;
             }
+
+            [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+            private static extern C1 CreateInstance();
+
+            [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+            private static extern void SetP1(C1 target, Task value);
         }
 
         """);

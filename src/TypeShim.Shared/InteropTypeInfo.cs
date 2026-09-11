@@ -47,6 +47,16 @@ internal sealed class InteropTypeInfo
 
     public bool IsDelegateType() => ManagedType is KnownManagedType.Function or KnownManagedType.Action;
 
+    public bool IsReferenceInteropType => ManagedType is
+        KnownManagedType.Object
+        or KnownManagedType.String
+        or KnownManagedType.Exception
+        or KnownManagedType.Task
+        or KnownManagedType.Array
+        or KnownManagedType.Action
+        or KnownManagedType.Function
+        or KnownManagedType.JSObject;
+
     public required bool IsTSExport { get; init; }
 
     public bool IsEnum { get; init; }

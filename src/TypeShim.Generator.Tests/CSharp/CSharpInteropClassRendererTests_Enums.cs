@@ -50,6 +50,7 @@ internal class CSharpInteropClassRendererTests_Enums
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -93,6 +94,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -136,6 +138,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -179,6 +182,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -222,6 +226,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -281,6 +286,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -319,6 +325,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -362,6 +369,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -404,6 +412,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -429,19 +438,26 @@ public partial class C1Interop
     }
 
     private static string RenderInteropClassWithInitializer(string members)
+        => RenderInteropClassWithInitializer(members, underlyingType: null);
+
+    private static string RenderInteropClassWithInitializer(string members, string? underlyingType)
     {
+        string enumDeclaration = underlyingType is null
+            ? "public enum Color { Red, Green, Blue }"
+            : $"public enum Color : {underlyingType} {{ Red, Green, Blue }}";
+
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             using System.Threading.Tasks;
             namespace N1;
             [TSExport]
-            public enum Color { Red, Green, Blue }
+            {{enum}}
             [TSExport]
             public class C1
             {
             {{members}}
             }
-        """.Replace("{{members}}", members));
+        """.Replace("{{enum}}", enumDeclaration).Replace("{{members}}", members));
 
         SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
         List<INamedTypeSymbol> exportedSymbols = [.. symbolExtractor.ExtractAllExportedSymbols()];
@@ -470,6 +486,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -480,12 +497,20 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("Scalar"))
         {
-            Scalar = (Color)(initializer.GetPropertyAsInt32Nullable("Scalar") ?? throw new ArgumentException("Non-nullable property 'Scalar' missing or of invalid type", nameof(initializer))),
-            Nullable = initializer.GetPropertyAsInt32Nullable("Nullable") is { } NullableVal ? (Color)NullableVal : null,
-            Arr = Array.ConvertAll(initializer.GetPropertyAsInt32ArrayNullable("Arr") ?? throw new ArgumentException("Non-nullable property 'Arr' missing or of invalid type", nameof(initializer)), e => (Color)e),
-        };
+            SetScalar(instance, (Color)initializer.GetInt32Property("Scalar"));
+        }
+        if (initializer.HasProperty("Nullable"))
+        {
+            SetNullable(instance, initializer.GetInt32NullableProperty("Nullable") is { } NullableVal ? (Color)NullableVal : null);
+        }
+        if (initializer.HasProperty("Arr"))
+        {
+            SetArr(instance, Array.ConvertAll(initializer.GetInt32ArrayProperty("Arr"), e => (Color)e));
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Number>]
@@ -544,15 +569,113 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("Scalar"))
         {
-            Scalar = (Color)(initializer.GetPropertyAsInt32Nullable("Scalar") ?? throw new ArgumentException("Non-nullable property 'Scalar' missing or of invalid type", nameof(initializer))),
-            Nullable = initializer.GetPropertyAsInt32Nullable("Nullable") is { } NullableVal ? (Color)NullableVal : null,
-            Arr = Array.ConvertAll(initializer.GetPropertyAsInt32ArrayNullable("Arr") ?? throw new ArgumentException("Non-nullable property 'Arr' missing or of invalid type", nameof(initializer)), e => (Color)e),
-        };
+            SetScalar(instance, (Color)initializer.GetInt32Property("Scalar"));
+        }
+        if (initializer.HasProperty("Nullable"))
+        {
+            SetNullable(instance, initializer.GetInt32NullableProperty("Nullable") is { } NullableVal ? (Color)NullableVal : null);
+        }
+        if (initializer.HasProperty("Arr"))
+        {
+            SetArr(instance, Array.ConvertAll(initializer.GetInt32ArrayProperty("Arr"), e => (Color)e));
+        }
+        return instance;
     }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_Scalar")]
+    private static extern void SetScalar(C1 target, Color value);
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_Nullable")]
+    private static extern void SetNullable(C1 target, Color? value);
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_Arr")]
+    private static extern void SetArr(C1 target, Color[] value);
 }
 
 """);
+    }
+
+    [TestCase(null, "int", "GetInt32Property")]
+    [TestCase("byte", "byte", "GetByteProperty")]
+    [TestCase("short", "short", "GetInt16Property")]
+    [TestCase("int", "int", "GetInt32Property")]
+    [TestCase("long", "long", "GetInt64Property")]
+    public void CSharpInteropClass_EnumInitializerProperty_MarshalsViaUnderlyingTypeExtension(string? underlyingType, string interopType, string initializerMethod)
+    {
+        string interopClass = RenderInteropClassWithInitializer("""
+                public Color Scalar { get; set; }
+        """, underlyingType);
+
+        AssertEx.EqualOrDiff(interopClass, """
+#nullable enable
+// TypeShim generated TypeScript interop definitions
+using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
+    {
+        using var _ = initializer;
+        var instance = CreateInstance();
+        if (initializer.HasProperty("Scalar"))
+        {
+            SetScalar(instance, (Color)initializer.{{initializerMethod}}("Scalar"));
+        }
+        return instance;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static {{interopType}} get_Scalar([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = C1Interop.FromObject(instance);
+        return ({{interopType}})typed_instance.Scalar;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_Scalar([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] {{interopType}} value)
+    {
+        C1 typed_instance = C1Interop.FromObject(instance);
+        Color typed_value = (Color)value;
+        typed_instance.Scalar = typed_value;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject initializer)
+    {
+        using var _ = initializer;
+        var instance = CreateInstance();
+        if (initializer.HasProperty("Scalar"))
+        {
+            SetScalar(instance, (Color)initializer.{{initializerMethod}}("Scalar"));
+        }
+        return instance;
+    }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_Scalar")]
+    private static extern void SetScalar(C1 target, Color value);
+}
+
+""".Replace("{{interopType}}", interopType).Replace("{{initializerMethod}}", initializerMethod));
     }
 }

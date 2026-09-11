@@ -6,12 +6,7 @@ internal class JSObjectMethodResolver(List<InteropTypeInfo> resolvedTypes)
 {
     internal string ResolveJSObjectMethodName(InteropTypeInfo typeInfo)
     {
-        if (typeInfo.ManagedType is KnownManagedType.Nullable)
-        {
-            return ResolveJSObjectMethodName(typeInfo.TypeArgument!);
-        }
-
-        string extensionMethodName = new JSObjectExtensionInfo(typeInfo).GetGetPropertyAsMethodName();
+        string extensionMethodName = new JSObjectExtensionInfo(typeInfo).GetExtensionMethodName();
         resolvedTypes.Add(typeInfo);
         return extensionMethodName;
     }

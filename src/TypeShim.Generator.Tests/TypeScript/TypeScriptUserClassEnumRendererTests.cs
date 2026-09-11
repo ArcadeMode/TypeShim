@@ -87,8 +87,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public get P1(): Color {
@@ -111,7 +116,7 @@ export class C1 extends ProxyBase {
         AssertEx.EqualOrDiff(ts, """
 export namespace C1 {
   export interface Initializer {
-    P1: Color;
+    P1?: Color;
   }
   export interface Snapshot {
     P1: Color;

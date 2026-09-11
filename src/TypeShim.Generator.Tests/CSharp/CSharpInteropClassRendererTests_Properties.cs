@@ -49,6 +49,7 @@ internal class CSharpInteropClassRendererTests_Properties
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -59,10 +60,12 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = MyClassInterop.FromObject(initializer.GetPropertyAsObjectNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer))),
-        };
+            SetP1(instance, MyClassInterop.FromObject(initializer.GetObjectProperty("P1")));
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Any>]
@@ -91,11 +94,19 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = MyClassInterop.FromObject(initializer.GetPropertyAsObjectNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer))),
-        };
+            SetP1(instance, MyClassInterop.FromObject(initializer.GetObjectProperty("P1")));
+        }
+        return instance;
     }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, MyClass value);
 }
 
 """);
@@ -142,6 +153,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -206,6 +218,7 @@ public partial class C1Interop
         #nullable enable
         // TypeShim generated TypeScript interop definitions
         using System;
+        using System.Runtime.CompilerServices;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
         namespace N1;
@@ -216,10 +229,12 @@ public partial class C1Interop
             public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
             {
                 using var _ = initializer;
-                return new C1()
+                var instance = CreateInstance();
+                if (initializer.HasProperty("P1"))
                 {
-                    P1 = initializer.GetPropertyAsObjectNullable("P1") is { } P1Val ? MyClassInterop.FromObject(P1Val) : null,
-                };
+                    SetP1(instance, initializer.GetObjectNullableProperty("P1") is { } P1Val ? MyClassInterop.FromObject(P1Val) : null);
+                }
+                return instance;
             }
             [JSExport]
             [return: JSMarshalAs<JSType.Any>]
@@ -248,13 +263,21 @@ public partial class C1Interop
             public static C1 FromJSObject(JSObject initializer)
             {
                 using var _ = initializer;
-                return new C1()
+                var instance = CreateInstance();
+                if (initializer.HasProperty("P1"))
                 {
-                    P1 = initializer.GetPropertyAsObjectNullable("P1") is { } P1Val ? MyClassInterop.FromObject(P1Val) : null,
-                };
+                    SetP1(instance, initializer.GetObjectNullableProperty("P1") is { } P1Val ? MyClassInterop.FromObject(P1Val) : null);
+                }
+                return instance;
             }
+
+            [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+            private static extern C1 CreateInstance();
+
+            [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+            private static extern void SetP1(C1 target, MyClass? value);
         }
-        
+
         """);
     }
 
@@ -285,6 +308,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -295,10 +319,12 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = initializer.GetPropertyAsObjectNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, initializer.GetObjectProperty("P1"));
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Any>]
@@ -326,11 +352,19 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = initializer.GetPropertyAsObjectNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, initializer.GetObjectProperty("P1"));
+        }
+        return instance;
     }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, object value);
 }
 
 """);
@@ -363,6 +397,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -373,10 +408,12 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = initializer.GetPropertyAsInt32ArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, initializer.GetInt32ArrayProperty("P1"));
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Number>>]
@@ -404,11 +441,19 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = initializer.GetPropertyAsInt32ArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, initializer.GetInt32ArrayProperty("P1"));
+        }
+        return instance;
     }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, int[] value);
 }
 
 """);
@@ -441,6 +486,7 @@ public partial class C1Interop
         #nullable enable
         // TypeShim generated TypeScript interop definitions
         using System;
+        using System.Runtime.CompilerServices;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
         namespace N1;
@@ -451,10 +497,12 @@ public partial class C1Interop
             public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
             {
                 using var _ = initializer;
-                return new C1()
+                var instance = CreateInstance();
+                if (initializer.HasProperty("P1"))
                 {
-                    P1 = initializer.GetPropertyAsInt32ArraySegmentNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-                };
+                    SetP1(instance, initializer.GetInt32ArraySegmentProperty("P1"));
+                }
+                return instance;
             }
             [JSExport]
             [return: JSMarshalAs<JSType.MemoryView>]
@@ -482,11 +530,19 @@ public partial class C1Interop
             public static C1 FromJSObject(JSObject initializer)
             {
                 using var _ = initializer;
-                return new C1()
+                var instance = CreateInstance();
+                if (initializer.HasProperty("P1"))
                 {
-                    P1 = initializer.GetPropertyAsInt32ArraySegmentNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-                };
+                    SetP1(instance, initializer.GetInt32ArraySegmentProperty("P1"));
+                }
+                return instance;
             }
+
+            [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+            private static extern C1 CreateInstance();
+
+            [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+            private static extern void SetP1(C1 target, ArraySegment<int> value);
         }
 
         """);
@@ -533,6 +589,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -543,10 +600,12 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = Array.ConvertAll(initializer.GetPropertyAsObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)), e => MyClassInterop.FromObject(e)),
-        };
+            SetP1(instance, Array.ConvertAll(initializer.GetObjectArrayProperty("P1"), e => MyClassInterop.FromObject(e)));
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
@@ -575,11 +634,19 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = Array.ConvertAll(initializer.GetPropertyAsObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)), e => MyClassInterop.FromObject(e)),
-        };
+            SetP1(instance, Array.ConvertAll(initializer.GetObjectArrayProperty("P1"), e => MyClassInterop.FromObject(e)));
+        }
+        return instance;
     }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, MyClass[] value);
 }
 
 """);
@@ -626,6 +693,7 @@ public partial class C1Interop
         #nullable enable
         // TypeShim generated TypeScript interop definitions
         using System;
+        using System.Runtime.CompilerServices;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
         namespace N1;
@@ -636,10 +704,12 @@ public partial class C1Interop
             public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
             {
                 using var _ = initializer;
-                return new C1()
+                var instance = CreateInstance();
+                if (initializer.HasProperty("P1"))
                 {
-                    P1 = Array.ConvertAll(initializer.GetPropertyAsObjectNullableArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)), e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null),
-                };
+                    SetP1(instance, Array.ConvertAll(initializer.GetObjectNullableArrayProperty("P1"), e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null));
+                }
+                return instance;
             }
             [JSExport]
             [return: JSMarshalAs<JSType.Array<JSType.Any>>]
@@ -668,11 +738,19 @@ public partial class C1Interop
             public static C1 FromJSObject(JSObject initializer)
             {
                 using var _ = initializer;
-                return new C1()
+                var instance = CreateInstance();
+                if (initializer.HasProperty("P1"))
                 {
-                    P1 = Array.ConvertAll(initializer.GetPropertyAsObjectNullableArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)), e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null),
-                };
+                    SetP1(instance, Array.ConvertAll(initializer.GetObjectNullableArrayProperty("P1"), e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null));
+                }
+                return instance;
             }
+
+            [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+            private static extern C1 CreateInstance();
+
+            [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+            private static extern void SetP1(C1 target, MyClass?[] value);
         }
 
         """);
@@ -718,6 +796,7 @@ public partial class C1Interop
         #nullable enable
         // TypeShim generated TypeScript interop definitions
         using System;
+        using System.Runtime.CompilerServices;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
         namespace N1;
@@ -728,10 +807,12 @@ public partial class C1Interop
             public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
             {
                 using var _ = initializer;
-                return new C1()
+                var instance = CreateInstance();
+                if (initializer.HasProperty("P1"))
                 {
-                    P1 = initializer.GetPropertyAsObjectArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => MyClassInterop.FromObject(e)) : null,
-                };
+                    SetP1(instance, initializer.GetObjectArrayNullableProperty("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => MyClassInterop.FromObject(e)) : null);
+                }
+                return instance;
             }
             [JSExport]
             [return: JSMarshalAs<JSType.Array<JSType.Any>>]
@@ -760,11 +841,19 @@ public partial class C1Interop
             public static C1 FromJSObject(JSObject initializer)
             {
                 using var _ = initializer;
-                return new C1()
+                var instance = CreateInstance();
+                if (initializer.HasProperty("P1"))
                 {
-                    P1 = initializer.GetPropertyAsObjectArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => MyClassInterop.FromObject(e)) : null,
-                };
+                    SetP1(instance, initializer.GetObjectArrayNullableProperty("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => MyClassInterop.FromObject(e)) : null);
+                }
+                return instance;
             }
+
+            [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+            private static extern C1 CreateInstance();
+
+            [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+            private static extern void SetP1(C1 target, MyClass[]? value);
         }
 
         """);
@@ -811,6 +900,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -821,10 +911,12 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = initializer.GetPropertyAsObjectNullableArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null) : null,
-        };
+            SetP1(instance, initializer.GetObjectNullableArrayNullableProperty("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null) : null);
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
@@ -853,11 +945,19 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = initializer.GetPropertyAsObjectNullableArrayNullable("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null) : null,
-        };
+            SetP1(instance, initializer.GetObjectNullableArrayNullableProperty("P1") is { } P1Val ? Array.ConvertAll(P1Val, e => e is { } eVal ? MyClassInterop.FromObject(eVal) : null) : null);
+        }
+        return instance;
     }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, MyClass?[]? value);
 }
 
 """);
@@ -904,6 +1004,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -914,10 +1015,12 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = (initializer.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer))).ContinueWith(t => MyClassInterop.FromObject(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously),
-        };
+            SetP1(instance, initializer.GetObjectTaskProperty("P1").ContinueWith(t => MyClassInterop.FromObject(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
@@ -946,11 +1049,19 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = (initializer.GetPropertyAsObjectTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer))).ContinueWith(t => MyClassInterop.FromObject(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously),
-        };
+            SetP1(instance, initializer.GetObjectTaskProperty("P1").ContinueWith(t => MyClassInterop.FromObject(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+        }
+        return instance;
     }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, Task<MyClass> value);
 }
 
 """);
@@ -997,6 +1108,7 @@ public partial class C1Interop
         #nullable enable
         // TypeShim generated TypeScript interop definitions
         using System;
+        using System.Runtime.CompilerServices;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
         namespace N1;
@@ -1007,10 +1119,12 @@ public partial class C1Interop
             public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
             {
                 using var _ = initializer;
-                return new C1()
+                var instance = CreateInstance();
+                if (initializer.HasProperty("P1"))
                 {
-                    P1 = (initializer.GetPropertyAsObjectNullableTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer))).ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously),
-                };
+                    SetP1(instance, initializer.GetObjectNullableTaskProperty("P1").ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+                }
+                return instance;
             }
             [JSExport]
             [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
@@ -1039,13 +1153,21 @@ public partial class C1Interop
             public static C1 FromJSObject(JSObject initializer)
             {
                 using var _ = initializer;
-                return new C1()
+                var instance = CreateInstance();
+                if (initializer.HasProperty("P1"))
                 {
-                    P1 = (initializer.GetPropertyAsObjectNullableTaskNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer))).ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously),
-                };
+                    SetP1(instance, initializer.GetObjectNullableTaskProperty("P1").ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+                }
+                return instance;
             }
+
+            [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+            private static extern C1 CreateInstance();
+
+            [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+            private static extern void SetP1(C1 target, Task<MyClass?> value);
         }
-        
+
         """);
     }
 
@@ -1090,6 +1212,7 @@ public partial class C1Interop
         #nullable enable
         // TypeShim generated TypeScript interop definitions
         using System;
+        using System.Runtime.CompilerServices;
         using System.Runtime.InteropServices.JavaScript;
         using System.Threading.Tasks;
         namespace N1;
@@ -1100,10 +1223,12 @@ public partial class C1Interop
             public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
             {
                 using var _ = initializer;
-                return new C1()
+                var instance = CreateInstance();
+                if (initializer.HasProperty("P1"))
                 {
-                    P1 = initializer.GetPropertyAsObjectNullableTaskNullable("P1")?.ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously),
-                };
+                    SetP1(instance, initializer.GetObjectNullableTaskNullableProperty("P1")?.ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+                }
+                return instance;
             }
             [JSExport]
             [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
@@ -1132,13 +1257,21 @@ public partial class C1Interop
             public static C1 FromJSObject(JSObject initializer)
             {
                 using var _ = initializer;
-                return new C1()
+                var instance = CreateInstance();
+                if (initializer.HasProperty("P1"))
                 {
-                    P1 = initializer.GetPropertyAsObjectNullableTaskNullable("P1")?.ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously),
-                };
+                    SetP1(instance, initializer.GetObjectNullableTaskNullableProperty("P1")?.ContinueWith(t => t.Result is { } tVal ? MyClassInterop.FromObject(tVal) : null, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+                }
+                return instance;
             }
+
+            [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+            private static extern C1 CreateInstance();
+
+            [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+            private static extern void SetP1(C1 target, Task<MyClass?>? value);
         }
-        
+
         """);
     }
 
@@ -1170,6 +1303,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -1180,10 +1314,12 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = ({{typeName}}[])initializer.GetPropertyAsObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, ({{typeName}}[])initializer.GetObjectArrayProperty("P1"));
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
@@ -1212,11 +1348,19 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = ({{typeName}}[])initializer.GetPropertyAsObjectArrayNullable("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, ({{typeName}}[])initializer.GetObjectArrayProperty("P1"));
+        }
+        return instance;
     }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, {{typeName}}[] value);
 }
 
 """.Replace("{{typeName}}", typeName));

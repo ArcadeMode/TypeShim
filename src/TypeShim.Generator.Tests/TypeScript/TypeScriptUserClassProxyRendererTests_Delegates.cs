@@ -1057,8 +1057,13 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
           /**
            * @param initializer - Object with member-initializers
            */
-          constructor(initializer: C1.Initializer) {
-            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: (arg0: number, arg1: ManagedObject) => initializer.P1(String.fromCharCode(arg0), ProxyBase.fromHandle(UserClass, arg1)) }));
+          constructor(initializer?: C1.Initializer) {
+            function buildInitializer(): object {
+              const o: Record<string, unknown> = {};
+              if (initializer?.P1 !== undefined) o.P1 = (arg0: number, arg1: ManagedObject) => initializer.P1(String.fromCharCode(arg0), ProxyBase.fromHandle(UserClass, arg1));
+              return o;
+            }
+            super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
           }
 
           public get P1(): (arg0: string, arg1: UserClass | UserClass.Initializer) => void {
@@ -1070,7 +1075,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
             TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, (arg0: number, arg1: ManagedObject) => value(String.fromCharCode(arg0), ProxyBase.fromHandle(UserClass, arg1)));
           }
         }
-        
+
         """);
     }
     
@@ -1114,8 +1119,13 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
           /**
            * @param initializer - Object with member-initializers
            */
-          constructor(initializer: C1.Initializer) {
-            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: (arg0: number) => { const retVal = initializer.P1(String.fromCharCode(arg0)); return retVal instanceof UserClass ? retVal.instance : retVal } }));
+          constructor(initializer?: C1.Initializer) {
+            function buildInitializer(): object {
+              const o: Record<string, unknown> = {};
+              if (initializer?.P1 !== undefined) o.P1 = (arg0: number) => { const retVal = initializer.P1(String.fromCharCode(arg0)); return retVal instanceof UserClass ? retVal.instance : retVal };
+              return o;
+            }
+            super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
           }
 
           public get P1(): (arg0: string) => UserClass {
@@ -1127,7 +1137,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
             TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, (arg0: number) => { const retVal = value(String.fromCharCode(arg0)); return retVal instanceof UserClass ? retVal.instance : retVal });
           }
         }
-        
+
         """);
     }
     
@@ -1171,8 +1181,13 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
           /**
            * @param initializer - Object with member-initializers
            */
-          constructor(initializer: C1.Initializer) {
-            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: (arg0: number) => initializer.P1(String.fromCharCode(arg0)) }));
+          constructor(initializer?: C1.Initializer) {
+            function buildInitializer(): object {
+              const o: Record<string, unknown> = {};
+              if (initializer?.P1 !== undefined) o.P1 = (arg0: number) => initializer.P1(String.fromCharCode(arg0));
+              return o;
+            }
+            super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
           }
 
           public get P1(): (arg0: string) => void {
@@ -1184,7 +1199,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
             TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, (arg0: number) => value(String.fromCharCode(arg0)));
           }
         }
-        
+
         """);
     }
     
@@ -1228,8 +1243,13 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
           /**
            * @param initializer - Object with member-initializers
            */
-          constructor(initializer: C1.Initializer) {
-            super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: (arg0: ManagedObject) => initializer.P1(ProxyBase.fromHandle(UserClass, arg0)) }));
+          constructor(initializer?: C1.Initializer) {
+            function buildInitializer(): object {
+              const o: Record<string, unknown> = {};
+              if (initializer?.P1 !== undefined) o.P1 = (arg0: ManagedObject) => initializer.P1(ProxyBase.fromHandle(UserClass, arg0));
+              return o;
+            }
+            super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
           }
 
           public get P1(): (arg0: UserClass | UserClass.Initializer) => void {
@@ -1241,7 +1261,7 @@ internal class TypeScriptUserClassProxyRendererTests_Delegates
             TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, (arg0: ManagedObject) => value(ProxyBase.fromHandle(UserClass, arg0)));
           }
         }
-        
+
         """);
     }
 

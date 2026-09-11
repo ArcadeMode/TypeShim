@@ -16,6 +16,12 @@ internal static class RenderConstants
     
     internal const string ManagedObject = "ManagedObject";
 
+    internal const string MarshallPropertyAsClass = "MarshallPropertyAs";
+
     internal static string InteropClassName(ClassInfo classInfo) => classInfo.IsTSExport ? $"{classInfo.Name}Interop" : classInfo.Name;
+
+    internal static string UnsafeAccessorSetMethod(PropertyInfo propertyInfo) => $"Set{propertyInfo.Name}";
+
+    internal const string UnsafeAccessorConstructorMethod = "CreateInstance";
 
 }

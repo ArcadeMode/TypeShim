@@ -43,8 +43,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public get P1(): {{typeScriptType}} {
@@ -91,8 +96,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public get P1(): {{typeScriptType}} {
@@ -135,8 +145,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public static get P1(): {{typeScriptType}} {
@@ -256,8 +271,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: initializer.P1 instanceof UserClass ? initializer.P1.instance : initializer.P1 }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1 instanceof UserClass ? initializer.P1.instance : initializer.P1;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public get P1(): UserClass {
@@ -371,8 +391,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: initializer.P1 ? initializer.P1 instanceof UserClass ? initializer.P1.instance : initializer.P1 : null }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1 ? initializer.P1 instanceof UserClass ? initializer.P1.instance : initializer.P1 : null;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public get P1(): UserClass | null {
@@ -431,8 +456,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: initializer.P1.then(e => e instanceof UserClass ? e.instance : e) }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1.then(e => e instanceof UserClass ? e.instance : e);
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public get P1(): Promise<UserClass> {
@@ -491,8 +521,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public get P1(): Promise<void> {
@@ -550,8 +585,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: initializer.P1.map(e => e instanceof UserClass ? e.instance : e) }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1.map(e => e instanceof UserClass ? e.instance : e);
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public get P1(): Array<UserClass> {
@@ -610,8 +650,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: initializer.P1.map(e => e ? e instanceof UserClass ? e.instance : e : null) }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1.map(e => e ? e instanceof UserClass ? e.instance : e : null);
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public get P1(): Array<UserClass | null> {
@@ -670,8 +715,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: initializer.P1 ? initializer.P1.map(e => e instanceof UserClass ? e.instance : e) : null }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1 ? initializer.P1.map(e => e instanceof UserClass ? e.instance : e) : null;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public get P1(): Array<UserClass> | null {
@@ -730,8 +780,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: initializer.P1 ? initializer.P1.map(e => e ? e instanceof UserClass ? e.instance : e : null) : null }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1 ? initializer.P1.map(e => e ? e instanceof UserClass ? e.instance : e : null) : null;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public get P1(): Array<UserClass | null> | null {
@@ -790,8 +845,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: initializer.P1.then(e => e ? e instanceof UserClass ? e.instance : e : null) }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1.then(e => e ? e instanceof UserClass ? e.instance : e : null);
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public get P1(): Promise<UserClass | null> {
@@ -850,8 +910,13 @@ export class C1 extends ProxyBase {
   /**
    * @param initializer - Object with member-initializers
    */
-  constructor(initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor({ ...initializer, P1: initializer.P1 ? initializer.P1.then(e => e ? e instanceof UserClass ? e.instance : e : null) : null }));
+  constructor(initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1 ? initializer.P1.then(e => e ? e instanceof UserClass ? e.instance : e : null) : null;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(buildInitializer()));
   }
 
   public get P1(): Promise<UserClass | null> | null {

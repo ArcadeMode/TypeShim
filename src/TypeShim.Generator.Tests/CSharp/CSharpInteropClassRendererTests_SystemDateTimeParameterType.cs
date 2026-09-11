@@ -38,6 +38,7 @@ internal class CSharpInteropClassRendererTests_SystemDateTimeParameterType
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -85,6 +86,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -110,8 +112,8 @@ public partial class C1Interop
 """.Replace("{{interopTypeExpression}}", interopTypeExpression)));
     }
 
-    [TestCase("DateTime", "global::System.DateTime", "GetPropertyAsDateTimeNullable")]
-    [TestCase("DateTimeOffset", "global::System.DateTimeOffset", "GetPropertyAsDateTimeOffsetNullable")]
+    [TestCase("DateTime", "global::System.DateTime", "GetDateTimeProperty")]
+    [TestCase("DateTimeOffset", "global::System.DateTimeOffset", "GetDateTimeOffsetProperty")]
     public void CSharpInteropClass_InstanceProperty_ForDateTimeParameterType(string typeName, string interopTypeExpression, string initializerMethod)
     {
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
@@ -138,6 +140,7 @@ public partial class C1Interop
 #nullable enable
 // TypeShim generated TypeScript interop definitions
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 namespace N1;
@@ -148,10 +151,12 @@ public partial class C1Interop
     public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, initializer.{{initializerMethod}}("P1"));
+        }
+        return instance;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Date>]
@@ -179,13 +184,21 @@ public partial class C1Interop
     public static C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
-        return new C1()
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
         {
-            P1 = initializer.{{initializerMethod}}("P1") ?? throw new ArgumentException("Non-nullable property 'P1' missing or of invalid type", nameof(initializer)),
-        };
+            SetP1(instance, initializer.{{initializerMethod}}("P1"));
+        }
+        return instance;
     }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, {{managedTypeExpression}} value);
 }
 
-""".Replace("{{typeExpression}}", interopTypeExpression).Replace("{{initializerMethod}}", initializerMethod));
+""".Replace("{{typeExpression}}", interopTypeExpression).Replace("{{managedTypeExpression}}", typeName).Replace("{{initializerMethod}}", initializerMethod));
     }
 }

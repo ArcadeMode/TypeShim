@@ -36,6 +36,7 @@ internal sealed class CSharpInteropClassRenderer
         _ctx.AppendLine("#nullable enable")
             .AppendLine("// TypeShim generated TypeScript interop definitions")
             .AppendLine("using System;")
+            .AppendLine("using System.Runtime.CompilerServices;")
             .AppendLine("using System.Runtime.InteropServices.JavaScript;")
             .AppendLine("using System.Threading.Tasks;")
             .Append("namespace ").Append(_classInfo.Namespace).AppendLine(";")
@@ -73,6 +74,11 @@ internal sealed class CSharpInteropClassRenderer
             if (_classInfo.Constructor is { AcceptsInitializer: true, IsParameterless: true, InitializerObject: { } initializerParameter } constructorMethod)
             {
                 _methodRenderer.RenderFromJSObjectMapper(constructorMethod, initializerParameter);
+            }
+
+            if (_classInfo.Constructor is not null)
+            {
+                _methodRenderer.RenderMemberInitializerAccessors(_classInfo.Constructor);
             }
         }
         

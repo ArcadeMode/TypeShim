@@ -19,18 +19,37 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, IEnumerable
             .AppendLine("// JSImports for the type marshalling process")
             .AppendLine("using System;")
             .AppendLine("using System.Runtime.InteropServices.JavaScript;")
-            .AppendLine("using System.Threading.Tasks;")
-            .AppendLine("public static partial class JSObjectExtensions")
+            .AppendLine("using System.Threading.Tasks;");
+
+        JSObjectExtensionInfo[] extensionInfos = [.. targetTypeInfos
+            .Select(typeInfo => new JSObjectExtensionInfo(typeInfo))
+            .DistinctBy(extInfo => extInfo.Name)];
+
+        _ctx.AppendLine("public static class JSObjectExtensions")
             .AppendLine("{");
         using (_ctx.Indent())
         {
-            JSObjectExtensionInfo[] extensionInfos = [.. targetTypeInfos
-                .Select(typeInfo => new JSObjectExtensionInfo(typeInfo))
-                .DistinctBy(extInfo => extInfo.Name)];
-            HashSet<string> processedTypes = [];
+            bool isFirst = true;
             foreach (JSObjectExtensionInfo typeInfo in extensionInfos)
             {
+                if (!isFirst) _ctx.AppendLine();
                 RenderExtensionMethodForType(typeInfo);
+                isFirst = false;
+            }
+        }
+        _ctx.AppendLine("}");
+        _ctx.AppendLine();
+
+        _ctx.Append("public static partial class ").AppendLine(RenderConstants.MarshallPropertyAsClass)
+            .AppendLine("{");
+        using (_ctx.Indent())
+        {
+            bool isFirst = true;
+            foreach (JSObjectExtensionInfo typeInfo in extensionInfos)
+            {
+                if (!isFirst) _ctx.AppendLine();
+                RenderMarshallerMethodForType(typeInfo);
+                isFirst = false;
             }
         }
         _ctx.AppendLine("}");
@@ -38,37 +57,41 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, IEnumerable
 
     private void RenderExtensionMethodForType(JSObjectExtensionInfo extensionInfo)
     {
-        DeferredExpressionRenderer marshalAsMethodNameRenderer = DeferredExpressionRenderer.FromUnary(() =>
-        {
-            _ctx.Append("MarshalAs").Append(extensionInfo.Name);
-        });
-        DeferredExpressionRenderer getPropertyAsMethodNameRenderer = DeferredExpressionRenderer.FromUnary(() =>
-        {
-            _ctx.Append("GetPropertyAs").Append(extensionInfo.Name).Append("Nullable");
-        });
+        InteropTypeInfo type = extensionInfo.TypeInfo;
 
-        _ctx.Append("public static ").Append(extensionInfo.TypeInfo.CSharpInteropTypeSyntax).Append("? ");
-        getPropertyAsMethodNameRenderer.Render();
-        _ctx.AppendLine("(this JSObject jsObject, string propertyName)");
+        _ctx.Append("public static ").Append(type.CSharpInteropTypeSyntax).Append(' ')
+            .Append(extensionInfo.GetExtensionMethodName())
+            .AppendLine("(this JSObject jsObject, string propertyName)");
         _ctx.AppendLine("{");
         using (_ctx.Indent())
         {
-            _ctx.Append("return jsObject.HasProperty(propertyName) ? ");
-            marshalAsMethodNameRenderer.Render();
-            _ctx.Append("(jsObject, propertyName) : (")
-                .Append(extensionInfo.TypeInfo.CSharpInteropTypeSyntax)
-                .AppendLine("?)null;");
+            _ctx.Append("return ").Append(RenderConstants.MarshallPropertyAsClass).Append('.')
+                .Append(extensionInfo.GetMarshallerMethodName()).Append("(jsObject, propertyName)");
+            if (RequiresNonNullableCoalesce(type))
+            {
+                _ctx.Append(" ?? throw new InvalidOperationException($\"Marshalling value for property '{propertyName}' yielded unexpected null value, expected non-nullable '")
+                    .Append(type.CSharpInteropTypeSyntax).Append("'\")");
+            }
+            _ctx.AppendLine(";");
         }
         _ctx.AppendLine("}");
+    }
+
+    private void RenderMarshallerMethodForType(JSObjectExtensionInfo extensionInfo)
+    {
+        InteropTypeInfo type = extensionInfo.TypeInfo;
 
         JSMarshalAsAttributeRenderer attributeRenderer = new(_ctx);
         attributeRenderer.RenderJSImportAttribute("unwrapProperty");
         _ctx.AppendLine();
-        attributeRenderer.RenderReturnAttribute(extensionInfo.TypeInfo.JSTypeSyntax);
+        attributeRenderer.RenderReturnAttribute(type.JSTypeSyntax);
         _ctx.AppendLine();
-        _ctx.Append("public static partial ").Append(extensionInfo.TypeInfo.CSharpInteropTypeSyntax).Append(' ');
-        marshalAsMethodNameRenderer.Render();
-        _ctx.Append('(');
+        _ctx.Append("public static partial ").Append(type.CSharpInteropTypeSyntax);
+        if (RequiresNonNullableCoalesce(type))
+        {
+            _ctx.Append('?');
+        }
+        _ctx.Append(' ').Append(extensionInfo.GetMarshallerMethodName()).Append('(');
         attributeRenderer.RenderParameterAttribute(SyntaxFactory.ParseTypeName("JSType.Object"));
         _ctx.Append(' ').Append(InteropTypeInfo.JSObjectTypeInfo.CSharpInteropTypeSyntax).Append(" obj")
             .Append(", ");
@@ -76,4 +99,7 @@ internal sealed class JSObjectExtensionsRenderer(RenderContext _ctx, IEnumerable
         _ctx.Append(" string propertyName")
             .AppendLine(");");
     }
+
+    private static bool RequiresNonNullableCoalesce(InteropTypeInfo type)
+        => !type.IsNullableType && type.IsReferenceInteropType;
 }

@@ -46,7 +46,12 @@ export class C1 extends ProxyBase {
    * @param initializer - Object with member-initializers
    */
   constructor(count: number = 5, initializer?: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(count, { ...initializer }));
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(count, buildInitializer()));
   }
 
   public get P1(): string | null {
@@ -62,15 +67,40 @@ export class C1 extends ProxyBase {
     }
 
     [Test]
-    public void OptionalCtorParam_WithNonNullableInitializerMember_Throws()
+    public void OptionalCtorParam_WithNonNullableInitializerMember_RendersOptionalInitializer()
     {
-        Assert.Throws<NotSupportedOptionalParameterException>(() => Render("""
+        string output = Render("""
             public class C1
             {
                 public C1(int count = 5) {}
                 public string P1 { get; set; }
             }
-        """));
+        """);
+
+        AssertEx.EqualOrDiff(output, """
+export class C1 extends ProxyBase {
+  /**
+   * @param initializer - Object with member-initializers
+   */
+  constructor(count: number = 5, initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(count, buildInitializer()));
+  }
+
+  public get P1(): string {
+    return TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+  }
+
+  public set P1(value: string) {
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value);
+  }
+}
+
+""");
     }
 
     [Test]
@@ -111,15 +141,41 @@ export class C1 extends ProxyBase {
     }
 
     [Test]
-    public void OptionalCtorParam_WithNonNullableCharMember_Throws()
+    public void OptionalCtorParam_WithNonNullableCharMember_RendersOptionalInitializer()
     {
-        Assert.Throws<NotSupportedOptionalParameterException>(() => Render("""
+        string output = Render("""
             public class C1
             {
                 public C1(int count = 5) {}
                 public char P1 { get; set; }
             }
-        """));
+        """);
+
+        AssertEx.EqualOrDiff(output, """
+export class C1 extends ProxyBase {
+  /**
+   * @param initializer - Object with member-initializers
+   */
+  constructor(count: number = 5, initializer?: C1.Initializer) {
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1.charCodeAt(0);
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(count, buildInitializer()));
+  }
+
+  public get P1(): string {
+    const res = TypeShimConfig.exports.N1.C1Interop.get_P1(this.instance);
+    return String.fromCharCode(res);
+  }
+
+  public set P1(value: string) {
+    TypeShimConfig.exports.N1.C1Interop.set_P1(this.instance, value.charCodeAt(0));
+  }
+}
+
+""");
     }
 
     [Test]
@@ -139,7 +195,12 @@ export class C1 extends ProxyBase {
    * @param initializer - Object with member-initializers
    */
   constructor(count: number, initializer: C1.Initializer) {
-    super(TypeShimConfig.exports.N1.C1Interop.ctor(count, { ...initializer }));
+    function buildInitializer(): object {
+      const o: Record<string, unknown> = {};
+      if (initializer?.P1 !== undefined) o.P1 = initializer.P1;
+      return o;
+    }
+    super(TypeShimConfig.exports.N1.C1Interop.ctor(count, buildInitializer()));
   }
 
   public get P1(): string {
