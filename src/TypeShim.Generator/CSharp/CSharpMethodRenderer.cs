@@ -228,7 +228,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     private void RenderConstructorInvocation(ConstructorInfo constructorInfo)
     {
-        if (!(constructorInfo.AcceptsInitializer && constructorInfo.InitializerObject is MethodParameterInfo initializerParameter))
+        if (constructorInfo.InitializerObject is not MethodParameterInfo initializerParameter)
         {
             _ctx.Append("return ").Append(RenderConstants.UnsafeAccessorConstructorMethod).Append('(');
             RenderPositionalArguments(constructorInfo);

@@ -47,11 +47,6 @@ internal sealed class InteropTypeInfo
 
     public bool IsDelegateType() => ManagedType is KnownManagedType.Function or KnownManagedType.Action;
 
-    /// <summary>
-    /// True when the top-level marshalled type is a reference type, i.e. the JS interop marshaller
-    /// (<c>JSMarshalerArgument.ToManaged(out T?)</c>) can legitimately yield <c>null</c> at the boundary.
-    /// Value types (numbers, bool, char, DateTime, Span/ArraySegment, Nullable&lt;T&gt;) never marshal null.
-    /// </summary>
     public bool IsReferenceInteropType => ManagedType is
         KnownManagedType.Object
         or KnownManagedType.String

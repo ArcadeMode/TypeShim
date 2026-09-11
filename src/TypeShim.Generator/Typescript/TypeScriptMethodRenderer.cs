@@ -65,7 +65,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
             {
                 if (constructorInfo.InitializerObject != null)
                 {
-                    RenderInitializerFunction(constructorInfo.InitializerObject);
+                    RenderInitializerFunction(constructorInfo, constructorInfo.InitializerObject);
                 }
 
                 ctx.Append("super(");
@@ -76,11 +76,8 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
         }
     }
 
-    private void RenderInitializerFunction(MethodParameterInfo initializerObject)
+    private void RenderInitializerFunction(ConstructorInfo constructor, MethodParameterInfo initializerObject)
     {
-        ConstructorInfo constructor = ctx.Class.Constructor
-            ?? throw new InvalidOperationException($"Can not render initializer function for class {ctx.Class.Name} with no constructor");
-
         ctx.AppendLine("function buildInitializer(): object {");
         using (ctx.Indent())
         {
@@ -481,12 +478,5 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
     }
 
     private static bool CanOmitInitializerArgument(ConstructorInfo constructorInfo)
-    {
-        if (constructorInfo.InitializerObject == null)
-        {
-            return true;
-        }
-
-        return !constructorInfo.HasRequiredMemberInitializers;
-    }
+        => constructorInfo.InitializerObject is null || !constructorInfo.HasRequiredMemberInitializers;
 }
