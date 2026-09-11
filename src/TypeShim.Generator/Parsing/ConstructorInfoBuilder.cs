@@ -17,7 +17,7 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
             Type = InteropTypeInfo.JSObjectTypeInfo
         };
 
-        return new ConstructorInfo
+        ConstructorInfo constructorInfo = new()
         {
             Name = "ctor",
             Parameters = parameterInfos,
@@ -26,5 +26,16 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
             MemberInitializers = [.. initializerProperties],
             Comment = new CommentInfoBuilder(memberMethod).Build(initializersObjectParameter),
         };
+
+        if (constructorInfo.HasOptionalParameters
+            && constructorInfo.InitializerObject != null
+            && constructorInfo.HasRequiredMemberInitializers)
+        {
+            throw new NotSupportedOptionalParameterException(
+                $"Class '{classSymbol.Name}' cannot combine optional constructor parameters with a non-omittable initializer object. " +
+                "Make the parameters required, or ensure the initializer has no required members so it can be omitted.");
+        }
+
+        return constructorInfo;
     }
 }
