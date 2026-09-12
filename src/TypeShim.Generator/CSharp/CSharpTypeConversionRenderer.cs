@@ -252,7 +252,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
                 // reference types up-convert to the interop 'object' implicitly; other converted types (e.g. enums) need an explicit cast
                 InteropTypeInfo parameterType = argumentInfo.ParameterTypes[i];
                 DeferredExpressionRenderer argNameRenderer = DeferredExpressionRenderer.FromUnary(() => _ctx.Append("arg").Append(i));
-                if (parameterType.RequiresTypeConversion && parameterType.CSharpInteropTypeSyntax.ToString() is not "object")
+                if (parameterType.RequiresTypeConversion && parameterType.ManagedType is not KnownManagedType.Object)
                 {
                     RenderInlineCovariantTypeUpConversion(parameterType, argNameRenderer);
                 }
