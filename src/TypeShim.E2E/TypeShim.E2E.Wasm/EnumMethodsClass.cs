@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace TypeShim.E2E.Wasm;
 
@@ -46,6 +47,8 @@ public class EnumMethodsClass
     public Priority[] PriorityArrayProperty { get; set; } = [];
     public Season SeasonProperty { get; set; }
 
+    public required Func<Priority, Priority> PriorityFuncProperty { get; set; }
+
     public Priority EchoPriority(Priority priority) => priority;
     public SpecialByte EchoSpecialByte(SpecialByte specialByte) => specialByte;
     public Priority? EchoNullablePriority(Priority? priority) => priority;
@@ -56,6 +59,10 @@ public class EnumMethodsClass
     public Task<Priority> HighestPriorityTask() => Task.FromResult(Priority.High);
 
     public Priority NextPriority(Priority priority) => priority == Priority.High ? Priority.High : priority + 1;
+
+    public Priority InvokePriorityFunc(Func<Priority, Priority> func, Priority priority) => func(priority);
+
+    public Func<Priority, Priority> GetNextPriorityFunc() => priority => priority == Priority.High ? Priority.High : priority + 1;
 
     public Priority PriorityOrDefault(Priority p = Priority.Medium) => p;
     public Priority PriorityOrLiteralDefault(Priority p = default) => p;

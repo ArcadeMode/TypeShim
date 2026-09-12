@@ -10,6 +10,7 @@ describe('Enum Test', () => {
             NullablePriorityProperty: Priority.Low,
             PriorityArrayProperty: [Priority.Low, Priority.High],
             SeasonProperty: Season.Summer,
+            PriorityFuncProperty: (priority: Priority) => priority,
         });
     });
 
@@ -85,6 +86,23 @@ describe('Enum Test', () => {
         expect(testObject.NextPriority(Priority.Medium)).toBe(Priority.High);
         expect(testObject.NextPriority(Priority.High)).toBe(Priority.High);
     });
+
+    test('Enum round-trips through a delegate parameter', () => {
+        expect(testObject.InvokePriorityFunc(priority => priority, Priority.High)).toBe(Priority.High);
+        expect(testObject.InvokePriorityFunc(priority => Priority.Low, Priority.High)).toBe(Priority.Low);
+    });
+
+    test('Enum round-trips through a delegate property', () => {
+        expect(testObject.PriorityFuncProperty(Priority.Medium)).toBe(Priority.Medium);
+        testObject.PriorityFuncProperty = priority => Priority.High;
+        expect(testObject.PriorityFuncProperty(Priority.Low)).toBe(Priority.High);
+    });
+
+    test('Enum round-trips through a returned delegate', () => {
+        const next = testObject.GetNextPriorityFunc();
+        expect(next(Priority.Low)).toBe(Priority.Medium);
+        expect(next(Priority.High)).toBe(Priority.High);
+    });
 });
 
 describe('Optional Enum Parameters', () => {
@@ -96,6 +114,7 @@ describe('Optional Enum Parameters', () => {
             NullablePriorityProperty: Priority.Low,
             PriorityArrayProperty: [Priority.Low, Priority.High],
             SeasonProperty: Season.Summer,
+            PriorityFuncProperty: (priority: Priority) => priority,
         });
     });
 
