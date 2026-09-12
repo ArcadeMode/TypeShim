@@ -1322,4 +1322,88 @@ public partial class C1Interop
 
         """);
     }
+
+    [Test]
+    public void CSharpInteropClass_Method_FunctionEnumEnum_ParameterAndReturnType()
+    {
+        SyntaxTree enumTree = CSharpSyntaxTree.ParseText("""
+            namespace N1;
+            [TSExport]
+            public enum MyEnum
+            {
+                First,
+                Second,
+                Third
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public MyEnum M1(Func<MyEnum, MyEnum> func, MyEnum value) => func(value);
+                public Func<MyEnum, MyEnum> M2() => (MyEnum value) => value;
+            }
+        """);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(enumTree)], TestFixture.TargetingPackRefDir);
+        List<INamedTypeSymbol> exportedSymbols = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedSymbols, Has.Count.EqualTo(2));
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(exportedSymbols.First(), typeCache).Build();
+        EnumInfo enumInfo = new EnumInfoBuilder(exportedSymbols.Last(), typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo, enumInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+
+        AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
+// TypeShim generated TypeScript interop definitions
+using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor()
+    {
+        return CreateInstance();
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static int M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Number, JSType.Number>>] Func<int, int> func, [JSMarshalAs<JSType.Number>] int value)
+    {
+        C1 typed_instance = C1Interop.FromObject(instance);
+        Func<MyEnum, MyEnum> typed_func = (MyEnum arg0) => (MyEnum)func((int)arg0);
+        MyEnum typed_value = (MyEnum)value;
+        return (int)typed_instance.M1(typed_func, typed_value);
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Function<JSType.Number, JSType.Number>>]
+    public static Func<int, int> M2([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = C1Interop.FromObject(instance);
+        Func<MyEnum, MyEnum> retVal = typed_instance.M2();
+        return (int arg0) => (int)retVal((MyEnum)arg0);
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
+}
+
+""");
+    }
 }

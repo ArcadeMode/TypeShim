@@ -4,7 +4,7 @@ using TypeShim.Shared;
 
 namespace TypeShim.Generator;
 
-internal sealed class SymbolMap(IEnumerable<NamedTypeInfo> allNamedTypes)
+internal sealed class SymbolMap(NamedTypeInfo? currentType, IEnumerable<NamedTypeInfo> allNamedTypes)
 {
     private readonly Dictionary<InteropTypeInfo, NamedTypeInfo> _typeToNamedTypeDict = allNamedTypes.ToDictionary(n => n.Type);
 
@@ -16,6 +16,39 @@ internal sealed class SymbolMap(IEnumerable<NamedTypeInfo> allNamedTypes)
     {
         _typeToNamedTypeDict.TryGetValue(type, out NamedTypeInfo? info);
         return info ?? throw new NotFoundNamedTypeInfoException($"Could not find NamedTypeInfo for type: {type.CSharpTypeSyntax}");
+    }
+
+    /// <summary>Resolves the C# type syntax to emit: fully-qualified <c>global::</c> for types in another namespace, otherwise minimally qualified.</summary>
+    internal InteropTypeReference GetInteropTypeReference(InteropTypeInfo type)
+        => new()
+        {
+            TypeSyntax = ReferencesTypeOutsideCurrentNamespace(type)
+                ? type.CSharpFullyQualifiedTypeSyntax.ToString()
+                : type.CSharpTypeSyntax.ToString()
+        };
+
+    private bool ReferencesTypeOutsideCurrentNamespace(InteropTypeInfo type)
+    {
+        _ = currentType ?? throw new InvalidOperationException("cannot match namespace against namedtypeinfo 'null'");
+
+        if (_typeToNamedTypeDict.TryGetValue(type, out NamedTypeInfo? info) && info.Namespace != currentType.Namespace)
+        {
+            return true;
+        }
+
+        if (type.TypeArgument is { } typeArgument && ReferencesTypeOutsideCurrentNamespace(typeArgument))
+        {
+            return true;
+        }
+
+        if (type.ArgumentInfo is DelegateArgumentInfo delegateArgumentInfo
+            && (ReferencesTypeOutsideCurrentNamespace(delegateArgumentInfo.ReturnType)
+                || delegateArgumentInfo.ParameterTypes.Any(ReferencesTypeOutsideCurrentNamespace)))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>
