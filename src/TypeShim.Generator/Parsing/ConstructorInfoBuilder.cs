@@ -17,7 +17,7 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
             Type = InteropTypeInfo.JSObjectTypeInfo
         };
 
-        return new ConstructorInfo
+        ConstructorInfo constructorInfo = new()
         {
             Name = "ctor",
             Parameters = parameterInfos,
@@ -26,5 +26,14 @@ internal sealed class ConstructorInfoBuilder(INamedTypeSymbol classSymbol, IMeth
             MemberInitializers = [.. initializerProperties],
             Comment = new CommentInfoBuilder(memberMethod).Build(initializersObjectParameter),
         };
+
+        if (constructorInfo.HasOptionalParameters
+            && constructorInfo.InitializerObject != null
+            && constructorInfo.HasRequiredMemberInitializers)
+        {
+            throw new NotSupportedOptionalParameterException($"Class '{classSymbol.Name}' contains an illegal combination of required properties and optional constructor parameters. Ensure both are either required or optional.");
+        }
+
+        return constructorInfo;
     }
 }
