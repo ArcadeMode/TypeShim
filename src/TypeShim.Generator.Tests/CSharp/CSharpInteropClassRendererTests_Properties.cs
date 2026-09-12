@@ -220,6 +220,112 @@ public partial class C1Interop
     }
 
     [Test]
+    public void CSharpInteropClass_InstanceProperty_WithNullableUserClassType_InDifferentNamespace_QualifiesReferences()
+    {
+        SyntaxTree userClass = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N2;
+            [TSExport]
+            public class MyClass
+            {
+                public void M1()
+                {
+                }
+            }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public N2.MyClass? P1 { get; set; }
+            }
+        """);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userClass)], TestFixture.TargetingPackRefDir);
+        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedClasses, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedClasses.First(c => c.Name == "C1");
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.First(c => c.Name == "MyClass"), typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+
+        // The cross-namespace nullable reference keeps its `?` annotation while being qualified with
+        // global::, so the generated C# stays nullability-correct and compiles without a using for N2.
+        AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
+// TypeShim generated TypeScript interop definitions
+using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
+    {
+        using var _ = initializer;
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
+        {
+            SetP1(instance, initializer.GetObjectNullableProperty("P1") is { } P1Val ? global::N2.MyClassInterop.FromObject(P1Val) : null);
+        }
+        return instance;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object? get_P1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = C1Interop.FromObject(instance);
+        return (object?)typed_instance.P1;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Any>] object? value)
+    {
+        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N2.MyClass? typed_value = value is { } valueVal ? global::N2.MyClassInterop.FromObject(valueVal) : null;
+        typed_instance.P1 = typed_value;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject initializer)
+    {
+        using var _ = initializer;
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
+        {
+            SetP1(instance, initializer.GetObjectNullableProperty("P1") is { } P1Val ? global::N2.MyClassInterop.FromObject(P1Val) : null);
+        }
+        return instance;
+    }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, global::N2.MyClass? value);
+}
+
+""");
+    }
+
+    [Test]
     public void CSharpInteropClass_StaticProperty_WithUserClassType()
     {
         SyntaxTree userClass = CSharpSyntaxTree.ParseText("""

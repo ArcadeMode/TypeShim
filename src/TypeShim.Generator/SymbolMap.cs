@@ -18,22 +18,20 @@ internal sealed class SymbolMap(NamedTypeInfo? currentType, IEnumerable<NamedTyp
         return info ?? throw new NotFoundNamedTypeInfoException($"Could not find NamedTypeInfo for type: {type.CSharpTypeSyntax}");
     }
 
-    /// <summary>
-    /// Resolves the managed and interop type names to emit in generated C# for the given type, qualifying them
-    /// with <c>global::</c> only when the type (or a nested type argument / delegate parameter) lives in a different
-    /// namespace than the type currently being rendered. Same-namespace references stay minimally qualified.
-    /// </summary>
+    /// <summary>Resolves the C# type syntax to emit: fully-qualified <c>global::</c> for types in another namespace, otherwise minimally qualified.</summary>
     internal InteropTypeReference GetInteropTypeReference(InteropTypeInfo type)
-    {
-        string typeSyntax = ReferencesTypeOutsideCurrentNamespace(type)
-            ? type.CSharpFullyQualifiedTypeSyntax.ToString()
-            : type.CSharpTypeSyntax.ToString();
-        return new InteropTypeReference { TypeSyntax = typeSyntax };
-    }
+        => new()
+        {
+            TypeSyntax = ReferencesTypeOutsideCurrentNamespace(type)
+                ? type.CSharpFullyQualifiedTypeSyntax.ToString()
+                : type.CSharpTypeSyntax.ToString()
+        };
 
     private bool ReferencesTypeOutsideCurrentNamespace(InteropTypeInfo type)
     {
-        if (_typeToNamedTypeDict.TryGetValue(type, out NamedTypeInfo? info) && info.Namespace != currentType?.Namespace)
+        _ = currentType ?? throw new InvalidOperationException("cannot match namespace against namedtypeinfo 'null'");
+
+        if (_typeToNamedTypeDict.TryGetValue(type, out NamedTypeInfo? info) && info.Namespace != currentType.Namespace)
         {
             return true;
         }
@@ -43,13 +41,11 @@ internal sealed class SymbolMap(NamedTypeInfo? currentType, IEnumerable<NamedTyp
             return true;
         }
 
-        if (type.ArgumentInfo is DelegateArgumentInfo delegateArgumentInfo)
+        if (type.ArgumentInfo is DelegateArgumentInfo delegateArgumentInfo
+            && (ReferencesTypeOutsideCurrentNamespace(delegateArgumentInfo.ReturnType)
+                || delegateArgumentInfo.ParameterTypes.Any(ReferencesTypeOutsideCurrentNamespace)))
         {
-            if (ReferencesTypeOutsideCurrentNamespace(delegateArgumentInfo.ReturnType)
-                || delegateArgumentInfo.ParameterTypes.Any(ReferencesTypeOutsideCurrentNamespace))
-            {
-                return true;
-            }
+            return true;
         }
 
         return false;

@@ -10,6 +10,9 @@ namespace TypeShim.Shared;
 
 internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropTypeInfoCache cache)
 {
+    private static readonly SymbolDisplayFormat FullyQualifiedNullableFormat = SymbolDisplayFormat.FullyQualifiedFormat
+        .WithMiscellaneousOptions(SymbolDisplayFormat.FullyQualifiedFormat.MiscellaneousOptions | SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+
     private readonly bool IsTSExport = SymbolFacts.HasTSExportAttribute(typeSymbol);
 
     public InteropTypeInfo Build()
@@ -23,7 +26,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
     {
         JSTypeInfo jsTypeInfo = JSTypeInfo.CreateJSTypeInfoForTypeSymbol(typeSymbol);
         TypeSyntax clrTypeSyntax = SyntaxFactory.ParseTypeName(typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
-        TypeSyntax fqTypeSyntax = SyntaxFactory.ParseTypeName(typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
+        TypeSyntax fqTypeSyntax = SyntaxFactory.ParseTypeName(typeSymbol.ToDisplayString(FullyQualifiedNullableFormat));
 
         return jsTypeInfo switch
         {
