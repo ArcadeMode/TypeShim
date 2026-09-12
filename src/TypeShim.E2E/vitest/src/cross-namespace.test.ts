@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import { CrossNamespaceClass, ExternalClass } from 'typeshim';
+import { CrossNamespaceClass, ExternalClass, ExternalEnum } from 'typeshim';
 
 describe('Cross Namespace References', () => {
     let testObject: CrossNamespaceClass;
@@ -9,6 +9,9 @@ describe('Cross Namespace References', () => {
             NullableReference: null,
             ReferenceArray: [],
             ReferenceFunc: (value: ExternalClass) => value,
+            EnumReference: ExternalEnum.First,
+            NullableEnumReference: null,
+            EnumReferenceArray: [],
         });
     });
 
@@ -68,5 +71,46 @@ describe('Cross Namespace References', () => {
         const echoed = testObject.ReferenceFunc(new ExternalClass({ Id: 10, Name: 'prop' }));
         expect(echoed).toBeInstanceOf(ExternalClass);
         expect(echoed.Name).toBe('prop');
+    });
+
+    test('Cross-namespace enum members have correct numeric values', () => {
+        expect(ExternalEnum.First).toBe(0);
+        expect(ExternalEnum.Second).toBe(1);
+        expect(ExternalEnum.Third).toBe(2);
+    });
+
+    test('Reads and mutates a cross-namespace enum property', () => {
+        expect(testObject.EnumReference).toBe(ExternalEnum.First);
+        testObject.EnumReference = ExternalEnum.Third;
+        expect(testObject.EnumReference).toBe(ExternalEnum.Third);
+    });
+
+    test('Handles a nullable cross-namespace enum property', () => {
+        expect(testObject.NullableEnumReference).toBeNull();
+        testObject.NullableEnumReference = ExternalEnum.Second;
+        expect(testObject.NullableEnumReference).toBe(ExternalEnum.Second);
+    });
+
+    test('Handles an array of cross-namespace enums', () => {
+        const roundTripped = testObject.EchoEnumArray([ExternalEnum.First, ExternalEnum.Third]);
+        expect(Array.from(roundTripped)).toEqual([ExternalEnum.First, ExternalEnum.Third]);
+    });
+
+    test('Passes and returns a cross-namespace enum through a method', () => {
+        expect(testObject.EchoEnum(ExternalEnum.Second)).toBe(ExternalEnum.Second);
+    });
+
+    test('Passes and returns a nullable cross-namespace enum through a method', () => {
+        expect(testObject.EchoNullableEnum(null)).toBeNull();
+        expect(testObject.EchoNullableEnum(ExternalEnum.Third)).toBe(ExternalEnum.Third);
+    });
+
+    test('Returns a cross-namespace enum nested in a Task', async () => {
+        expect(await testObject.EchoEnumAsync(ExternalEnum.Second)).toBe(ExternalEnum.Second);
+    });
+
+    test('Invokes a delegate over cross-namespace enums', () => {
+        const result = testObject.InvokeEnumFunc(value => value, ExternalEnum.Third);
+        expect(result).toBe(ExternalEnum.Third);
     });
 });

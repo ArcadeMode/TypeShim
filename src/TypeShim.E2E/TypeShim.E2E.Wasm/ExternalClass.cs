@@ -14,3 +14,16 @@ public class ExternalClass
 
     public string Describe() => $"{Id}:{Name}";
 }
+
+/// <summary>
+/// An exported enum in a different namespace than the rest of the E2E suite, used to exercise
+/// cross-namespace qualification of enum references.
+/// </summary>
+[TSExport]
+public enum ExternalEnum
+{
+    First,
+    Second,
+    Third
+}
+

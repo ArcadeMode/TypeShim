@@ -149,9 +149,6 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
-        // C1 (own namespace N1) references stay minimally qualified; the cross-namespace
-        // MyClass (N2) type and its interop class are qualified with global:: so the generated
-        // C# compiles without a using directive for N2.
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
 // TypeShim generated TypeScript interop definitions
@@ -256,8 +253,6 @@ public partial class C1Interop
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
         string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
 
-        // The cross-namespace nullable reference keeps its `?` annotation while being qualified with
-        // global::, so the generated C# stays nullability-correct and compiles without a using for N2.
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
 // TypeShim generated TypeScript interop definitions
@@ -320,6 +315,103 @@ public partial class C1Interop
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
     private static extern void SetP1(C1 target, global::N2.MyClass? value);
+}
+
+""");
+    }
+
+    [Test]
+    public void CSharpInteropClass_InstanceProperty_WithEnumType_InDifferentNamespace_QualifiesReferences()
+    {
+        SyntaxTree userEnum = CSharpSyntaxTree.ParseText("""
+            namespace N2;
+            [TSExport]
+            public enum MyEnum { First, Second, Third }
+        """);
+
+        SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
+            using System;
+            using System.Threading.Tasks;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                public N2.MyEnum P1 { get; set; }
+            }
+        """);
+        SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree), CSharpFileInfo.Create(userEnum)], TestFixture.TargetingPackRefDir);
+        List<INamedTypeSymbol> exportedTypes = [.. symbolExtractor.ExtractAllExportedSymbols()];
+        Assert.That(exportedTypes, Has.Count.EqualTo(2));
+        INamedTypeSymbol classSymbol = exportedTypes.First(c => c.Name == "C1");
+
+        InteropTypeInfoCache typeCache = new();
+        ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
+        EnumInfo userEnumInfo = new EnumInfoBuilder(exportedTypes.First(c => c.Name == "MyEnum"), typeCache).Build();
+        RenderContext renderContext = new(classInfo, [classInfo, userEnumInfo], RenderOptions.CSharp);
+        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+
+        AssertEx.EqualOrDiff(interopClass, """    
+#nullable enable
+// TypeShim generated TypeScript interop definitions
+using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.JavaScript;
+using System.Threading.Tasks;
+namespace N1;
+public partial class C1Interop
+{
+    [JSExport]
+    [return: JSMarshalAs<JSType.Any>]
+    public static object ctor([JSMarshalAs<JSType.Object>] JSObject initializer)
+    {
+        using var _ = initializer;
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
+        {
+            SetP1(instance, (global::N2.MyEnum)initializer.GetInt32Property("P1"));
+        }
+        return instance;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Number>]
+    public static int get_P1([JSMarshalAs<JSType.Any>] object instance)
+    {
+        C1 typed_instance = C1Interop.FromObject(instance);
+        return (int)typed_instance.P1;
+    }
+    [JSExport]
+    [return: JSMarshalAs<JSType.Void>]
+    public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] int value)
+    {
+        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N2.MyEnum typed_value = (global::N2.MyEnum)value;
+        typed_instance.P1 = typed_value;
+    }
+    public static C1 FromObject(object obj)
+    {
+        return obj switch
+        {
+            C1 instance => instance,
+            JSObject jsObj => FromJSObject(jsObj),
+            _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
+        };
+    }
+    public static C1 FromJSObject(JSObject initializer)
+    {
+        using var _ = initializer;
+        var instance = CreateInstance();
+        if (initializer.HasProperty("P1"))
+        {
+            SetP1(instance, (global::N2.MyEnum)initializer.GetInt32Property("P1"));
+        }
+        return instance;
+    }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
+    private static extern C1 CreateInstance();
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
+    private static extern void SetP1(C1 target, global::N2.MyEnum value);
 }
 
 """);
