@@ -249,13 +249,12 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
             for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
             {
                 if (i > 0) _ctx.Append(", ");
-                // the wrapper's parameters are managed-typed, so enum arguments must be up-converted to
-                // their interop (underlying numeric) type before invoking the interop delegate; reference
-                // types up-convert to object implicitly.
+                // reference types up-convert to the interop 'object' implicitly; other converted types (e.g. enums) need an explicit cast
+                InteropTypeInfo parameterType = argumentInfo.ParameterTypes[i];
                 DeferredExpressionRenderer argNameRenderer = DeferredExpressionRenderer.FromUnary(() => _ctx.Append("arg").Append(i));
-                if (argumentInfo.ParameterTypes[i].IsEnum)
+                if (parameterType.RequiresTypeConversion && parameterType.CSharpInteropTypeSyntax.ToString() is not "object")
                 {
-                    RenderInlineCovariantTypeUpConversion(argumentInfo.ParameterTypes[i], argNameRenderer);
+                    RenderInlineCovariantTypeUpConversion(parameterType, argNameRenderer);
                 }
                 else
                 {
