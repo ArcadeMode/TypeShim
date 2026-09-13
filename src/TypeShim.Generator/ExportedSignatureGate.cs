@@ -18,21 +18,11 @@ internal static class ExportedSignatureGate
         IReadOnlyList<INamedTypeSymbol> exportedSymbols)
     {
         ThrowIfHasSyntaxErrors(exportedSymbols);
-        ThrowIfHasSemanticErrors(compilation);
+        ThrowIfHasErrorDiagnostic(compilation);
     }
 
-    private static void ThrowIfHasSemanticErrors(CSharpCompilation compilation)
+    private static void ThrowIfHasErrorDiagnostic(CSharpCompilation compilation)
     {
-        // Any declaration error means the user's code will not compile, so there is nothing valid to
-        // generate from and we stop. Declaration diagnostics bind declarations/signatures only (never
-        // method bodies) in a single pass over the whole compilation, which keeps the check cheap and
-        // avoids body errors caused by non-TSExport symbol stripping. The only errors we tolerate are
-        // the name/type-availability false positives introduced by that stripping and the minimal set
-        // of loaded references (see IgnoredDiagnosticIds); those are surfaced with richer, name-
-        // specific messages by the parser and the analyzer. Nullable analysis is a body/flow concern
-        // that only yields warnings (never the errors we gate on), so we run the pass on a throwaway
-        // nullable-disabled options variant to skip that work. The original compilation keeps its
-        // nullable context so the symbols it produced for codegen are unaffected.
         CSharpCompilation analysisCompilation = compilation.WithOptions(
             compilation.Options.WithNullableContextOptions(NullableContextOptions.Disable));
 

@@ -128,9 +128,6 @@ internal class ExportedSignatureGateTests
     [Test]
     public void ExtractAllExportedSymbols_DuplicateNonPublicMember_ThrowsWithCs0111()
     {
-        // A real compile error off the interop signature (here a duplicate non-public method, CS0111).
-        // The user's code will not compile, so the gate stops the run rather than generating from it.
-        // Previously such off-signature errors were tolerated; the analyzer still reports CS0111.
         SymbolExtractor extractor = Extractor("""
             using System;
             namespace N1;
@@ -151,8 +148,6 @@ internal class ExportedSignatureGateTests
     [Test]
     public void ExtractAllExportedSymbols_InvalidInitAccessorOnStaticProperty_ThrowsWithCs8856()
     {
-        // 'init' on a static member is invalid C# (CS8856). The error sits on the accessor list, off
-        // the property signature, but the gate now stops on any declaration error all the same.
         SymbolExtractor extractor = Extractor("""
             using System;
             namespace N1;
