@@ -11,7 +11,7 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
         ThrowIfInheritsUnsupportedType();
         ThrowIfContainsRequiredFields();
 
-        bool isTSExport = SymbolFacts.HasTSExportAttribute(classSymbol);
+        bool isTSExport = SymbolFacts.IsTSExportOrNested(classSymbol);
 
         List<PropertyInfo> properties = BuildProperties();
         return new ClassInfo
@@ -25,7 +25,25 @@ internal sealed class ClassInfoBuilder(INamedTypeSymbol classSymbol, InteropType
             Methods = BuildMethods(isTSExport),
             Properties = properties,
             Comment = new CommentInfoBuilder(classSymbol).Build(),
+            NestedTypes = BuildNestedTypes(),
         };
+    }
+
+    private IReadOnlyList<NamedTypeInfo> BuildNestedTypes()
+    {
+        List<NamedTypeInfo> nestedTypes = [];
+        foreach (INamedTypeSymbol nestedSymbol in classSymbol.GetTypeMembers())
+        {
+            if (nestedSymbol.DeclaredAccessibility != Accessibility.Public)
+            {
+                continue;
+            }
+            if (new NamedTypeInfoBuilder(nestedSymbol, typeInfoCache).Build() is NamedTypeInfo nestedType)
+            {
+                nestedTypes.Add(nestedType);
+            }
+        }
+        return nestedTypes;
     }
 
     private ConstructorInfo? BuildConstructor(List<PropertyInfo> properties)

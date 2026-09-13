@@ -33,10 +33,8 @@ internal sealed class TypescriptAssemblyExportsRenderer(
                 {
                     RenderClassInteropMethods(classInfo);
                 }
-                else
-                {
-                    RenderModuleInfoObject(child.Value); // recurse into child object
-                }
+                // A class node may also contain nested interop classes; namespace nodes only have children.
+                RenderModuleInfoObject(child.Value);
             }
             ctx.AppendLine("};");
         }

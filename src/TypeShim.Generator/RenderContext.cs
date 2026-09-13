@@ -13,6 +13,7 @@ internal sealed class RenderContext(NamedTypeInfo? targetType, IEnumerable<Named
     internal ClassInfo Class => targetType as ClassInfo ?? throw new InvalidOperationException("Current type in RenderContext is not a class");
     internal NamedTypeInfo NamedType => targetType ?? throw new InvalidOperationException("No current type in RenderContext");
     internal LocalScope LocalScope => _localScope ?? throw new InvalidOperationException("No active method in context");
+    internal IReadOnlyList<NamedTypeInfo> AllNamedTypes { get; } = allNamedTypes as IReadOnlyList<NamedTypeInfo> ?? [.. allNamedTypes];
     internal SymbolMap SymbolMap { get; } = new(allNamedTypes);
 
     private readonly StringBuilder _sb = new(capacity: 16 * 1024);
@@ -57,6 +58,19 @@ internal sealed class RenderContext(NamedTypeInfo? targetType, IEnumerable<Named
         if (!string.IsNullOrEmpty(line)) AppendIndentIfNewLine();
         _sb.AppendLine(line);
         _isNewLine = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Appends pre-rendered multi-line content, re-indenting each line to the current depth.
+    /// Used to inject the output of a nested type's own <see cref="RenderContext"/> into this one.
+    /// </summary>
+    internal RenderContext AppendIndentedBlock(string content)
+    {
+        foreach (string rawLine in content.TrimEnd('\r', '\n').Split('\n'))
+        {
+            AppendLine(rawLine.TrimEnd('\r'));
+        }
         return this;
     }
 

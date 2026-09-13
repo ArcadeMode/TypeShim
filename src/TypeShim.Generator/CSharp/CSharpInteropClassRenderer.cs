@@ -9,6 +9,7 @@ internal sealed class CSharpInteropClassRenderer
 {
     private readonly ClassInfo _classInfo;
     private readonly RenderContext _ctx;
+    private readonly JSObjectMethodResolver _methodResolver;
     private readonly CSharpTypeConversionRenderer _conversionRenderer;
     private readonly CSharpMethodRenderer _methodRenderer;
 
@@ -16,12 +17,13 @@ internal sealed class CSharpInteropClassRenderer
     {
         ArgumentNullException.ThrowIfNull(classInfo);
         ArgumentNullException.ThrowIfNull(context);
-        if (classInfo.IsTSExport && !classInfo.Methods.Any() && !classInfo.Properties.Any())
+        if (classInfo.IsTSExport && !classInfo.Methods.Any() && !classInfo.Properties.Any() && classInfo.NestedTypes.Count == 0)
         {
-            throw new ArgumentException("Interop class must have at least one method or property to render.", nameof(classInfo));
+            throw new ArgumentException("Interop class must have at least one method, property or nested type to render.", nameof(classInfo));
         }
         _classInfo = classInfo;
         _ctx = context;
+        _methodResolver = methodResolver;
         _conversionRenderer = new CSharpTypeConversionRenderer(context);
         _methodRenderer = new CSharpMethodRenderer(context, _conversionRenderer, methodResolver);
     }
@@ -39,8 +41,16 @@ internal sealed class CSharpInteropClassRenderer
             .AppendLine("using System.Runtime.CompilerServices;")
             .AppendLine("using System.Runtime.InteropServices.JavaScript;")
             .AppendLine("using System.Threading.Tasks;")
-            .Append("namespace ").Append(_classInfo.Namespace).AppendLine(";")
-            .Append("public partial class ").AppendLine(RenderConstants.InteropClassName(_classInfo))
+            .Append("namespace ").Append(_classInfo.Namespace).AppendLine(";");
+
+        RenderClassBlock();
+        return _ctx.ToString();
+    }
+
+    // Renders `public partial class {Name}Interop { ... }` (without the file header), recursing into nested classes.
+    private void RenderClassBlock()
+    {
+        _ctx.Append("public partial class ").AppendLine(RenderConstants.InteropClassName(_classInfo))
             .AppendLine("{");
 
         using (_ctx.Indent())
@@ -65,7 +75,7 @@ internal sealed class CSharpInteropClassRenderer
                 _methodRenderer.RenderPropertyMethod(propertyInfo, propertyInfo.SetMethod);
                 // Note: init is not rendered as an interop method.
             }
-            
+
             if (!_classInfo.IsStatic)
             {
                 _methodRenderer.RenderFromObjectMapper();
@@ -80,9 +90,24 @@ internal sealed class CSharpInteropClassRenderer
             {
                 _methodRenderer.RenderMemberInitializerAccessors(_classInfo.Constructor);
             }
+
+            RenderNestedInteropClasses();
         }
-        
+
         _ctx.AppendLine("}");
-        return _ctx.ToString();
+    }
+
+    // Emits nested classes as physically nested partial interop classes so the runtime assemblyExports
+    // nest them under their parent (e.g. ShipmentInterop.ManifestInterop). Nested enums cross as numbers
+    // and produce no C# interop surface, so they are skipped here.
+    private void RenderNestedInteropClasses()
+    {
+        foreach (ClassInfo nested in _classInfo.NestedTypes.OfType<ClassInfo>())
+        {
+            RenderContext childCtx = new(nested, _ctx.AllNamedTypes, RenderOptions.CSharp);
+            CSharpInteropClassRenderer childRenderer = new(nested, childCtx, _methodResolver);
+            childRenderer.RenderClassBlock();
+            _ctx.AppendIndentedBlock(childCtx.ToString());
+        }
     }
 }

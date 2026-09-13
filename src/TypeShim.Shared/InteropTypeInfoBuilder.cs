@@ -13,7 +13,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
     private static readonly SymbolDisplayFormat FullyQualifiedNullableFormat = SymbolDisplayFormat.FullyQualifiedFormat
         .WithMiscellaneousOptions(SymbolDisplayFormat.FullyQualifiedFormat.MiscellaneousOptions | SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
 
-    private readonly bool IsTSExport = SymbolFacts.HasTSExportAttribute(typeSymbol);
+    private readonly bool IsTSExport = SymbolFacts.IsTSExportOrNested(typeSymbol);
 
     public InteropTypeInfo Build()
     {
