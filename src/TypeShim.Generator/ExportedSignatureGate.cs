@@ -25,6 +25,51 @@ internal static class ExportedSignatureGate
 
     private static void ThrowIfHasSemanticErrors(CSharpCompilation compilation, IReadOnlyList<INamedTypeSymbol> exportedSymbols)
     {
+        // Only check public signatures (return type, parameters, and constraints). The body of the
+        // member is not relevant to the interop surface and actually is very likely to contain many
+        // errors due to non TSExport symbol stripping (perf).
+        Dictionary<SyntaxTree, List<TextSpan>> signatureSpansByTree = CollectSignatureSpans(exportedSymbols);
+        if (signatureSpansByTree.Count == 0)
+        {
+            return;
+        }
+
+        // Declaration diagnostics bind declarations/signatures only (never method bodies), which is
+        // exactly the interop surface we care about, in a single pass over the whole compilation. This
+        // replaces creating and binding a fresh SemanticModel per exported member. Nullable analysis is
+        // a body/flow concern that only yields warnings (never the errors we gate on), so we run the
+        // pass on a throwaway nullable-disabled options variant to skip that work. The original
+        // compilation keeps its nullable context so the symbols it produced for codegen are unaffected.
+        CSharpCompilation analysisCompilation = compilation.WithOptions(
+            compilation.Options.WithNullableContextOptions(NullableContextOptions.Disable));
+
+        foreach (Diagnostic diagnostic in analysisCompilation.GetDeclarationDiagnostics())
+        {
+            if (diagnostic.Severity != DiagnosticSeverity.Error || IgnoredDiagnosticIds.Contains(diagnostic.Id))
+            {
+                continue;
+            }
+
+            SyntaxTree? tree = diagnostic.Location.SourceTree;
+            if (tree is null || !signatureSpansByTree.TryGetValue(tree, out List<TextSpan>? spans))
+            {
+                continue;
+            }
+
+            TextSpan diagnosticSpan = diagnostic.Location.SourceSpan;
+            foreach (TextSpan span in spans)
+            {
+                if (span.IntersectsWith(diagnosticSpan))
+                {
+                    throw MakeException(diagnostic);
+                }
+            }
+        }
+    }
+
+    private static Dictionary<SyntaxTree, List<TextSpan>> CollectSignatureSpans(IReadOnlyList<INamedTypeSymbol> exportedSymbols)
+    {
+        Dictionary<SyntaxTree, List<TextSpan>> spansByTree = [];
         foreach (INamedTypeSymbol type in exportedSymbols)
         {
             foreach (ISymbol member in type.GetMembers())
@@ -36,25 +81,23 @@ internal static class ExportedSignatureGate
 
                 foreach (SyntaxReference syntaxReference in member.DeclaringSyntaxReferences)
                 {
-                    // Only check public signatures (return type, parameters, and constraints).
-                    // The body of the member is not relevant to the interop surface and actually
-                    // is very likely to contain many errors due to non TSExport symbol stripping (perf)
                     if (!TryGetSignatureSpan(syntaxReference.GetSyntax(), out TextSpan span))
                     {
                         continue;
                     }
 
-                    SemanticModel model = compilation.GetSemanticModel(syntaxReference.SyntaxTree);
-                    foreach (Diagnostic diagnostic in model.GetDiagnostics(span))
+                    if (!spansByTree.TryGetValue(syntaxReference.SyntaxTree, out List<TextSpan>? spans))
                     {
-                        if (diagnostic.Severity == DiagnosticSeverity.Error && !IgnoredDiagnosticIds.Contains(diagnostic.Id))
-                        {
-                            throw MakeException(diagnostic);
-                        }
+                        spans = [];
+                        spansByTree[syntaxReference.SyntaxTree] = spans;
                     }
+
+                    spans.Add(span);
                 }
             }
         }
+
+        return spansByTree;
     }
 
     private static void ThrowIfHasSyntaxErrors(IReadOnlyList<INamedTypeSymbol> exportedSymbols)
