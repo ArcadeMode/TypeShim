@@ -179,7 +179,6 @@ export class C1 extends ProxyBase {
             public static class C1
             {
                 public static {{typeExpression}} P1 { get; set; }
-                public static {{typeExpression}} P2 { get; init; }
                 public static {{typeExpression}} P3 { get; }
                 public static {{typeExpression}} P4 => 1;
             }
@@ -206,14 +205,6 @@ export class C1 {
 
   public static set P1(value: {{typeScriptType}}) {
     TypeShimConfig.exports.N1.C1Interop.set_P1(value);
-  }
-
-  public static get P2(): {{typeScriptType}} {
-    return TypeShimConfig.exports.N1.C1Interop.get_P2();
-  }
-
-  public static set P2(value: {{typeScriptType}}) {
-    TypeShimConfig.exports.N1.C1Interop.set_P2(value);
   }
 
   public static get P3(): {{typeScriptType}} {

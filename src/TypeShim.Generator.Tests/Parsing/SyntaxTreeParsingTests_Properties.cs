@@ -143,7 +143,9 @@ internal class SyntaxTreeParsingTests_Properties
     [Test]
     public void ClassInfoBuilder_NonPublicRequiredMemberProperty_Throws()
     {
-        // this is not valid C# syntax anyway, but if provided this kind of input, no invalid code should be generated.
+        // 'internal required' is invalid C# (CS9032: a required member must be at least as visible as
+        // its containing type). The exported-surface gate stops codegen on any such declaration error,
+        // so no invalid code is generated. The C# analyzer still surfaces the richer CS9032 message.
         SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText("""
             using System;
             namespace N1;
@@ -155,10 +157,7 @@ internal class SyntaxTreeParsingTests_Properties
         """);
 
         SymbolExtractor symbolExtractor = new([CSharpFileInfo.Create(syntaxTree)], TestFixture.TargetingPackRefDir);
-        List<INamedTypeSymbol> exportedClasses = [.. symbolExtractor.ExtractAllExportedSymbols()];
-        Assert.That(exportedClasses, Has.Count.EqualTo(1));
-        INamedTypeSymbol classSymbol = exportedClasses[0];
-        InteropTypeInfoCache typeCache = new();
-        Assert.Throws<NotSupportedPropertyException>(() => new ClassInfoBuilder(classSymbol, typeCache).Build());
+        InvalidCodeException ex = Assert.Throws<InvalidCodeException>(() => symbolExtractor.ExtractAllExportedSymbols());
+        Assert.That(ex!.Message, Does.Contain("CS9032"));
     }
 }
