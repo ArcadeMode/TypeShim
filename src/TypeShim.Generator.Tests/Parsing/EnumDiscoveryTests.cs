@@ -147,7 +147,7 @@ internal class EnumDiscoveryTests
             public enum Color { Red, Green, Blue }
         """);
 
-        SymbolMap symbolMap = new(null, [enumInfo]);
+        SymbolMap symbolMap = new([enumInfo]);
         Assert.That(symbolMap.GetNamedTypeInfo(enumInfo.Type), Is.SameAs(enumInfo));
     }
 }

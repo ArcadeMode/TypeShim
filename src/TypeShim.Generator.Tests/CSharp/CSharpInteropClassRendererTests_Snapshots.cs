@@ -64,26 +64,26 @@ public partial class C1Interop
     [return: JSMarshalAs<{{jsType}}>]
     public static {{typeExpression}} get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         return typed_instance.P1;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<{{jsType}}>] {{typeExpression}} value)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         typed_instance.P1 = value;
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             JSObject jsObj => FromJSObject(jsObj),
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
-    public static C1 FromJSObject(JSObject initializer)
+    public static global::N1.C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
         var instance = CreateInstance();
@@ -95,10 +95,10 @@ public partial class C1Interop
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
-    private static extern void SetP1(C1 target, {{typeExpression}} value);
+    private static extern void SetP1(global::N1.C1 target, {{typeExpression}} value);
 }
 
 """.Replace("{{typeExpression}}", interopTypeExpression)
@@ -149,7 +149,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, ({{typeName}}[])initializer.GetObjectArrayProperty("P1"));
+            SetP1(instance, (global::System.{{typeName}}[])initializer.GetObjectArrayProperty("P1"));
         }
         if (initializer.HasProperty("P2"))
         {
@@ -161,47 +161,47 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static object[] get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         return (object[])typed_instance.P1;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Array<JSType.Any>>] object[] value)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        {{typeName}}[] typed_value = ({{typeName}}[])value;
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::System.{{typeName}}[] typed_value = (global::System.{{typeName}}[])value;
         typed_instance.P1 = typed_value;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Number>]
     public static int get_P2([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         return typed_instance.P2;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P2([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] int value)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         typed_instance.P2 = value;
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             JSObject jsObj => FromJSObject(jsObj),
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
-    public static C1 FromJSObject(JSObject initializer)
+    public static global::N1.C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, ({{typeName}}[])initializer.GetObjectArrayProperty("P1"));
+            SetP1(instance, (global::System.{{typeName}}[])initializer.GetObjectArrayProperty("P1"));
         }
         if (initializer.HasProperty("P2"))
         {
@@ -211,13 +211,13 @@ public partial class C1Interop
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
-    private static extern void SetP1(C1 target, {{typeName}}[] value);
+    private static extern void SetP1(global::N1.C1 target, global::System.{{typeName}}[] value);
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P2")]
-    private static extern void SetP2(C1 target, int value);
+    private static extern void SetP2(global::N1.C1 target, int value);
 }
 
 """.Replace("{{typeName}}", typeName));
@@ -266,7 +266,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetObjectTaskProperty("P1").ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+            SetP1(instance, initializer.GetObjectTaskProperty("P1").ContinueWith(t => (global::System.{{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
         }
         if (initializer.HasProperty("P2"))
         {
@@ -278,47 +278,47 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
     public static Task<object> get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         return typed_instance.P1.ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> value)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        Task<{{typeName}}> typed_value = value.ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::System.Threading.Tasks.Task<global::System.{{typeName}}> typed_value = value.ContinueWith(t => (global::System.{{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
         typed_instance.P1 = typed_value;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Number>]
     public static int get_P2([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         return typed_instance.P2;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P2([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] int value)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         typed_instance.P2 = value;
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             JSObject jsObj => FromJSObject(jsObj),
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
-    public static C1 FromJSObject(JSObject initializer)
+    public static global::N1.C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
         var instance = CreateInstance();
         if (initializer.HasProperty("P1"))
         {
-            SetP1(instance, initializer.GetObjectTaskProperty("P1").ContinueWith(t => ({{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
+            SetP1(instance, initializer.GetObjectTaskProperty("P1").ContinueWith(t => (global::System.{{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously));
         }
         if (initializer.HasProperty("P2"))
         {
@@ -328,13 +328,13 @@ public partial class C1Interop
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
-    private static extern void SetP1(C1 target, Task<{{typeName}}> value);
+    private static extern void SetP1(global::N1.C1 target, global::System.Threading.Tasks.Task<global::System.{{typeName}}> value);
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P2")]
-    private static extern void SetP2(C1 target, int value);
+    private static extern void SetP2(global::N1.C1 target, int value);
 }
 
 """.Replace("{{typeName}}", typeName));

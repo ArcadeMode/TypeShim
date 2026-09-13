@@ -30,7 +30,7 @@ internal sealed class TypeScriptDefaultValueRenderer(RenderContext ctx)
 
             // 'x: T = null' would violate TypeScript strictNullChecks, user can fix themselves by making their type nullable.
             throw new NotSupportedDefaultValueException(
-                $"Null default values for reference type '{type.CSharpTypeSyntax}' are not yet supported.");
+                $"Null default values for reference type '{type.CSharpFullyQualifiedTypeSyntax}' are not yet supported.");
         }
 
         InteropTypeInfo valueType = type.IsNullableType && type.TypeArgument is not null ? type.TypeArgument : type;
@@ -55,7 +55,7 @@ internal sealed class TypeScriptDefaultValueRenderer(RenderContext ctx)
             KnownManagedType.Double
             or KnownManagedType.Single => FormatFloatingPoint(def.Value),
             _ => throw new NotSupportedDefaultValueException(
-                $"Default values of type '{type.CSharpTypeSyntax}' are not supported."),
+                $"Default values of type '{type.CSharpFullyQualifiedTypeSyntax}' are not supported."),
         };
 
         ctx.Append(literal);

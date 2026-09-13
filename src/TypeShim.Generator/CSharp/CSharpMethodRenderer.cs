@@ -193,7 +193,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     internal void RenderFromObjectMapper()
     {
-        _ctx.Append("public static ").Append(_ctx.Class.Type.CSharpTypeSyntax.ToString()).Append(' ').Append(RenderConstants.FromObject).AppendLine("(object obj)");
+        _ctx.Append("public static ").Append(_ctx.Class.Type.CSharpFullyQualifiedTypeSyntax.ToString()).Append(' ').Append(RenderConstants.FromObject).AppendLine("(object obj)");
         _ctx.AppendLine("{");
         using (_ctx.Indent())
         {
@@ -201,7 +201,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             _ctx.AppendLine("{");
             using (_ctx.Indent())
             {
-                _ctx.Append(_ctx.Class.Type.CSharpTypeSyntax.ToString()).AppendLine(" instance => instance,");
+                _ctx.Append(_ctx.Class.Type.CSharpFullyQualifiedTypeSyntax.ToString()).AppendLine(" instance => instance,");
                 if (_ctx.Class is { Constructor: { AcceptsInitializer: true, IsParameterless: true } })
                 {
                     _ctx.Append("JSObject jsObj => ").Append(RenderConstants.FromJSObject).AppendLine("(jsObj),");
@@ -215,7 +215,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
 
     internal void RenderFromJSObjectMapper(ConstructorInfo constructorInfo, MethodParameterInfo initializerParameter)
     {
-        _ctx.Append("public static ").Append(_ctx.Class.Type.CSharpTypeSyntax).Append(' ').Append(RenderConstants.FromJSObject).Append("(JSObject ").Append(initializerParameter.Name).AppendLine(")")
+        _ctx.Append("public static ").Append(_ctx.Class.Type.CSharpFullyQualifiedTypeSyntax).Append(' ').Append(RenderConstants.FromJSObject).Append("(JSObject ").Append(initializerParameter.Name).AppendLine(")")
             .AppendLine("{");
 
         using (_ctx.Indent())
@@ -311,13 +311,13 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
     {
         _ctx.AppendLine();
         _ctx.AppendLine("[UnsafeAccessor(UnsafeAccessorKind.Constructor)]");
-        _ctx.Append("private static extern ").Append(constructorInfo.Type.CSharpTypeSyntax).Append(' ')
+        _ctx.Append("private static extern ").Append(constructorInfo.Type.CSharpFullyQualifiedTypeSyntax).Append(' ')
             .Append(RenderConstants.UnsafeAccessorConstructorMethod).Append('(');
         bool isFirst = true;
         foreach (MethodParameterInfo param in constructorInfo.Parameters)
         {
             if (!isFirst) _ctx.Append(", ");
-            _ctx.Append(_ctx.SymbolMap.GetInteropTypeReference(param.Type).TypeSyntax).Append(' ').Append(param.Name);
+            _ctx.Append(param.Type.CSharpFullyQualifiedTypeSyntax).Append(' ').Append(param.Name);
             isFirst = false;
         }
         _ctx.AppendLine(");");
@@ -328,8 +328,8 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             _ctx.Append("[UnsafeAccessor(UnsafeAccessorKind.Method, Name = \"set_")
                 .Append(propertyInfo.Name).AppendLine("\")]");
             _ctx.Append("private static extern void ").Append(RenderConstants.UnsafeAccessorSetMethod(propertyInfo)).Append('(')
-                .Append(constructorInfo.Type.CSharpTypeSyntax).Append(" target, ")
-                .Append(_ctx.SymbolMap.GetInteropTypeReference(propertyInfo.Type).TypeSyntax).AppendLine(" value);");
+                .Append(constructorInfo.Type.CSharpFullyQualifiedTypeSyntax).Append(" target, ")
+                .Append(propertyInfo.Type.CSharpFullyQualifiedTypeSyntax).AppendLine(" value);");
         }
     }
 }

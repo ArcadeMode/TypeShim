@@ -51,7 +51,6 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             ManagedType = simpleTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(simpleTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = simpleTypeInfo.GetTypeSyntax(),
-            CSharpTypeSyntax = clrTypeSyntax,
             CSharpFullyQualifiedTypeSyntax = fqTypeSyntax,
             TypeArgument = null,
             ArgumentInfo = null,
@@ -91,7 +90,6 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             ManagedType = arrayTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(arrayTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = arrayTypeInfo.GetTypeSyntax(),
-            CSharpTypeSyntax = clrTypeSyntax,
             CSharpFullyQualifiedTypeSyntax = fqTypeSyntax,
             TypeArgument = elementTypeInfo,
             ArgumentInfo = null,
@@ -123,7 +121,6 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             ManagedType = taskTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(taskTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = taskTypeInfo.GetTypeSyntax(),
-            CSharpTypeSyntax = clrTypeSyntax,
             CSharpFullyQualifiedTypeSyntax = fqTypeSyntax,
             TypeArgument = taskReturnTypeInfo,
             ArgumentInfo = null,
@@ -158,7 +155,6 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             ManagedType = nullableTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(nullableTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = nullableTypeInfo.GetTypeSyntax(),
-            CSharpTypeSyntax = clrTypeSyntax,
             CSharpFullyQualifiedTypeSyntax = fqTypeSyntax,
             TypeArgument = innerTypeInfo,
             ArgumentInfo = null,
@@ -197,7 +193,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
 
         if (innerTypeInfo.ManagedType is not KnownManagedType.Byte and not KnownManagedType.Int32 and not KnownManagedType.Double)
         {
-            throw new NotSupportedTypeException($"Type argument {innerTypeInfo.CSharpTypeSyntax} in {clrTypeSyntax} is not supported.");
+            throw new NotSupportedTypeException($"Type argument {innerTypeInfo.CSharpFullyQualifiedTypeSyntax} in {clrTypeSyntax} is not supported.");
         }
 
         return new InteropTypeInfo
@@ -205,7 +201,6 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             ManagedType = spanTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(spanTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = spanTypeInfo.GetTypeSyntax(),
-            CSharpTypeSyntax = clrTypeSyntax,
             CSharpFullyQualifiedTypeSyntax = fqTypeSyntax,
             TypeArgument = innerTypeInfo,
             ArgumentInfo = null,
@@ -243,7 +238,6 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             ManagedType = functionTypeInfo.KnownType,
             JSTypeSyntax = GetJSTypeSyntax(functionTypeInfo, clrTypeSyntax),
             CSharpInteropTypeSyntax = functionTypeInfo.GetTypeSyntax(),
-            CSharpTypeSyntax = clrTypeSyntax,
             CSharpFullyQualifiedTypeSyntax = fqTypeSyntax,
             TypeArgument = null,
             ArgumentInfo = argumentInfo,

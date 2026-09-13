@@ -54,20 +54,20 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function>] Action callback)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         typed_instance.M1(callback);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 }
 
 """);
@@ -116,20 +116,20 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.String>>] Action<string> callback)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         typed_instance.M1(callback);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 }
 
 """);
@@ -178,20 +178,20 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.String, JSType.Number>>] Action<string, int> callback)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         typed_instance.M1(callback);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 }
 
 """);
@@ -240,20 +240,20 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.String, JSType.Number, JSType.Boolean>>] Action<string, int, bool> callback)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         typed_instance.M1(callback);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 }
 
 """);
@@ -302,20 +302,20 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.String>]
     public static string M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.String>>] Func<string> callback)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         return typed_instance.M1(callback);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 }
 
 """);
@@ -364,20 +364,20 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.String>]
     public static string M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.String, JSType.Number>>] Func<string, int> callback)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         return typed_instance.M1(callback);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 }
 
 """);
@@ -426,20 +426,20 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.String>]
     public static string M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.String, JSType.Number, JSType.Boolean>>] Func<string, int, bool> callback)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         return typed_instance.M1(callback);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 }
 
 """);
@@ -499,21 +499,21 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Any>>] Action<object> callback)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        Action<MyClass> typed_callback = (MyClass arg0) => callback(arg0);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::System.Action<global::N1.MyClass> typed_callback = (global::N1.MyClass arg0) => callback(arg0);
         typed_instance.M1(typed_callback);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 }
 
 """);
@@ -573,21 +573,21 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Function<JSType.Any>>]
     public static Action<object> M1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        Action<MyClass> retVal = typed_instance.M1();
-        return (object arg0) => retVal(MyClassInterop.FromObject(arg0));
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::System.Action<global::N1.MyClass> retVal = typed_instance.M1();
+        return (object arg0) => retVal(global::N1.MyClassInterop.FromObject(arg0));
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 }
 
 """);
@@ -647,21 +647,21 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Function<JSType.Any, JSType.Any>>]
     public static Func<object, object> M1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        Func<MyClass, MyClass> retVal = typed_instance.M1();
-        return (object arg0) => (object)retVal(MyClassInterop.FromObject(arg0));
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::System.Func<global::N1.MyClass, global::N1.MyClass> retVal = typed_instance.M1();
+        return (object arg0) => (object)retVal(global::N1.MyClassInterop.FromObject(arg0));
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 }
 
 """);
@@ -721,21 +721,21 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Function<JSType.Number, JSType.Any>>]
     public static Func<int, object?> M1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        Func<int, MyClass?> retVal = typed_instance.M1();
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::System.Func<int, global::N1.MyClass?> retVal = typed_instance.M1();
         return (int arg0) => (object?)retVal(arg0);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 }
 
 """);
@@ -795,21 +795,21 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Function<JSType.Any>>]
     public static Func<object?> M1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        Func<MyClass?> retVal = typed_instance.M1();
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::System.Func<global::N1.MyClass?> retVal = typed_instance.M1();
         return () => (object?)retVal();
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 }
 
 """);
@@ -869,21 +869,21 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Void>]
             public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Number, JSType.Any>>] Func<int, object?> func)
             {
-                C1 typed_instance = C1Interop.FromObject(instance);
-                Func<int, MyClass?> typed_func = (int arg0) => func(arg0) is { } funcVal ? MyClassInterop.FromObject(funcVal) : null;
+                global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+                global::System.Func<int, global::N1.MyClass?> typed_func = (int arg0) => func(arg0) is { } funcVal ? global::N1.MyClassInterop.FromObject(funcVal) : null;
                 typed_instance.M1(typed_func);
             }
-            public static C1 FromObject(object obj)
+            public static global::N1.C1 FromObject(object obj)
             {
                 return obj switch
                 {
-                    C1 instance => instance,
+                    global::N1.C1 instance => instance,
                     _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
                 };
             }
 
             [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-            private static extern C1 CreateInstance();
+            private static extern global::N1.C1 CreateInstance();
         }
 
         """);
@@ -943,21 +943,21 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Void>]
             public static void M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Any>>] Func<object?> func)
             {
-                C1 typed_instance = C1Interop.FromObject(instance);
-                Func<MyClass?> typed_func = () => func() is { } funcVal ? MyClassInterop.FromObject(funcVal) : null;
+                global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+                global::System.Func<global::N1.MyClass?> typed_func = () => func() is { } funcVal ? global::N1.MyClassInterop.FromObject(funcVal) : null;
                 typed_instance.M1(typed_func);
             }
-            public static C1 FromObject(object obj)
+            public static global::N1.C1 FromObject(object obj)
             {
                 return obj switch
                 {
-                    C1 instance => instance,
+                    global::N1.C1 instance => instance,
                     _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
                 };
             }
 
             [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-            private static extern C1 CreateInstance();
+            private static extern global::N1.C1 CreateInstance();
         }
 
         """);
@@ -1020,22 +1020,22 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Any, JSType.Any>>] Func<object, object> func, [JSMarshalAs<JSType.Function<JSType.Any>>] Func<object> paramFunc)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        Func<MyClass, MyClass> typed_func = (MyClass arg0) => MyClassInterop.FromObject(func(arg0));
-        Func<MyClass> typed_paramFunc = () => MyClassInterop.FromObject(paramFunc());
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::System.Func<global::N1.MyClass, global::N1.MyClass> typed_func = (global::N1.MyClass arg0) => global::N1.MyClassInterop.FromObject(func(arg0));
+        global::System.Func<global::N1.MyClass> typed_paramFunc = () => global::N1.MyClassInterop.FromObject(paramFunc());
         return (object)typed_instance.M1(typed_func, typed_paramFunc);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 }
 
 """);
@@ -1094,7 +1094,7 @@ public partial class C1Interop
                 if (initializer.HasProperty("P1"))
                 {
                     Func<object, object> tmpP1 = initializer.GetObjectObjectFunctionProperty("P1");
-                    SetP1(instance, (MyClass arg0) => MyClassInterop.FromObject(tmpP1(arg0)));
+                    SetP1(instance, (global::N1.MyClass arg0) => global::N1.MyClassInterop.FromObject(tmpP1(arg0)));
                 }
                 return instance;
             }
@@ -1102,44 +1102,44 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Function<JSType.Any, JSType.Any>>]
             public static Func<object, object> get_P1([JSMarshalAs<JSType.Any>] object instance)
             {
-                C1 typed_instance = C1Interop.FromObject(instance);
-                Func<MyClass, MyClass> retVal = typed_instance.P1;
-                return (object arg0) => (object)retVal(MyClassInterop.FromObject(arg0));
+                global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+                global::System.Func<global::N1.MyClass, global::N1.MyClass> retVal = typed_instance.P1;
+                return (object arg0) => (object)retVal(global::N1.MyClassInterop.FromObject(arg0));
             }
             [JSExport]
             [return: JSMarshalAs<JSType.Void>]
             public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Any, JSType.Any>>] Func<object, object> value)
             {
-                C1 typed_instance = C1Interop.FromObject(instance);
-                Func<MyClass, MyClass> typed_value = (MyClass arg0) => MyClassInterop.FromObject(value(arg0));
+                global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+                global::System.Func<global::N1.MyClass, global::N1.MyClass> typed_value = (global::N1.MyClass arg0) => global::N1.MyClassInterop.FromObject(value(arg0));
                 typed_instance.P1 = typed_value;
             }
-            public static C1 FromObject(object obj)
+            public static global::N1.C1 FromObject(object obj)
             {
                 return obj switch
                 {
-                    C1 instance => instance,
+                    global::N1.C1 instance => instance,
                     JSObject jsObj => FromJSObject(jsObj),
                     _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
                 };
             }
-            public static C1 FromJSObject(JSObject initializer)
+            public static global::N1.C1 FromJSObject(JSObject initializer)
             {
                 using var _ = initializer;
                 var instance = CreateInstance();
                 if (initializer.HasProperty("P1"))
                 {
                     Func<object, object> tmpP1 = initializer.GetObjectObjectFunctionProperty("P1");
-                    SetP1(instance, (MyClass arg0) => MyClassInterop.FromObject(tmpP1(arg0)));
+                    SetP1(instance, (global::N1.MyClass arg0) => global::N1.MyClassInterop.FromObject(tmpP1(arg0)));
                 }
                 return instance;
             }
 
             [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-            private static extern C1 CreateInstance();
+            private static extern global::N1.C1 CreateInstance();
 
             [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
-            private static extern void SetP1(C1 target, Func<MyClass, MyClass> value);
+            private static extern void SetP1(global::N1.C1 target, global::System.Func<global::N1.MyClass, global::N1.MyClass> value);
         }
 
         """);
@@ -1194,26 +1194,26 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Function>]
     public static Action get_P1([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         return typed_instance.P1;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function>] Action value)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         typed_instance.P1 = value;
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             JSObject jsObj => FromJSObject(jsObj),
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
-    public static C1 FromJSObject(JSObject initializer)
+    public static global::N1.C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
         var instance = CreateInstance();
@@ -1225,10 +1225,10 @@ public partial class C1Interop
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
-    private static extern void SetP1(C1 target, Action value);
+    private static extern void SetP1(global::N1.C1 target, global::System.Action value);
 }
 
 """);
@@ -1283,26 +1283,26 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Function<JSType.String>>]
             public static Action<char> get_P1([JSMarshalAs<JSType.Any>] object instance)
             {
-                C1 typed_instance = C1Interop.FromObject(instance);
+                global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
                 return typed_instance.P1;
             }
             [JSExport]
             [return: JSMarshalAs<JSType.Void>]
             public static void set_P1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.String>>] Action<char> value)
             {
-                C1 typed_instance = C1Interop.FromObject(instance);
+                global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
                 typed_instance.P1 = value;
             }
-            public static C1 FromObject(object obj)
+            public static global::N1.C1 FromObject(object obj)
             {
                 return obj switch
                 {
-                    C1 instance => instance,
+                    global::N1.C1 instance => instance,
                     JSObject jsObj => FromJSObject(jsObj),
                     _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
                 };
             }
-            public static C1 FromJSObject(JSObject initializer)
+            public static global::N1.C1 FromJSObject(JSObject initializer)
             {
                 using var _ = initializer;
                 var instance = CreateInstance();
@@ -1314,10 +1314,10 @@ public partial class C1Interop
             }
 
             [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-            private static extern C1 CreateInstance();
+            private static extern global::N1.C1 CreateInstance();
 
             [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_P1")]
-            private static extern void SetP1(C1 target, Action<char> value);
+            private static extern void SetP1(global::N1.C1 target, global::System.Action<char> value);
         }
 
         """);
@@ -1378,30 +1378,30 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static int M1([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Function<JSType.Number, JSType.Number>>] Func<int, int> func, [JSMarshalAs<JSType.Number>] int value)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        Func<MyEnum, MyEnum> typed_func = (MyEnum arg0) => (MyEnum)func((int)arg0);
-        MyEnum typed_value = (MyEnum)value;
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::System.Func<global::N1.MyEnum, global::N1.MyEnum> typed_func = (global::N1.MyEnum arg0) => (global::N1.MyEnum)func((int)arg0);
+        global::N1.MyEnum typed_value = (global::N1.MyEnum)value;
         return (int)typed_instance.M1(typed_func, typed_value);
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Function<JSType.Number, JSType.Number>>]
     public static Func<int, int> M2([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        Func<MyEnum, MyEnum> retVal = typed_instance.M2();
-        return (int arg0) => (int)retVal((MyEnum)arg0);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::System.Func<global::N1.MyEnum, global::N1.MyEnum> retVal = typed_instance.M2();
+        return (int arg0) => (int)retVal((global::N1.MyEnum)arg0);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 }
 
 """);

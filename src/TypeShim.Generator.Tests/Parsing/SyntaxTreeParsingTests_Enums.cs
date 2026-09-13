@@ -33,7 +33,7 @@ internal class SyntaxTreeParsingTests_Enums
             Assert.That(info.ManagedType, Is.EqualTo(KnownManagedType.Int32));
             Assert.That(info.RequiresTypeConversion, Is.True);
             Assert.That(info.SupportsTypeConversion, Is.True);
-            Assert.That(info.CSharpTypeSyntax.ToString(), Is.EqualTo("Color"));
+            Assert.That(info.CSharpFullyQualifiedTypeSyntax.ToString(), Is.EqualTo("global::N1.Color"));
             Assert.That(info.CSharpInteropTypeSyntax.ToString(), Is.EqualTo("int"));
             Assert.That(info.JSTypeSyntax.ToString(), Is.EqualTo("JSType.Number"));
         });
