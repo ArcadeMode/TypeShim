@@ -20,7 +20,9 @@ internal sealed class InteropTypeInfo
     /// </summary>
     public required TypeSyntax JSTypeSyntax { get; init; }
 
+    /// <summary>
     /// Fully-qualified (<c>global::</c>-prefixed) syntax for writing the CLR type in generated C#, so cross-namespace references resolve without using directives.
+    /// </summary>
     public required TypeSyntax CSharpFullyQualifiedTypeSyntax { get; init; }
     
     /// <summary>
