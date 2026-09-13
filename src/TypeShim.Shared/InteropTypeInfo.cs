@@ -21,17 +21,12 @@ internal sealed class InteropTypeInfo
     public required TypeSyntax JSTypeSyntax { get; init; }
 
     /// <summary>
-    /// Syntax for writing the CLR type in C# (i.e. the user's original type)
-    /// </summary>
-    public required TypeSyntax CSharpTypeSyntax { get; init; }
-
-    /// <summary>
     /// Fully-qualified (<c>global::</c>-prefixed) syntax for writing the CLR type in generated C#, so cross-namespace references resolve without using directives.
     /// </summary>
     public required TypeSyntax CSharpFullyQualifiedTypeSyntax { get; init; }
     
     /// <summary>
-    /// Syntax for writing the CLR type on the interop method. This is usually equal to <see cref="CSharpTypeSyntax"/>,<br/>
+    /// Syntax for writing the CLR type on the interop method. This is usually equal to <see cref="CSharpFullyQualifiedTypeSyntax"/>,<br/>
     /// but e.g. YourClass, Task&lt;YourClass&gt; or YourClass[] have to be object, Task&lt;object&gt; or object[] for the interop method.
     /// </summary>
     public required TypeSyntax CSharpInteropTypeSyntax { get; init; }
@@ -87,7 +82,6 @@ internal sealed class InteropTypeInfo
         ManagedType = KnownManagedType.JSObject,
         JSTypeSyntax = SyntaxFactory.ParseTypeName("JSType.Object"),
         CSharpInteropTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
-        CSharpTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
         CSharpFullyQualifiedTypeSyntax = SyntaxFactory.ParseTypeName("JSObject"),
         IsTaskType = false,
         IsArrayType = false,

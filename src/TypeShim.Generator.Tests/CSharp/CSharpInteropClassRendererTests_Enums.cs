@@ -66,14 +66,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void ScalarParam([JSMarshalAs<JSType.Number>] int c)
     {
-        Color typed_c = (Color)c;
+        global::N1.Color typed_c = (global::N1.Color)c;
         C1.ScalarParam(typed_c);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
@@ -110,14 +110,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void ScalarParam([JSMarshalAs<JSType.Number>] byte c)
     {
-        Color typed_c = (Color)c;
+        global::N1.Color typed_c = (global::N1.Color)c;
         C1.ScalarParam(typed_c);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
@@ -154,14 +154,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void ScalarParam([JSMarshalAs<JSType.Number>] short c)
     {
-        Color typed_c = (Color)c;
+        global::N1.Color typed_c = (global::N1.Color)c;
         C1.ScalarParam(typed_c);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
@@ -198,14 +198,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void ScalarParam([JSMarshalAs<JSType.Number>] int c)
     {
-        Color typed_c = (Color)c;
+        global::N1.Color typed_c = (global::N1.Color)c;
         C1.ScalarParam(typed_c);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
@@ -242,14 +242,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void ScalarParam([JSMarshalAs<JSType.Number>] long c)
     {
-        Color typed_c = (Color)c;
+        global::N1.Color typed_c = (global::N1.Color)c;
         C1.ScalarParam(typed_c);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
@@ -296,15 +296,15 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static long Echo([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] long b)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        Big typed_b = (Big)b;
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::N1.Big typed_b = (global::N1.Big)b;
         return (long)typed_instance.Echo(typed_b);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
@@ -341,14 +341,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void NullableParam([JSMarshalAs<JSType.Number>] int? c)
     {
-        Color? typed_c = c is { } cVal ? (Color)cVal : null;
+        global::N1.Color? typed_c = c is { } cVal ? (global::N1.Color)cVal : null;
         C1.NullableParam(typed_c);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
@@ -385,14 +385,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void ArrayParam([JSMarshalAs<JSType.Array<JSType.Number>>] int[] c)
     {
-        Color[] typed_c = Array.ConvertAll(c, e => (Color)e);
+        global::N1.Color[] typed_c = Array.ConvertAll(c, e => (global::N1.Color)e);
         C1.ArrayParam(typed_c);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
@@ -424,11 +424,11 @@ public partial class C1Interop
     {
         return C1.TaskReturn().ContinueWith(t => (int)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
@@ -500,15 +500,15 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("Scalar"))
         {
-            SetScalar(instance, (Color)initializer.GetInt32Property("Scalar"));
+            SetScalar(instance, (global::N1.Color)initializer.GetInt32Property("Scalar"));
         }
         if (initializer.HasProperty("Nullable"))
         {
-            SetNullable(instance, initializer.GetInt32NullableProperty("Nullable") is { } NullableVal ? (Color)NullableVal : null);
+            SetNullable(instance, initializer.GetInt32NullableProperty("Nullable") is { } NullableVal ? (global::N1.Color)NullableVal : null);
         }
         if (initializer.HasProperty("Arr"))
         {
-            SetArr(instance, Array.ConvertAll(initializer.GetInt32ArrayProperty("Arr"), e => (Color)e));
+            SetArr(instance, Array.ConvertAll(initializer.GetInt32ArrayProperty("Arr"), e => (global::N1.Color)e));
         }
         return instance;
     }
@@ -516,86 +516,86 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static int get_Scalar([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         return (int)typed_instance.Scalar;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_Scalar([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] int value)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        Color typed_value = (Color)value;
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::N1.Color typed_value = (global::N1.Color)value;
         typed_instance.Scalar = typed_value;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Number>]
     public static int? get_Nullable([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         return (int?)typed_instance.Nullable;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_Nullable([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] int? value)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        Color? typed_value = value is { } valueVal ? (Color)valueVal : null;
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::N1.Color? typed_value = value is { } valueVal ? (global::N1.Color)valueVal : null;
         typed_instance.Nullable = typed_value;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Number>>]
     public static int[] get_Arr([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         return Array.ConvertAll(typed_instance.Arr, e => (int)e);
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_Arr([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Array<JSType.Number>>] int[] value)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        Color[] typed_value = Array.ConvertAll(value, e => (Color)e);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::N1.Color[] typed_value = Array.ConvertAll(value, e => (global::N1.Color)e);
         typed_instance.Arr = typed_value;
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             JSObject jsObj => FromJSObject(jsObj),
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
-    public static C1 FromJSObject(JSObject initializer)
+    public static global::N1.C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
         var instance = CreateInstance();
         if (initializer.HasProperty("Scalar"))
         {
-            SetScalar(instance, (Color)initializer.GetInt32Property("Scalar"));
+            SetScalar(instance, (global::N1.Color)initializer.GetInt32Property("Scalar"));
         }
         if (initializer.HasProperty("Nullable"))
         {
-            SetNullable(instance, initializer.GetInt32NullableProperty("Nullable") is { } NullableVal ? (Color)NullableVal : null);
+            SetNullable(instance, initializer.GetInt32NullableProperty("Nullable") is { } NullableVal ? (global::N1.Color)NullableVal : null);
         }
         if (initializer.HasProperty("Arr"))
         {
-            SetArr(instance, Array.ConvertAll(initializer.GetInt32ArrayProperty("Arr"), e => (Color)e));
+            SetArr(instance, Array.ConvertAll(initializer.GetInt32ArrayProperty("Arr"), e => (global::N1.Color)e));
         }
         return instance;
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_Scalar")]
-    private static extern void SetScalar(C1 target, Color value);
+    private static extern void SetScalar(global::N1.C1 target, global::N1.Color value);
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_Nullable")]
-    private static extern void SetNullable(C1 target, Color? value);
+    private static extern void SetNullable(global::N1.C1 target, global::N1.Color? value);
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_Arr")]
-    private static extern void SetArr(C1 target, Color[] value);
+    private static extern void SetArr(global::N1.C1 target, global::N1.Color[] value);
 }
 
 """);
@@ -630,7 +630,7 @@ public partial class C1Interop
         var instance = CreateInstance();
         if (initializer.HasProperty("Scalar"))
         {
-            SetScalar(instance, (Color)initializer.{{initializerMethod}}("Scalar"));
+            SetScalar(instance, (global::N1.Color)initializer.{{initializerMethod}}("Scalar"));
         }
         return instance;
     }
@@ -638,42 +638,42 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static {{interopType}} get_Scalar([JSMarshalAs<JSType.Any>] object instance)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
         return ({{interopType}})typed_instance.Scalar;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_Scalar([JSMarshalAs<JSType.Any>] object instance, [JSMarshalAs<JSType.Number>] {{interopType}} value)
     {
-        C1 typed_instance = C1Interop.FromObject(instance);
-        Color typed_value = (Color)value;
+        global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
+        global::N1.Color typed_value = (global::N1.Color)value;
         typed_instance.Scalar = typed_value;
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             JSObject jsObj => FromJSObject(jsObj),
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
-    public static C1 FromJSObject(JSObject initializer)
+    public static global::N1.C1 FromJSObject(JSObject initializer)
     {
         using var _ = initializer;
         var instance = CreateInstance();
         if (initializer.HasProperty("Scalar"))
         {
-            SetScalar(instance, (Color)initializer.{{initializerMethod}}("Scalar"));
+            SetScalar(instance, (global::N1.Color)initializer.{{initializerMethod}}("Scalar"));
         }
         return instance;
     }
 
     [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-    private static extern C1 CreateInstance();
+    private static extern global::N1.C1 CreateInstance();
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_Scalar")]
-    private static extern void SetScalar(C1 target, Color value);
+    private static extern void SetScalar(global::N1.C1 target, global::N1.Color value);
 }
 
 """.Replace("{{interopType}}", interopType).Replace("{{initializerMethod}}", initializerMethod));
