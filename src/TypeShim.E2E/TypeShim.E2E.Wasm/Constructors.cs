@@ -68,3 +68,11 @@ public class NonNullableInitializerConstructor
     public required ExportedClass Reference { get; set; }
     public required int[] Numbers { get; set; }
 }
+
+[TSExport]
+public class InitOnlyPropertiesConstructor
+{
+    public int Count { get; init; } = 42;
+    public string Label { get; init; } = "default";
+    public required string Name { get; init; }
+}
