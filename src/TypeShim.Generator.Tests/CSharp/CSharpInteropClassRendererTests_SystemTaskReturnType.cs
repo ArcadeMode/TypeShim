@@ -65,11 +65,11 @@ public partial class C1Interop
     {
         return C1.M1();
     }
-    public static C1 FromObject(object obj)
+    public static global::N1.C1 FromObject(object obj)
     {
         return obj switch
         {
-            C1 instance => instance,
+            global::N1.C1 instance => instance,
             _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
         };
     }
@@ -136,11 +136,11 @@ public partial class C1Interop
             {
                 return C1.M1().ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
             }
-            public static C1 FromObject(object obj)
+            public static global::N1.C1 FromObject(object obj)
             {
                 return obj switch
                 {
-                    C1 instance => instance,
+                    global::N1.C1 instance => instance,
                     _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
                 };
             }
@@ -205,14 +205,14 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
             public static Task<object> M1([JSMarshalAs<JSType.Any>] object instance)
             {
-                C1 typed_instance = C1Interop.FromObject(instance);
+                global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
                 return typed_instance.M1().ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
             }
-            public static C1 FromObject(object obj)
+            public static global::N1.C1 FromObject(object obj)
             {
                 return obj switch
                 {
-                    C1 instance => instance,
+                    global::N1.C1 instance => instance,
                     _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
                 };
             }
@@ -265,11 +265,11 @@ public partial class C1Interop
             {
                 return C1.M1().ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
             }
-            public static C1 FromObject(object obj)
+            public static global::N1.C1 FromObject(object obj)
             {
                 return obj switch
                 {
-                    C1 instance => instance,
+                    global::N1.C1 instance => instance,
                     _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
                 };
             }
@@ -320,14 +320,14 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Promise<JSType.Void>>]
             public static Task M1([JSMarshalAs<JSType.Any>] object instance)
             {
-                C1 typed_instance = C1Interop.FromObject(instance);
+                global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
                 return typed_instance.M1();
             }
-            public static C1 FromObject(object obj)
+            public static global::N1.C1 FromObject(object obj)
             {
                 return obj switch
                 {
-                    C1 instance => instance,
+                    global::N1.C1 instance => instance,
                     _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
                 };
             }
@@ -378,14 +378,14 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Promise<JSType.Void>>]
             public static Task? M1([JSMarshalAs<JSType.Any>] object instance)
             {
-                C1 typed_instance = C1Interop.FromObject(instance);
+                global::N1.C1 typed_instance = global::N1.C1Interop.FromObject(instance);
                 return typed_instance.M1();
             }
-            public static C1 FromObject(object obj)
+            public static global::N1.C1 FromObject(object obj)
             {
                 return obj switch
                 {
-                    C1 instance => instance,
+                    global::N1.C1 instance => instance,
                     _ => throw new ArgumentException($"Invalid object type {obj?.GetType().ToString() ?? "null"}", nameof(obj)),
                 };
             }

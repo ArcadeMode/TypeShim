@@ -4,7 +4,7 @@ namespace TypeShim.Generator.Typescript;
 
 internal static class TypeScriptSymbolNameResolver
 {
-    internal static string ResolveSimpleInteropTypeSymbol(InteropTypeInfo typeInfo)
+    internal static string ResolveSimpleInteropTypeSymbol(InteropTypeInfo typeInfo, SymbolMap symbolMap)
     {
         return typeInfo.ManagedType switch
         {
@@ -13,20 +13,20 @@ internal static class TypeScriptSymbolNameResolver
             KnownManagedType.Char // chars are represented as numbers on the interop boundary (is intended: https://github.com/dotnet/runtime/issues/123187)
                 => "number",
             _ when typeInfo.IsEnum => "number", // enums cross the interop boundary as number
-            _ => ResolveSimpleTypeSymbol(typeInfo)
+            _ => ResolveSimpleTypeSymbol(typeInfo, symbolMap)
         };
     }
 
-    internal static string ResolveSimpleTypeSymbol(InteropTypeInfo typeInfo)
+    internal static string ResolveSimpleTypeSymbol(InteropTypeInfo typeInfo, SymbolMap symbolMap)
     {
         if (typeInfo.IsEnum)
         {
-            return typeInfo.CSharpTypeSyntax.ToString();
+            return symbolMap.GetNamedTypeInfo(typeInfo).Name;
         }
         return typeInfo.ManagedType switch
         {
             KnownManagedType.Object when typeInfo.RequiresTypeConversion && typeInfo.SupportsTypeConversion
-                => typeInfo.CSharpTypeSyntax.ToString(),
+                => symbolMap.GetNamedTypeInfo(typeInfo).Name,
             KnownManagedType.Object when typeInfo.RequiresTypeConversion && !typeInfo.SupportsTypeConversion
                 => "ManagedObject",
             KnownManagedType.Object when !typeInfo.RequiresTypeConversion

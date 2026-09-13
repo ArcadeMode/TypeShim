@@ -108,7 +108,7 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
     }
 
     private string GetSymbolName(InteropTypeInfo typeInfo) 
-        => interop ? TypeScriptSymbolNameResolver.ResolveSimpleInteropTypeSymbol(typeInfo) : TypeScriptSymbolNameResolver.ResolveSimpleTypeSymbol(typeInfo);
+        => interop ? TypeScriptSymbolNameResolver.ResolveSimpleInteropTypeSymbol(typeInfo, ctx.SymbolMap) : TypeScriptSymbolNameResolver.ResolveSimpleTypeSymbol(typeInfo, ctx.SymbolMap);
 
     private void RenderSuffix(InteropTypeInfo typeInfo, TypeShimSymbolType symbolType)
     {
@@ -136,13 +136,13 @@ internal class TypeScriptSymbolNameRenderer(TypeShimSymbolType returnSymbolType,
             return;
         }
 
-        throw new NotImplementedException($"Unhandled type/symboltype combination for {typeInfo.CSharpTypeSyntax} {symbolType}");
+        throw new NotImplementedException($"Unhandled type/symboltype combination for {typeInfo.CSharpFullyQualifiedTypeSyntax} {symbolType}");
 
         void RenderProxyInitializerSuffix(bool interop, InteropTypeInfo innerMostTSExport)
         {
             if (ctx.SymbolMap.GetNamedTypeInfo(innerMostTSExport) is not ClassInfo classInfo)
             {
-                throw new InvalidOperationException($"Expected {innerMostTSExport.CSharpTypeSyntax} to be a class type.");
+                throw new InvalidOperationException($"Expected {innerMostTSExport.CSharpFullyQualifiedTypeSyntax} to be a class type.");
             }
 
             if (classInfo is not { Constructor: { AcceptsInitializer: true, IsParameterless: true } })

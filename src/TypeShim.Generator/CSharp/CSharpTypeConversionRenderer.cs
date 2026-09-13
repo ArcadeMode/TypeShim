@@ -17,7 +17,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         string newVarName = $"typed_{_ctx.LocalScope.GetAccessorExpression(parameterInfo)}";
 
         DeferredExpressionRenderer convertedValueAccessor = RenderTypeDownConversion(parameterInfo.Type, varName, DeferredExpressionRenderer.FromUnary(() => _ctx.Append(varName)));
-        _ctx.Append(_ctx.SymbolMap.GetInteropTypeReference(parameterInfo.Type).TypeSyntax).Append(' ').Append(newVarName).Append(" = ");
+        _ctx.Append(parameterInfo.Type.CSharpFullyQualifiedTypeSyntax).Append(' ').Append(newVarName).Append(" = ");
         convertedValueAccessor.Render();
         _ctx.AppendLine(";");
         _ctx.LocalScope.UpdateAccessorExpression(parameterInfo, newVarName);
@@ -70,7 +70,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         else if (returnType.IsDelegateType() && returnType.ArgumentInfo is DelegateArgumentInfo argumentInfo) // Action/Action<T1...Tn>/Func<T1...Tn>
         {
             // Note: for delegates its important that we store retVal first, to avoid multiple evaluations of valueExpression inside the wrapper delegate, as it can be a method call
-            _ctx.Append(_ctx.SymbolMap.GetInteropTypeReference(returnType).TypeSyntax).Append(" retVal = ");
+            _ctx.Append(returnType.CSharpFullyQualifiedTypeSyntax).Append(" retVal = ");
             valueExpressionRenderer.Render();
             _ctx.AppendLine(";");
             return DeferredExpressionRenderer.FromUnary(() => RenderInlineDelegateTypeUpConversion(returnType, "retVal", argumentInfo));
@@ -110,19 +110,19 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         }
         else
         {
-            throw new NotImplementedException($"Type conversion not implemented for type: {typeInfo.CSharpTypeSyntax}. Please file an issue at https://github.com/ArcadeMode/TypeShim");
+            throw new NotImplementedException($"Type conversion not implemented for type: {typeInfo.CSharpFullyQualifiedTypeSyntax}. Please file an issue at https://github.com/ArcadeMode/TypeShim");
         }
     }
 
     private void RenderInlineCovariantTypeDownConversion(InteropTypeInfo typeInfo, DeferredExpressionRenderer accessorExpressionRenderer)
     {
-        _ctx.Append('(').Append(_ctx.SymbolMap.GetInteropTypeReference(typeInfo).TypeSyntax).Append(')');
+        _ctx.Append('(').Append(typeInfo.CSharpFullyQualifiedTypeSyntax).Append(')');
         accessorExpressionRenderer.Render();
     }
 
     private void RenderInlineEnumTypeDownConversion(InteropTypeInfo typeInfo, DeferredExpressionRenderer accessorExpressionRenderer)
     {
-        _ctx.Append('(').Append(_ctx.SymbolMap.GetInteropTypeReference(typeInfo).TypeSyntax).Append(')');
+        _ctx.Append('(').Append(typeInfo.CSharpFullyQualifiedTypeSyntax).Append(')');
         if (accessorExpressionRenderer.IsBinary) _ctx.Append('(');
         accessorExpressionRenderer.Render();
         if (accessorExpressionRenderer.IsBinary) _ctx.Append(')');
@@ -140,7 +140,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
 
         if (typeInfo is { RequiresTypeConversion: true, SupportsTypeConversion: true } && _ctx.SymbolMap.GetNamedTypeInfo(typeInfo) is ClassInfo)
         {
-            _ctx.Append(_ctx.SymbolMap.GetInteropTypeReference(typeInfo).InteropClassTypeSyntax).Append('.').Append(RenderConstants.FromObject).Append('(');
+            _ctx.Append(typeInfo.CSharpFullyQualifiedTypeSyntax).Append("Interop").Append('.').Append(RenderConstants.FromObject).Append('(');
             accessorExpressionRenderer.Render();
             _ctx.Append(")");
         }
@@ -238,7 +238,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
         for (int i = 0; i < argumentInfo.ParameterTypes.Length; i++)
         {
             if (i > 0) _ctx.Append(", ");
-            _ctx.Append(_ctx.SymbolMap.GetInteropTypeReference(argumentInfo.ParameterTypes[i]).TypeSyntax).Append(' ').Append("arg").Append(i);
+            _ctx.Append(argumentInfo.ParameterTypes[i].CSharpFullyQualifiedTypeSyntax).Append(' ').Append("arg").Append(i);
         }
         _ctx.Append(") => ");
 
