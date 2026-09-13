@@ -10,7 +10,8 @@ import {
     ExportedClassActionConstructor,
     IntStringMixedConstructor,
     OptionalInitializerConstructor,
-    NonNullableInitializerConstructor
+    NonNullableInitializerConstructor,
+    InitOnlyPropertiesConstructor
 } from 'typeshim';
 
 describe('Constructors Test', () => {
@@ -173,5 +174,23 @@ describe('Constructors Test', () => {
             Reference: new ExportedClass({ Id: 1 }),
             Numbers: null
         } as any)).toThrow();
+    });
+
+    test('InitOnlyPropertiesConstructor omitting non-required init members keeps C# defaults', () => {
+        const instance = new InitOnlyPropertiesConstructor({ Name: 'only-name' });
+        expect(instance.Name).toBe('only-name');
+        expect(instance.Count).toBe(42);
+        expect(instance.Label).toBe('default');
+    });
+
+    test('InitOnlyPropertiesConstructor providing non-required init members overrides defaults', () => {
+        const instance = new InitOnlyPropertiesConstructor({ Name: 'full', Count: 7, Label: 'custom' });
+        expect(instance.Name).toBe('full');
+        expect(instance.Count).toBe(7);
+        expect(instance.Label).toBe('custom');
+    });
+
+    test('InitOnlyPropertiesConstructor missing required init member throws', () => {
+        expect(() => new InitOnlyPropertiesConstructor({} as any)).toThrow();
     });
 });
