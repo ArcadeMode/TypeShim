@@ -18,10 +18,10 @@ internal static class ExportedSignatureGate
         IReadOnlyList<INamedTypeSymbol> exportedSymbols)
     {
         ThrowIfHasSyntaxErrors(exportedSymbols);
-        ThrowIfHasErrorDiagnostic(compilation);
+        ThrowIfHasSemanticErrors(compilation);
     }
 
-    private static void ThrowIfHasErrorDiagnostic(CSharpCompilation compilation)
+    private static void ThrowIfHasSemanticErrors(CSharpCompilation compilation)
     {
         CSharpCompilation analysisCompilation = compilation.WithOptions(
             compilation.Options.WithNullableContextOptions(NullableContextOptions.Disable));
