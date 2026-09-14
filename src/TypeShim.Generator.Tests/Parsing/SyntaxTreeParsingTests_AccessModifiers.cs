@@ -25,19 +25,19 @@ internal class SyntaxTreeParsingTests_AccessModifiers
                 {
                     return 1;
                 }
-                protected static int M2()
+                protected static int M3()
                 {
                     return 1;
                 }
-                protected int M2()
+                protected int M4()
                 {
                     return 1;
                 }
-                private static int M2()
+                private static int M5()
                 {
                     return 1;
                 }
-                private int M2()
+                private int M6()
                 {
                     return 1;
                 }
