@@ -104,10 +104,9 @@ internal sealed class CSharpInteropClassRenderer
     {
         foreach (ClassInfo nested in _classInfo.NestedTypes.OfType<ClassInfo>())
         {
-            RenderContext childCtx = new(nested, _ctx.AllNamedTypes, RenderOptions.CSharp);
-            CSharpInteropClassRenderer childRenderer = new(nested, childCtx, _methodResolver);
-            childRenderer.RenderClassBlock();
-            _ctx.AppendIndentedBlock(childCtx.ToString());
+            RenderContext nestedCtx = _ctx.GetNestedContext(nested);
+            CSharpInteropClassRenderer nestedRenderer = new(nested, nestedCtx, _methodResolver);
+            nestedRenderer.RenderClassBlock();
         }
     }
 }

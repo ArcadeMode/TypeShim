@@ -79,15 +79,6 @@ internal sealed class RenderContext
         return this;
     }
 
-    /// <summary>
-    /// Appends pre-rendered multi-line content, re-indenting each line to the current depth.
-    /// </summary>
-    internal RenderContext AppendIndentedBlock(string content)
-    {
-        _codeBuilder.AppendIndentedBlock(content);
-        return this;
-    }
-
     internal RenderContext Append(string text)
     {
         _codeBuilder.Append(text);

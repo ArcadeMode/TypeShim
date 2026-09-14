@@ -39,18 +39,6 @@ internal sealed class CodeBuilder(RenderOptions options)
         return this;
     }
 
-    /// <summary>
-    /// Appends pre-rendered multi-line content, re-indenting each line to the current depth.
-    /// </summary>
-    internal CodeBuilder AppendIndentedBlock(string content)
-    {
-        foreach (string rawLine in content.TrimEnd('\r', '\n').Split('\n'))
-        {
-            AppendLine(rawLine.TrimEnd('\r'));
-        }
-        return this;
-    }
-
     internal CodeBuilder Append(string text)
     {
         AppendIndentIfNewLine();
