@@ -102,9 +102,6 @@ internal class ExportedSignatureGateTests
     [Test]
     public void ExtractAllExportedSymbols_PrivateNestedClassInPublicExportedMember_ThrowsInconsistentAccessibility()
     {
-        // A private nested type (nested under a public [TSExport] container) used in a public exported
-        // member signature is inconsistent-accessibility (CS0050) and cannot be exported, so the gate
-        // must stop the run rather than emit broken interop that references an inaccessible type.
         SymbolExtractor extractor = Extractor("""
             using System;
             namespace N1;
@@ -124,8 +121,6 @@ internal class ExportedSignatureGateTests
     [Test]
     public void ExtractAllExportedSymbols_InternalNestedEnumInPublicExportedMember_ThrowsInconsistentAccessibility()
     {
-        // An internal nested enum used as a parameter of a public exported member is
-        // inconsistent-accessibility and cannot be exported, so the gate must stop the run.
         SymbolExtractor extractor = Extractor("""
             using System;
             namespace N1;

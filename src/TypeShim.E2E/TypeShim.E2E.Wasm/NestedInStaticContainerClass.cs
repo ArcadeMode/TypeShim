@@ -2,11 +2,6 @@ using System;
 
 namespace TypeShim.E2E.Wasm;
 
-/// <summary>
-/// A <c>[TSExport]</c> static container that nests a non-static class, exercising the case where the
-/// container itself projects only static members (behaving as a namespace of functions) while the nested
-/// class is instantiable and carries instance members.
-/// </summary>
 [TSExport]
 public static class NestedInStaticContainer
 {

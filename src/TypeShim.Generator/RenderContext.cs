@@ -11,6 +11,7 @@ internal sealed class RenderContext
 {
     private readonly NamedTypeInfo? _targetType;
     private readonly CodeBuilder _codeBuilder;
+    private readonly IEnumerable<NamedTypeInfo> _allNamedTypes;
 
     private LocalScope? _localScope;
 
@@ -24,10 +25,10 @@ internal sealed class RenderContext
     {
     }
 
-    private RenderContext(NamedTypeInfo? targetType, IReadOnlyList<NamedTypeInfo> allNamedTypes, SymbolMap symbolMap, CodeBuilder codeBuilder)
+    private RenderContext(NamedTypeInfo? targetType, IEnumerable<NamedTypeInfo> allNamedTypes, SymbolMap symbolMap, CodeBuilder codeBuilder)
     {
         _targetType = targetType;
-        AllNamedTypes = allNamedTypes;
+        _allNamedTypes = allNamedTypes;
         SymbolMap = symbolMap;
         _codeBuilder = codeBuilder;
     }
@@ -35,7 +36,6 @@ internal sealed class RenderContext
     internal ClassInfo Class => NamedType as ClassInfo ?? throw new InvalidOperationException("Current type in RenderContext is not a class");
     internal NamedTypeInfo NamedType => _targetType ?? throw new InvalidOperationException("No current type in RenderContext");
     internal LocalScope LocalScope => _localScope ?? throw new InvalidOperationException("No active method in context");
-    internal IReadOnlyList<NamedTypeInfo> AllNamedTypes { get; }
     internal SymbolMap SymbolMap { get; }
 
     /// <summary>
@@ -43,7 +43,7 @@ internal sealed class RenderContext
     /// nested type renders directly into the current output at the current indentation level.
     /// </summary>
     internal RenderContext GetNestedContext(NamedTypeInfo nestedType)
-        => new(nestedType, AllNamedTypes, SymbolMap, _codeBuilder);
+        => new(nestedType, _allNamedTypes, SymbolMap, _codeBuilder);
 
     internal void EnterScope(MethodInfo methodInfo)
     {

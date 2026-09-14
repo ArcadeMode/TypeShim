@@ -96,9 +96,6 @@ internal sealed class CSharpInteropClassRenderer
         _ctx.AppendLine("}");
     }
 
-    // Emits nested classes as physically nested partial interop classes so the runtime assemblyExports
-    // nest them under their parent (e.g. ShipmentInterop.ManifestInterop). Nested enums cross as numbers
-    // and produce no C# interop surface, so they are skipped here.
     private void RenderNestedInteropClasses()
     {
         foreach (ClassInfo nested in _classInfo.NestedTypes.OfType<ClassInfo>())

@@ -3,12 +3,6 @@ using System.Threading.Tasks;
 
 namespace TypeShim.E2E.Wasm;
 
-/// <summary>
-/// Exercises types nested inside a <c>[TSExport]</c> container: a nested instance class, a nested static
-/// class and a nested enum, together with their use across every shape the generator must qualify
-/// (properties, method parameters and return types, and nested inside Task, nullable, array and delegate
-/// types). Only the container is annotated; the nested types inherit exportedness.
-/// </summary>
 [TSExport]
 public class NestedTypesContainer
 {
