@@ -61,7 +61,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static {{typeExpression}} M1()
     {
-        return C1.M1();
+        return global::N1.C1.M1();
     }
 }
 
@@ -121,7 +121,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static {{typeExpression}} M1()
     {
-        return C1.M1();
+        return global::N1.C1.M1();
     }
 }
 

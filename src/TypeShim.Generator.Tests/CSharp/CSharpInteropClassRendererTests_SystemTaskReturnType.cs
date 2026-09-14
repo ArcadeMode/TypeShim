@@ -63,7 +63,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Promise<JSType.Number>>]
     public static Task<{{typeExpression}}> M1()
     {
-        return C1.M1();
+        return global::N1.C1.M1();
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -134,7 +134,7 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
             public static Task<object> M1()
             {
-                return C1.M1().ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
+                return global::N1.C1.M1().ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
             }
             public static global::N1.C1 FromObject(object obj)
             {
@@ -263,7 +263,7 @@ public partial class C1Interop
             [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
             public static Task<object> M1()
             {
-                return C1.M1().ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
+                return global::N1.C1.M1().ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
             }
             public static global::N1.C1 FromObject(object obj)
             {

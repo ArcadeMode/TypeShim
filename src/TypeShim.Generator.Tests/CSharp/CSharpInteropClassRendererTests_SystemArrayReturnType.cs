@@ -59,7 +59,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Array<JSType.Number>>]
     public static {{typeExpression}}[] M1()
     {
-        return C1.M1();
+        return global::N1.C1.M1();
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -128,7 +128,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static object[] M1()
     {
-        return (object[])C1.M1();
+        return (object[])global::N1.C1.M1();
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -256,7 +256,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static object[] M1()
     {
-        return (object[])C1.M1();
+        return (object[])global::N1.C1.M1();
     }
     public static global::N1.C1 FromObject(object obj)
     {

@@ -468,14 +468,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Any>]
     public static object get_P1()
     {
-        return (object)C1.P1;
+        return (object)global::N1.C1.P1;
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void set_P1([JSMarshalAs<JSType.Any>] object value)
     {
         global::N1.MyClass typed_value = global::N1.MyClassInterop.FromObject(value);
-        C1.P1 = typed_value;
+        global::N1.C1.P1 = typed_value;
     }
 }
 

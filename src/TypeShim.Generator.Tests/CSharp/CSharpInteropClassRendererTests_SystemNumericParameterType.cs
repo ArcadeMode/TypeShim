@@ -61,7 +61,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Number>] {{typeExpression}} arg1)
     {
-        C1.M1(arg1);
+        global::N1.C1.M1(arg1);
     }
 }
 
@@ -121,7 +121,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Number>] {{typeExpression}} arg1)
     {
-        C1.M1(arg1);
+        global::N1.C1.M1(arg1);
     }
 }
 

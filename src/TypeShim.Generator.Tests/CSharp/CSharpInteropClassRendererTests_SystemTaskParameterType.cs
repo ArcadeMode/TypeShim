@@ -64,7 +64,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Number>>] Task<{{typeExpression}}> task)
     {
-        C1.M1(task);
+        global::N1.C1.M1(task);
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -138,7 +138,7 @@ public partial class C1Interop
             public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
             {
                 global::System.Threading.Tasks.Task<global::N1.MyClass> typed_task = task.ContinueWith(t => global::N1.MyClassInterop.FromObject(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
-                C1.M1(typed_task);
+                global::N1.C1.M1(typed_task);
             }
             public static global::N1.C1 FromObject(object obj)
             {
@@ -209,7 +209,7 @@ public partial class C1Interop
             public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
             {
                 global::System.Threading.Tasks.Task<global::N1.MyClass> typed_task = task.ContinueWith(t => global::N1.MyClassInterop.FromObject(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
-                C1.M1(typed_task);
+                global::N1.C1.M1(typed_task);
             }
             public static global::N1.C1 FromObject(object obj)
             {
@@ -269,7 +269,7 @@ public partial class C1Interop
             public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
             {
                 global::System.Threading.Tasks.Task<global::System.{{typeName}}> typed_task = task.ContinueWith(t => (global::System.{{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
-                C1.M1(typed_task);
+                global::N1.C1.M1(typed_task);
             }
             public static global::N1.C1 FromObject(object obj)
             {

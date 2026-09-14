@@ -72,7 +72,7 @@ public partial class OuterInterop
     public static object Make([JSMarshalAs<JSType.Number>] int k)
     {
         global::N1.Outer.Kind typed_k = (global::N1.Outer.Kind)k;
-        return (object)Outer.Make(typed_k);
+        return (object)global::N1.Outer.Make(typed_k);
     }
     public static global::N1.Outer FromObject(object obj)
     {
@@ -121,38 +121,38 @@ public partial class ConsumerInterop
     [return: JSMarshalAs<JSType.Any>]
     public static object Direct()
     {
-        return (object)Consumer.Direct();
+        return (object)global::N1.Consumer.Direct();
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static object[] Arr()
     {
-        return (object[])Consumer.Arr();
+        return (object[])global::N1.Consumer.Arr();
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Any>]
     public static object? Nily()
     {
-        return (object?)Consumer.Nily();
+        return (object?)global::N1.Consumer.Nily();
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Promise<JSType.Any>>]
     public static Task<object> Asy()
     {
-        return Consumer.Asy().ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
+        return global::N1.Consumer.Asy().ContinueWith(t => (object)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Function<JSType.Any>>]
     public static Action<object> Del()
     {
-        global::System.Action<global::N1.Outer.Inner> retVal = Consumer.Del();
+        global::System.Action<global::N1.Outer.Inner> retVal = global::N1.Consumer.Del();
         return (object arg0) => retVal(global::N1.OuterInterop.InnerInterop.FromObject(arg0));
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Number>]
     public static int EnumRef()
     {
-        return (int)Consumer.EnumRef();
+        return (int)global::N1.Consumer.EnumRef();
     }
     public static global::N1.Consumer FromObject(object obj)
     {

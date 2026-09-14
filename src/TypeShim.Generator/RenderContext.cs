@@ -15,11 +15,13 @@ internal sealed class RenderContext
     private LocalScope? _localScope;
 
     internal RenderContext(NamedTypeInfo? targetType, IEnumerable<NamedTypeInfo> allNamedTypes, RenderOptions options)
+        : this(targetType, allNamedTypes as IReadOnlyList<NamedTypeInfo> ?? [.. allNamedTypes], options)
     {
-        _targetType = targetType;
-        AllNamedTypes = allNamedTypes as IReadOnlyList<NamedTypeInfo> ?? [.. allNamedTypes];
-        SymbolMap = new(AllNamedTypes);
-        _codeBuilder = new CodeBuilder(options);
+    }
+
+    private RenderContext(NamedTypeInfo? targetType, IReadOnlyList<NamedTypeInfo> allNamedTypes, RenderOptions options)
+        : this(targetType, allNamedTypes, new SymbolMap(allNamedTypes), new CodeBuilder(options))
+    {
     }
 
     private RenderContext(NamedTypeInfo? targetType, IReadOnlyList<NamedTypeInfo> allNamedTypes, SymbolMap symbolMap, CodeBuilder codeBuilder)
@@ -30,7 +32,7 @@ internal sealed class RenderContext
         _codeBuilder = codeBuilder;
     }
 
-    internal ClassInfo Class => _targetType as ClassInfo ?? throw new InvalidOperationException("Current type in RenderContext is not a class");
+    internal ClassInfo Class => NamedType as ClassInfo ?? throw new InvalidOperationException("Current type in RenderContext is not a class");
     internal NamedTypeInfo NamedType => _targetType ?? throw new InvalidOperationException("No current type in RenderContext");
     internal LocalScope LocalScope => _localScope ?? throw new InvalidOperationException("No active method in context");
     internal IReadOnlyList<NamedTypeInfo> AllNamedTypes { get; }
