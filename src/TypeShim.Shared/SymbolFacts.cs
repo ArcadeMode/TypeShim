@@ -15,11 +15,6 @@ internal static class SymbolFacts
     internal static bool HasJSExportAttribute(ISymbol symbol)
         => symbol.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) == JSExportFqn);
 
-    /// <summary>
-    /// A type is projected as an exported TypeShim type when it (or any of its containing types) is
-    /// annotated with <c>[TSExport]</c>. Nested types therefore inherit exportedness from their container
-    /// and need not repeat the annotation.
-    /// </summary>
     internal static bool IsTSExportOrNested(ITypeSymbol type)
     {
         for (ITypeSymbol? current = type; current is not null; current = current.ContainingType)
