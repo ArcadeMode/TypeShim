@@ -87,6 +87,23 @@ internal sealed class SymbolMap
         return string.IsNullOrEmpty(node.Namespace) ? $"global::{dottedInterop}" : $"global::{node.Namespace}.{dottedInterop}";
     }
 
+    /// <summary>
+    /// The name used to reference a class as the target of a static down-call in generated C#. Top-level
+    /// classes use their simple name (resolved via the enclosing namespace); nested classes use the
+    /// fully-qualified (<c>global::</c>-prefixed) user type name, since the interop class they are emitted
+    /// into is not physically nested within the user's container and cannot resolve the simple name.
+    /// </summary>
+    internal string GetCSharpUserTypeName(ClassInfo classInfo)
+    {
+        if (!_parent.ContainsKey(classInfo))
+        {
+            return classInfo.Name;
+        }
+
+        string dotted = string.Join(".", AncestorChainAndSelf(classInfo).Select(n => n.Name));
+        return string.IsNullOrEmpty(classInfo.Namespace) ? $"global::{dotted}" : $"global::{classInfo.Namespace}.{dotted}";
+    }
+
     // Returns the enclosing named types from outermost to the type itself.
     private IReadOnlyList<NamedTypeInfo> AncestorChainAndSelf(NamedTypeInfo node)
     {

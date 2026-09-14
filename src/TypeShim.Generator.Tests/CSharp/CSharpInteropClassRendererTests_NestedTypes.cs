@@ -88,7 +88,7 @@ public partial class OuterInterop
         [return: JSMarshalAs<JSType.Number>]
         public static int Ping()
         {
-            return Inner.Ping();
+            return global::N1.Outer.Inner.Ping();
         }
         public static global::N1.Outer.Inner FromObject(object obj)
         {

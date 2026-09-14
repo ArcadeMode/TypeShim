@@ -145,4 +145,28 @@ internal class SyntaxTreeParsingTests_NestedTypes
 
         Assert.That(outer.NestedTypes, Is.Empty);
     }
+
+    [Test]
+    public void InternalNestedTypes_AreNotDiscovered()
+    {
+        ClassInfo outer = BuildClass("""
+            namespace N1;
+            [TSExport]
+            public class Outer
+            {
+                public int Id { get; set; }
+                internal class Hidden
+                {
+                    public int Value { get; set; }
+                }
+                internal enum HiddenKind
+                {
+                    A,
+                    B
+                }
+            }
+        """, "Outer");
+
+        Assert.That(outer.NestedTypes, Is.Empty);
+    }
 }

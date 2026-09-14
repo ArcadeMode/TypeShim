@@ -47,7 +47,6 @@ internal sealed class CSharpInteropClassRenderer
         return _ctx.ToString();
     }
 
-    // Renders `public partial class {Name}Interop { ... }` (without the file header), recursing into nested classes.
     private void RenderClassBlock()
     {
         _ctx.Append("public partial class ").AppendLine(RenderConstants.InteropClassName(_classInfo))
