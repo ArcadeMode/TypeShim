@@ -78,7 +78,7 @@ internal class SyntaxTreeParsingTests_Constructors
                 {
                 }
 
-                private C1(string name, int value, bool privateP) : this(name, value)
+                private C1(string name, int value, char privateP) : this(name, value)
                 {
                 }
             }
