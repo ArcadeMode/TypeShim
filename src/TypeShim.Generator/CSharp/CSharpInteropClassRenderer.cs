@@ -28,11 +28,11 @@ internal sealed class CSharpInteropClassRenderer
         _methodRenderer = new CSharpMethodRenderer(context, _conversionRenderer, methodResolver);
     }
 
-    internal string Render()
+    internal void Render()
     {
         if (!_classInfo.IsTSExport)
         {
-            return string.Empty;
+            return;
         }
 
         _ctx.AppendLine("#nullable enable")
@@ -44,7 +44,6 @@ internal sealed class CSharpInteropClassRenderer
             .Append("namespace ").Append(_classInfo.Namespace).AppendLine(";");
 
         RenderClassBlock();
-        return _ctx.ToString();
     }
 
     private void RenderClassBlock()

@@ -51,7 +51,8 @@ internal class CSharpInteropClassRendererTests_NestedTypes
         List<NamedTypeInfo> named = [.. exported.Select(s => new NamedTypeInfoBuilder(s, typeCache).Build()).OfType<NamedTypeInfo>()];
         ClassInfo target = named.OfType<ClassInfo>().First(c => c.Name == className);
         RenderContext renderContext = new(target, named, RenderOptions.CSharp);
-        return new CSharpInteropClassRenderer(target, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(target, renderContext, new JSObjectMethodResolver([])).Render();
+        return renderContext.ToString();
     }
 
     [Test]

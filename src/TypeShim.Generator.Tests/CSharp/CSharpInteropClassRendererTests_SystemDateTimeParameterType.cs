@@ -32,7 +32,8 @@ internal class CSharpInteropClassRendererTests_SystemDateTimeParameterType
         InteropTypeInfoCache typeInfoCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeInfoCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         Assert.That(interopClass, Is.EqualTo("""    
 #nullable enable
@@ -80,7 +81,8 @@ public partial class C1Interop
         InteropTypeInfoCache typeInfoCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeInfoCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         Assert.That(interopClass, Is.EqualTo("""    
 #nullable enable
@@ -134,7 +136,8 @@ public partial class C1Interop
         InteropTypeInfoCache typeInfoCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeInfoCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
