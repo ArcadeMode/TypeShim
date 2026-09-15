@@ -100,6 +100,44 @@ internal class ExportedSignatureGateTests
     }
 
     [Test]
+    public void ExtractAllExportedSymbols_PrivateNestedClassInPublicExportedMember_ThrowsInconsistentAccessibility()
+    {
+        SymbolExtractor extractor = Extractor("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class Outer
+            {
+                private Outer() {}
+                public Hidden Get() => null;
+                private class Hidden {}
+            }
+        """);
+
+        InvalidCodeException ex = Assert.Throws<InvalidCodeException>(() => extractor.ExtractAllExportedSymbols());
+        Assert.That(ex!.Message, Does.Contain("Inconsistent accessibility"));
+    }
+
+    [Test]
+    public void ExtractAllExportedSymbols_InternalNestedEnumInPublicExportedMember_ThrowsInconsistentAccessibility()
+    {
+        SymbolExtractor extractor = Extractor("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class Outer
+            {
+                private Outer() {}
+                public void Use(Kind k) {}
+                internal enum Kind { A, B }
+            }
+        """);
+
+        InvalidCodeException ex = Assert.Throws<InvalidCodeException>(() => extractor.ExtractAllExportedSymbols());
+        Assert.That(ex!.Message, Does.Contain("Inconsistent accessibility"));
+    }
+
+    [Test]
     public void ExtractAllExportedSymbols_CustomAttributeOnMethod_DoesNotThrow()
     {
         // The custom attribute is not in the partial compilation's references, so anchoring the

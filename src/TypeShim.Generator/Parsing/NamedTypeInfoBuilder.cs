@@ -23,7 +23,7 @@ internal sealed class NamedTypeInfoBuilder(INamedTypeSymbol symbol, InteropTypeI
     private ClassInfo? BuildClass()
     {
         ClassInfo classInfo = new ClassInfoBuilder(symbol, typeInfoCache).Build();
-        // dont bother with empty classes
-        return classInfo.Methods.Any() || classInfo.Properties.Any() ? classInfo : null;
+        // dont bother with empty classes, unless they contain nested exported types (they act as a namespace)
+        return classInfo.Methods.Any() || classInfo.Properties.Any() || classInfo.NestedTypes.Count > 0 ? classInfo : null;
     }
 }

@@ -49,7 +49,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Date>]
     public static global::System.{{typeName}} M1()
     {
-        return C1.M1();
+        return global::N1.C1.M1();
     }
 }
 

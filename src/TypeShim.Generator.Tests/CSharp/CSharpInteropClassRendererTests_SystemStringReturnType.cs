@@ -48,7 +48,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.String>]
     public static string M1()
     {
-        return C1.M1();
+        return global::N1.C1.M1();
     }
 }
 

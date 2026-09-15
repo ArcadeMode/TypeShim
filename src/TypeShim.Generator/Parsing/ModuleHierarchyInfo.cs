@@ -1,55 +1,48 @@
-﻿using TypeShim.Generator.Parsing;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using TypeShim.Generator.Parsing;
 
 namespace TypeShim.Generator.Typescript;
 
 internal class ModuleHierarchyInfo
 {
-    internal required ClassInfo? ExportedClass { get; init; }
+    internal ClassInfo? ExportedClass { get; private set; }
     internal IReadOnlyDictionary<string, ModuleHierarchyInfo> Children => _children;
 
     private readonly Dictionary<string, ModuleHierarchyInfo> _children = [];
 
     internal static ModuleHierarchyInfo FromClasses(IEnumerable<ClassInfo> classInfos)
     {
-        ModuleHierarchyInfo moduleInfo = new() { ExportedClass = null };
+        ModuleHierarchyInfo moduleInfo = new();
         foreach (ClassInfo classInfo in classInfos)
         {
-            string[] propertyAccessorParts = [.. classInfo.Namespace.Split('.'), RenderConstants.InteropClassName(classInfo)];
-            moduleInfo.Add(propertyAccessorParts, classInfo);
+            string[] namespaceParts = classInfo.Namespace.Split('.', StringSplitOptions.RemoveEmptyEntries);
+            ModuleHierarchyInfo namespaceNode = namespaceParts.Aggregate(moduleInfo, static (node, part) => node.GetOrAddChild(part));
+            namespaceNode.AddClass(classInfo);
         }
         return moduleInfo;
     }
 
-    private void Add(string[] accessorParts, ClassInfo classInfo)
+    // Adds this class as a child interop node, then recurses its nested classes so they nest underneath.
+    private void AddClass(ClassInfo classInfo)
     {
-        if (accessorParts.Length == 0)
+        ModuleHierarchyInfo classNode = GetOrAddChild(RenderConstants.InteropClassName(classInfo));
+        classNode.ExportedClass = classInfo;
+        // Nested enums cross the boundary as numbers and expose no interop methods, so only classes are nested here.
+        foreach (ClassInfo nestedClass in classInfo.NestedTypes.OfType<ClassInfo>())
         {
-            throw new InvalidOperationException("Cannot add class with no namespace parts");
+            classNode.AddClass(nestedClass);
         }
+    }
 
-        if (accessorParts.Length == 1)
+    private ModuleHierarchyInfo GetOrAddChild(string key)
+    {
+        if (!_children.TryGetValue(key, out ModuleHierarchyInfo? child))
         {
-            string localExport = accessorParts[0];
-            _children[localExport] = new ModuleHierarchyInfo
-            {
-                ExportedClass = classInfo
-            };
-            return;
+            child = new ModuleHierarchyInfo();
+            _children[key] = child;
         }
-        else
-        {
-            string localExport = accessorParts[0];
-            string[] remainingParts = accessorParts[1..];
-            if (!_children.TryGetValue(localExport, out ModuleHierarchyInfo? value))
-            {
-                value = new ModuleHierarchyInfo
-                {
-                    ExportedClass = null
-                };
-                _children[localExport] = value;
-            }
-
-            value.Add(remainingParts, classInfo);
-        }
+        return child;
     }
 }

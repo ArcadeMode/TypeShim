@@ -140,7 +140,7 @@ internal sealed class CSharpTypeConversionRenderer(RenderContext _ctx)
 
         if (typeInfo is { RequiresTypeConversion: true, SupportsTypeConversion: true } && _ctx.SymbolMap.GetNamedTypeInfo(typeInfo) is ClassInfo)
         {
-            _ctx.Append(typeInfo.CSharpFullyQualifiedTypeSyntax).Append("Interop").Append('.').Append(RenderConstants.FromObject).Append('(');
+            _ctx.Append(_ctx.SymbolMap.GetCSharpInteropTypeName(typeInfo)).Append('.').Append(RenderConstants.FromObject).Append('(');
             accessorExpressionRenderer.Render();
             _ctx.Append(")");
         }

@@ -38,7 +38,7 @@ internal sealed class TypeScriptDefaultValueRenderer(RenderContext ctx)
         if (valueType.IsEnum && ctx.SymbolMap.GetNamedTypeInfo(valueType) is EnumInfo enumInfo
             && enumInfo.GetMemberByValue(Convert.ToInt64(def.Value, CultureInfo.InvariantCulture)) is string memberName)
         {
-            ctx.Append(enumInfo.Name).Append('.').Append(memberName);
+            ctx.Append(ctx.SymbolMap.GetTypeScriptReferenceName(valueType)).Append('.').Append(memberName);
             return;
         }
 
