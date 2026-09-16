@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace TypeShim.Benchmarks;
 
@@ -145,10 +146,7 @@ public class GeneratorSetup
                 {
                     string oldClassName = $"SampleClass{classNum:D2}";
                     string newClassName = $"SampleClass{fileIndex}_{classNum:D2}";
-                    content = content.Replace($"class {oldClassName}", $"class {newClassName}");
-                    content = content.Replace($"static {oldClassName} Create()", $"static {newClassName} Create()");
-                    content = content.Replace($"return new {oldClassName}", $"return new {newClassName}");
-                    content = content.Replace($"private {oldClassName}(", $"private {newClassName}(");
+                    content = Regex.Replace(content, $@"\b{oldClassName}\b", newClassName);
                 }
             }
             
