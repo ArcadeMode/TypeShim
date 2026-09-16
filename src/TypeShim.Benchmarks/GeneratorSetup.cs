@@ -146,9 +146,6 @@ public class GeneratorSetup
                 {
                     string oldClassName = $"SampleClass{classNum:D2}";
                     string newClassName = $"SampleClass{fileIndex}_{classNum:D2}";
-                    // Rename every whole-word occurrence of the class identifier so that
-                    // declarations, constructors (public and private), static return types,
-                    // `new` expressions and cross-references all stay consistent.
                     content = Regex.Replace(content, $@"\b{oldClassName}\b", newClassName);
                 }
             }
