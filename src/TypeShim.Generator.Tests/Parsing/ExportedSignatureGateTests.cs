@@ -100,6 +100,44 @@ internal class ExportedSignatureGateTests
     }
 
     [Test]
+    public void ExtractAllExportedSymbols_PrivateNestedClassInPublicExportedMember_ThrowsInconsistentAccessibility()
+    {
+        SymbolExtractor extractor = Extractor("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class Outer
+            {
+                private Outer() {}
+                public Hidden Get() => null;
+                private class Hidden {}
+            }
+        """);
+
+        InvalidCodeException ex = Assert.Throws<InvalidCodeException>(() => extractor.ExtractAllExportedSymbols());
+        Assert.That(ex!.Message, Does.Contain("Inconsistent accessibility"));
+    }
+
+    [Test]
+    public void ExtractAllExportedSymbols_InternalNestedEnumInPublicExportedMember_ThrowsInconsistentAccessibility()
+    {
+        SymbolExtractor extractor = Extractor("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class Outer
+            {
+                private Outer() {}
+                public void Use(Kind k) {}
+                internal enum Kind { A, B }
+            }
+        """);
+
+        InvalidCodeException ex = Assert.Throws<InvalidCodeException>(() => extractor.ExtractAllExportedSymbols());
+        Assert.That(ex!.Message, Does.Contain("Inconsistent accessibility"));
+    }
+
+    [Test]
     public void ExtractAllExportedSymbols_CustomAttributeOnMethod_DoesNotThrow()
     {
         // The custom attribute is not in the partial compilation's references, so anchoring the
@@ -123,5 +161,42 @@ internal class ExportedSignatureGateTests
 
         List<INamedTypeSymbol> exported = [.. extractor.ExtractAllExportedSymbols()];
         Assert.That(exported.Select(s => s.Name), Does.Contain("C1"));
+    }
+
+    [Test]
+    public void ExtractAllExportedSymbols_DuplicateNonPublicMember_ThrowsWithCs0111()
+    {
+        SymbolExtractor extractor = Extractor("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public class C1
+            {
+                private C1() {}
+                public void M1() {}
+                private int Helper() => 1;
+                private int Helper() => 2;
+            }
+        """);
+
+        InvalidCodeException ex = Assert.Throws<InvalidCodeException>(() => extractor.ExtractAllExportedSymbols());
+        Assert.That(ex!.Message, Does.Contain("CS0111"));
+    }
+
+    [Test]
+    public void ExtractAllExportedSymbols_InvalidInitAccessorOnStaticProperty_ThrowsWithCs8856()
+    {
+        SymbolExtractor extractor = Extractor("""
+            using System;
+            namespace N1;
+            [TSExport]
+            public static class C1
+            {
+                public static int P1 { get; init; }
+            }
+        """);
+
+        InvalidCodeException ex = Assert.Throws<InvalidCodeException>(() => extractor.ExtractAllExportedSymbols());
+        Assert.That(ex!.Message, Does.Contain("CS8856"));
     }
 }

@@ -30,7 +30,8 @@ internal class CSharpInteropClassRendererTests_ParameterAttributes
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses[0], typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        return new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        return renderContext.ToString();
     }
 
     [Test]

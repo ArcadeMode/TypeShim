@@ -21,12 +21,12 @@ internal static class TypeScriptSymbolNameResolver
     {
         if (typeInfo.IsEnum)
         {
-            return symbolMap.GetNamedTypeInfo(typeInfo).Name;
+            return symbolMap.GetTypeScriptReferenceName(typeInfo);
         }
         return typeInfo.ManagedType switch
         {
             KnownManagedType.Object when typeInfo.RequiresTypeConversion && typeInfo.SupportsTypeConversion
-                => symbolMap.GetNamedTypeInfo(typeInfo).Name,
+                => symbolMap.GetTypeScriptReferenceName(typeInfo),
             KnownManagedType.Object when typeInfo.RequiresTypeConversion && !typeInfo.SupportsTypeConversion
                 => "ManagedObject",
             KnownManagedType.Object when !typeInfo.RequiresTypeConversion

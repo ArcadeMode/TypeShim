@@ -7,11 +7,12 @@ internal sealed class TypeScriptUserClassNamespaceRenderer(RenderContext ctx)
 {
     internal void Render()
     {
-        if (ctx.Class.IsStatic) return;
-
         PropertyInfo[] instancePropertyInfos = [.. ctx.Class.Properties.Where(p => !p.IsStatic && !p.Type.IsDelegateType())];
         PropertyInfo[] initializerPropertyInfos = ctx.Class.Constructor?.MemberInitializers ?? [];
-        if (initializerPropertyInfos.Length == 0 && instancePropertyInfos.Length == 0)
+        IReadOnlyList<NamedTypeInfo> nestedTypes = ctx.Class.NestedTypes;
+
+        bool hasInitializerOrSnapshot = initializerPropertyInfos.Length > 0 || instancePropertyInfos.Length > 0;
+        if (!hasInitializerOrSnapshot && nestedTypes.Count == 0)
             return;
 
         ctx.AppendLine($"export namespace {ctx.Class.Name} {{");
@@ -29,7 +30,27 @@ internal sealed class TypeScriptUserClassNamespaceRenderer(RenderContext ctx)
                 const string proxyParamName = "proxy";
                 shapesRenderer.RenderPropertiesFunction(proxyParamName);
             }
+
+            RenderNestedTypes(nestedTypes);
         }
         ctx.AppendLine("}");
+    }
+
+    private void RenderNestedTypes(IReadOnlyList<NamedTypeInfo> nestedTypes)
+    {
+        foreach (NamedTypeInfo nestedType in nestedTypes)
+        {
+            RenderContext nestedCtx = ctx.GetNestedContext(nestedType);
+            switch (nestedType)
+            {
+                case ClassInfo:
+                    new TypescriptUserClassProxyRenderer(nestedCtx).Render();
+                    new TypeScriptUserClassNamespaceRenderer(nestedCtx).Render();
+                    break;
+                case EnumInfo:
+                    new TypeScriptEnumRenderer(nestedCtx).Render();
+                    break;
+            }
+        }
     }
 }

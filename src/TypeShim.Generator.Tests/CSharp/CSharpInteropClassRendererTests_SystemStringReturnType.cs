@@ -32,7 +32,8 @@ internal class CSharpInteropClassRendererTests_SystemStringReturnType
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -48,7 +49,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.String>]
     public static string M1()
     {
-        return C1.M1();
+        return global::N1.C1.M1();
     }
 }
 
@@ -80,7 +81,8 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable

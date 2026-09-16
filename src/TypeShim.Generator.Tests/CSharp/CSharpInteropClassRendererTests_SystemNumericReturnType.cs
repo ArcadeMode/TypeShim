@@ -45,7 +45,8 @@ internal class CSharpInteropClassRendererTests_SystemNumericReturnType
         InteropTypeInfoCache typeInfoCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeInfoCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         Assert.That(interopClass, Is.EqualTo("""    
 #nullable enable
@@ -61,7 +62,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static {{typeExpression}} M1()
     {
-        return C1.M1();
+        return global::N1.C1.M1();
     }
 }
 
@@ -105,7 +106,8 @@ public partial class C1Interop
         InteropTypeInfoCache typeInfoCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeInfoCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         Assert.That(interopClass, Is.EqualTo("""    
 #nullable enable
@@ -121,7 +123,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static {{typeExpression}} M1()
     {
-        return C1.M1();
+        return global::N1.C1.M1();
     }
 }
 

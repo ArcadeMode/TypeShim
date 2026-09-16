@@ -48,7 +48,8 @@ internal class CSharpInteropClassRendererTests_SystemTaskParameterType
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         Assert.That(interopClass, Is.EqualTo("""    
 #nullable enable
@@ -64,7 +65,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Void>]
     public static void M1([JSMarshalAs<JSType.Promise<JSType.Number>>] Task<{{typeExpression}}> task)
     {
-        C1.M1(task);
+        global::N1.C1.M1(task);
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -119,7 +120,8 @@ public partial class C1Interop
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         // Important assertion here, Task<object> required for interop, cannot be simply casted to Task<MyClass>
         // the return type is void so we cannot await either, hence the TaskCompletionSource-based conversion.
@@ -138,7 +140,7 @@ public partial class C1Interop
             public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
             {
                 global::System.Threading.Tasks.Task<global::N1.MyClass> typed_task = task.ContinueWith(t => global::N1.MyClassInterop.FromObject(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
-                C1.M1(typed_task);
+                global::N1.C1.M1(typed_task);
             }
             public static global::N1.C1 FromObject(object obj)
             {
@@ -192,7 +194,8 @@ public partial class C1Interop
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.Last(), typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         AssertEx.EqualOrDiff(interopClass, """    
         #nullable enable
@@ -209,7 +212,7 @@ public partial class C1Interop
             public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
             {
                 global::System.Threading.Tasks.Task<global::N1.MyClass> typed_task = task.ContinueWith(t => global::N1.MyClassInterop.FromObject(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
-                C1.M1(typed_task);
+                global::N1.C1.M1(typed_task);
             }
             public static global::N1.C1 FromObject(object obj)
             {
@@ -250,7 +253,8 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         // Note: as there is no known mapping for these types, there is no 'FromObject' mapping, instead just try to cast ("taskTcs.SetResult(({{typeName}})t.Result)")
         // this is not broadly supported, only for types in the standard library
@@ -269,7 +273,7 @@ public partial class C1Interop
             public static void M1([JSMarshalAs<JSType.Promise<JSType.Any>>] Task<object> task)
             {
                 global::System.Threading.Tasks.Task<global::System.{{typeName}}> typed_task = task.ContinueWith(t => (global::System.{{typeName}})t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
-                C1.M1(typed_task);
+                global::N1.C1.M1(typed_task);
             }
             public static global::N1.C1 FromObject(object obj)
             {
@@ -309,7 +313,8 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         AssertEx.EqualOrDiff(interopClass, """    
         #nullable enable
@@ -363,7 +368,8 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         AssertEx.EqualOrDiff(interopClass, """
         #nullable enable

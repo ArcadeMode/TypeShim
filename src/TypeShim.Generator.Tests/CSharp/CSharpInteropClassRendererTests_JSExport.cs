@@ -30,7 +30,8 @@ internal class CSharpInteropClassRendererTests_JSExport
         InteropTypeInfoCache typeInfoCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeInfoCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         // No C# interop wrapper should be generated for a JSExport-only class -
         // the methods are already WASM-exported by Roslyn's source generator.

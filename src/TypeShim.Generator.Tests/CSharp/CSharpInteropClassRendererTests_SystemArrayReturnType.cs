@@ -43,7 +43,8 @@ internal class CSharpInteropClassRendererTests_SystemArrayReturnType
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         Assert.That(interopClass, Is.EqualTo("""    
 #nullable enable
@@ -59,7 +60,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Array<JSType.Number>>]
     public static {{typeExpression}}[] M1()
     {
-        return C1.M1();
+        return global::N1.C1.M1();
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -112,7 +113,8 @@ public partial class C1Interop
         ClassInfo classInfo = new ClassInfoBuilder(exportedClasses.ElementAt(0), typeCache).Build();
         ClassInfo userClassInfo = new ClassInfoBuilder(exportedClasses.ElementAt(1), typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo, userClassInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -128,7 +130,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static object[] M1()
     {
-        return (object[])C1.M1();
+        return (object[])global::N1.C1.M1();
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -182,7 +184,8 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         AssertEx.EqualOrDiff(interopClass, """    
 #nullable enable
@@ -240,7 +243,8 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         Assert.That(interopClass, Is.EqualTo("""    
 #nullable enable
@@ -256,7 +260,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Array<JSType.Any>>]
     public static object[] M1()
     {
-        return (object[])C1.M1();
+        return (object[])global::N1.C1.M1();
     }
     public static global::N1.C1 FromObject(object obj)
     {

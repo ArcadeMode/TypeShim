@@ -1,25 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 using TypeShim.Generator.Parsing;
 using TypeShim.Generator.Typescript;
 using TypeShim.Shared;
 
 namespace TypeShim.Generator;
 
-internal sealed class RenderContext(NamedTypeInfo? targetType, IEnumerable<NamedTypeInfo> allNamedTypes, RenderOptions options)
+internal sealed class RenderContext
 {
-    internal ClassInfo Class => targetType as ClassInfo ?? throw new InvalidOperationException("Current type in RenderContext is not a class");
-    internal NamedTypeInfo NamedType => targetType ?? throw new InvalidOperationException("No current type in RenderContext");
-    internal LocalScope LocalScope => _localScope ?? throw new InvalidOperationException("No active method in context");
-    internal SymbolMap SymbolMap { get; } = new(allNamedTypes);
+    private readonly NamedTypeInfo? _targetType;
+    private readonly CodeBuilder _codeBuilder;
+    private readonly IEnumerable<NamedTypeInfo> _allNamedTypes;
 
-    private readonly StringBuilder _sb = new(capacity: 16 * 1024);
-
-    private int _currentDepth = 0;
-    private bool _isNewLine = true;
     private LocalScope? _localScope;
+
+    internal RenderContext(NamedTypeInfo? targetType, IEnumerable<NamedTypeInfo> allNamedTypes, RenderOptions options)
+        : this(targetType, allNamedTypes as IReadOnlyList<NamedTypeInfo> ?? [.. allNamedTypes], options)
+    {
+    }
+
+    private RenderContext(NamedTypeInfo? targetType, IReadOnlyList<NamedTypeInfo> allNamedTypes, RenderOptions options)
+        : this(targetType, allNamedTypes, new SymbolMap(allNamedTypes), new CodeBuilder(options))
+    {
+    }
+
+    private RenderContext(NamedTypeInfo? targetType, IEnumerable<NamedTypeInfo> allNamedTypes, SymbolMap symbolMap, CodeBuilder codeBuilder)
+    {
+        _targetType = targetType;
+        _allNamedTypes = allNamedTypes;
+        SymbolMap = symbolMap;
+        _codeBuilder = codeBuilder;
+    }
+
+    internal ClassInfo Class => NamedType as ClassInfo ?? throw new InvalidOperationException("Current type in RenderContext is not a class");
+    internal NamedTypeInfo NamedType => _targetType ?? throw new InvalidOperationException("No current type in RenderContext");
+    internal LocalScope LocalScope => _localScope ?? throw new InvalidOperationException("No active method in context");
+    internal SymbolMap SymbolMap { get; }
+
+    /// <summary>
+    /// Creates a context targeting a nested type that shares this context's <see cref="CodeBuilder"/>, so the
+    /// nested type renders directly into the current output at the current indentation level.
+    /// </summary>
+    internal RenderContext GetNestedContext(NamedTypeInfo nestedType)
+        => new(nestedType, _allNamedTypes, SymbolMap, _codeBuilder);
 
     internal void EnterScope(MethodInfo methodInfo)
     {
@@ -43,65 +67,43 @@ internal sealed class RenderContext(NamedTypeInfo? targetType, IEnumerable<Named
     ///     ctx.AppendLine("..."); // prints with one level of indentation
     /// }</code>
     /// </summary>
-    /// <returns></returns>
-    internal IDisposable Indent()
-    {
-        _currentDepth++;
-        return new ActionOnDisposeDisposable(() => _currentDepth--);
-    }
+    internal IDisposable Indent() => _codeBuilder.Indent();
 
-    internal RenderContext AppendLine() => AppendLine(string.Empty);
+    internal RenderContext AppendLine()
+    {
+        _codeBuilder.AppendLine();
+        return this;
+    }
 
     internal RenderContext AppendLine(string line)
     {
-        if (!string.IsNullOrEmpty(line)) AppendIndentIfNewLine();
-        _sb.AppendLine(line);
-        _isNewLine = true;
+        _codeBuilder.AppendLine(line);
         return this;
     }
 
     internal RenderContext Append(string text)
     {
-        AppendIndentIfNewLine();
-        _sb.Append(text);
+        _codeBuilder.Append(text);
         return this;
     }
 
     internal RenderContext Append(object? text)
     {
-        if (text == null) return this;
-        return Append(text.ToString()!);
+        _codeBuilder.Append(text);
+        return this;
     }
 
     internal RenderContext Append(char text)
     {
-        AppendIndentIfNewLine();
-        _sb.Append(text);
+        _codeBuilder.Append(text);
         return this;
-    }
-
-    private void AppendIndentIfNewLine()
-    {
-        if (!_isNewLine) return;
-
-        _sb.Append(' ', options.IndentSpaces * _currentDepth);
-        _isNewLine = false;
     }
 
     /// <summary>
     /// Materialize the rendered content as a string.
     /// </summary>
-    /// <returns></returns>
     public override string ToString()
     {
-        return _sb.ToString();
-    }
-
-    private class ActionOnDisposeDisposable(Action onDisposal) : IDisposable
-    {
-        public void Dispose()
-        {
-            onDisposal.Invoke();
-        }
+        return _codeBuilder.ToString();
     }
 }

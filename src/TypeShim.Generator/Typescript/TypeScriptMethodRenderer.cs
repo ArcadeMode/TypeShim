@@ -451,7 +451,7 @@ internal sealed class TypeScriptMethodRenderer(RenderContext ctx)
 
         void RenderInteropMethodAccessor(string methodName)
         {
-            ctx.Append(ctx.Class.Namespace).Append('.').Append(RenderConstants.InteropClassName(ctx.Class)).Append('.').Append(methodName);
+            ctx.Append(ctx.SymbolMap.GetTypeScriptInteropAccessor(ctx.Class)).Append('.').Append(methodName);
         }
     }
 

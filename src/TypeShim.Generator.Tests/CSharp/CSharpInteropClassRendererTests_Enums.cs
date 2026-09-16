@@ -35,7 +35,8 @@ internal class CSharpInteropClassRendererTests_Enums
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        return new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        return renderContext.ToString();
     }
 
     [Test]
@@ -60,14 +61,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static int ScalarReturn()
     {
-        return (int)C1.ScalarReturn();
+        return (int)global::N1.C1.ScalarReturn();
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void ScalarParam([JSMarshalAs<JSType.Number>] int c)
     {
         global::N1.Color typed_c = (global::N1.Color)c;
-        C1.ScalarParam(typed_c);
+        global::N1.C1.ScalarParam(typed_c);
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -104,14 +105,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static byte ScalarReturn()
     {
-        return (byte)C1.ScalarReturn();
+        return (byte)global::N1.C1.ScalarReturn();
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void ScalarParam([JSMarshalAs<JSType.Number>] byte c)
     {
         global::N1.Color typed_c = (global::N1.Color)c;
-        C1.ScalarParam(typed_c);
+        global::N1.C1.ScalarParam(typed_c);
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -148,14 +149,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static short ScalarReturn()
     {
-        return (short)C1.ScalarReturn();
+        return (short)global::N1.C1.ScalarReturn();
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void ScalarParam([JSMarshalAs<JSType.Number>] short c)
     {
         global::N1.Color typed_c = (global::N1.Color)c;
-        C1.ScalarParam(typed_c);
+        global::N1.C1.ScalarParam(typed_c);
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -192,14 +193,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static int ScalarReturn()
     {
-        return (int)C1.ScalarReturn();
+        return (int)global::N1.C1.ScalarReturn();
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void ScalarParam([JSMarshalAs<JSType.Number>] int c)
     {
         global::N1.Color typed_c = (global::N1.Color)c;
-        C1.ScalarParam(typed_c);
+        global::N1.C1.ScalarParam(typed_c);
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -236,14 +237,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static long ScalarReturn()
     {
-        return (long)C1.ScalarReturn();
+        return (long)global::N1.C1.ScalarReturn();
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void ScalarParam([JSMarshalAs<JSType.Number>] long c)
     {
         global::N1.Color typed_c = (global::N1.Color)c;
-        C1.ScalarParam(typed_c);
+        global::N1.C1.ScalarParam(typed_c);
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -280,7 +281,8 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        string interopClass = new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        string interopClass = renderContext.ToString();
 
         AssertEx.EqualOrDiff(interopClass, """
 #nullable enable
@@ -335,14 +337,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Number>]
     public static int? NullableReturn()
     {
-        return (int?)C1.NullableReturn();
+        return (int?)global::N1.C1.NullableReturn();
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void NullableParam([JSMarshalAs<JSType.Number>] int? c)
     {
         global::N1.Color? typed_c = c is { } cVal ? (global::N1.Color)cVal : null;
-        C1.NullableParam(typed_c);
+        global::N1.C1.NullableParam(typed_c);
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -379,14 +381,14 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Array<JSType.Number>>]
     public static int[] ArrayReturn()
     {
-        return Array.ConvertAll(C1.ArrayReturn(), e => (int)e);
+        return Array.ConvertAll(global::N1.C1.ArrayReturn(), e => (int)e);
     }
     [JSExport]
     [return: JSMarshalAs<JSType.Void>]
     public static void ArrayParam([JSMarshalAs<JSType.Array<JSType.Number>>] int[] c)
     {
         global::N1.Color[] typed_c = Array.ConvertAll(c, e => (global::N1.Color)e);
-        C1.ArrayParam(typed_c);
+        global::N1.C1.ArrayParam(typed_c);
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -422,7 +424,7 @@ public partial class C1Interop
     [return: JSMarshalAs<JSType.Promise<JSType.Number>>]
     public static Task<int> TaskReturn()
     {
-        return C1.TaskReturn().ContinueWith(t => (int)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
+        return global::N1.C1.TaskReturn().ContinueWith(t => (int)t.Result, TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
     }
     public static global::N1.C1 FromObject(object obj)
     {
@@ -466,7 +468,8 @@ public partial class C1Interop
         InteropTypeInfoCache typeCache = new();
         ClassInfo classInfo = new ClassInfoBuilder(classSymbol, typeCache).Build();
         RenderContext renderContext = new(classInfo, [classInfo], RenderOptions.CSharp);
-        return new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        new CSharpInteropClassRenderer(classInfo, renderContext, new JSObjectMethodResolver([])).Render();
+        return renderContext.ToString();
     }
 
     [Test]

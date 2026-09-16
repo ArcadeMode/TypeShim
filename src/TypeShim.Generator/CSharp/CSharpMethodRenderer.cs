@@ -104,7 +104,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
             IReadOnlyCollection<MethodParameterInfo> parameters = methodInfo.Parameters;
             if (methodInfo.IsStatic)
             {
-                _ctx.Append(_ctx.Class.Name);
+                _ctx.Append(_ctx.Class.Type.CSharpFullyQualifiedTypeSyntax);
             }
             else
             {
@@ -141,7 +141,7 @@ internal sealed class CSharpMethodRenderer(RenderContext _ctx, CSharpTypeConvers
                 _conversionRenderer.RenderParameterTypeConversion(originalParamInfo);
             }
 
-            string accessedObject = methodInfo.IsStatic ? _ctx.Class.Name : _ctx.LocalScope.GetAccessorExpression(methodInfo.InstanceParameter!);
+            string accessedObject = methodInfo.IsStatic ? _ctx.Class.Type.CSharpFullyQualifiedTypeSyntax.ToString() : _ctx.LocalScope.GetAccessorExpression(methodInfo.InstanceParameter!);
             DeferredExpressionRenderer untypedValueExpressionRenderer = DeferredExpressionRenderer.FromUnary(() => _ctx.Append(accessedObject).Append('.').Append(propertyInfo.Name));
             DeferredExpressionRenderer typedValueExpressionRenderer = _conversionRenderer.RenderReturnTypeConversion(methodInfo.ReturnType, untypedValueExpressionRenderer);
             if (methodInfo.ReturnType.ManagedType != KnownManagedType.Void) // getter

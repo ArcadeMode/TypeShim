@@ -48,6 +48,37 @@ public class SampleClass01
             Console.WriteLine($"Hello from {Name} to {otherInstance.Description}!");
         });
     }
+
+    /// <summary>
+    /// The lifecycle state of the sample, exposed as a nested enum.
+    /// </summary>
+    public enum Status
+    {
+        Idle,
+        Running,
+        Done
+    }
+
+    /// <summary>
+    /// Gets or sets the current status
+    /// </summary>
+    public Status CurrentStatus { get; set; }
+
+    /// <summary>
+    /// Echoes the provided status
+    /// </summary>
+    public Status EchoStatus(Status status) => status;
+
+    /// <summary>
+    /// Describes the status, using optional parameters including an optional enum parameter
+    /// </summary>
+    /// <param name="status">The status to describe</param>
+    /// <param name="prefix">A prefix for the description</param>
+    /// <param name="suffix">An optional suffix</param>
+    public string Describe(Status status = Status.Idle, string prefix = "status", string? suffix = null)
+    {
+        return suffix != null ? $"{prefix}: {status}{suffix}" : $"{prefix}: {status}";
+    }
 }
 
 /// <summary>
@@ -78,6 +109,32 @@ public class SampleClass02
 
     public SampleClass02[] Siblings { get; set; } = Array.Empty<SampleClass02>();
     public int[] SiblingIDs { get; set; } = Array.Empty<int>();
+
+    /// <summary>
+    /// A nested detail record for the sample, exercising nested class codegen.
+    /// </summary>
+    public class Detail
+    {
+        /// <summary>
+        /// Gets or sets the label
+        /// </summary>
+        public string Label { get; set; } = "";
+
+        /// <summary>
+        /// Gets or sets the rank
+        /// </summary>
+        public int Rank { get; set; }
+    }
+
+    /// <summary>
+    /// Gets or sets the primary detail
+    /// </summary>
+    public Detail Primary { get; set; } = new();
+
+    /// <summary>
+    /// Builds a detail from the given label and rank
+    /// </summary>
+    public Detail MakeDetail(string label, int rank = 0) => new() { Label = label, Rank = rank };
 }
 
 /// <summary>
@@ -126,7 +183,27 @@ public class SampleClass03
     public static void StaticMethodWithFunc(Func<int, string> func)
     {
         Console.WriteLine(func(42));
-    }   
+    }
+
+    /// <summary>
+    /// A byte-backed nested enum, exercising underlying-type handling.
+    /// </summary>
+    public enum Level : byte
+    {
+        None = 0,
+        Warn = 128,
+        Max = 255
+    }
+
+    /// <summary>
+    /// Gets or sets the severity level
+    /// </summary>
+    public Level Severity { get; set; }
+
+    /// <summary>
+    /// Echoes the provided level, defaulting to Warn when omitted
+    /// </summary>
+    public Level EchoLevel(Level level = Level.Warn) => level;
 }
 
 /// <summary>
