@@ -141,4 +141,22 @@ internal static class TypeShimDiagnostics
         isEnabledByDefault: true,
         description: "Records synthesize an overloaded Equals method, TypeShim does not support overloads; use a regular class instead.");
 
+    internal static readonly DiagnosticDescriptor NestedTSExportWithoutExportedContainerRule = new(
+        id: "TSHIM020",
+        title: "Nested [TSExport] type will not be exported",
+        messageFormat: "Nested type '{0}' is marked with [TSExport] but none of its containing types are [TSExport], so it will not be exported",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A nested type is only exported when a containing type is [TSExport]; annotating the nested type alone has no effect because it is stripped from code generation.");
+
+    internal static readonly DiagnosticDescriptor RedundantNestedTSExportRule = new(
+        id: "TSHIM021",
+        title: "Redundant [TSExport] on a nested type",
+        messageFormat: "Nested type '{0}' does not need [TSExport] because it inherits exportedness from a containing [TSExport] type",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Info,
+        isEnabledByDefault: true,
+        description: "Nested public types inherit exportedness from their [TSExport] container, so the [TSExport] attribute on the nested type is inconsequential.");
+
 }

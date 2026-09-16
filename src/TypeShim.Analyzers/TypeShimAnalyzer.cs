@@ -29,7 +29,9 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         TypeShimDiagnostics.NoOptionalCtorParamWithRequiredInitializerRule,
         TypeShimDiagnostics.EnumMemberOutOfSafeRangeRule,
         TypeShimDiagnostics.UnsupportedInheritanceRule,
-        TypeShimDiagnostics.RecordNotSupportedRule
+        TypeShimDiagnostics.RecordNotSupportedRule,
+        TypeShimDiagnostics.NestedTSExportWithoutExportedContainerRule,
+        TypeShimDiagnostics.RedundantNestedTSExportRule
     ];
 
     public override void Initialize(AnalysisContext context)
@@ -48,7 +50,7 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         bool hasJSExport = SymbolFacts.HasJSExportAttribute(methodSymbol);
         if (!hasJSExport) return;
 
-        bool classHasTSExport = SymbolFacts.HasTSExportAttribute(methodSymbol.ContainingType);
+        bool classHasTSExport = SymbolFacts.IsExportSurfaceType(methodSymbol.ContainingType);
         if (classHasTSExport)
         {
             Diagnostic diagnostic = Diagnostic.Create(TypeShimDiagnostics.MixedExportRule, methodSymbol.Locations[0], methodSymbol.Name, methodSymbol.ContainingType.Name);
@@ -61,8 +63,14 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         if (context.Symbol is not INamedTypeSymbol type || type.TypeKind != TypeKind.Class)
             return;
 
-        bool hasTSExport = SymbolFacts.HasTSExportAttribute(type);
-        if (!hasTSExport)
+        // The accessibility rule applies to any explicitly [TSExport]-annotated class, regardless of
+        // whether it ends up on the export surface.
+        if (SymbolFacts.HasTSExportAttribute(type))
+            AnalyzeClassAccessibility(context, type);
+
+        ReportNestedExportAnnotationDiagnostics(context, type);
+
+        if (!SymbolFacts.IsExportSurfaceType(type))
             return;
         //Debugger.Launch();
         if (TryGetTypeDiagnostic(type) is DiagnosticDescriptor descriptor)
@@ -73,9 +81,28 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
                 return;
         }
 
-        AnalyzeClassAccessibility(context, type);
         AnalyzeInheritance(context, type);
         AnalyzeMembers(context, type);
+    }
+
+    // A nested type carrying its own [TSExport] either duplicates the exportedness it already inherits
+    // from a [TSExport] container (redundant), or has no [TSExport] ancestor and will be stripped from
+    // codegen (never exported). Non-public nested types are already flagged for accessibility (TSHIM008),
+    // so these advisories target public nested types only.
+    private static void ReportNestedExportAnnotationDiagnostics(SymbolAnalysisContext context, INamedTypeSymbol type)
+    {
+        if (type.ContainingType is null
+            || type.DeclaredAccessibility != Accessibility.Public
+            || !SymbolFacts.HasTSExportAttribute(type))
+        {
+            return;
+        }
+
+        DiagnosticDescriptor descriptor = SymbolFacts.AnyContainerIsTSExport(type)
+            ? TypeShimDiagnostics.RedundantNestedTSExportRule
+            : TypeShimDiagnostics.NestedTSExportWithoutExportedContainerRule;
+
+        context.ReportDiagnostic(Diagnostic.Create(descriptor, LocationFinder.GetDefaultLocation(type), type.Name));
     }
 
     private static void AnalyzeInheritance(SymbolAnalysisContext context, INamedTypeSymbol type)
@@ -174,14 +201,14 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         if (parameter.ContainingSymbol is not IMethodSymbol method
             || method.DeclaredAccessibility != Accessibility.Public
             || method.MethodKind is not (MethodKind.Ordinary or MethodKind.Constructor)
-            || !SymbolFacts.HasTSExportAttribute(method.ContainingType))
+            || !SymbolFacts.IsExportSurfaceType(method.ContainingType))
         {
             return;
         }
 
         Location location = parameterNode.Type?.GetLocation() ?? parameterNode.GetLocation();
 
-        if (IsSpanOrArraySegment(parameter.Type))
+        if (SymbolFacts.IsSpanOrArraySegment(parameter.Type))
         {
             string typeName = parameter.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
             context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.NoOptionalMemoryViewRule, location, parameter.Name, typeName));
@@ -199,23 +226,12 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
             if (context.SemanticModel.GetSymbolInfo(node, context.CancellationToken).Symbol is IFieldSymbol { IsConst: true } field
                 && field.ContainingType.TypeKind != TypeKind.Enum
                 && field.Locations.Any(l => l.IsInSource)
-                && !SymbolFacts.HasTSExportAttribute(field.ContainingType))
+                && !SymbolFacts.IsExportSurfaceType(field.ContainingType))
             {
                 context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.UnresolvableDefaultConstRule, location, parameter.Name, field.Name));
                 return;
             }
         }
-    }
-
-    private static bool IsSpanOrArraySegment(ITypeSymbol type)
-    {
-        ITypeSymbol effective = type;
-        if (SymbolFacts.IsNullable(type) && type is INamedTypeSymbol { TypeArguments.Length: 1 } nullable)
-            effective = nullable.TypeArguments[0];
-
-        string fullName = effective.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        return fullName.StartsWith(Constants.SpanGlobal, StringComparison.Ordinal)
-            || fullName.StartsWith(Constants.ArraySegmentGlobal, StringComparison.Ordinal);
     }
 
     private static void CheckOptionalConstructorParameter(SymbolAnalysisContext context, INamedTypeSymbol type, IMethodSymbol constructor)
@@ -224,26 +240,13 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         if (optionalParameter is null)
             return;
 
-        bool hasNonOmittableInitializerMember = type.GetMembers().OfType<IPropertySymbol>().Any(IsNonOmittableInitializerMember);
+        bool hasNonOmittableInitializerMember = type.GetMembers().OfType<IPropertySymbol>().Any(SymbolFacts.IsNonOmittableInitializerMember);
         if (!hasNonOmittableInitializerMember)
             return;
 
         Location location = LocationFinder.GetMethodParameterLocation(constructor, optionalParameter, context.CancellationToken);
         context.ReportDiagnostic(Diagnostic.Create(
             TypeShimDiagnostics.NoOptionalCtorParamWithRequiredInitializerRule, location, optionalParameter.Name, type.Name));
-    }
-
-    private static bool IsNonOmittableInitializerMember(IPropertySymbol property)
-    {
-        // Matches the member-initializer set: public property with a public set/init accessor.
-        if (property.DeclaredAccessibility != Accessibility.Public
-            || property.SetMethod is not { DeclaredAccessibility: Accessibility.Public })
-        {
-            return false;
-        }
-
-        // Non-nullable members are mandatory in the generated interop; nullable ones can be omitted.
-        return property.Type.NullableAnnotation != NullableAnnotation.Annotated;
     }
 
     private static void CheckPropertyType(SymbolAnalysisContext context, IPropertySymbol property)
@@ -276,7 +279,9 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         if (context.Symbol is not INamedTypeSymbol type || type.TypeKind != TypeKind.Enum)
             return;
 
-        if (!SymbolFacts.HasTSExportAttribute(type))
+        ReportNestedExportAnnotationDiagnostics(context, type);
+
+        if (!SymbolFacts.IsExportSurfaceType(type))
             return;
 
         // An unsupported underlying type makes the whole enum unrepresentable, and its member values may
