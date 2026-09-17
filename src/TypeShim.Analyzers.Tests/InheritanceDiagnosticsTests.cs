@@ -133,4 +133,27 @@ internal class InheritanceDiagnosticsTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
         AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
+
+
+    [Test]
+    public async Task Inheritance_OnNestedType_IsFlagged()
+    {
+        string source = """
+            using TypeShim;
+
+            public class BaseC { public int P { get; set; } }
+
+            [TSExport]
+            public class Outer
+            {
+                public class Inner : BaseC
+                {
+                    public int Value { get; set; }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, UnsupportedInheritanceId);
+    }
 }

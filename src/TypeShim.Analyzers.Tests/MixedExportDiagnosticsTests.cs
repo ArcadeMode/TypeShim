@@ -92,4 +92,28 @@ internal class MixedExportDiagnosticsTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
         AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
+
+
+    [Test]
+    public async Task JSExportMethodInNestedTypeUnderTSExportContainer_IsFlagged()
+    {
+        string source = """
+            using System;
+            using System.Runtime.InteropServices.JavaScript;
+            using TypeShim;
+
+            [TSExport]
+            public partial class Outer
+            {
+                public partial class Inner
+                {
+                    [JSExport]
+                    public static void M() { }
+                }
+            }
+            """ + "\n" + JSExportAttributeSource;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, MixedExportId);
+    }
 }

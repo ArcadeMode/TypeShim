@@ -44,14 +44,17 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         context.RegisterSyntaxNodeAction(CheckOptionalParameterDefault, SyntaxKind.Parameter);
     }
 
+    private static bool IsOnExportSurface(INamedTypeSymbol type)
+        => SymbolFacts.IsTSExportOrNested(type)
+            && (type.ContainingType is null || SymbolFacts.GetEffectiveAccessibility(type) == Accessibility.Public);
+
     private static void AnalyzeMethodForMixedExport(SymbolAnalysisContext context)
     {
         IMethodSymbol methodSymbol = (IMethodSymbol)context.Symbol;
         bool hasJSExport = SymbolFacts.HasJSExportAttribute(methodSymbol);
         if (!hasJSExport) return;
 
-        bool classHasTSExport = SymbolFacts.IsExportSurfaceType(methodSymbol.ContainingType);
-        if (classHasTSExport)
+        if (IsOnExportSurface(methodSymbol.ContainingType))
         {
             Diagnostic diagnostic = Diagnostic.Create(TypeShimDiagnostics.MixedExportRule, methodSymbol.Locations[0], methodSymbol.Name, methodSymbol.ContainingType.Name);
             context.ReportDiagnostic(diagnostic);
@@ -63,14 +66,13 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         if (context.Symbol is not INamedTypeSymbol type || type.TypeKind != TypeKind.Class)
             return;
 
-        // The accessibility rule applies to any explicitly [TSExport]-annotated class, regardless of
-        // whether it ends up on the export surface.
         if (SymbolFacts.HasTSExportAttribute(type))
+        {
             AnalyzeClassAccessibility(context, type);
+            CheckNestedExportAnnotation(context, type);
+        }
 
-        ReportNestedExportAnnotationDiagnostics(context, type);
-
-        if (!SymbolFacts.IsExportSurfaceType(type))
+        if (!IsOnExportSurface(type))
             return;
         //Debugger.Launch();
         if (TryGetTypeDiagnostic(type) is DiagnosticDescriptor descriptor)
@@ -85,20 +87,17 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         AnalyzeMembers(context, type);
     }
 
-    // A nested type carrying its own [TSExport] either duplicates the exportedness it already inherits
-    // from a [TSExport] container (redundant), or has no [TSExport] ancestor and will be stripped from
-    // codegen (never exported). Non-public nested types are already flagged for accessibility (TSHIM008),
-    // so these advisories target public nested types only.
-    private static void ReportNestedExportAnnotationDiagnostics(SymbolAnalysisContext context, INamedTypeSymbol type)
+    private static void CheckNestedExportAnnotation(SymbolAnalysisContext context, INamedTypeSymbol type)
     {
-        if (type.ContainingType is null
-            || type.DeclaredAccessibility != Accessibility.Public
-            || !SymbolFacts.HasTSExportAttribute(type))
-        {
+        if (type.ContainingType is null || type.DeclaredAccessibility != Accessibility.Public)
             return;
-        }
 
-        DiagnosticDescriptor descriptor = SymbolFacts.AnyContainerIsTSExport(type)
+        ReportNestedExportAnnotation(context, type);
+    }
+
+    private static void ReportNestedExportAnnotation(SymbolAnalysisContext context, INamedTypeSymbol type)
+    {
+        DiagnosticDescriptor descriptor = SymbolFacts.IsTSExportOrNested(type.ContainingType)
             ? TypeShimDiagnostics.RedundantNestedTSExportRule
             : TypeShimDiagnostics.NestedTSExportWithoutExportedContainerRule;
 
@@ -201,7 +200,7 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         if (parameter.ContainingSymbol is not IMethodSymbol method
             || method.DeclaredAccessibility != Accessibility.Public
             || method.MethodKind is not (MethodKind.Ordinary or MethodKind.Constructor)
-            || !SymbolFacts.IsExportSurfaceType(method.ContainingType))
+            || !IsOnExportSurface(method.ContainingType))
         {
             return;
         }
@@ -226,7 +225,7 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
             if (context.SemanticModel.GetSymbolInfo(node, context.CancellationToken).Symbol is IFieldSymbol { IsConst: true } field
                 && field.ContainingType.TypeKind != TypeKind.Enum
                 && field.Locations.Any(l => l.IsInSource)
-                && !SymbolFacts.IsExportSurfaceType(field.ContainingType))
+                && !IsOnExportSurface(field.ContainingType))
             {
                 context.ReportDiagnostic(Diagnostic.Create(TypeShimDiagnostics.UnresolvableDefaultConstRule, location, parameter.Name, field.Name));
                 return;
@@ -279,9 +278,10 @@ internal sealed class TypeShimAnalyzer : DiagnosticAnalyzer
         if (context.Symbol is not INamedTypeSymbol type || type.TypeKind != TypeKind.Enum)
             return;
 
-        ReportNestedExportAnnotationDiagnostics(context, type);
+        if (SymbolFacts.HasTSExportAttribute(type))
+            CheckNestedExportAnnotation(context, type);
 
-        if (!SymbolFacts.IsExportSurfaceType(type))
+        if (!IsOnExportSurface(type))
             return;
 
         // An unsupported underlying type makes the whole enum unrepresentable, and its member values may

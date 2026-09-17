@@ -145,4 +145,93 @@ internal class TypeDiagnosticsTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
         AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
+
+
+    [Test]
+    public async Task ValidNestedType_UnderExportedContainer_ProducesNoDiagnostics()
+    {
+        string source = """
+            using TypeShim;
+
+            [TSExport]
+            public class Outer
+            {
+                public int Id { get; set; }
+
+                public class Inner
+                {
+                    public int Value { get; set; }
+                    public int Compute() => Value;
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
+    }
+
+    [Test]
+    public async Task UnsupportedType_InsideNestedType_IsFlagged()
+    {
+        string source = """
+            using TypeShim;
+
+            [TSExport]
+            public class Outer
+            {
+                public class Inner
+                {
+                    public decimal M() => 0m;
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, UnsupportedTypeId);
+    }
+
+    [Test]
+    public async Task UnsupportedType_InsideMultiLevelNestedType_IsFlagged()
+    {
+        string source = """
+            using TypeShim;
+
+            [TSExport]
+            public class Outer
+            {
+                public class Middle
+                {
+                    public class Inner
+                    {
+                        public decimal M() => 0m;
+                    }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, UnsupportedTypeId);
+    }
+
+    [Test]
+    public async Task NonExportedType_InsideNestedType_IsFlagged()
+    {
+        string source = """
+            using TypeShim;
+
+            public class Other { }
+
+            [TSExport]
+            public class Outer
+            {
+                public class Inner
+                {
+                    public Other M() => new Other();
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, NonExportedTypeId);
+    }
 }
