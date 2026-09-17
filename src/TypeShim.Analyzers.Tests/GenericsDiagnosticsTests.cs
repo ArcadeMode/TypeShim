@@ -154,4 +154,24 @@ internal class GenericsDiagnosticsTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
         AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, GenericMethodId);
     }
+
+    [Test]
+    public async Task GenericNestedType_WithoutGenericMethods_IsFlagged()
+    {
+        string source = """
+            using TypeShim;
+
+            [TSExport]
+            public class Outer
+            {
+                public class Inner<T>
+                {
+                    public int P { get; set; }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, GenericClassId);
+    }
 }
