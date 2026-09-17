@@ -156,4 +156,26 @@ internal class OptionalParameterDiagnosticsTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
         AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
+
+
+    [Test]
+    public async Task OptionalMemoryViewParameter_InsideNestedType_IsFlagged()
+    {
+        string source = """
+            using System;
+            using TypeShim;
+
+            [TSExport]
+            public class Outer
+            {
+                public class Inner
+                {
+                    public void M(Span<byte> data = default) { }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, OptionalMemoryViewId);
+    }
 }

@@ -367,4 +367,25 @@ internal class EnumDiagnosticsTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
         AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
+
+
+    [Test]
+    public async Task EnumMemberOutOfRange_InNestedEnum_IsFlagged()
+    {
+        string source = """
+            using TypeShim;
+
+            [TSExport]
+            public class Outer
+            {
+                public enum Kind : long
+                {
+                    Big = 9007199254740992
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, MemberOutOfRangeId);
+    }
 }

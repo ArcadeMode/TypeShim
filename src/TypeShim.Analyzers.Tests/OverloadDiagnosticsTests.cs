@@ -104,4 +104,26 @@ internal class OverloadDiagnosticsTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
         AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
     }
+
+
+    [Test]
+    public async Task Overloads_InsideNestedType_AreFlagged()
+    {
+        string source = """
+            using TypeShim;
+
+            [TSExport]
+            public class Outer
+            {
+                public class Inner
+                {
+                    public void M() { }
+                    public void M(int x) { }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
+        AnalyzerTestHelper.AssertSingleDiagnostic(diagnostics, OverloadId);
+    }
 }

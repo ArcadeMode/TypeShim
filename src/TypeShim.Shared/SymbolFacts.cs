@@ -27,6 +27,43 @@ internal static class SymbolFacts
         return false;
     }
 
+    internal static Accessibility GetEffectiveAccessibility(ITypeSymbol type)
+    {
+        Accessibility lowest = Accessibility.Public;
+        for (ITypeSymbol? current = type; current is not null; current = current.ContainingType)
+        {
+            if (current.DeclaredAccessibility < lowest)
+            {
+                lowest = current.DeclaredAccessibility;
+            }
+        }
+        return lowest;
+    }
+
+    internal static bool IsSpanOrArraySegment(ITypeSymbol type)
+    {
+        ITypeSymbol effective = type;
+        if (IsNullable(type) && type is INamedTypeSymbol { TypeArguments.Length: 1 } nullable)
+        {
+            effective = nullable.TypeArguments[0];
+        }
+
+        string fullName = effective.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        return fullName.StartsWith(Constants.SpanGlobal, StringComparison.Ordinal)
+            || fullName.StartsWith(Constants.ArraySegmentGlobal, StringComparison.Ordinal);
+    }
+
+    internal static bool IsNonOmittableInitializerMember(IPropertySymbol property)
+    {
+        if (property.DeclaredAccessibility != Accessibility.Public
+            || property.SetMethod is not { DeclaredAccessibility: Accessibility.Public })
+        {
+            return false;
+        }
+
+        return property.Type.NullableAnnotation != NullableAnnotation.Annotated;
+    }
+
     internal static bool HasTSExportAttribute(ISymbol symbol)
     {
         foreach (AttributeData attr in symbol.GetAttributes())

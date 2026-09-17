@@ -119,4 +119,49 @@ internal class AccessibilityDiagnosticsTests
         var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
         AnalyzerTestHelper.AssertDiagnostics(diagnostics, PublicOnlyId, OverloadId);
     }
+
+
+    [Test]
+    public async Task PublicNestedType_UnderExportedContainer_IsNotFlagged()
+    {
+        string source = """
+            using TypeShim;
+
+            [TSExport]
+            public class Outer
+            {
+                public int Id { get; set; }
+
+                public class Inner
+                {
+                    public int Value { get; set; }
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
+    }
+
+    [Test]
+    public async Task PrivateNestedType_UnderExportedContainer_IsNotAnalyzed()
+    {
+        string source = """
+            using TypeShim;
+
+            [TSExport]
+            public class Outer
+            {
+                public int Id { get; set; }
+
+                private class Hidden
+                {
+                    public decimal M() => 0m;
+                }
+            }
+            """;
+
+        var diagnostics = await AnalyzerTestHelper.GetDiagnosticsAsync(source);
+        AnalyzerTestHelper.AssertNoDiagnostics(diagnostics);
+    }
 }
