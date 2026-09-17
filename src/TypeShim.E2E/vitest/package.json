@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@emnapi/runtime": "^1.11.3",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.5.1",
     "@vitest/browser": "^4.1.11",
     "@vitest/browser-playwright": "^4.1.10",
     "cross-env": "^10.1.0",
@@ -19,7 +19,7 @@
     "playwright": "^1.63.0",
     "typescript": "^7.0.2",
     "unplugin-dotnet-wasm": "^1.5.2",
-    "vite": "^8.2.2",
+    "vite": "^8.3.0",
     "vitest": "^4.1.10"
   }
 }
