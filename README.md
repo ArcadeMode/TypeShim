@@ -49,7 +49,6 @@ namespace Sample.Adventure;
 [TSExport]
 public class Hero
 {
-    // A nested enum is exported alongside its container as `Hero.Role`.
     public enum Role { Mage, Rogue, Knight }
 
     public string Name { get; set; }
@@ -164,7 +163,7 @@ Passing an initializer object in another initializer object.
 
 ### <a name="nested-types"></a> Nested types (`MyClass.Nested`)
 
-Public types nested inside an exported class are exported too, mirroring their C# nesting in TypeScript. A nested class, enum or static class on `MyClass` becomes `MyClass.Nested`, sitting right next to the generated `MyClass.Snapshot` and `MyClass.Initializer` members. Only the top-level container needs `[TSExport]`; nested public types inherit exportedness from it. They behave like any other exported type: usable as property types, method parameters and return types, inside `Task<T>`, arrays and delegates. The [`vite-react-wasm` sample](https://github.com/ArcadeMode/TypeShim/blob/master/samples/vite-react-wasm) demonstrates this with a `Person.LifeStage` nested enum consumed from React.
+Public types nested inside an exported class are exported too, mirroring their C# nesting in TypeScript. A nested class, enum or static class on `MyClass` becomes `MyClass.Nested`, sitting right next to the generated `MyClass.Snapshot` and `MyClass.Initializer` members. Only the top-level container needs `[TSExport]`; nested public types inherit exportedness from it. They behave like any other exported type: usable as property types, method parameters and return types, inside `Task<T>`, arrays and delegates. The [`vite-react-wasm` sample](https://github.com/ArcadeMode/TypeShim/blob/master/samples/vite-react-wasm) demonstrates this with a `Dog.Size` nested enum consumed from React.
 
 ## <a name="enriched-type-support"></a> Enriched Type support
 

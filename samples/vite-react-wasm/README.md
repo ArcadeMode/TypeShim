@@ -15,7 +15,7 @@ This sample bundles a .NET library into a react app, while TypeShim provides the
 The domain of this app is 'people', each person may have a pet (I had to come up with _something_). The classes representing this domain are defined in the `Library` project and consumed in the react `app` project for the UI. The same classes are also consumed in the `Server` project to facilitate an Api endpoint for pulling some generated data.
 
 #### Library 
-This project is where most 'logic' resides. This is rather simple stuff with classes like `Person`, `Pet` and `PeopleProvider` which are all part of the interop API (i.e. have `[TSExport]`). It also shows off a **nested type**: `Person` declares a nested `LifeStage` enum, exported to TypeScript as `Person.LifeStage` and surfaced through the derived `Person.Stage` property. The react app reads it in `/app/src/people/PersonCard.tsx` to label each person's life stage.
+This project is where most 'logic' resides. This is rather simple stuff with classes like `Person`, `Pet` and `PeopleProvider` which are all part of the interop API (i.e. have `[TSExport]`). 
 
 When built, this project outputs an npm project in the `/Library/bin/wwwroot` directory which contains a combination of files from:
 - The source code `Library/wwwroot` 
