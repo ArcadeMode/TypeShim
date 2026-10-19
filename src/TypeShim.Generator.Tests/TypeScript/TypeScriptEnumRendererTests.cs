@@ -113,18 +113,15 @@ export enum Color {
             HierarchyInfo = ModuleHierarchyInfo.FromClasses([.. all.OfType<ClassInfo>()])
         };
 
-        List<RenderContext> contexts = new TypeScriptRenderer(all, moduleInfo).Render();
-        // Contexts: [0] config preamble, [1] assembly exports, [2] the enum
-        string enumContext = contexts[2].ToString();
+        string rendered = new TypeScriptRenderer(all, moduleInfo).Render().ToString();
 
-        AssertEx.EqualOrDiff(enumContext, """
+        Assert.That(rendered, Does.Contain("""
 // TypeShim generated TypeScript definitions for enum: N1.Color
 export enum Color {
   Red = 0,
   Green = 1,
   Blue = 2,
 }
-
-""");
+""".ReplaceLineEndings("\n")));
     }
 }
