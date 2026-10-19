@@ -68,9 +68,26 @@ public class Person
 [TSExport]
 public class Dog
 {
+    /// <summary>
+    /// A <b>nested</b> type, scoped to <see cref="Dog"/>. TypeShim exports it to
+    /// TypeScript as <c>Dog.Size</c>, keeping the enum namespaced to its owner.
+    /// </summary>
+    public enum Size { Small, Medium, Large }
+
     public required string Name { get; set; }
     public required string Breed { get; set; }
     public required int Age { get; set; }
+
+    /// <summary>
+    /// The <see cref="Size"/> category derived from <see cref="Breed"/>. Demonstrates a nested enum
+    /// crossing the interop boundary, consumed in TypeScript as <c>Dog.Size</c>.
+    /// </summary>
+    public Size SizeCategory => Breed switch
+    {
+        "Dachshund" or "Beagle" or "Poodle" => Size.Small,
+        "Bulldog" or "Spaniel" or "Boxer" => Size.Medium,
+        _ => Size.Large,
+    };
 
     public string Bark() => new[] { "bark", "yip", "woof", "arf", "growl", "howl", "whine", "snarl" }[Age % 8];
 
