@@ -1,7 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
-using System.Text;
 using TypeShim.Shared;
 using TypeShim.Generator;
 using TypeShim.Generator.CSharp;
@@ -58,5 +57,5 @@ static Task GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<Name
     RenderContext rootCtx = new(null, namedTypeInfos, RenderOptions.TypeScript);
     TypeScriptRenderer tsRenderer = new(rootCtx, namedTypeInfos, moduleInfo);
     tsRenderer.Render();
-    return File.WriteAllTextAsync(parsedArgs.TsOutputFilePath, rootCtx.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+    return File.WriteAllTextAsync(parsedArgs.TsOutputFilePath, rootCtx.ToString());
 }
