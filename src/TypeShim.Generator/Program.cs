@@ -60,7 +60,7 @@ static Task GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<Name
 
     async Task WriteFile(List<RenderContext> ctxs)
     {
-        using FileStream fs = new(parsedArgs.TsOutputFilePath, FileMode.OpenOrCreate, FileAccess.Write);
+        using FileStream fs = new(parsedArgs.TsOutputFilePath, FileMode.Create, FileAccess.Write);
         StreamWriter tsWriter = new(fs, Encoding.UTF8, 16 * 1024);
         foreach (RenderContext ctx in ctxs)
         {
