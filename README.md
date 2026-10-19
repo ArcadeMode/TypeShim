@@ -13,7 +13,6 @@ TypeShim generates strongly-typed interop code for both C# & TypeScript, tailore
 ## At a glance
 
 - 📤 Class level exports.
-- 🪆 [Nested types](#nested-types).
 - 💎 [Rich type support](#enriched-type-support).
 - ✍ Powerful [concepts](#concepts).
 - 🦾 Thoroughly validated
@@ -78,7 +77,7 @@ public static partial class Dice
 }
 ```
 
-On the TypeScript side things look familiar, class names, properties, methods and constructors all resemble the exported C# classes. Nested types mirror their C# nesting, so `Hero.Role` is reached through its container.
+On the TypeScript side things look familiar, class names, properties, methods and constructors all resemble the exported C# classes.
 
 ```js
 import { dotnet } from '_framework/dotnet'
@@ -160,10 +159,6 @@ Passing an initializer object in another initializer object.
 </table>
 
 > 💡 Arrays of mixed proxies and initializers are supported as parameters for methods if the above conditions for the array element type are satisfied. The contained initializer objects will be constructed into new dotnet class instances while the object references behind the proxies are preserved.
-
-### <a name="nested-types"></a> Nested types (`MyClass.Nested`)
-
-Public types nested inside an exported class are exported too, mirroring their C# nesting in TypeScript. A nested class, enum or static class on `MyClass` becomes `MyClass.Nested`, sitting right next to the generated `MyClass.Snapshot` and `MyClass.Initializer` members. Only the top-level container needs `[TSExport]`; nested public types inherit exportedness from it. They behave like any other exported type: usable as property types, method parameters and return types, inside `Task<T>`, arrays and delegates. The [`vite-react-wasm` sample](https://github.com/ArcadeMode/TypeShim/blob/master/samples/vite-react-wasm) demonstrates this with a `Dog.Size` nested enum consumed from React.
 
 ## <a name="enriched-type-support"></a> Enriched Type support
 
