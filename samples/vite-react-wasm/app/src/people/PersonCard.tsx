@@ -26,7 +26,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({ initPerson }) => {
                   {person.Name}
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.875rem', color: '#555' }}>
-                  Age: {person.Age}
+                  Age: {person.Age} &middot; {Person.LifeStage[person.Stage]}
                 </p>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>

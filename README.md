@@ -13,6 +13,7 @@ TypeShim generates strongly-typed interop code for both C# & TypeScript, tailore
 ## At a glance
 
 - 📤 Class level exports.
+- 🪆 [Nested types](#nested-types).
 - 💎 [Rich type support](#enriched-type-support).
 - ✍ Powerful [concepts](#concepts).
 - 🦾 Thoroughly validated
@@ -37,7 +38,7 @@ nuget install TypeShim
 You'll still need to load your wasm browser app as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-).
 
 ### TypeShim
-A small fantasy inspired demo to show language use powered by TypeShim. Notable aspects are that `[TSExport]` exports both `class` and `enum` to TypeScript, that `[JSExport]` is included (see `Dice`) and that parameters of class types take class instances or initializers (see `Recruit(..)` invocations)
+A small fantasy inspired demo to show language use powered by TypeShim. Notable aspects are that `[TSExport]` exports both `class` and `enum` to TypeScript, that nested types (see `Hero.Role`) are exported under their containing type, that `[JSExport]` is included (see `Dice`) and that parameters of class types take class instances or initializers (see `Recruit(..)` invocations)
 
 ```csharp
 using System.Runtime.InteropServices.JavaScript;
@@ -46,11 +47,11 @@ using TypeShim;
 namespace Sample.Adventure;
 
 [TSExport]
-public enum Role { Mage, Rogue, Knight }
-
-[TSExport]
 public class Hero
 {
+    // A nested enum is exported alongside its container as `Hero.Role`.
+    public enum Role { Mage, Rogue, Knight }
+
     public string Name { get; set; }
     public Role Role { get; set; }
     public int Hp { get; set; }
@@ -66,7 +67,7 @@ public class Hero
 public class Party
 {
     private readonly List<Hero> _members = [];
-    public Hero Leader { get; } = new() { Name = "Rook", Role = Role.Rogue, Hp = 12 };
+    public Hero Leader { get; } = new() { Name = "Rook", Role = Hero.Role.Rogue, Hp = 12 };
     public Hero[] Members => [Leader, .._members];
     public void Recruit(Hero hero) => _members.Add(hero);
 }
@@ -78,20 +79,20 @@ public static partial class Dice
 }
 ```
 
-On the TypeScript side things look familiar, class names, properties, methods and constructors all resemble the exported C# classes.
+On the TypeScript side things look familiar, class names, properties, methods and constructors all resemble the exported C# classes. Nested types mirror their C# nesting, so `Hero.Role` is reached through its container.
 
 ```js
 import { dotnet } from '_framework/dotnet'
-import { Party, Hero, Role, Dice } from 'typeshim.ts';
+import { Party, Hero, Dice } from 'typeshim.ts';
 
 public async UsingTypeShim() {
     await dotnet.create()
     const party = new Party();
     console.log(party.Leader.Name); // "Rook"
 
-    const mage = new Hero({ Name: "Ivy", Role: Role.Mage, Hp: 8 });
+    const mage = new Hero({ Name: "Ivy", Role: Hero.Role.Mage, Hp: 8 });
     party.Recruit(mage);
-    party.Recruit({ Name: "Ash", Role: Role.Knight, Hp: 16 });
+    party.Recruit({ Name: "Ash", Role: Hero.Role.Knight, Hp: 16 });
     console.log(party.Members.length); // 3
 
     mage.Heal(party); // +5
@@ -160,6 +161,10 @@ Passing an initializer object in another initializer object.
 </table>
 
 > 💡 Arrays of mixed proxies and initializers are supported as parameters for methods if the above conditions for the array element type are satisfied. The contained initializer objects will be constructed into new dotnet class instances while the object references behind the proxies are preserved.
+
+### <a name="nested-types"></a> Nested types (`MyClass.Nested`)
+
+Public types nested inside an exported class are exported too, mirroring their C# nesting in TypeScript. A nested class, enum or static class on `MyClass` becomes `MyClass.Nested`, sitting right next to the generated `MyClass.Snapshot` and `MyClass.Initializer` members. Only the top-level container needs `[TSExport]`; nested public types inherit exportedness from it. They behave like any other exported type: usable as property types, method parameters and return types, inside `Task<T>`, arrays and delegates. The [`vite-react-wasm` sample](https://github.com/ArcadeMode/TypeShim/blob/master/samples/vite-react-wasm) demonstrates this with a `Person.LifeStage` nested enum consumed from React.
 
 ## <a name="enriched-type-support"></a> Enriched Type support
 
