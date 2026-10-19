@@ -55,18 +55,8 @@ static Task GenerateTypeScriptInteropCode(ProgramArguments parsedArgs, List<Name
         ExportedClasses = classInfos,
         HierarchyInfo = ModuleHierarchyInfo.FromClasses(classInfos)
     };
-    TypeScriptRenderer tsRenderer = new(namedTypeInfos, moduleInfo);
-    return WriteFile(tsRenderer.Render());
-
-    async Task WriteFile(List<RenderContext> ctxs)
-    {
-        using FileStream fs = new(parsedArgs.TsOutputFilePath, FileMode.OpenOrCreate, FileAccess.Write);
-        StreamWriter tsWriter = new(fs, Encoding.UTF8, 16 * 1024);
-        foreach (RenderContext ctx in ctxs)
-        {
-            await tsWriter.WriteLineAsync(ctx.ToString());
-        }
-        tsWriter.Flush();
-        tsWriter.Close();
-    }
+    RenderContext rootCtx = new(null, namedTypeInfos, RenderOptions.TypeScript);
+    TypeScriptRenderer tsRenderer = new(rootCtx, namedTypeInfos, moduleInfo);
+    tsRenderer.Render();
+    return File.WriteAllTextAsync(parsedArgs.TsOutputFilePath, rootCtx.ToString(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
 }
