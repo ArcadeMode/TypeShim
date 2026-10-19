@@ -113,7 +113,9 @@ export enum Color {
             HierarchyInfo = ModuleHierarchyInfo.FromClasses([.. all.OfType<ClassInfo>()])
         };
 
-        string rendered = new TypeScriptRenderer(all, moduleInfo).Render().ToString();
+        RenderContext rootCtx = new(null, all, RenderOptions.TypeScript);
+        new TypeScriptRenderer(rootCtx, all, moduleInfo).Render();
+        string rendered = rootCtx.ToString();
 
         Assert.That(rendered, Does.Contain("""
 // TypeShim generated TypeScript definitions for enum: N1.Color
