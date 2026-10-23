@@ -42,7 +42,7 @@ internal sealed class RenderContext
     /// Creates a context targeting a nested type that shares this context's <see cref="CodeBuilder"/>, so the
     /// nested type renders directly into the current output at the current indentation level.
     /// </summary>
-    internal RenderContext GetNestedContext(NamedTypeInfo nestedType)
+    internal RenderContext GetNestedContext(NamedTypeInfo? nestedType = null)
         => new(nestedType, _allNamedTypes, SymbolMap, _codeBuilder);
 
     internal void EnterScope(MethodInfo methodInfo)

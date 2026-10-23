@@ -37,7 +37,7 @@ nuget install TypeShim
 You'll still need to load your wasm browser app as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-).
 
 ### TypeShim
-A small fantasy inspired demo to show language use powered by TypeShim. Notable aspects are that `[TSExport]` exports both `class` and `enum` to TypeScript, that `[JSExport]` is included (see `Dice`) and that parameters of class types take class instances or initializers (see `Recruit(..)` invocations)
+A small fantasy inspired demo to show language use powered by TypeShim. Notable aspects are that `[TSExport]` exports both `class` and `enum` to TypeScript, that nested types (see `Hero.Role`) are exported under their containing type, that `[JSExport]` is included (see `Dice`) and that parameters of class types take class instances or initializers (see `Recruit(..)` invocations)
 
 ```csharp
 using System.Runtime.InteropServices.JavaScript;
@@ -46,11 +46,10 @@ using TypeShim;
 namespace Sample.Adventure;
 
 [TSExport]
-public enum Role { Mage, Rogue, Knight }
-
-[TSExport]
 public class Hero
 {
+    public enum Role { Mage, Rogue, Knight }
+
     public string Name { get; set; }
     public Role Role { get; set; }
     public int Hp { get; set; }
@@ -66,7 +65,7 @@ public class Hero
 public class Party
 {
     private readonly List<Hero> _members = [];
-    public Hero Leader { get; } = new() { Name = "Rook", Role = Role.Rogue, Hp = 12 };
+    public Hero Leader { get; } = new() { Name = "Rook", Role = Hero.Role.Rogue, Hp = 12 };
     public Hero[] Members => [Leader, .._members];
     public void Recruit(Hero hero) => _members.Add(hero);
 }
@@ -82,16 +81,16 @@ On the TypeScript side things look familiar, class names, properties, methods an
 
 ```js
 import { dotnet } from '_framework/dotnet'
-import { Party, Hero, Role, Dice } from 'typeshim.ts';
+import { Party, Hero, Dice } from 'typeshim.ts';
 
 public async UsingTypeShim() {
     await dotnet.create()
     const party = new Party();
     console.log(party.Leader.Name); // "Rook"
 
-    const mage = new Hero({ Name: "Ivy", Role: Role.Mage, Hp: 8 });
+    const mage = new Hero({ Name: "Ivy", Role: Hero.Role.Mage, Hp: 8 });
     party.Recruit(mage);
-    party.Recruit({ Name: "Ash", Role: Role.Knight, Hp: 16 });
+    party.Recruit({ Name: "Ash", Role: Hero.Role.Knight, Hp: 16 });
     console.log(party.Members.length); // 3
 
     mage.Heal(party); // +5

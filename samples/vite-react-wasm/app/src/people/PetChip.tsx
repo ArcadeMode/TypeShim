@@ -12,6 +12,7 @@ export const PetChip: React.FC<PetChipProps> = ({ petProxy, onClick }) => {
   const age = petProxy.Age;
   const humanAge = petProxy.GetAge(true);
   const bark = petProxy.Bark();
+  const size = Dog.Size[petProxy.SizeCategory];
 
   return (
     <span
@@ -33,7 +34,7 @@ export const PetChip: React.FC<PetChipProps> = ({ petProxy, onClick }) => {
       title={`Pet: ${name} (Breed: ${breed})`}
       onClick={() => onClick?.(petProxy)}
     >
-      Pet: {name} {age}/{humanAge} ({breed}) - {bark}
+      Pet: {name} {age}/{humanAge} ({breed}, {size}) - {bark}
     </span>
   );
 };
