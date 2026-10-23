@@ -1,62 +1,62 @@
-﻿using System.Text;
-using TypeShim.Generator.Parsing;
+﻿using TypeShim.Generator.Parsing;
 using TypeShim.Generator.Typescript;
 using TypeShim.Generator;
 
-internal class TypeScriptRenderer(List<NamedTypeInfo> namedTypeInfos, ModuleInfo moduleInfo)
+internal class TypeScriptRenderer(RenderContext ctx, List<NamedTypeInfo> namedTypeInfos, ModuleInfo moduleInfo)
 {
-    internal List<RenderContext> Render()
+    internal void Render()
     {
-        List<RenderContext> renderContexts = new(namedTypeInfos.Count + 2)
-        {
-            RenderTypeShimConfig(),
-            RenderAssemblyExports()
-        };
+        RenderTypeShimConfig();
+        RenderAssemblyExports();
         foreach (NamedTypeInfo namedType in namedTypeInfos)
         {
-            renderContexts.Add(namedType switch
+            switch (namedType)
             {
-                ClassInfo classInfo => RenderUserClass(classInfo),
-                EnumInfo enumInfo => RenderUserEnum(enumInfo),
-                _ => throw new InvalidOperationException($"Unsupported named type: {namedType.GetType().Name}"),
-            });
+                case ClassInfo classInfo:
+                    RenderUserClass(classInfo);
+                    break;
+                case EnumInfo enumInfo:
+                    RenderUserEnum(enumInfo);
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unsupported named type: {namedType.GetType().Name}");
+            }
         }
-        return renderContexts;
     }
 
-    private RenderContext RenderTypeShimConfig()
+    private void RenderTypeShimConfig()
     {
-        RenderContext configCtx = new(null, namedTypeInfos, RenderOptions.TypeScript);
+        RenderContext configCtx = ctx.GetNestedContext();
         TypeScriptPreambleRenderer configRenderer = new(configCtx);
         configRenderer.Render();
-        return configCtx;
+        ctx.AppendLine();
     }
 
-    private RenderContext RenderAssemblyExports()
+    private void RenderAssemblyExports()
     {
-        RenderContext renderCtx = new(null, namedTypeInfos, RenderOptions.TypeScript);
+        RenderContext renderCtx = ctx.GetNestedContext();
         TypescriptAssemblyExportsRenderer moduleInterfaceRenderer = new(moduleInfo.HierarchyInfo, renderCtx);
         moduleInterfaceRenderer.Render();
-        return renderCtx;
+        ctx.AppendLine();
     }
-    
-    private RenderContext RenderUserClass(ClassInfo classInfo)
+
+    private void RenderUserClass(ClassInfo classInfo)
     {
-        RenderContext renderCtx = new(classInfo, namedTypeInfos, RenderOptions.TypeScript);
+        RenderContext renderCtx = ctx.GetNestedContext(classInfo);
         renderCtx.AppendLine($"// TypeShim generated TypeScript definitions for class: {renderCtx.Class.Namespace}.{renderCtx.Class.Name}");
         TypescriptUserClassProxyRenderer proxyRenderer = new(renderCtx);
         proxyRenderer.Render();
         TypeScriptUserClassNamespaceRenderer namespaceRenderer = new(renderCtx);
         namespaceRenderer.Render();
-        return renderCtx;
+        ctx.AppendLine();
     }
 
-    private RenderContext RenderUserEnum(EnumInfo enumInfo)
+    private void RenderUserEnum(EnumInfo enumInfo)
     {
-        RenderContext renderCtx = new(enumInfo, namedTypeInfos, RenderOptions.TypeScript);
+        RenderContext renderCtx = ctx.GetNestedContext(enumInfo);
         renderCtx.AppendLine($"// TypeShim generated TypeScript definitions for enum: {enumInfo.Namespace}.{enumInfo.Name}");
         TypeScriptEnumRenderer enumRenderer = new(renderCtx);
         enumRenderer.Render();
-        return renderCtx;
+        ctx.AppendLine();
     }
 }
