@@ -2,7 +2,6 @@ import { describe, test, expect, beforeEach } from 'vitest';
 import { ExportedClass, TaskPropertiesClass } from "typeshim";
 import { delay } from "./async";
 import { dateOnly, dateOffsetHour } from './date';
-import { isCI } from '../suite';
 
 describe('Task Properties Test', () => {
     let exportedClass: ExportedClass;
@@ -97,9 +96,7 @@ describe('Task Properties Test', () => {
         await expect(testObject.TaskOfLongProperty).resolves.toBe(450);
     });
 
-    // Completed task of long fails to marshall, skip in CI, keep active locally for visibility
-    // https://github.com/dotnet/runtime/pull/123366
-    test.skipIf(isCI)('Resolves completed Long Task', async () => {
+    test('Resolves completed Long Task', async () => {
         testObject.TaskOfLongProperty = delay(10).then(() => 450);
         await delay(20); // wait longer than the task delay so its in completed state
         await expect(testObject.TaskOfLongProperty).resolves.toBe(450);

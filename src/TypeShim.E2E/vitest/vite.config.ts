@@ -15,7 +15,7 @@ export default defineConfig({
       projectName: 'TypeShim.E2E.Wasm',
       projectRoot: resolve(import.meta.dirname, '../TypeShim.E2E.Wasm'),
       configuration: 'Debug',
-      targetFramework: 'net10.0',
+      targetFramework: 'net11.0',
       isPublish: false
     })
   ],

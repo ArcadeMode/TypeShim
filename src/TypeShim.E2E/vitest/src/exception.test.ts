@@ -2,7 +2,6 @@ import { describe, test, expect, beforeEach } from 'vitest';
 import { ExportedClass, SimplePropertiesTest, TaskPropertiesClass } from "typeshim";
 import { delay } from "./async";
 import { dateOnly, dateOffsetHour } from './date';
-import { isCI, skipInvalidPromiseResolveValueTests } from '../suite';
 
 describe('Task Properties Test', () => {
     let exportedClass: ExportedClass;
@@ -65,7 +64,7 @@ describe('Task Properties Test', () => {
         expect(() => simpleTestObject.NIntProperty = -3).toThrow();
     });
 
-    test.skipIf(skipInvalidPromiseResolveValueTests)('Setting property to Promise of out-of-range NInt sets throwing Task', async () => {
+    test('Setting property to Promise of out-of-range NInt sets throwing Task', async () => {
         taskTestObject.TaskOfNIntProperty = Promise.resolve(-1);
         await expect(taskTestObject.TaskOfNIntProperty).rejects.toThrow(); // try to get the task back, it should throw the assertion
     });
@@ -75,7 +74,7 @@ describe('Task Properties Test', () => {
         expect(() => simpleTestObject.ShortProperty = -(1<<15) - 1).toThrow();
     });
 
-    test.skipIf(skipInvalidPromiseResolveValueTests)('Cannot set out of range Task of short', async () => {
+    test('Cannot set out of range Task of short', async () => {
         taskTestObject.TaskOfShortProperty = Promise.resolve(1<<15);     
         await expect(taskTestObject.TaskOfShortProperty).rejects.toThrow(); // try to get the task back, it should throw the assertion
     });
