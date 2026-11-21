@@ -17,6 +17,7 @@ public class OptionalParametersClass
     // Nullable value-type defaults.
     public int NullableOrFallback(int? value = null) => value ?? -1;
     public int NullableWithDefault(int? value = 42) => value ?? -1;
+    public float? EchoNullableFloat(float? value = null) => value;
 
     // Char defaults.
     public string CharOrDefault(char c = 'Z') => c.ToString();

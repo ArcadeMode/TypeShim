@@ -44,6 +44,12 @@ describe('Optional Parameters Test', () => {
         expect(instance.NullableWithDefault(9)).toBe(9);
     });
 
+    test('nullable float default and round trip', () => {
+        expect(instance.EchoNullableFloat()).toBeNull();
+        expect(instance.EchoNullableFloat(null)).toBeNull();
+        expect(instance.EchoNullableFloat(2.5)).toBe(2.5);
+    });
+
     test('char default applied and overridden', () => {
         expect(instance.CharOrDefault()).toBe('Z');
         expect(instance.CharOrDefault('q')).toBe('q');

@@ -351,8 +351,10 @@ internal class JSObjectExtensionsRendererTests_Properties
     }
     
     [TestCase("ArraySegment<int>", "ArraySegment<int>", "Int32ArraySegment", "JSType.MemoryView")]
+    [TestCase("ArraySegment<float>", "ArraySegment<float>", "SingleArraySegment", "JSType.MemoryView")]
     [TestCase("ArraySegment<double>", "ArraySegment<double>", "DoubleArraySegment", "JSType.MemoryView")]
     [TestCase("Span<int>", "Span<int>", "Int32Span", "JSType.MemoryView")]
+    [TestCase("Span<float>", "Span<float>", "SingleSpan", "JSType.MemoryView")]
     [TestCase("Span<double>", "Span<double>", "DoubleSpan", "JSType.MemoryView")]
     public void JSObjectExtensionsRendererTests_InstanceProperty_WithMemoryViewType(
         string exposedTypeName,

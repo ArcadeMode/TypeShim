@@ -10,6 +10,7 @@ describe('Array Properties Test', () => {
             ByteArrayProperty: [1, 2, 3],
             IntArrayProperty: [7, 8, 9],
             StringArrayProperty: ["one", "two", "three"],
+            FloatArrayProperty: [1.5, 2.25, 3.75],
             DoubleArrayProperty: [1.1, 2.2, 3.3],
             JSObjectArrayProperty: [{ a: 1 }, { b: 2 }, { c: 3 }],
             ObjectArrayProperty: [exportedClass.instance],
@@ -27,6 +28,23 @@ describe('Array Properties Test', () => {
         const original = testObject.IntArrayProperty.slice();
         testObject.IntArrayProperty[0] = 42;
         expect(testObject.IntArrayProperty).toStrictEqual(original);
+    });
+
+    test('Float array property', () => {
+        expect(Array.from(testObject.FloatArrayProperty)).toStrictEqual([1.5, 2.25, 3.75]);
+        testObject.FloatArrayProperty = [4.5, -0.125];
+        expect(Array.from(testObject.FloatArrayProperty)).toStrictEqual([4.5, -0.125]);
+    });
+
+    test('Float array property values are narrowed to single precision', () => {
+        testObject.FloatArrayProperty = [0.1];
+        expect(testObject.FloatArrayProperty[0]).toBe(Math.fround(0.1));
+    });
+
+    test('Does not mutate Float array property', () => {
+        const original = testObject.FloatArrayProperty.slice();
+        testObject.FloatArrayProperty[0] = 42;
+        expect(testObject.FloatArrayProperty).toStrictEqual(original);
     });
 
     test('Initialized ExportedClass array property', () => {
@@ -80,6 +98,7 @@ describe('Array Properties Test', () => {
             ByteArrayProperty: [],
             IntArrayProperty: [],
             StringArrayProperty: [],
+            FloatArrayProperty: [],
             DoubleArrayProperty: [],
             JSObjectArrayProperty: [],
             ObjectArrayProperty: [],

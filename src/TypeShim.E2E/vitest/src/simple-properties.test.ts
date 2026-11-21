@@ -20,6 +20,7 @@ describe('Simple Properties Test', () => {
             CharNullableProperty: null,
             DoubleProperty: 6.7,
             FloatProperty: 8.9,
+            FloatNullableProperty: 1.5,
             DateTimeProperty: dateNow,
             DateTimeOffsetProperty: dateNow,
             ExportedClassProperty: exportedClass,
@@ -95,6 +96,17 @@ describe('Simple Properties Test', () => {
         expect(testObject.DateTimeOffsetProperty).toEqual(dateNow); 
     });
     
+    test('Returns nullable Float property', () => {
+        expect(testObject.FloatNullableProperty).toBe(1.5);
+    });
+
+    test('Mutates nullable Float property to null and back', () => {
+        testObject.FloatNullableProperty = null;
+        expect(testObject.FloatNullableProperty).toBeNull();
+        testObject.FloatNullableProperty = 0.1;
+        expect(testObject.FloatNullableProperty).toBe(Math.fround(0.1));
+    });
+
     test('Returns Long property by value', () => {
         expect(testObject.LongProperty).toBe(5);
     });

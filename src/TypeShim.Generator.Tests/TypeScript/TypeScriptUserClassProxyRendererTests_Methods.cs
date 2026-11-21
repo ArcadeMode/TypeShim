@@ -52,6 +52,7 @@ export class C1 extends ProxyBase {
     }
 
     [TestCase("string?", "string | null")]
+    [TestCase("float?", "number | null")]
     [TestCase("double?", "number | null")]
     [TestCase("bool?", "boolean | null")]
     public void TypeScriptUserClassProxy_InstanceMethod_WithNullablePrimitiveReturnType(string typeExpression, string typeScriptType)
@@ -597,9 +598,11 @@ export class C1 extends ProxyBase {
 
     [TestCase("Span<int>", "Int32Array")]
     [TestCase("Span<byte>", "Uint8Array")]
+    [TestCase("Span<float>", "Float32Array")]
     [TestCase("Span<double>", "Float64Array")]
     [TestCase("ArraySegment<int>", "Int32Array")]
     [TestCase("ArraySegment<byte>", "Uint8Array")]
+    [TestCase("ArraySegment<float>", "Float32Array")]
     [TestCase("ArraySegment<double>", "Float64Array")]
     public void TypeScriptUserClassProxy_MemoryViewMethods_RendersMemoryViewTypes(string typeName, string tsArrayType)
     {

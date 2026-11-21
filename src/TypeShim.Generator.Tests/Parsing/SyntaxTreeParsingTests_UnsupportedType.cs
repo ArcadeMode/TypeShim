@@ -74,6 +74,7 @@ internal class SyntaxTreeParsingTests_UnsupportedType
     [TestCase("int[]")] // Task<int[]>
     [TestCase("int?")] // Task<int?>
     [TestCase("byte?")]
+    [TestCase("float?")]
     [TestCase("double?")]
     [TestCase("long?")]
     [TestCase("Task")] // Task<Task>
@@ -112,7 +113,6 @@ internal class SyntaxTreeParsingTests_UnsupportedType
     [TestCase("Char")]
     [TestCase("Int16")]
     [TestCase("Int64")]
-    [TestCase("float")]
     [TestCase("IntPtr")]
     [TestCase("DateTime")]
     [TestCase("DateTimeOffset")]

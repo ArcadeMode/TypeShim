@@ -16,6 +16,8 @@ internal class CSharpInteropClassRendererTests_SystemArrayReturnType
     [TestCase("byte", "byte")]
     [TestCase("Int32", "int")]
     [TestCase("int", "int")]
+    [TestCase("Single", "float")]
+    [TestCase("float", "float")]
     [TestCase("Double", "double")]
     [TestCase("double", "double")]
     public void CSharpInteropClass_StaticMethod_HasJSTypePromiseArrayNumber_ForNumericArrayReturnType(string typeExpression, string interopTypeExpression)

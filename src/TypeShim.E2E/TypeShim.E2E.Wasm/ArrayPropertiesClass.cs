@@ -11,5 +11,6 @@ public class  ArrayPropertiesClass
     public ExportedClass[] ExportedClassArrayProperty { get; set; } = [];
     public int[] IntArrayProperty { get; set; } = [];
     public string[] StringArrayProperty { get; set; } = [];
+    public float[] FloatArrayProperty { get; set; } = [];
     public double[] DoubleArrayProperty { get; set; } = [];
 }
