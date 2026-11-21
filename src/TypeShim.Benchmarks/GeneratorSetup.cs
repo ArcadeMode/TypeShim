@@ -35,7 +35,7 @@ public class GeneratorSetup
             string assemblyLocation = Assembly.GetExecutingAssembly().Location;
             string binDir = Path.GetDirectoryName(assemblyLocation)!;
             
-            // Navigate from bin/Release/net10.0 up to the project directory
+            // Navigate from bin/Release/net11.0 up to the project directory
             BenchmarkProjectSourceDir = Path.GetFullPath(Path.Combine(binDir, "../../.."));
             ProjectRoot = Path.GetFullPath(Path.Combine(BenchmarkProjectSourceDir, "../.."));
             GeneratorBuildsDir = Path.Combine(BenchmarkProjectSourceDir, "GeneratorBuilds");
