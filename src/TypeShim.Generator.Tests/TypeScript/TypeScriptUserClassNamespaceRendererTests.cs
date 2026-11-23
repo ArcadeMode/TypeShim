@@ -12,12 +12,15 @@ namespace TypeShim.Generator.Tests.TypeScript;
 internal class TypeScriptUserClassNamespaceRendererTests
 {
     [TestCase("string", "string")]
+    [TestCase("float", "number")]
     [TestCase("double", "number")]
     [TestCase("bool", "boolean")]
     [TestCase("string[]", "Array<string>")]
+    [TestCase("float[]", "Array<number>")]
     [TestCase("double[]", "Array<number>")]
     [TestCase("ArraySegment<int>", "IMemoryView<Int32Array>")]
     [TestCase("Task<string>", "Promise<string>")]
+    [TestCase("Task<float>", "Promise<number>")]
     [TestCase("Task<double>", "Promise<number>")]
     public void UserClassNamespace_InstancePropertyOfType_GeneratesPropertyInSnapshotAndInitializer(string typeExpression, string typeScriptType)
     {

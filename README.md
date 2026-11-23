@@ -204,9 +204,11 @@ Table 1. TypeShim supported interop types
 | `T[]`                | `T[]`       | ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-11.0#type-mappings) |
 | `Span<Byte>`         | `MemoryView`| ✅     |      |
 | `Span<Int32>`        | `MemoryView`| ✅     |      |
+| `Span<Single>`       | `MemoryView`| ✅     |      |
 | `Span<Double>`       | `MemoryView`| ✅     |      |
 | `ArraySegment<Byte>` | `MemoryView`| ✅     |      |
 | `ArraySegment<Int32>`| `MemoryView`| ✅     |      |
+| `ArraySegment<Single>`| `MemoryView`| ✅    |      |
 | `ArraySegment<Double>`| `MemoryView`| ✅    |      |
 | `Task`               | `Promise`   | ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-11.0#type-mappings) |
 | `Action`             | `Function`  | ✅     |      |

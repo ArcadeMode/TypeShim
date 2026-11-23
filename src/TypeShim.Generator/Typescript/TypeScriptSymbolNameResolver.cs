@@ -68,6 +68,7 @@ internal static class TypeScriptSymbolNameResolver
         {
             { ManagedType: KnownManagedType.Byte } => "Uint8Array",
             { ManagedType: KnownManagedType.Int32 } => "Int32Array",
+            { ManagedType: KnownManagedType.Single } => "Float32Array",
             { ManagedType: KnownManagedType.Double } => "Float64Array",
             _ => throw new InvalidOperationException($"Type argument '{typeInfo.TypeArgument?.ManagedType}' is not valid for MemoryView types.")
         };

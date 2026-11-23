@@ -51,6 +51,7 @@ export class C1 extends ProxyBase {
     }
 
     [TestCase("string?", "string | null")]
+    [TestCase("float?", "number | null")]
     [TestCase("double?", "number | null")]
     [TestCase("bool?", "boolean | null")]
     public void TypeScriptUserClassProxy_ParameterizedConstructor_WithNullablePrimitiveParameterType(string typeExpression, string typeScriptType)

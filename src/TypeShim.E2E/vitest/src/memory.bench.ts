@@ -32,6 +32,7 @@ function makeObject() {
     ByteArrayProperty: [1, 2, 3],
     IntArrayProperty: [7, 8, 9],
     StringArrayProperty: ['one', 'two', 'three'],
+    FloatArrayProperty: [1.5, 2.5, 3.5],
     DoubleArrayProperty: [1.1, 2.2, 3.3],
     JSObjectArrayProperty: [{ a: 1 }, { b: 2 }, { c: 3 }],
     ObjectArrayProperty: [exported.instance],

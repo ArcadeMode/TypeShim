@@ -190,7 +190,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
         }
         InteropTypeInfo innerTypeInfo = new InteropTypeInfoBuilder(innerTypeSymbol, cache).Build();
 
-        if (innerTypeInfo.ManagedType is not KnownManagedType.Byte and not KnownManagedType.Int32 and not KnownManagedType.Double)
+        if (innerTypeInfo.ManagedType is not KnownManagedType.Byte and not KnownManagedType.Int32 and not KnownManagedType.Single and not KnownManagedType.Double)
         {
             throw new NotSupportedTypeException($"Type argument {innerTypeInfo.CSharpFullyQualifiedTypeSyntax} in {fqTypeSyntax} is not supported.");
         }
@@ -366,6 +366,7 @@ internal sealed class InteropTypeInfoBuilder(ITypeSymbol typeSymbol, InteropType
             {
                 KnownManagedType.Byte
                 or KnownManagedType.Int32
+                or KnownManagedType.Single
                 or KnownManagedType.Double => "JSType.Number",
                 KnownManagedType.JSObject => "JSType.Object",
                 KnownManagedType.String => "JSType.String",

@@ -858,9 +858,11 @@ export interface AssemblyExports{
 
     [TestCase("Span<int>", "Int32Array")]
     [TestCase("Span<byte>", "Uint8Array")]
+    [TestCase("Span<float>", "Float32Array")]
     [TestCase("Span<double>", "Float64Array")]
     [TestCase("ArraySegment<int>", "Int32Array")]
     [TestCase("ArraySegment<byte>", "Uint8Array")]
+    [TestCase("ArraySegment<float>", "Float32Array")]
     [TestCase("ArraySegment<double>", "Float64Array")]
     public void TypeScriptInteropInterfaceRenderer_MemoryViewMethods_RendersMemoryViewTypes(string typeName, string tsArrayType)
     {

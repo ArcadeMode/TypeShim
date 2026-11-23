@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { MemoryViewMethodClass, MemoryViewPropertyClass } from "typeshim";
 
-type AnyTypedArray = Int32Array | Uint8Array | Float64Array;
+type AnyTypedArray = Int32Array | Uint8Array | Float32Array | Float64Array;
 type AnyTypedArrayCtor = {
     new(length: number): AnyTypedArray;
     new(elements: ArrayLike<number>): AnyTypedArray;
@@ -20,7 +20,7 @@ type MemoryViewGetter = (instance: MemoryViewMethodClass) => {
 
 function runMemoryViewTests(options: {
     viewKind: 'Span' | 'ArraySegment';
-    typeLabel: 'Byte' | 'Int32' | 'Double';
+    typeLabel: 'Byte' | 'Int32' | 'Float' | 'Double';
     getView: MemoryViewGetter;
     ctor: AnyTypedArrayCtor;
     expected: number[];
@@ -33,7 +33,9 @@ function runMemoryViewTests(options: {
         expect(view.length).toBe(expected.length);
     });
 
-    test(`${typeLabel} ${viewKind} byteLength is as expected`, () => {
+    // .NET runtime MemoryView.byteLength has no case for MemoryViewType.Single and returns 0
+    // https://github.com/dotnet/runtime/blob/main/src/mono/browser/runtime/marshal.ts
+    test.skipIf(typeLabel === 'Float')(`${typeLabel} ${viewKind} byteLength is as expected`, () => {
         const testInstance = new MemoryViewMethodClass();
         const view = getView(testInstance);
         expect(view.byteLength).toBe(expected.length * ctor.BYTES_PER_ELEMENT);
@@ -94,7 +96,7 @@ function runMemoryViewTests(options: {
 
 function runMemoryViewSumTests(options: {
     viewKind: 'Span' | 'ArraySegment';
-    typeLabel: 'Byte' | 'Int32' | 'Double';
+    typeLabel: 'Byte' | 'Int32' | 'Float' | 'Double';
     getView: MemoryViewGetter;
     sum: (instance: MemoryViewMethodClass, view: ReturnType<MemoryViewGetter>) => number;
     expectedSum: number;
@@ -115,7 +117,7 @@ function runMemoryViewSumTests(options: {
         const testInstance = new MemoryViewMethodClass();
         const view = getView(testInstance);
         const actual = sum(testInstance, view);
-        if (typeLabel === 'Double') {
+        if (typeLabel === 'Double' || typeLabel === 'Float') {
             expect(actual).toBeCloseTo(expectedSum, 10);
         } else {
             expect(actual).toBe(expectedSum);
@@ -129,7 +131,7 @@ function runMemoryViewSumTests(options: {
         view.set(new ctor(setValues));
 
         const actual = sum(testInstance, view);
-        if (typeLabel === 'Double') {
+        if (typeLabel === 'Double' || typeLabel === 'Float') {
             expect(actual).toBeCloseTo(expectedSumAfterSet, 10);
         } else {
             expect(actual).toBe(expectedSumAfterSet);
@@ -153,6 +155,14 @@ describe('MemoryView Tests', () => {
             getView: (x) => x.GetByteSpan(),
             ctor: Uint8Array,
             expected: [1 << 0, 1 << 1, 1 << 2, 1 << 3, 1 << 4],
+        });
+
+        runMemoryViewTests({
+            viewKind: 'Span',
+            typeLabel: 'Float',
+            getView: (x) => x.GetFloatSpan(),
+            ctor: Float32Array,
+            expected: [0.5, 1.5, 2.5, 3.5, 4.5],
         });
 
         runMemoryViewTests({
@@ -186,6 +196,16 @@ describe('MemoryView Tests', () => {
 
             runMemoryViewSumTests({
                 viewKind: 'Span',
+                typeLabel: 'Float',
+                getView: (x) => x.GetFloatSpan(),
+                sum: (x, v) => x.SumFloatSpan(v as any),
+                expectedSum: 12.5,
+                setValues: [10.5, 20.5, 30.5, 40.5, 50.5],
+                expectedSumAfterSet: 152.5,
+            });
+
+            runMemoryViewSumTests({
+                viewKind: 'Span',
                 typeLabel: 'Double',
                 getView: (x) => x.GetDoubleSpan(),
                 sum: (x, v) => x.SumDoubleSpan(v as any),
@@ -211,6 +231,14 @@ describe('MemoryView Tests', () => {
             getView: (x) => x.GetByteArraySegment(),
             ctor: Uint8Array,
             expected: [1 << 0, 1 << 1, 1 << 2, 1 << 3, 1 << 4],
+        });
+
+        runMemoryViewTests({
+            viewKind: 'ArraySegment',
+            typeLabel: 'Float',
+            getView: (x) => x.GetFloatArraySegment(),
+            ctor: Float32Array,
+            expected: [0.5, 1.5, 2.5, 3.5, 4.5],
         });
 
         runMemoryViewTests({
@@ -244,6 +272,16 @@ describe('MemoryView Tests', () => {
 
             runMemoryViewSumTests({
                 viewKind: 'ArraySegment',
+                typeLabel: 'Float',
+                getView: (x) => x.GetFloatArraySegment(),
+                sum: (x, v) => x.SumFloatArraySegment(v as any),
+                expectedSum: 12.5,
+                setValues: [10.5, 20.5, 30.5, 40.5, 50.5],
+                expectedSumAfterSet: 152.5,
+            });
+
+            runMemoryViewSumTests({
+                viewKind: 'ArraySegment',
                 typeLabel: 'Double',
                 getView: (x) => x.GetDoubleArraySegment(),
                 sum: (x, v) => x.SumDoubleArraySegment(v as any),
@@ -261,6 +299,7 @@ describe('MemoryView Tests', () => {
             const testInstance = new MemoryViewPropertyClass({
                 ByteArraySegment: arraySegment,
                 Int32ArraySegment: helper.GetInt32ArraySegment(),
+                FloatArraySegment: helper.GetFloatArraySegment(),
                 DoubleArraySegment: helper.GetDoubleArraySegment(),
             });
             const propertyValue = testInstance.ByteArraySegment;
@@ -277,6 +316,7 @@ describe('MemoryView Tests', () => {
             const testInstance = new MemoryViewPropertyClass({
                 ByteArraySegment: helper.GetByteArraySegment(),
                 Int32ArraySegment: arraySegment,
+                FloatArraySegment: helper.GetFloatArraySegment(),
                 DoubleArraySegment: helper.GetDoubleArraySegment(),
             });
             const propertyValue = testInstance.Int32ArraySegment;
@@ -293,6 +333,7 @@ describe('MemoryView Tests', () => {
             const testInstance = new MemoryViewPropertyClass({
                 ByteArraySegment: helper.GetByteArraySegment(),
                 Int32ArraySegment: helper.GetInt32ArraySegment(),
+                FloatArraySegment: helper.GetFloatArraySegment(),
                 DoubleArraySegment: arraySegment,
             });
             const propertyValue = testInstance.DoubleArraySegment;
@@ -303,12 +344,46 @@ describe('MemoryView Tests', () => {
             expect(propertyValue.slice()).toEqual(arraySegment.slice()); // still equals because same memory
         });
 
+        test('Float ArraySegment property is gettable', () => {
+            const helper = new MemoryViewMethodClass();
+            const arraySegment = helper.GetFloatArraySegment();
+            const testInstance = new MemoryViewPropertyClass({
+                ByteArraySegment: helper.GetByteArraySegment(),
+                Int32ArraySegment: helper.GetInt32ArraySegment(),
+                FloatArraySegment: arraySegment,
+                DoubleArraySegment: helper.GetDoubleArraySegment(),
+            });
+            const propertyValue = testInstance.FloatArraySegment;
+            expect(propertyValue).toEqual(arraySegment);
+            expect(propertyValue.slice()).toEqual(arraySegment.slice());
+
+            arraySegment.set(new Float32Array([10.5, 20.5]), 0);
+            expect(propertyValue.slice()).toEqual(arraySegment.slice()); // still equals because same memory
+        });
+
+        test('Float ArraySegment property is settable', () => {
+            const helper = new MemoryViewMethodClass();
+
+            const testInstance = new MemoryViewPropertyClass({
+                ByteArraySegment: helper.GetByteArraySegment(),
+                Int32ArraySegment: helper.GetInt32ArraySegment(),
+                FloatArraySegment: helper.GetFloatArraySegment(),
+                DoubleArraySegment: helper.GetDoubleArraySegment(),
+            });
+            const arraySegment = helper.GetFloatArraySegment();
+            arraySegment.set(new Float32Array([10.5, 20.5]), 0);
+            testInstance.FloatArraySegment = arraySegment;
+            expect(testInstance.FloatArraySegment).toEqual(arraySegment);
+            expect(testInstance.FloatArraySegment.slice()).toEqual(arraySegment.slice());
+        });
+
         test('Byte ArraySegment property is settable', () => {
             const helper = new MemoryViewMethodClass();
             
             const testInstance = new MemoryViewPropertyClass({
                 ByteArraySegment: helper.GetByteArraySegment(),
                 Int32ArraySegment: helper.GetInt32ArraySegment(),
+                FloatArraySegment: helper.GetFloatArraySegment(),
                 DoubleArraySegment: helper.GetDoubleArraySegment(),
             });
             const arraySegment = helper.GetByteArraySegment();
@@ -324,6 +399,7 @@ describe('MemoryView Tests', () => {
             const testInstance = new MemoryViewPropertyClass({
                 ByteArraySegment: helper.GetByteArraySegment(),
                 Int32ArraySegment: helper.GetInt32ArraySegment(),
+                FloatArraySegment: helper.GetFloatArraySegment(),
                 DoubleArraySegment: helper.GetDoubleArraySegment(),
             });
             const arraySegment = helper.GetInt32ArraySegment();
@@ -339,6 +415,7 @@ describe('MemoryView Tests', () => {
             const testInstance = new MemoryViewPropertyClass({
                 ByteArraySegment: helper.GetByteArraySegment(),
                 Int32ArraySegment: helper.GetInt32ArraySegment(),
+                FloatArraySegment: helper.GetFloatArraySegment(),
                 DoubleArraySegment: helper.GetDoubleArraySegment(),
             });
             const arraySegment = helper.GetDoubleArraySegment();
@@ -353,6 +430,7 @@ describe('MemoryView Tests', () => {
             const testInstance = new MemoryViewPropertyClass({
                 ByteArraySegment: helper.GetByteArraySegment(),
                 Int32ArraySegment: helper.GetInt32ArraySegment(),
+                FloatArraySegment: helper.GetFloatArraySegment(),
                 DoubleArraySegment: helper.GetDoubleArraySegment(),
             });
 
@@ -361,6 +439,8 @@ describe('MemoryView Tests', () => {
             expect(snapshot.ByteArraySegment.slice()).toEqual(testInstance.ByteArraySegment.slice());
             expect(snapshot.Int32ArraySegment).toEqual(testInstance.Int32ArraySegment);
             expect(snapshot.Int32ArraySegment.slice()).toEqual(testInstance.Int32ArraySegment.slice());
+            expect(snapshot.FloatArraySegment).toEqual(testInstance.FloatArraySegment);
+            expect(snapshot.FloatArraySegment.slice()).toEqual(testInstance.FloatArraySegment.slice());
             expect(snapshot.DoubleArraySegment).toEqual(testInstance.DoubleArraySegment);
             expect(snapshot.DoubleArraySegment.slice()).toEqual(testInstance.DoubleArraySegment.slice());
         });

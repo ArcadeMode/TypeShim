@@ -17,6 +17,7 @@ public class SimplePropertiesTest
     public char? CharNullableProperty { get; set; }
     public double DoubleProperty { get; set; }
     public float FloatProperty { get; set; }
+    public float? FloatNullableProperty { get; set; }
     public DateTime DateTimeProperty { get; set; }
     public DateTimeOffset DateTimeOffsetProperty { get; set; }
     public object ObjectProperty { get; set; } = new object();
