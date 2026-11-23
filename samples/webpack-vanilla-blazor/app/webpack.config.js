@@ -56,7 +56,7 @@ module.exports = (env, argv) => {
         projectName: 'Library',
         projectRoot: path.resolve(__dirname, '../Library'),
         configuration: isProduction ? 'Release' : 'Debug',
-        targetFramework: 'net10.0',
+        targetFramework: 'net11.0',
         isPublish: isProduction,
         logLevel: 'info',
       }),

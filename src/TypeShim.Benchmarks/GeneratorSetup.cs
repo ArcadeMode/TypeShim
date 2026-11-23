@@ -35,12 +35,26 @@ public class GeneratorSetup
             string assemblyLocation = Assembly.GetExecutingAssembly().Location;
             string binDir = Path.GetDirectoryName(assemblyLocation)!;
             
-            // Navigate from bin/Release/net10.0 up to the project directory
+            // Navigate from bin/Release/net11.0 up to the project directory
             BenchmarkProjectSourceDir = Path.GetFullPath(Path.Combine(binDir, "../../.."));
             ProjectRoot = Path.GetFullPath(Path.Combine(BenchmarkProjectSourceDir, "../.."));
             GeneratorBuildsDir = Path.Combine(BenchmarkProjectSourceDir, "GeneratorBuilds");
         }
 
+        // BenchmarkDotNet subprocesses run from a separate build output without TargetingPackRefDir.txt,
+        // so prefer the directory passed down by Program.cs.
+        string? targetingPackRefEnvDir = Environment.GetEnvironmentVariable("TYPESHIM_TARGETINGPACK_REF_DIR");
+        TargetingPackRefDir = !string.IsNullOrEmpty(targetingPackRefEnvDir) && Directory.Exists(targetingPackRefEnvDir)
+            ? targetingPackRefEnvDir
+            : ReadTargetingPackRefDirFromFile();
+
+        SampleClassesDir = Path.Combine(BenchmarkProjectSourceDir, "SampleClasses");
+        NonAotGeneratorPath = GetGeneratorPath("NonAOT");
+        AotGeneratorPath = GetGeneratorPath("AOT");
+    }
+
+    private static string ReadTargetingPackRefDirFromFile()
+    {
         var filePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "TargetingPackRefDir.txt"));
 
         if (!File.Exists(filePath))
@@ -65,11 +79,7 @@ public class GeneratorSetup
                 $"Targeting pack reference directory from '{filePath}' does not exist: '{dir}'.");
         }
 
-        TargetingPackRefDir = dir;
-
-        SampleClassesDir = Path.Combine(BenchmarkProjectSourceDir, "SampleClasses");
-        NonAotGeneratorPath = GetGeneratorPath("NonAOT");
-        AotGeneratorPath = GetGeneratorPath("AOT");
+        return dir;
     }
 
     private string GetGeneratorPath(string buildType)

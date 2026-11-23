@@ -34,7 +34,7 @@ nuget install TypeShim
 
 [Check out the sample projects](https://github.com/ArcadeMode/TypeShim/blob/master/samples) to see TypeShim in action. The snippets below also give a general idea of its capabilities.
 
-You'll still need to load your wasm browser app as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-10.0#javascript-interop-on-).
+You'll still need to load your wasm browser app as [described in the docs](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/wasm-browser-app?view=aspnetcore-11.0#javascript-interop-on-).
 
 ### TypeShim
 A small fantasy inspired demo to show language use powered by TypeShim. Notable aspects are that `[TSExport]` exports both `class` and `enum` to TypeScript, that nested types (see `Hero.Role`) are exported under their containing type, that `[JSExport]` is included (see `Dice`) and that parameters of class types take class instances or initializers (see `Recruit(..)` invocations)
@@ -162,9 +162,9 @@ Passing an initializer object in another initializer object.
 
 ## <a name="enriched-type-support"></a> Enriched Type support
 
-TypeShim enriches the supported types by JSExport by adding _your_ classes to the [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings). Repetitive patterns for type transformation are readily supported and tested in TypeShim.
+TypeShim enriches the supported types by JSExport by adding _your_ classes to the [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-11.0#type-mappings). Repetitive patterns for type transformation are readily supported and tested in TypeShim.
 
-Of course, TypeShim brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) to TypeScript. Makes TypeShim officially offer a superset of the .NET types available in JS.
+Of course, TypeShim brings all [types marshalled by .NET](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-11.0#type-mappings) to TypeScript. Makes TypeShim officially offer a superset of the .NET types available in JS.
 
 TypeShim aims to continue to broaden its type support. Suggestions and contributions are welcome.
 
@@ -201,14 +201,14 @@ Table 1. TypeShim supported interop types
 | `Exception`          | `Error`     | ✅     |      |
 | `JSObject`           | `Object`    | ✅     | Requires manual JSObject handling |
 | `String`             | `String`    | ✅     |      |
-| `T[]`                | `T[]`       | ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) |
+| `T[]`                | `T[]`       | ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-11.0#type-mappings) |
 | `Span<Byte>`         | `MemoryView`| ✅     |      |
 | `Span<Int32>`        | `MemoryView`| ✅     |      |
 | `Span<Double>`       | `MemoryView`| ✅     |      |
 | `ArraySegment<Byte>` | `MemoryView`| ✅     |      |
 | `ArraySegment<Int32>`| `MemoryView`| ✅     |      |
 | `ArraySegment<Double>`| `MemoryView`| ✅    |      |
-| `Task`               | `Promise`   | ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-10.0#type-mappings) |
+| `Task`               | `Promise`   | ✅     | * [Only supported .NET types](https://learn.microsoft.com/en-us/aspnet/core/client-side/dotnet-interop/?view=aspnetcore-11.0#type-mappings) |
 | `Action`             | `Function`  | ✅     |      |
 | `Action<T1>`         | `Function`  | ✅     |      |
 | `Action<T1, T2>`     | `Function`  | ✅     |      |

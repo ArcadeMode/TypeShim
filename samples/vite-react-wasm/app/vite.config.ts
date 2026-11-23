@@ -8,7 +8,7 @@ export default defineConfig({
       projectName: 'Library',
       projectRoot: '../Library',
       configuration: 'Debug',
-      targetFramework: 'net10.0',
+      targetFramework: 'net11.0',
       isPublish: false,
     }),
     react()

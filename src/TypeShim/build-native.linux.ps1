@@ -22,9 +22,9 @@ if ([string]::IsNullOrWhiteSpace($sdkVersion)) {
 }
 
 $image = if ($muslRids -contains $RID) {
-    "mcr.microsoft.com/dotnet/sdk:$sdkVersion-alpine3.23-aot"
+    "mcr.microsoft.com/dotnet/sdk:$sdkVersion-alpine3.24-aot"
 } else {
-    "mcr.microsoft.com/dotnet/sdk:$sdkVersion-noble-aot"
+    "mcr.microsoft.com/dotnet/sdk:$sdkVersion-resolute-aot"
 }
 
 function Get-DockerPlatformForRid([string]$rid) {
