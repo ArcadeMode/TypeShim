@@ -12,14 +12,14 @@
   "devDependencies": {
     "@emnapi/runtime": "^1.11.3",
     "@types/node": "^26.6.6",
-    "@vitest/browser": "^5.1.0",
+    "@vitest/browser": "^5.1.1",
     "@vitest/browser-playwright": "^5.0.1",
     "cross-env": "^10.1.0",
     "jsdom": "^31.0.1",
-    "playwright": "^1.65.0",
+    "playwright": "^1.65.1",
     "typescript": "^7.0.2",
     "unplugin-dotnet-wasm": "^1.5.2",
-    "vite": "^8.3.6",
+    "vite": "^8.3.8",
     "vitest": "^5.0.1"
   }
 }
