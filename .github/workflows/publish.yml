@@ -104,7 +104,7 @@ jobs:
         id: nuget_login
         uses: NuGet/login@v1
         with:
-          user: ${{ secrets.NUGET_USER }}
+          user: ArcadeMode
 
       - name: Push to NuGet.org
         if: ${{ !inputs.dry-run }}
