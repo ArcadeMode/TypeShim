@@ -64,6 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -98,13 +99,20 @@ jobs:
           -p:Version=${{ needs.version.outputs.version }}
           -p:ContinuousIntegrationBuild=true
 
+      - name: NuGet login (Trusted Publishing)
+        if: ${{ !inputs.dry-run }}
+        id: nuget_login
+        uses: NuGet/login@v1
+        with:
+          user: ArcadeMode
+
       - name: Push to NuGet.org
         if: ${{ !inputs.dry-run }}
         run: >
           dotnet nuget push 
           TypeShim.${{ needs.version.outputs.version }}.nupkg
-          -k ${{ secrets.NUGET_KEY }} 
-          -s https://api.nuget.org/v3/index.json
+          --api-key "${{ steps.nuget_login.outputs.NUGET_API_KEY }}"
+          --source https://api.nuget.org/v3/index.json
       
       - name: Upload NuGet package as artifact
         if: ${{ inputs.dry-run }}
